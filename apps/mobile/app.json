@@ -1,0 +1,25 @@
+{
+  "expo": {
+    "name": "LifeOS",
+    "slug": "lifeos",
+    "version": "0.1.0",
+    "orientation": "portrait",
+    "scheme": "lifeos",
+    "userInterfaceStyle": "automatic",
+    "ios": {
+      "supportsTablet": false,
+      "bundleIdentifier": "com.lifeos.mobile"
+    },
+    "android": {
+      "package": "com.lifeos.mobile",
+      "predictiveBackGestureEnabled": false
+    },
+    "plugins": [
+      "expo-router"
+    ],
+    "experiments": {
+      "typedRoutes": true,
+      "reactCompiler": true
+    }
+  }
+}

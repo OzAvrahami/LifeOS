@@ -1,5 +1,7 @@
 # LifeOS — Inbox Wireframe
 
+> ה־ASCII wireframe מגדיר היררכיית מידע, התנהגות וכוונת מוצר — לא פריסה סופית בסגנון Desktop. ה־UI הסופי יתוכנן Mobile-first עבור viewport של טלפון.
+
 ## עיקרון מוביל
 
 ה־Inbox צריך להיות המקום הכי מהיר ופשוט ב־LifeOS.

@@ -16,15 +16,16 @@
 
 ---
 
-## Phase 2 — Design
+## Phase 2 — Mobile-First Design
 
 מטרת השלב: להחליט איך LifeOS נראית ומתנהגת.
 
-* [ ] הגדרת שפה עיצובית
+* [ ] הגדרת שפה עיצובית Mobile-first
+* [ ] עיצוב ניווט ראשי לטלפון
 * [ ] עיצוב מסך היום
 * [ ] עיצוב מסך השבוע
 * [ ] עיצוב Inbox
-* [ ] עיצוב ניווט ראשי
+* [ ] עיצוב Quick Capture
 * [ ] מצבי Empty / Loading / Error בסיסיים
 
 **תוצאה:** יש לנו עיצוב ברור לגרסה הראשונה.
@@ -35,14 +36,15 @@
 
 מטרת השלב: להקים את התשתית הטכנית של LifeOS.
 
-* [ ] בחירת Stack
-* [ ] יצירת הפרויקט
-* [ ] Git repository
-* [ ] מבנה תיקיות
+* [x] בחירת Expo / React Native / TypeScript ל־Client ו־Node / Express / TypeScript ל־API
+* [x] יצירת Mobile workspace עם Expo Router
+* [x] יצירת API workspace ו־REST foundation
+* [x] הגדרת Supabase Auth / Bearer token / RLS boundary
+* [x] מבנה npm workspaces ראשוני
 * [ ] Database
 * [ ] מודל משתמש
 * [ ] מודל משימות
-* [ ] תשתית UI בסיסית
+* [x] תשתית UI בסיסית
 
 **תוצאה:** הפרויקט רץ ואפשר להתחיל לפתח פיצ'רים.
 
@@ -97,7 +99,6 @@
 * Habits
 * Goals
 * Automations
-* Mobile application
 * Notifications
 * תחומי חיים מתקדמים
 
