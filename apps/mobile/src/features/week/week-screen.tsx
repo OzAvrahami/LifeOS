@@ -27,9 +27,11 @@ import { WeekDemoState } from './week.types';
 
 export function WeekScreen({
   initialState = 'normal',
+  onNavigateInbox,
   onNavigateToday,
 }: {
   initialState?: WeekDemoState;
+  onNavigateInbox?: () => void;
   onNavigateToday?: () => void;
 }) {
   const [weekState, setWeekState] = useState<WeekDemoState>(initialState);
@@ -43,6 +45,7 @@ export function WeekScreen({
   return (
     <>
       <MobileShell
+        onNavigateInbox={onNavigateInbox}
         onNavigateToday={onNavigateToday}
         onQuickCapture={() => setCaptureOpen(true)}
         selected="week"

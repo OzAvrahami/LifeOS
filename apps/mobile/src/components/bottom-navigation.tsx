@@ -20,15 +20,17 @@ const navigationItems: NavigationItem[] = [
 ];
 
 export function BottomNavigation({
+  onNavigateInbox,
   onNavigateToday,
   onNavigateWeek,
   onQuickCapture,
   selected,
 }: {
+  onNavigateInbox?: () => void;
   onNavigateToday?: () => void;
   onNavigateWeek?: () => void;
   onQuickCapture?: () => void;
-  selected: 'today' | 'week';
+  selected: 'today' | 'week' | 'inbox';
 }) {
   const insets = useSafeAreaInsets();
 
@@ -56,7 +58,15 @@ export function BottomNavigation({
               accessibilityRole="button"
               accessibilityState={{ selected: item.id === selected }}
               key={item.label}
-              onPress={item.id === 'today' ? onNavigateToday : item.id === 'week' ? onNavigateWeek : undefined}
+              onPress={
+                item.id === 'today'
+                  ? onNavigateToday
+                  : item.id === 'week'
+                    ? onNavigateWeek
+                    : item.id === 'inbox'
+                      ? onNavigateInbox
+                      : undefined
+              }
               style={styles.navigationItem}
             >
               <Ionicons

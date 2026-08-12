@@ -9,10 +9,18 @@ const initialMetrics = {
   insets: { bottom: 34, left: 0, right: 0, top: 47 },
 };
 
-function renderWeek(initialState: 'normal' | 'unplanned' | 'overloaded' | 'planning' = 'normal', onNavigateToday?: () => void) {
+function renderWeek(
+  initialState: 'normal' | 'unplanned' | 'overloaded' | 'planning' = 'normal',
+  onNavigateToday?: () => void,
+  onNavigateInbox?: () => void,
+) {
   return render(
     <SafeAreaProvider initialMetrics={initialMetrics}>
-      <WeekScreen initialState={initialState} onNavigateToday={onNavigateToday} />
+      <WeekScreen
+        initialState={initialState}
+        onNavigateInbox={onNavigateInbox}
+        onNavigateToday={onNavigateToday}
+      />
     </SafeAreaProvider>,
   );
 }
@@ -95,6 +103,15 @@ describe('<WeekScreen />', () => {
 
     await user.press(within(screen.getByLabelText('ניווט ראשי')).getByText('שבוע'));
     expect(onNavigateWeek).toHaveBeenCalledTimes(1);
+  });
+
+  it('invokes Inbox navigation from Week', async () => {
+    const onNavigateInbox = jest.fn();
+    const user = userEvent.setup();
+    await renderWeek('normal', undefined, onNavigateInbox);
+
+    await user.press(within(screen.getByLabelText('ניווט ראשי')).getByText('Inbox'));
+    expect(onNavigateInbox).toHaveBeenCalledTimes(1);
   });
 
   it('opens the existing Quick Capture sheet from Week', async () => {

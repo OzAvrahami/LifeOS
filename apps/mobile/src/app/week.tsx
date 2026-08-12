@@ -1,4 +1,4 @@
-import { useLocalSearchParams, useRouter } from 'expo-router';
+import { Href, useLocalSearchParams, useRouter } from 'expo-router';
 
 import { WeekScreen } from '@/features/week/week-screen';
 import { isWeekDemoState } from '@/features/week/week.types';
@@ -13,6 +13,7 @@ export default function WeekRoute() {
     <WeekScreen
       initialState={previewState}
       key={previewState}
+      onNavigateInbox={() => router.push('/inbox' as Href)}
       onNavigateToday={() => router.replace('/')}
     />
   );

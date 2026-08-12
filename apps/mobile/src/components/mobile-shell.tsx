@@ -8,20 +8,23 @@ import { BottomNavigation } from './bottom-navigation';
 
 export function MobileShell({
   children,
+  onNavigateInbox,
   onNavigateToday,
   onNavigateWeek,
   onQuickCapture,
   selected = 'today',
 }: PropsWithChildren<{
+  onNavigateInbox?: () => void;
   onNavigateToday?: () => void;
   onNavigateWeek?: () => void;
   onQuickCapture?: () => void;
-  selected?: 'today' | 'week';
+  selected?: 'today' | 'week' | 'inbox';
 }>) {
   return (
     <SafeAreaView edges={['top']} style={styles.safeArea}>
       <View style={styles.content}>{children}</View>
       <BottomNavigation
+        onNavigateInbox={onNavigateInbox}
         onNavigateToday={onNavigateToday}
         onNavigateWeek={onNavigateWeek}
         onQuickCapture={onQuickCapture}

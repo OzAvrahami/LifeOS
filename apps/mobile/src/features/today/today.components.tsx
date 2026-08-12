@@ -89,15 +89,28 @@ export function Commitments({ items }: { items: Commitment[] }) {
   );
 }
 
-export function TaskList({ tasks }: { tasks: TodayTask[] }) {
+export function TaskList({ newTaskId, tasks }: { newTaskId?: string; tasks: TodayTask[] }) {
   return (
     <View accessibilityLabel="המשימות שלי" style={styles.taskList}>
       {tasks.map((task, index) => (
-        <View key={task.id} style={[styles.taskRow, index < tasks.length - 1 && styles.taskDivider]}>
+        <View
+          key={task.id}
+          style={[
+            styles.taskRow,
+            task.id === newTaskId && styles.newTaskRow,
+            index < tasks.length - 1 && styles.taskDivider,
+          ]}
+        >
           <View style={styles.checkbox} />
           <Text style={styles.taskTitle}>{task.title}</Text>
-          <View style={[styles.lifeAreaDot, { backgroundColor: lifeAreaColor[task.lifeArea] }]} />
-          <Text style={styles.taskDuration}>{task.durationMinutes} דק׳</Text>
+          {task.id === newTaskId ? (
+            <Text style={styles.newTaskBadge}>חדש</Text>
+          ) : (
+            <>
+              <View style={[styles.lifeAreaDot, { backgroundColor: lifeAreaColor[task.lifeArea] }]} />
+              <Text style={styles.taskDuration}>{task.durationMinutes} דק׳</Text>
+            </>
+          )}
         </View>
       ))}
     </View>
@@ -266,6 +279,17 @@ const styles = StyleSheet.create({
     gap: spacing.sm,
     minHeight: 52,
     paddingVertical: 13,
+  },
+  newTaskRow: { backgroundColor: colors.accentWeak, marginHorizontal: -spacing.md, paddingHorizontal: spacing.md },
+  newTaskBadge: {
+    backgroundColor: colors.surface,
+    borderRadius: 6,
+    color: colors.accent,
+    fontFamily: typography.family.bold,
+    fontSize: 11,
+    paddingHorizontal: spacing.xs,
+    paddingVertical: 2,
+    writingDirection: 'rtl',
   },
   taskDivider: { borderBottomColor: colors.divider, borderBottomWidth: StyleSheet.hairlineWidth },
   checkbox: { borderColor: '#C9C3B5', borderRadius: 11, borderWidth: 1.75, height: 22, width: 22 },

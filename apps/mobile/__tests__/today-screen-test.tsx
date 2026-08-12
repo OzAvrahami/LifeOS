@@ -40,6 +40,31 @@ describe('<TodayScreen />', () => {
     expect(within(navigation).getByText('היום').parent?.props.accessibilityState).toEqual({ selected: true });
   });
 
+  it('invokes Inbox navigation from Today', async () => {
+    const onNavigateInbox = jest.fn();
+    const user = userEvent.setup();
+    await render(
+      <SafeAreaProvider initialMetrics={initialMetrics}>
+        <TodayScreen onNavigateInbox={onNavigateInbox} />
+      </SafeAreaProvider>,
+    );
+
+    await user.press(within(screen.getByLabelText('ניווט ראשי')).getByText('Inbox'));
+    expect(onNavigateInbox).toHaveBeenCalledTimes(1);
+  });
+
+  it('renders a moved Inbox task once with the approved Today confirmation', async () => {
+    await render(
+      <SafeAreaProvider initialMetrics={initialMetrics}>
+        <TodayScreen movedInboxTask={{ id: 'same-task', title: 'לקבוע טיפול לרכב' }} />
+      </SafeAreaProvider>,
+    );
+
+    expect(screen.getAllByText('לקבוע טיפול לרכב')).toHaveLength(1);
+    expect(screen.getByText('נוסף להיום מה־Inbox · אותה משימה')).toBeTruthy();
+    expect(screen.getByText('5 משימות')).toBeTruthy();
+  });
+
   it('renders an open but shaped unplanned day', async () => {
     await render(
       <SafeAreaProvider initialMetrics={initialMetrics}>
