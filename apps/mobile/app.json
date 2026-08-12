@@ -5,7 +5,7 @@
     "version": "0.1.0",
     "orientation": "portrait",
     "scheme": "lifeos",
-    "userInterfaceStyle": "automatic",
+    "userInterfaceStyle": "light",
     "ios": {
       "supportsTablet": false,
       "bundleIdentifier": "com.lifeos.mobile"
@@ -15,7 +15,10 @@
       "predictiveBackGestureEnabled": false
     },
     "plugins": [
-      "expo-router"
+      "expo-router",
+      "expo-font",
+      "expo-asset",
+      "expo-splash-screen"
     ],
     "experiments": {
       "typedRoutes": true,
