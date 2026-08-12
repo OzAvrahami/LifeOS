@@ -20,7 +20,13 @@ import { normalTodayFixture } from './today.fixture';
 import { TodayDemoState } from './today.types';
 import { UnplannedState } from './unplanned-state';
 
-export function TodayScreen({ initialState = 'normal' }: { initialState?: TodayDemoState }) {
+export function TodayScreen({
+  initialState = 'normal',
+  onNavigateWeek,
+}: {
+  initialState?: TodayDemoState;
+  onNavigateWeek?: () => void;
+}) {
   const [todayState, setTodayState] = useState<TodayDemoState>(initialState);
   const [captureOpen, setCaptureOpen] = useState(false);
 
@@ -50,7 +56,9 @@ export function TodayScreen({ initialState = 'normal' }: { initialState?: TodayD
 
   return (
     <>
-      <MobileShell onQuickCapture={() => setCaptureOpen(true)}>{content}</MobileShell>
+      <MobileShell onNavigateWeek={onNavigateWeek} onQuickCapture={() => setCaptureOpen(true)}>
+        {content}
+      </MobileShell>
       <QuickCaptureSheet onClose={() => setCaptureOpen(false)} visible={captureOpen} />
     </>
   );

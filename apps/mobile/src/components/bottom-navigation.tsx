@@ -5,21 +5,31 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { colors, spacing, typography } from '@/theme/tokens';
 
 type NavigationItem = {
+  id: 'today' | 'week' | 'capture' | 'inbox' | 'more';
   label: string;
   icon: keyof typeof Ionicons.glyphMap;
-  selected?: boolean;
   ltr?: boolean;
 };
 
 const navigationItems: NavigationItem[] = [
-  { label: 'היום', icon: 'radio-button-on-outline', selected: true },
-  { label: 'שבוע', icon: 'calendar-clear-outline' },
-  { label: '', icon: 'add' },
-  { label: 'Inbox', icon: 'file-tray-outline', ltr: true },
-  { label: 'עוד', icon: 'ellipsis-horizontal' },
+  { id: 'today', label: 'היום', icon: 'radio-button-on-outline' },
+  { id: 'week', label: 'שבוע', icon: 'calendar-clear-outline' },
+  { id: 'capture', label: '', icon: 'add' },
+  { id: 'inbox', label: 'Inbox', icon: 'file-tray-outline', ltr: true },
+  { id: 'more', label: 'עוד', icon: 'ellipsis-horizontal' },
 ];
 
-export function BottomNavigation({ onQuickCapture }: { onQuickCapture?: () => void }) {
+export function BottomNavigation({
+  onNavigateToday,
+  onNavigateWeek,
+  onQuickCapture,
+  selected,
+}: {
+  onNavigateToday?: () => void;
+  onNavigateWeek?: () => void;
+  onQuickCapture?: () => void;
+  selected: 'today' | 'week';
+}) {
   const insets = useSafeAreaInsets();
 
   return (
@@ -29,7 +39,7 @@ export function BottomNavigation({ onQuickCapture }: { onQuickCapture?: () => vo
     >
       <View style={styles.items}>
         {navigationItems.map((item, index) =>
-          index === 2 ? (
+          item.id === 'capture' ? (
             <Pressable
               accessibilityLabel="הוספה מהירה"
               accessibilityRole="button"
@@ -44,19 +54,20 @@ export function BottomNavigation({ onQuickCapture }: { onQuickCapture?: () => vo
           ) : (
             <Pressable
               accessibilityRole="button"
-              accessibilityState={{ selected: item.selected ?? false }}
+              accessibilityState={{ selected: item.id === selected }}
               key={item.label}
+              onPress={item.id === 'today' ? onNavigateToday : item.id === 'week' ? onNavigateWeek : undefined}
               style={styles.navigationItem}
             >
               <Ionicons
-                color={item.selected ? colors.accent : '#A8A296'}
+                color={item.id === selected ? colors.accent : '#A8A296'}
                 name={item.icon}
                 size={24}
               />
               <Text
                 style={[
                   styles.navigationLabel,
-                  item.selected && styles.navigationLabelSelected,
+                  item.id === selected && styles.navigationLabelSelected,
                   item.ltr && styles.ltrLabel,
                 ]}
               >
