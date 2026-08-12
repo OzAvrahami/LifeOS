@@ -12,6 +12,13 @@ export const colors = {
   accent: '#2F8F86',
   accentWeak: '#E4F1EF',
   accentText: '#2A7D75',
+  overlay: 'rgba(28, 25, 18, 0.34)',
+  warningSurface: '#F5E6DD',
+  warningText: '#8A421F',
+  warningMuted: '#9A6B4E',
+  warningAction: '#BB6A4E',
+  warningBadge: '#F3E2D9',
+  completedSurface: '#F1EDE3',
   white: '#FFFFFF',
   lifeArea: {
     work: '#3E7C93',

@@ -1,5 +1,24 @@
 export type LifeArea = 'work' | 'family' | 'home';
 
+export type TodayDemoState =
+  | 'normal'
+  | 'unplanned'
+  | 'active'
+  | 'overloaded'
+  | 'partially_completed';
+
+const todayDemoStates: readonly TodayDemoState[] = [
+  'normal',
+  'unplanned',
+  'active',
+  'overloaded',
+  'partially_completed',
+];
+
+export function isTodayDemoState(value: string | undefined): value is TodayDemoState {
+  return todayDemoStates.some((state) => state === value);
+}
+
 export type TodayTask = {
   id: string;
   title: string;

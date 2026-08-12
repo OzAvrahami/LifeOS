@@ -6,11 +6,14 @@ import { colors } from '@/theme/tokens';
 
 import { BottomNavigation } from './bottom-navigation';
 
-export function MobileShell({ children }: PropsWithChildren) {
+export function MobileShell({
+  children,
+  onQuickCapture,
+}: PropsWithChildren<{ onQuickCapture?: () => void }>) {
   return (
     <SafeAreaView edges={['top']} style={styles.safeArea}>
       <View style={styles.content}>{children}</View>
-      <BottomNavigation />
+      <BottomNavigation onQuickCapture={onQuickCapture} />
     </SafeAreaView>
   );
 }

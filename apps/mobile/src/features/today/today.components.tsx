@@ -54,7 +54,7 @@ export function WorkloadBadge({ label }: { label: string }) {
   );
 }
 
-export function FocusCard({ task }: { task: TodayTask }) {
+export function FocusCard({ task, onStart }: { task: TodayTask; onStart?: () => void }) {
   return (
     <View accessibilityLabel="עכשיו" style={styles.focusCard}>
       <View style={styles.focusLabelRow}>
@@ -63,7 +63,7 @@ export function FocusCard({ task }: { task: TodayTask }) {
       </View>
       <Text style={styles.focusTitle}>{task.title}</Text>
       <Text style={styles.focusMeta}>כ־{task.durationMinutes} דקות · עבודה</Text>
-      <Pressable accessibilityRole="button" style={styles.startButton}>
+      <Pressable accessibilityRole="button" onPress={onStart} style={styles.startButton}>
         <Text style={styles.startButtonText}>התחלה</Text>
       </Pressable>
     </View>

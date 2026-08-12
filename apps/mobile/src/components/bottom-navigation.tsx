@@ -19,7 +19,7 @@ const navigationItems: NavigationItem[] = [
   { label: 'עוד', icon: 'ellipsis-horizontal' },
 ];
 
-export function BottomNavigation() {
+export function BottomNavigation({ onQuickCapture }: { onQuickCapture?: () => void }) {
   const insets = useSafeAreaInsets();
 
   return (
@@ -30,7 +30,13 @@ export function BottomNavigation() {
       <View style={styles.items}>
         {navigationItems.map((item, index) =>
           index === 2 ? (
-            <Pressable accessibilityLabel="הוספה מהירה" accessibilityRole="button" key="capture" style={styles.captureSlot}>
+            <Pressable
+              accessibilityLabel="הוספה מהירה"
+              accessibilityRole="button"
+              key="capture"
+              onPress={onQuickCapture}
+              style={styles.captureSlot}
+            >
               <View style={styles.captureButton}>
                 <Ionicons color={colors.white} name="add" size={30} />
               </View>

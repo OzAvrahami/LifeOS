@@ -26,3 +26,36 @@ export const normalTodayFixture: TodayFixture = {
   ],
   suggestion: 'משימה חשובה מהשבוע · להכין הצעת מחיר',
 };
+
+export const unplannedTodayFixture = {
+  greeting: 'בוקר טוב, עוז',
+  dateLabel: 'שבת, 8 באוגוסט',
+  commitments: normalTodayFixture.commitments,
+} as const;
+
+export const activeTodayFixture = {
+  dateLabel: 'שבת, 8 באוגוסט',
+  task: normalTodayFixture.focus,
+  laterTasks: normalTodayFixture.tasks.slice(1),
+  commitment: normalTodayFixture.commitments[0],
+} as const;
+
+export const overloadedTodayFixture = {
+  greeting: 'בוקר טוב, עוז',
+  dateLabel: 'שבת, 8 באוגוסט',
+  plannedTime: '8:10',
+  availableTime: '6:00',
+  taskCount: 7,
+  commitmentCount: 2,
+  tasks: [
+    { ...normalTodayFixture.tasks[0], durationMinutes: 90, important: true },
+    { id: 'proposal', title: 'להכין הצעת מחיר', durationMinutes: 45, lifeArea: 'work' as const },
+    { id: 'storage', title: 'לסדר את המחסן', durationMinutes: 60, lifeArea: 'home' as const, deferLabel: 'מחר' },
+  ],
+} as const;
+
+export const partiallyCompletedTodayFixture = {
+  dateLabel: 'שבת, 8 באוגוסט',
+  nextTask: normalTodayFixture.tasks[2],
+  completedTasks: normalTodayFixture.tasks.slice(0, 2),
+} as const;
