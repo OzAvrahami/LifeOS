@@ -89,12 +89,23 @@ export function Commitments({ items }: { items: Commitment[] }) {
   );
 }
 
-export function TaskList({ newTaskId, tasks }: { newTaskId?: string; tasks: TodayTask[] }) {
+export function TaskList({
+  newTaskId,
+  onStartTask,
+  tasks,
+}: {
+  newTaskId?: string;
+  onStartTask?: (taskId: string) => void;
+  tasks: TodayTask[];
+}) {
   return (
     <View accessibilityLabel="המשימות שלי" style={styles.taskList}>
       {tasks.map((task, index) => (
-        <View
+        <Pressable
+          accessibilityLabel={`התחל משימה: ${task.title}`}
+          accessibilityRole="button"
           key={task.id}
+          onPress={() => onStartTask?.(task.id)}
           style={[
             styles.taskRow,
             task.id === newTaskId && styles.newTaskRow,
@@ -111,7 +122,7 @@ export function TaskList({ newTaskId, tasks }: { newTaskId?: string; tasks: Toda
               <Text style={styles.taskDuration}>{task.durationMinutes} דק׳</Text>
             </>
           )}
-        </View>
+        </Pressable>
       ))}
     </View>
   );

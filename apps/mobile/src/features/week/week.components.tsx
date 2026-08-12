@@ -1,4 +1,5 @@
 import { Ionicons } from '@expo/vector-icons';
+import { useState } from 'react';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 
 import { colors, radius, spacing, typography } from '@/theme/tokens';
@@ -93,22 +94,58 @@ export function WeekDayRow({ children, day, expanded = false }: { children?: Rea
   );
 }
 
-export function UnscheduledWeekTasks({ tasks }: { tasks: UnscheduledWeekTask[] }) {
+export function UnscheduledWeekTasks({
+  onMoveToToday,
+  tasks,
+}: {
+  onMoveToToday?: (taskId: string) => void;
+  tasks: UnscheduledWeekTask[];
+}) {
+  const [choosingTaskId, setChoosingTaskId] = useState<string | null>(null);
   const visibleTasks = tasks.slice(0, 2);
+  const hiddenTaskCount = tasks.length - visibleTasks.length;
   return (
     <View accessibilityLabel="לתכנן השבוע" style={styles.unscheduledCard}>
       {visibleTasks.map((task) => (
         <View key={task.id} style={styles.unscheduledRow}>
           <Text style={styles.unscheduledTitle}>{task.title}</Text>
           <Text style={styles.duration}>{task.durationMinutes} דק׳</Text>
-          <Pressable accessibilityRole="button" style={styles.chooseDay}>
-            <Text style={styles.chooseDayText}>בחר יום</Text>
-          </Pressable>
+          {choosingTaskId === task.id ? (
+            <View style={styles.dayChoices}>
+              <Pressable
+                accessibilityLabel={`שבץ להיום: ${task.title}`}
+                accessibilityRole="button"
+                onPress={() => onMoveToToday?.(task.id)}
+                style={styles.todayChoice}
+              >
+                <Text style={styles.todayChoiceText}>היום</Text>
+              </Pressable>
+              <Pressable
+                accessibilityLabel={`בטל שיבוץ: ${task.title}`}
+                accessibilityRole="button"
+                onPress={() => setChoosingTaskId(null)}
+                style={styles.cancelChoice}
+              >
+                <Ionicons color={colors.textFaint} name="close" size={16} />
+              </Pressable>
+            </View>
+          ) : (
+            <Pressable
+              accessibilityLabel={`בחר יום עבור ${task.title}`}
+              accessibilityRole="button"
+              onPress={() => setChoosingTaskId(task.id)}
+              style={styles.chooseDay}
+            >
+              <Text style={styles.chooseDayText}>בחר יום</Text>
+            </Pressable>
+          )}
         </View>
       ))}
-      {tasks.length > visibleTasks.length ? (
+      {hiddenTaskCount > 0 ? (
         <Pressable accessibilityRole="button" style={styles.moreTask}>
-          <Text style={styles.moreTaskText}>עוד משימה אחת · {tasks[2].title} ←</Text>
+          <Text style={styles.moreTaskText}>
+            עוד {hiddenTaskCount === 1 ? 'משימה אחת' : `${hiddenTaskCount} משימות`} · {tasks[2].title} ←
+          </Text>
         </Pressable>
       ) : null}
     </View>
@@ -165,6 +202,10 @@ const styles = StyleSheet.create({
   duration: { color: colors.textFaint, fontFamily: typography.family.regular, fontSize: typography.size.label, writingDirection: 'rtl' },
   chooseDay: { backgroundColor: colors.accentWeak, borderRadius: 9, paddingHorizontal: spacing.sm, paddingVertical: 6 },
   chooseDayText: { color: colors.accent, fontFamily: typography.family.bold, fontSize: typography.size.label, writingDirection: 'rtl' },
+  dayChoices: { alignItems: 'center', flexDirection: 'row-reverse', gap: spacing.xxs },
+  todayChoice: { backgroundColor: colors.accent, borderRadius: 9, paddingHorizontal: spacing.sm, paddingVertical: 6 },
+  todayChoiceText: { color: colors.white, fontFamily: typography.family.bold, fontSize: typography.size.label, writingDirection: 'rtl' },
+  cancelChoice: { alignItems: 'center', height: 30, justifyContent: 'center', width: 26 },
   moreTask: { minHeight: 35, justifyContent: 'center' },
   moreTaskText: { color: colors.accent, fontFamily: typography.family.bold, fontSize: typography.size.label, textAlign: 'right', writingDirection: 'rtl' },
   notice: { backgroundColor: colors.warningSurface, borderRadius: radius.lg, marginTop: spacing.md, padding: spacing.md },

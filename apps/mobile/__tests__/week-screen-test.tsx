@@ -1,13 +1,9 @@
 import { render, screen, userEvent, within } from '@testing-library/react-native';
-import { SafeAreaProvider } from 'react-native-safe-area-context';
 
 import { TodayScreen } from '@/features/today/today-screen';
 import { WeekScreen } from '@/features/week/week-screen';
 
-const initialMetrics = {
-  frame: { height: 844, width: 390, x: 0, y: 0 },
-  insets: { bottom: 34, left: 0, right: 0, top: 47 },
-};
+import { TestProviders } from '../test-utils/test-providers';
 
 function renderWeek(
   initialState: 'normal' | 'unplanned' | 'overloaded' | 'planning' = 'normal',
@@ -15,13 +11,13 @@ function renderWeek(
   onNavigateInbox?: () => void,
 ) {
   return render(
-    <SafeAreaProvider initialMetrics={initialMetrics}>
+    <TestProviders>
       <WeekScreen
         initialState={initialState}
         onNavigateInbox={onNavigateInbox}
         onNavigateToday={onNavigateToday}
       />
-    </SafeAreaProvider>,
+    </TestProviders>,
   );
 }
 
@@ -96,9 +92,9 @@ describe('<WeekScreen />', () => {
     const onNavigateWeek = jest.fn();
     const user = userEvent.setup();
     await render(
-      <SafeAreaProvider initialMetrics={initialMetrics}>
+      <TestProviders>
         <TodayScreen onNavigateWeek={onNavigateWeek} />
-      </SafeAreaProvider>,
+      </TestProviders>,
     );
 
     await user.press(within(screen.getByLabelText('ניווט ראשי')).getByText('שבוע'));

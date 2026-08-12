@@ -4,47 +4,81 @@ import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { colors, radius, spacing, typography } from '@/theme/tokens';
 
 import { partiallyCompletedTodayFixture } from './today.fixture';
+import { TodayTask } from './today.types';
 
-export function PartiallyCompletedState({ onStart }: { onStart: () => void }) {
+export function PartiallyCompletedState({
+  completedTasks,
+  nextTask,
+  openTasks,
+  onStart,
+}: {
+  completedTasks?: TodayTask[];
+  nextTask?: TodayTask | null;
+  openTasks?: TodayTask[];
+  onStart: () => void;
+}) {
   const today = partiallyCompletedTodayFixture;
+  const visibleCompletedTasks = completedTasks ?? today.completedTasks;
+  const visibleNextTask = nextTask === undefined ? today.nextTask : nextTask;
+  const visibleOpenTasks = openTasks ?? (visibleNextTask ? [visibleNextTask] : []);
+  const remainingCount = visibleOpenTasks.length;
+  const completedLabel = visibleCompletedTasks.length === 1
+    ? '1 הושלמה'
+    : `${visibleCompletedTasks.length} הושלמו`;
+  const remainingLabel = remainingCount === 1 ? '1 נשארה' : `${remainingCount} נשארו`;
 
   return (
     <ScrollView contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
       <Text style={styles.date}>{today.dateLabel}</Text>
       <View accessibilityLabel="התקדמות היום" style={styles.progressRow}>
         <View style={styles.dots}>
-          <View style={styles.doneDot} />
-          <View style={styles.doneDot} />
-          <View style={styles.openDot} />
+          {visibleCompletedTasks.map((task) => <View key={task.id} style={styles.doneDot} />)}
+          {visibleOpenTasks.map((task) => <View key={task.id} style={styles.openDot} />)}
         </View>
-        <Text style={styles.progressText}>2 הושלמו · 1 נשארה</Text>
+        <Text style={styles.progressText}>
+          {completedLabel} · {remainingLabel}
+        </Text>
       </View>
-      <Text style={styles.progressNote}>נשארה משימה אחת מתוכננת להיום.</Text>
+      <Text style={styles.progressNote}>
+        {remainingCount === 0
+          ? 'כל המשימות המתוכננות הושלמו.'
+          : remainingCount === 1
+            ? 'נשארה משימה אחת מתוכננת להיום.'
+            : `נשארו ${remainingCount} משימות מתוכננות להיום.`}
+      </Text>
 
-      <View accessibilityLabel="הבא בתור" style={styles.nextCard}>
-        <Text style={styles.nextLabel}>הבא בתור</Text>
-        <Text style={styles.nextTitle}>{today.nextTask.title}</Text>
-        <Text style={styles.nextMeta}>כ־{today.nextTask.durationMinutes} דקות · בית</Text>
-        <Pressable accessibilityRole="button" onPress={onStart} style={styles.startButton}>
-          <Text style={styles.startText}>התחלה</Text>
-        </Pressable>
-      </View>
-
-      <Text style={styles.sectionLabel}>פתוח</Text>
-      <View accessibilityLabel="משימות פתוחות" style={styles.openTasks}>
-        <View style={styles.taskRow}>
-          <View style={styles.checkbox} />
-          <Text style={styles.taskTitle}>{today.nextTask.title}</Text>
-          <Text style={styles.duration}>{today.nextTask.durationMinutes} דק׳</Text>
+      {visibleNextTask ? (
+        <View accessibilityLabel="הבא בתור" style={styles.nextCard}>
+          <Text style={styles.nextLabel}>הבא בתור</Text>
+          <Text style={styles.nextTitle}>{visibleNextTask.title}</Text>
+          <Text style={styles.nextMeta}>כ־{visibleNextTask.durationMinutes} דקות · בית</Text>
+          <Pressable accessibilityRole="button" onPress={onStart} style={styles.startButton}>
+            <Text style={styles.startText}>התחלה</Text>
+          </Pressable>
         </View>
-      </View>
+      ) : null}
+
+      {visibleNextTask ? (
+        <>
+          <Text style={styles.sectionLabel}>פתוח</Text>
+          <View accessibilityLabel="משימות פתוחות" style={styles.openTasks}>
+            {visibleOpenTasks.map((task, index) => (
+              <View key={task.id} style={[styles.taskRow, index > 0 && styles.divider]}>
+                <View style={styles.checkbox} />
+                <Text style={styles.taskTitle}>{task.title}</Text>
+                <Text style={styles.duration}>{task.durationMinutes} דק׳</Text>
+              </View>
+            ))}
+          </View>
+        </>
+      ) : null}
 
       <View style={styles.completedHeading}>
         <Text style={styles.sectionLabelInline}>הושלמו היום</Text>
-        <View style={styles.count}><Text style={styles.countText}>2</Text></View>
+        <View style={styles.count}><Text style={styles.countText}>{visibleCompletedTasks.length}</Text></View>
       </View>
       <View accessibilityLabel="משימות שהושלמו" style={styles.completedTasks}>
-        {today.completedTasks.map((task, index) => (
+        {visibleCompletedTasks.map((task, index) => (
           <View key={task.id} style={[styles.taskRow, index === 0 && styles.divider]}>
             <View style={styles.checkIcon}>
               <Ionicons color={colors.white} name="checkmark" size={14} />

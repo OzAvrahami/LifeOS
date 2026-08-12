@@ -3,7 +3,11 @@ import { useState } from 'react';
 import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 
 import { MobileShell } from '@/components/mobile-shell';
-import { QuickCaptureSheet } from '@/features/capture/quick-capture-sheet';
+import {
+  CaptureDestination,
+  QuickCaptureSheet,
+} from '@/features/capture/quick-capture-sheet';
+import { useDemoTasks } from '@/features/tasks/demo-task-provider';
 import { colors, radius, spacing, typography } from '@/theme/tokens';
 
 import {
@@ -37,6 +41,7 @@ export function WeekScreen({
   const [weekState, setWeekState] = useState<WeekDemoState>(initialState);
   const [planningInitialStep, setPlanningInitialStep] = useState(initialState === 'planning' ? 2 : 0);
   const [captureOpen, setCaptureOpen] = useState(false);
+  const { captureTask, moveTaskToToday, weekTasks } = useDemoTasks();
 
   if (weekState === 'planning') {
     return <WeekPlanningFlow initialStep={planningInitialStep} onDone={() => setWeekState('normal')} />;
@@ -55,15 +60,35 @@ export function WeekScreen({
         ) : weekState === 'overloaded' ? (
           <OverloadedWeek />
         ) : (
-          <NormalWeek />
+          <NormalWeek
+            onMoveToToday={(taskId) => {
+              moveTaskToToday(taskId);
+              onNavigateToday?.();
+            }}
+            tasks={weekTasks.map((task) => ({
+              durationMinutes: task.estimatedMinutes ?? 0,
+              id: task.id,
+              title: task.title,
+            }))}
+          />
         )}
       </MobileShell>
-      <QuickCaptureSheet onClose={() => setCaptureOpen(false)} visible={captureOpen} />
+      <QuickCaptureSheet
+        onClose={() => setCaptureOpen(false)}
+        onSave={(title, destination) => handleQuickCapture(title, destination, captureTask)}
+        visible={captureOpen}
+      />
     </>
   );
 }
 
-function NormalWeek() {
+function NormalWeek({
+  onMoveToToday,
+  tasks,
+}: {
+  onMoveToToday: (taskId: string) => void;
+  tasks: typeof unscheduledWeekTasks;
+}) {
   return (
     <ScrollView contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
       <WeekHeader />
@@ -73,7 +98,7 @@ function NormalWeek() {
         {normalWeekDays.map((day) => <WeekDayRow day={day} key={day.id} />)}
       </View>
       <WeekSectionLabel>לתכנן השבוע</WeekSectionLabel>
-      <UnscheduledWeekTasks tasks={unscheduledWeekTasks} />
+      <UnscheduledWeekTasks onMoveToToday={onMoveToToday} tasks={tasks} />
     </ScrollView>
   );
 }
@@ -161,3 +186,11 @@ const styles = StyleSheet.create({
   commitmentTitle: { color: colors.text, flex: 1, fontFamily: typography.family.regular, fontSize: typography.size.meta, textAlign: 'right', writingDirection: 'rtl' },
   commitmentTime: { color: colors.textFaint, fontFamily: typography.family.regular, fontSize: typography.size.label, writingDirection: 'ltr' },
 });
+
+function handleQuickCapture(
+  title: string,
+  destination: CaptureDestination,
+  captureTask: (title: string, destination: 'inbox' | 'today' | 'week') => void,
+) {
+  if (destination !== 'day') captureTask(title, destination);
+}

@@ -15,7 +15,7 @@ export default function InboxRoute() {
       key={previewState}
       onMoveToToday={(task) =>
         router.replace({
-          params: { inboxTaskId: task.id, inboxTaskTitle: task.title },
+          params: { inboxTaskId: task.id },
           pathname: '/',
         } as Href)
       }

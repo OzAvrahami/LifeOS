@@ -1,21 +1,17 @@
 import { render, screen, userEvent, within } from '@testing-library/react-native';
-import { SafeAreaProvider } from 'react-native-safe-area-context';
 
 import { InboxScreen } from '@/features/inbox/inbox-screen';
 
-const initialMetrics = {
-  frame: { height: 844, width: 390, x: 0, y: 0 },
-  insets: { bottom: 34, left: 0, right: 0, top: 47 },
-};
+import { TestProviders } from '../test-utils/test-providers';
 
 function renderInbox(
   initialState: 'normal' | 'empty' | 'busy' | 'processing' = 'normal',
   props: Partial<React.ComponentProps<typeof InboxScreen>> = {},
 ) {
   return render(
-    <SafeAreaProvider initialMetrics={initialMetrics}>
+    <TestProviders>
       <InboxScreen initialState={initialState} {...props} />
-    </SafeAreaProvider>,
+    </TestProviders>,
   );
 }
 

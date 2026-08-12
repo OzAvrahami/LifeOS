@@ -13,7 +13,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { colors, radius, spacing, typography } from '@/theme/tokens';
 
-type CaptureDestination = 'inbox' | 'today' | 'week' | 'day';
+export type CaptureDestination = 'inbox' | 'today' | 'week' | 'day';
 
 const destinations: { id: CaptureDestination; label: string; ltr?: boolean }[] = [
   { id: 'inbox', label: 'Inbox', ltr: true },
@@ -22,7 +22,15 @@ const destinations: { id: CaptureDestination; label: string; ltr?: boolean }[] =
   { id: 'day', label: 'בחר יום' },
 ];
 
-export function QuickCaptureSheet({ onClose, visible }: { onClose: () => void; visible: boolean }) {
+export function QuickCaptureSheet({
+  onClose,
+  onSave,
+  visible,
+}: {
+  onClose: () => void;
+  onSave?: (title: string, destination: CaptureDestination) => void;
+  visible: boolean;
+}) {
   const insets = useSafeAreaInsets();
   const [title, setTitle] = useState('');
   const [destination, setDestination] = useState<CaptureDestination>('inbox');
@@ -34,7 +42,10 @@ export function QuickCaptureSheet({ onClose, visible }: { onClose: () => void; v
   };
 
   const save = () => {
-    if (title.trim()) close();
+    const nextTitle = title.trim();
+    if (!nextTitle) return;
+    onSave?.(nextTitle, destination);
+    close();
   };
 
   return (

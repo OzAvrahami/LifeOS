@@ -1,19 +1,15 @@
 import { render, screen, userEvent, within } from '@testing-library/react-native';
-import { SafeAreaProvider } from 'react-native-safe-area-context';
 
 import { TodayScreen } from '@/features/today/today-screen';
 
-const initialMetrics = {
-  frame: { height: 844, width: 390, x: 0, y: 0 },
-  insets: { bottom: 34, left: 0, right: 0, top: 47 },
-};
+import { TestProviders } from '../test-utils/test-providers';
 
 describe('<TodayScreen />', () => {
   it('renders the normal day hierarchy and fixture content', async () => {
     await render(
-      <SafeAreaProvider initialMetrics={initialMetrics}>
+      <TestProviders>
         <TodayScreen />
-      </SafeAreaProvider>,
+      </TestProviders>,
     );
 
     expect(screen.getByText('בוקר טוב, עוז')).toBeTruthy();
@@ -26,9 +22,9 @@ describe('<TodayScreen />', () => {
 
   it('renders the approved navigation with Today selected', async () => {
     await render(
-      <SafeAreaProvider initialMetrics={initialMetrics}>
+      <TestProviders>
         <TodayScreen />
-      </SafeAreaProvider>,
+      </TestProviders>,
     );
 
     const navigation = screen.getByLabelText('ניווט ראשי');
@@ -44,9 +40,9 @@ describe('<TodayScreen />', () => {
     const onNavigateInbox = jest.fn();
     const user = userEvent.setup();
     await render(
-      <SafeAreaProvider initialMetrics={initialMetrics}>
+      <TestProviders>
         <TodayScreen onNavigateInbox={onNavigateInbox} />
-      </SafeAreaProvider>,
+      </TestProviders>,
     );
 
     await user.press(within(screen.getByLabelText('ניווט ראשי')).getByText('Inbox'));
@@ -55,9 +51,9 @@ describe('<TodayScreen />', () => {
 
   it('renders a moved Inbox task once with the approved Today confirmation', async () => {
     await render(
-      <SafeAreaProvider initialMetrics={initialMetrics}>
+      <TestProviders>
         <TodayScreen movedInboxTask={{ id: 'same-task', title: 'לקבוע טיפול לרכב' }} />
-      </SafeAreaProvider>,
+      </TestProviders>,
     );
 
     expect(screen.getAllByText('לקבוע טיפול לרכב')).toHaveLength(1);
@@ -67,9 +63,9 @@ describe('<TodayScreen />', () => {
 
   it('renders an open but shaped unplanned day', async () => {
     await render(
-      <SafeAreaProvider initialMetrics={initialMetrics}>
+      <TestProviders>
         <TodayScreen initialState="unplanned" />
-      </SafeAreaProvider>,
+      </TestProviders>,
     );
 
     expect(screen.getByText('היום שלך עדיין פתוח')).toBeTruthy();
@@ -79,9 +75,9 @@ describe('<TodayScreen />', () => {
 
   it('renders an active task with finish and stop controls but no timer', async () => {
     await render(
-      <SafeAreaProvider initialMetrics={initialMetrics}>
+      <TestProviders>
         <TodayScreen initialState="active" />
-      </SafeAreaProvider>,
+      </TestProviders>,
     );
 
     expect(screen.getByLabelText('פעיל עכשיו')).toBeTruthy();
@@ -94,9 +90,9 @@ describe('<TodayScreen />', () => {
 
   it('renders the warm overloaded-day guidance', async () => {
     await render(
-      <SafeAreaProvider initialMetrics={initialMetrics}>
+      <TestProviders>
         <TodayScreen initialState="overloaded" />
-      </SafeAreaProvider>,
+      </TestProviders>,
     );
 
     expect(screen.getByText('עמוס מדי')).toBeTruthy();
@@ -107,9 +103,9 @@ describe('<TodayScreen />', () => {
 
   it('renders human-readable partial progress without a productivity percentage', async () => {
     await render(
-      <SafeAreaProvider initialMetrics={initialMetrics}>
+      <TestProviders>
         <TodayScreen initialState="partially_completed" />
-      </SafeAreaProvider>,
+      </TestProviders>,
     );
 
     expect(screen.getByText('2 הושלמו · 1 נשארה')).toBeTruthy();
@@ -120,9 +116,9 @@ describe('<TodayScreen />', () => {
   it('opens Quick Capture with a required title and Inbox selected by default', async () => {
     const user = userEvent.setup();
     await render(
-      <SafeAreaProvider initialMetrics={initialMetrics}>
+      <TestProviders>
         <TodayScreen />
-      </SafeAreaProvider>,
+      </TestProviders>,
     );
 
     await user.press(screen.getByLabelText('הוספה מהירה'));
@@ -135,9 +131,9 @@ describe('<TodayScreen />', () => {
   it('dismisses Quick Capture from its backdrop', async () => {
     const user = userEvent.setup();
     await render(
-      <SafeAreaProvider initialMetrics={initialMetrics}>
+      <TestProviders>
         <TodayScreen />
-      </SafeAreaProvider>,
+      </TestProviders>,
     );
 
     await user.press(screen.getByLabelText('הוספה מהירה'));

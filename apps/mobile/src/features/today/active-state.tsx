@@ -3,9 +3,24 @@ import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { colors, radius, spacing, typography } from '@/theme/tokens';
 
 import { activeTodayFixture } from './today.fixture';
+import { TodayTask } from './today.types';
 
-export function ActiveState({ onFinish, onStop }: { onFinish: () => void; onStop: () => void }) {
+export function ActiveState({
+  laterTasks,
+  onFinish,
+  onStartTask,
+  onStop,
+  task,
+}: {
+  laterTasks?: TodayTask[];
+  onFinish: () => void;
+  onStartTask?: (taskId: string) => void;
+  onStop: () => void;
+  task?: TodayTask;
+}) {
   const today = activeTodayFixture;
+  const activeTask = task ?? today.task;
+  const remainingTasks = laterTasks ?? today.laterTasks;
 
   return (
     <ScrollView contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
@@ -17,8 +32,8 @@ export function ActiveState({ onFinish, onStop }: { onFinish: () => void; onStop
           <View style={styles.activeDot} />
           <Text style={styles.activeLabel}>פעיל עכשיו</Text>
         </View>
-        <Text style={styles.title}>{today.task.title}</Text>
-        <Text style={styles.meta}>הערכה: כ־{today.task.durationMinutes} דקות · עבודה</Text>
+        <Text style={styles.title}>{activeTask.title}</Text>
+        <Text style={styles.meta}>הערכה: כ־{activeTask.durationMinutes} דקות · עבודה</Text>
         <View style={styles.actions}>
           <Pressable accessibilityRole="button" onPress={onFinish} style={styles.finishButton}>
             <Text style={styles.finishText}>סיום</Text>
@@ -31,12 +46,18 @@ export function ActiveState({ onFinish, onStop }: { onFinish: () => void; onStop
 
       <Text style={styles.sectionLabel}>בהמשך היום</Text>
       <View accessibilityLabel="בהמשך היום" style={styles.taskList}>
-        {today.laterTasks.map((task, index) => (
-          <View key={task.id} style={[styles.taskRow, index === 0 && styles.divider]}>
+        {remainingTasks.map((laterTask, index) => (
+          <Pressable
+            accessibilityLabel={`התחל משימה: ${laterTask.title}`}
+            accessibilityRole="button"
+            key={laterTask.id}
+            onPress={() => onStartTask?.(laterTask.id)}
+            style={[styles.taskRow, index === 0 && styles.divider]}
+          >
             <View style={styles.checkbox} />
-            <Text style={styles.taskTitle}>{task.title}</Text>
-            <Text style={styles.duration}>{task.durationMinutes} דק׳</Text>
-          </View>
+            <Text style={styles.taskTitle}>{laterTask.title}</Text>
+            <Text style={styles.duration}>{laterTask.durationMinutes} דק׳</Text>
+          </Pressable>
         ))}
       </View>
 

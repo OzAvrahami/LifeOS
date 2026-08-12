@@ -10,6 +10,7 @@ import {
 } from '@expo-google-fonts/assistant';
 
 import { QueryProvider } from '@/lib/query/query-provider';
+import { DemoTaskProvider } from '@/features/tasks/demo-task-provider';
 
 export default function RootLayout() {
   const [fontsLoaded] = useFonts({
@@ -26,8 +27,10 @@ export default function RootLayout() {
 
   return (
     <QueryProvider>
-      <Stack screenOptions={{ headerShown: false }} />
-      <StatusBar style="dark" />
+      <DemoTaskProvider>
+        <Stack screenOptions={{ headerShown: false }} />
+        <StatusBar style="dark" />
+      </DemoTaskProvider>
     </QueryProvider>
   );
 }

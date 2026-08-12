@@ -10,27 +10,32 @@ import { InboxDestination, InboxTask } from './inbox.types';
 const initialProcessingIndex = 2;
 
 export function InboxProcessingView({
+  initialIndex = initialProcessingIndex,
+  items = processingInboxItems,
   onExit,
   onMove,
 }: {
+  initialIndex?: number;
+  items?: InboxTask[];
   onExit: () => void;
   onMove: (task: InboxTask, destination: InboxDestination, day?: string) => void;
 }) {
-  const [index, setIndex] = useState(initialProcessingIndex);
+  const [queue] = useState(items);
+  const [index, setIndex] = useState(initialIndex);
   const [choosingDay, setChoosingDay] = useState(false);
-  const task = processingInboxItems[index];
+  const task = queue[index];
 
   const advance = (destination?: InboxDestination, day?: string) => {
     if (destination) onMove(task, destination, day);
     setChoosingDay(false);
-    if (index >= processingInboxItems.length - 1) {
+    if (index >= queue.length - 1) {
       onExit();
       return;
     }
     setIndex((current) => current + 1);
   };
 
-  const progress = ((index + 1) / processingInboxItems.length) * 100;
+  const progress = ((index + 1) / queue.length) * 100;
 
   return (
     <SafeAreaView edges={['top', 'bottom']} style={styles.safeArea}>
@@ -41,11 +46,11 @@ export function InboxProcessingView({
             <Text style={styles.closeText}>✕</Text>
           </Pressable>
         </View>
-        <Text style={styles.counter}>{index + 1} מתוך {processingInboxItems.length}</Text>
+        <Text style={styles.counter}>{index + 1} מתוך {queue.length}</Text>
         <View
-          accessibilityLabel={`${index + 1} מתוך ${processingInboxItems.length}`}
+          accessibilityLabel={`${index + 1} מתוך ${queue.length}`}
           accessibilityRole="progressbar"
-          accessibilityValue={{ max: processingInboxItems.length, min: 1, now: index + 1 }}
+          accessibilityValue={{ max: queue.length, min: 1, now: index + 1 }}
           style={styles.progressTrack}
         >
           <View style={[styles.progressFill, { width: `${progress}%` }]} />
