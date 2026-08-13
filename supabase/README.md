@@ -1,7 +1,19 @@
 # Supabase project boundary
 
-This directory will own local Supabase configuration, migrations, seed data, and functions when those artifacts are introduced.
+This directory owns the local Supabase configuration and versioned database migrations.
 
-No Supabase project, schema, tables, migrations, or seed data are initialized yet. Product data access will be implemented in `apps/api` and will use the authenticated user's access token so normal operations remain subject to Row Level Security.
+The Task foundation is defined under `migrations/`. Product data access runs through
+`apps/api` using the authenticated caller's access token, so normal operations remain
+subject to Row Level Security.
 
-Service-role or secret keys are intentionally not part of the current foundation.
+Use the repository-local CLI from the repository root:
+
+```text
+npx supabase start
+npx supabase db reset
+```
+
+Remote migrations must be reviewed, linked explicitly, and applied with
+`npx supabase db push`. Never use `db reset --linked` for this project.
+
+Service-role keys and database credentials are intentionally not part of the repository.
