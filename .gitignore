@@ -34,3 +34,4 @@ yarn-error.log*
 *.key
 *.mobileprovision
 *.pem
+design-reference/lifeos-v0.1/.thumbnail
