@@ -22,6 +22,7 @@
   bdi, .num { unicode-bidi: isolate; }
   ::-webkit-scrollbar { width: 0; height: 0; }
   @keyframes lifeos-pulse { 0%,100% { opacity: 1; transform: scale(1); } 50% { opacity: .45; transform: scale(.82); } }
+  @keyframes lifeos-spin { to { transform: rotate(360deg); } }
 </style>
 </helmet>
 
@@ -887,6 +888,300 @@
             <div style="display:flex;flex-direction:column;align-items:center;"><span style="width:54px;height:54px;border-radius:50%;background:var(--ac);margin-top:-20px;display:flex;align-items:center;justify-content:center;box-shadow:0 8px 18px -4px rgba(47,143,134,.6);"><svg width="26" height="26"><line x1="13" y1="6" x2="13" y2="20" stroke="#fff" stroke-width="2.6" stroke-linecap="round"/><line x1="6" y1="13" x2="20" y2="13" stroke="#fff" stroke-width="2.6" stroke-linecap="round"/></svg></span></div>
             <div style="display:flex;flex-direction:column;align-items:center;gap:4px;color:#A8A296;"><svg width="24" height="24" fill="none"><path d="M4 6h16v9a3 3 0 0 1-3 3H7a3 3 0 0 1-3-3V6z" stroke="currentColor" stroke-width="2"/><path d="M4 12h4l1.5 2.5h5L16 12h4" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/></svg><span style="font-size:11px;font-weight:600;"><bdi>Inbox</bdi></span></div>
             <div style="display:flex;flex-direction:column;align-items:center;gap:4px;color:#A8A296;"><svg width="24" height="24" fill="none"><circle cx="6" cy="12" r="1.9" fill="currentColor"/><circle cx="12" cy="12" r="1.9" fill="currentColor"/><circle cx="18" cy="12" r="1.9" fill="currentColor"/></svg><span style="font-size:11px;font-weight:600;">עוד</span></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <div style="width:100%;max-width:1240px;display:flex;flex-direction:column;gap:6px;">
+    <div style="font-size:13px;font-weight:800;letter-spacing:.08em;color:#8C8577;">05 · כניסה · <bdi>Auth</bdi></div>
+    <p style="margin:0;font-size:15px;color:#6E6A60;line-height:1.5;max-width:680px;">דלת כניסה רגועה ל־<bdi>LifeOS</bdi> — אותם צבעים, טיפוגרפיה ומשטחים. בלי ניווט תחתון: זה קורה עוד לפני הכניסה למוצר.</p>
+  </div>
+
+  <!-- ============ AUTH FOUNDATION BOARD ============ -->
+  <div style="width:100%;max-width:1240px;background:#F4F1EA;border-radius:28px;padding:40px;display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:40px;">
+    <div style="grid-column:1/-1;font-size:15px;font-weight:700;">יסודות הכניסה</div>
+
+    <div style="display:flex;flex-direction:column;gap:16px;">
+      <div style="font-size:13px;font-weight:700;color:#8C8577;letter-spacing:.04em;">שדות טקסט</div>
+      <div><div style="font-size:11px;color:#9A9488;margin-bottom:6px;">רגיל</div><div style="height:50px;background:#FBF9F3;border:1px solid #EAE4D8;border-radius:14px;display:flex;align-items:center;padding:0 16px;font-size:15px;color:#9A9488;">name@example.com</div></div>
+      <div><div style="font-size:11px;color:#9A9488;margin-bottom:6px;">במיקוד</div><div style="height:50px;background:#FBF9F3;border:1.5px solid var(--ac);border-radius:14px;box-shadow:0 0 0 4px var(--ac-weak);display:flex;align-items:center;padding:0 16px;font-size:15px;color:#23211C;">oz<span style="width:2px;height:19px;background:var(--ac);display:inline-block;margin-inline-start:2px;"></span></div></div>
+      <div><div style="font-size:11px;color:#9A9488;margin-bottom:6px;">מלא</div><div style="height:50px;background:#FBF9F3;border:1px solid #EAE4D8;border-radius:14px;display:flex;align-items:center;padding:0 16px;font-size:15px;color:#23211C;">oz.avrahami@gmail.com</div></div>
+      <div><div style="font-size:11px;color:#9A9488;margin-bottom:6px;">שגיאה</div><div style="height:50px;background:#FBF3EF;border:1.5px solid #DDA588;border-radius:14px;display:flex;align-items:center;padding:0 16px;font-size:15px;color:#23211C;">oz.avrahami</div><div style="font-size:13px;color:#B5623C;margin-top:7px;display:flex;align-items:center;gap:6px;"><span style="width:16px;height:16px;border-radius:50%;background:#C77A5A;display:flex;align-items:center;justify-content:center;flex:0 0 auto;"><span style="color:#fff;font-size:11px;font-weight:800;line-height:1;">!</span></span>כתובת מייל לא תקינה</div></div>
+      <div><div style="font-size:11px;color:#9A9488;margin-bottom:6px;">מושבת</div><div style="height:50px;background:#EFEBE1;border:1px solid #E4DFD4;border-radius:14px;display:flex;align-items:center;padding:0 16px;font-size:15px;color:#B8B2A6;">name@example.com</div></div>
+    </div>
+
+    <div style="display:flex;flex-direction:column;gap:16px;">
+      <div style="font-size:13px;font-weight:700;color:#8C8577;letter-spacing:.04em;">כפתורים ופעולות</div>
+      <div><div style="font-size:11px;color:#9A9488;margin-bottom:6px;">ראשי</div><button style="width:100%;height:52px;background:var(--ac);color:#fff;border:none;border-radius:15px;font-size:16px;font-weight:700;font-family:inherit;">התחברות</button></div>
+      <div><div style="font-size:11px;color:#9A9488;margin-bottom:6px;">בטעינה</div><button style="width:100%;height:52px;background:var(--ac);color:#fff;border:none;border-radius:15px;font-size:16px;font-weight:700;font-family:inherit;display:flex;align-items:center;justify-content:center;gap:10px;opacity:.92;"><span style="width:19px;height:19px;border-radius:50%;border:2.5px solid rgba(255,255,255,.4);border-top-color:#fff;display:inline-block;animation:lifeos-spin .8s linear infinite;"></span>מתחבר…</button></div>
+      <div><div style="font-size:11px;color:#9A9488;margin-bottom:6px;">מושבת</div><button style="width:100%;height:52px;background:#E3DDD0;color:#B0AA9C;border:none;border-radius:15px;font-size:16px;font-weight:700;font-family:inherit;">יצירת חשבון</button></div>
+      <div><div style="font-size:11px;color:#9A9488;margin-bottom:6px;">משני</div><button style="width:100%;height:52px;background:transparent;color:#3A382F;border:1.5px solid #DCD6C9;border-radius:15px;font-size:16px;font-weight:600;font-family:inherit;">הרשמה</button></div>
+      <div><div style="font-size:11px;color:#9A9488;margin-bottom:6px;">קישור</div><span style="color:var(--ac);font-weight:700;font-size:15px;">שכחתי סיסמה</span></div>
+    </div>
+
+    <div style="display:flex;flex-direction:column;gap:16px;">
+      <div style="font-size:13px;font-weight:700;color:#8C8577;letter-spacing:.04em;">אימות והודעות</div>
+      <div><div style="font-size:11px;color:#9A9488;margin-bottom:6px;">שגיאה בשדה</div><div style="font-size:14px;color:#B5623C;display:flex;align-items:center;gap:7px;"><span style="width:16px;height:16px;border-radius:50%;background:#C77A5A;display:flex;align-items:center;justify-content:center;flex:0 0 auto;"><span style="color:#fff;font-size:11px;font-weight:800;line-height:1;">!</span></span>הסיסמאות אינן תואמות</div></div>
+      <div><div style="font-size:11px;color:#9A9488;margin-bottom:6px;">תקין</div><div style="font-size:14px;color:#2A7D75;display:flex;align-items:center;gap:7px;"><span style="width:16px;height:16px;border-radius:50%;background:var(--ac);display:flex;align-items:center;justify-content:center;flex:0 0 auto;"><svg width="9" height="9" viewBox="0 0 12 12"><polyline points="2,6.5 5,9 10,3" fill="none" stroke="#fff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg></span>הסיסמה חזקה מספיק</div></div>
+      <div><div style="font-size:11px;color:#9A9488;margin-bottom:6px;">הודעת שגיאה</div><div style="background:#FAF0EB;border:1px solid #E7C6B4;border-radius:14px;padding:13px 15px;display:flex;align-items:center;gap:10px;"><span style="width:20px;height:20px;border-radius:50%;background:#C77A5A;display:flex;align-items:center;justify-content:center;flex:0 0 auto;"><span style="color:#fff;font-size:13px;font-weight:800;line-height:1;">!</span></span><span style="font-size:14px;font-weight:600;color:#A8502F;">אימייל או סיסמה שגויים</span></div></div>
+      <div><div style="font-size:11px;color:#9A9488;margin-bottom:6px;">הצלחה</div><div style="background:#23211C;border-radius:14px;padding:12px 15px;display:flex;align-items:center;gap:10px;box-shadow:0 10px 24px -14px rgba(0,0,0,.5);"><span style="width:20px;height:20px;border-radius:50%;background:var(--ac);display:flex;align-items:center;justify-content:center;flex:0 0 auto;"><svg width="11" height="11" viewBox="0 0 12 12"><polyline points="2,6.5 5,9 10,3" fill="none" stroke="#fff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg></span><span style="font-size:14px;color:#F4F1EA;font-weight:500;">הסיסמה עודכנה</span></div></div>
+      <div><div style="font-size:11px;color:#9A9488;margin-bottom:6px;">חיבור</div><div style="background:#FBF9F3;border:1px solid #EAE4D8;border-radius:14px;padding:12px 15px;display:flex;align-items:center;gap:10px;"><span style="width:8px;height:8px;border-radius:50%;background:#C77A5A;flex:0 0 auto;"></span><span style="font-size:14px;color:#6E6A60;">יש בעיה בחיבור. אפשר לנסות שוב.</span></div></div>
+    </div>
+  </div>
+
+  <!-- ============ AUTH PHONE ROW ============ -->
+  <div style="display:flex;flex-wrap:wrap;gap:56px 44px;justify-content:center;align-items:flex-start;width:100%;">
+
+    <div style="display:flex;flex-direction:column;gap:16px;align-items:center;">
+      <div style="text-align:center;"><div style="font-size:16px;font-weight:700;">ברוכים הבאים</div><div style="font-size:13px;color:#8C8577;">כניסה ראשונית · שני נתיבים ברורים</div></div>
+      <div style="width:402px;padding:6px;background:#141310;border-radius:52px;box-shadow:0 26px 60px -22px rgba(30,25,15,.4);">
+        <div style="position:relative;width:390px;height:844px;background:#F4F1EA;border-radius:46px;overflow:hidden;">
+          <div style="position:absolute;top:12px;left:50%;transform:translateX(-50%);width:118px;height:33px;background:#000;border-radius:20px;z-index:8;"></div>
+          <div style="height:54px;display:flex;align-items:center;justify-content:space-between;padding:0 26px;font-size:15px;font-weight:700;"><span><bdi>9:41</bdi></span><span style="display:flex;align-items:center;gap:6px;"><span style="display:flex;align-items:flex-end;gap:2px;"><i style="width:3px;height:5px;background:#23211C;border-radius:1px;"></i><i style="width:3px;height:7px;background:#23211C;border-radius:1px;"></i><i style="width:3px;height:9px;background:#23211C;border-radius:1px;"></i><i style="width:3px;height:11px;background:#23211C;border-radius:1px;"></i></span><span style="width:24px;height:12px;border:1.3px solid #23211C;border-radius:3px;padding:1.5px;"><span style="display:block;width:72%;height:100%;background:#23211C;border-radius:1px;"></span></span></span></div>
+          <div style="height:790px;padding:0 32px 46px;display:flex;flex-direction:column;">
+            <div style="flex:1;display:flex;flex-direction:column;justify-content:center;align-items:center;text-align:center;gap:20px;">
+              <span style="width:70px;height:70px;border-radius:22px;background:var(--ac);display:flex;align-items:center;justify-content:center;box-shadow:0 14px 30px -10px rgba(47,143,134,.55);"><span style="width:26px;height:26px;border-radius:50%;border:4.5px solid #fff;"></span></span>
+              <div style="font-size:42px;font-weight:800;letter-spacing:-.02em;margin-top:6px;"><bdi>LifeOS</bdi></div>
+              <div style="font-size:18px;color:#6E6A60;line-height:1.55;max-width:270px;">סדר ברור ליום ולשבוע שלך. להתחיל בפשטות, ולראות מה חשוב עכשיו.</div>
+            </div>
+            <div style="display:flex;flex-direction:column;gap:12px;">
+              <button style="width:100%;height:54px;background:var(--ac);color:#fff;border:none;border-radius:15px;font-size:17px;font-weight:700;font-family:inherit;">התחברות</button>
+              <button style="width:100%;height:54px;background:transparent;color:#3A382F;border:1.5px solid #DCD6C9;border-radius:15px;font-size:17px;font-weight:600;font-family:inherit;">הרשמה</button>
+              <div style="text-align:center;font-size:13px;color:#9A9488;margin-top:8px;line-height:1.5;">בהמשך יש הסכמה ל<span style="color:var(--ac);font-weight:600;">תנאי השימוש</span> ול<span style="color:var(--ac);font-weight:600;">פרטיות</span></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div style="display:flex;flex-direction:column;gap:16px;align-items:center;">
+      <div style="text-align:center;"><div style="font-size:16px;font-weight:700;">התחברות</div><div style="font-size:13px;color:#8C8577;">אימייל וסיסמה · מצב רגיל</div></div>
+      <div style="width:402px;padding:6px;background:#141310;border-radius:52px;box-shadow:0 26px 60px -22px rgba(30,25,15,.4);">
+        <div style="position:relative;width:390px;height:844px;background:#F4F1EA;border-radius:46px;overflow:hidden;">
+          <div style="position:absolute;top:12px;left:50%;transform:translateX(-50%);width:118px;height:33px;background:#000;border-radius:20px;z-index:8;"></div>
+          <div style="height:54px;display:flex;align-items:center;justify-content:space-between;padding:0 26px;font-size:15px;font-weight:700;"><span><bdi>9:41</bdi></span><span style="display:flex;align-items:center;gap:6px;"><span style="display:flex;align-items:flex-end;gap:2px;"><i style="width:3px;height:5px;background:#23211C;border-radius:1px;"></i><i style="width:3px;height:7px;background:#23211C;border-radius:1px;"></i><i style="width:3px;height:9px;background:#23211C;border-radius:1px;"></i><i style="width:3px;height:11px;background:#23211C;border-radius:1px;"></i></span><span style="width:24px;height:12px;border:1.3px solid #23211C;border-radius:3px;padding:1.5px;"><span style="display:block;width:72%;height:100%;background:#23211C;border-radius:1px;"></span></span></span></div>
+          <div style="height:790px;padding:14px 30px 40px;display:flex;flex-direction:column;">
+            <button style="width:40px;height:40px;border-radius:50%;background:#FBF9F3;border:1px solid #EAE4D8;display:flex;align-items:center;justify-content:center;padding:0;"><svg width="18" height="18" viewBox="0 0 18 18" fill="none"><polyline points="7,4 12,9 7,14" stroke="#6E6A60" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
+            <div style="margin-top:18px;">
+              <div style="font-size:30px;font-weight:800;">התחברות</div>
+              <div style="font-size:16px;color:#6E6A60;margin-top:6px;">טוב לראות אותך שוב</div>
+            </div>
+            <div style="margin-top:30px;display:flex;flex-direction:column;gap:16px;">
+              <div><div style="font-size:13px;font-weight:700;color:#6E6A60;margin-bottom:8px;">אימייל</div><div style="height:54px;background:#FBF9F3;border:1px solid #EAE4D8;border-radius:14px;display:flex;align-items:center;padding:0 16px;font-size:16px;color:#23211C;">oz.avrahami@gmail.com</div></div>
+              <div><div style="font-size:13px;font-weight:700;color:#6E6A60;margin-bottom:8px;">סיסמה</div><div style="height:54px;background:#FBF9F3;border:1px solid #EAE4D8;border-radius:14px;display:flex;align-items:center;padding:0 16px;gap:10px;"><span style="flex:1;font-size:22px;letter-spacing:4px;color:#23211C;line-height:1;">••••••••</span><svg width="20" height="20" viewBox="0 0 24 24" fill="none"><path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7-10-7-10-7z" stroke="#9A9488" stroke-width="2"/><circle cx="12" cy="12" r="3" stroke="#9A9488" stroke-width="2"/></svg></div></div>
+              <div style="text-align:end;margin-top:-2px;"><span style="color:var(--ac);font-weight:700;font-size:14px;">שכחתי סיסמה</span></div>
+            </div>
+            <button style="margin-top:26px;width:100%;height:54px;background:var(--ac);color:#fff;border:none;border-radius:15px;font-size:17px;font-weight:700;font-family:inherit;">התחברות</button>
+            <div style="flex:1;"></div>
+            <div style="text-align:center;font-size:15px;color:#6E6A60;">עדיין אין חשבון? <span style="color:var(--ac);font-weight:700;">הרשמה</span></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div style="display:flex;flex-direction:column;gap:16px;align-items:center;">
+      <div style="text-align:center;"><div style="font-size:16px;font-weight:700;">התחברות · שגיאה</div><div style="font-size:13px;color:#8C8577;">הודעה רגועה, לא אגרסיבית</div></div>
+      <div style="width:402px;padding:6px;background:#141310;border-radius:52px;box-shadow:0 26px 60px -22px rgba(30,25,15,.4);">
+        <div style="position:relative;width:390px;height:844px;background:#F4F1EA;border-radius:46px;overflow:hidden;">
+          <div style="position:absolute;top:12px;left:50%;transform:translateX(-50%);width:118px;height:33px;background:#000;border-radius:20px;z-index:8;"></div>
+          <div style="height:54px;display:flex;align-items:center;justify-content:space-between;padding:0 26px;font-size:15px;font-weight:700;"><span><bdi>9:41</bdi></span><span style="display:flex;align-items:center;gap:6px;"><span style="display:flex;align-items:flex-end;gap:2px;"><i style="width:3px;height:5px;background:#23211C;border-radius:1px;"></i><i style="width:3px;height:7px;background:#23211C;border-radius:1px;"></i><i style="width:3px;height:9px;background:#23211C;border-radius:1px;"></i><i style="width:3px;height:11px;background:#23211C;border-radius:1px;"></i></span><span style="width:24px;height:12px;border:1.3px solid #23211C;border-radius:3px;padding:1.5px;"><span style="display:block;width:72%;height:100%;background:#23211C;border-radius:1px;"></span></span></span></div>
+          <div style="height:790px;padding:14px 30px 40px;display:flex;flex-direction:column;">
+            <button style="width:40px;height:40px;border-radius:50%;background:#FBF9F3;border:1px solid #EAE4D8;display:flex;align-items:center;justify-content:center;padding:0;"><svg width="18" height="18" viewBox="0 0 18 18" fill="none"><polyline points="7,4 12,9 7,14" stroke="#6E6A60" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
+            <div style="margin-top:18px;">
+              <div style="font-size:30px;font-weight:800;">התחברות</div>
+              <div style="font-size:16px;color:#6E6A60;margin-top:6px;">טוב לראות אותך שוב</div>
+            </div>
+            <div style="margin-top:20px;background:#FAF0EB;border:1px solid #E7C6B4;border-radius:14px;padding:13px 15px;display:flex;align-items:center;gap:10px;"><span style="width:20px;height:20px;border-radius:50%;background:#C77A5A;display:flex;align-items:center;justify-content:center;flex:0 0 auto;"><span style="color:#fff;font-size:13px;font-weight:800;line-height:1;">!</span></span><span style="font-size:14px;font-weight:600;color:#A8502F;">אימייל או סיסמה שגויים</span></div>
+            <div style="margin-top:18px;display:flex;flex-direction:column;gap:16px;">
+              <div><div style="font-size:13px;font-weight:700;color:#6E6A60;margin-bottom:8px;">אימייל</div><div style="height:54px;background:#FBF9F3;border:1px solid #EAE4D8;border-radius:14px;display:flex;align-items:center;padding:0 16px;font-size:16px;color:#23211C;">oz.avrahami@gmail.com</div></div>
+              <div><div style="font-size:13px;font-weight:700;color:#6E6A60;margin-bottom:8px;">סיסמה</div><div style="height:54px;background:#FBF3EF;border:1.5px solid #DDA588;border-radius:14px;display:flex;align-items:center;padding:0 16px;gap:10px;"><span style="flex:1;font-size:22px;letter-spacing:4px;color:#23211C;line-height:1;">•••••</span><svg width="20" height="20" viewBox="0 0 24 24" fill="none"><path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7-10-7-10-7z" stroke="#9A9488" stroke-width="2"/><circle cx="12" cy="12" r="3" stroke="#9A9488" stroke-width="2"/></svg></div></div>
+              <div style="text-align:end;margin-top:-2px;"><span style="color:var(--ac);font-weight:700;font-size:14px;">שכחתי סיסמה</span></div>
+            </div>
+            <button style="margin-top:22px;width:100%;height:54px;background:var(--ac);color:#fff;border:none;border-radius:15px;font-size:17px;font-weight:700;font-family:inherit;">התחברות</button>
+            <div style="flex:1;"></div>
+            <div style="text-align:center;font-size:15px;color:#6E6A60;">עדיין אין חשבון? <span style="color:var(--ac);font-weight:700;">הרשמה</span></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div style="display:flex;flex-direction:column;gap:16px;align-items:center;">
+      <div style="text-align:center;"><div style="font-size:16px;font-weight:700;">הרשמה</div><div style="font-size:13px;color:#8C8577;">חשבון חדש · קליל וקצר</div></div>
+      <div style="width:402px;padding:6px;background:#141310;border-radius:52px;box-shadow:0 26px 60px -22px rgba(30,25,15,.4);">
+        <div style="position:relative;width:390px;height:844px;background:#F4F1EA;border-radius:46px;overflow:hidden;">
+          <div style="position:absolute;top:12px;left:50%;transform:translateX(-50%);width:118px;height:33px;background:#000;border-radius:20px;z-index:8;"></div>
+          <div style="height:54px;display:flex;align-items:center;justify-content:space-between;padding:0 26px;font-size:15px;font-weight:700;"><span><bdi>9:41</bdi></span><span style="display:flex;align-items:center;gap:6px;"><span style="display:flex;align-items:flex-end;gap:2px;"><i style="width:3px;height:5px;background:#23211C;border-radius:1px;"></i><i style="width:3px;height:7px;background:#23211C;border-radius:1px;"></i><i style="width:3px;height:9px;background:#23211C;border-radius:1px;"></i><i style="width:3px;height:11px;background:#23211C;border-radius:1px;"></i></span><span style="width:24px;height:12px;border:1.3px solid #23211C;border-radius:3px;padding:1.5px;"><span style="display:block;width:72%;height:100%;background:#23211C;border-radius:1px;"></span></span></span></div>
+          <div style="height:790px;padding:14px 30px 34px;display:flex;flex-direction:column;">
+            <button style="width:40px;height:40px;border-radius:50%;background:#FBF9F3;border:1px solid #EAE4D8;display:flex;align-items:center;justify-content:center;padding:0;"><svg width="18" height="18" viewBox="0 0 18 18" fill="none"><polyline points="7,4 12,9 7,14" stroke="#6E6A60" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
+            <div style="margin-top:16px;">
+              <div style="font-size:28px;font-weight:800;">יצירת חשבון</div>
+              <div style="font-size:15px;color:#6E6A60;margin-top:6px;">כמה פרטים ואפשר להתחיל</div>
+            </div>
+            <div style="margin-top:22px;display:flex;flex-direction:column;gap:14px;">
+              <div><div style="font-size:13px;font-weight:700;color:#6E6A60;margin-bottom:7px;">שם</div><div style="height:52px;background:#FBF9F3;border:1.5px solid var(--ac);border-radius:14px;box-shadow:0 0 0 4px var(--ac-weak);display:flex;align-items:center;padding:0 16px;font-size:16px;color:#23211C;">עוז<span style="width:2px;height:20px;background:var(--ac);display:inline-block;margin-inline-start:2px;"></span></div></div>
+              <div><div style="font-size:13px;font-weight:700;color:#6E6A60;margin-bottom:7px;">אימייל</div><div style="height:52px;background:#FBF9F3;border:1px solid #EAE4D8;border-radius:14px;display:flex;align-items:center;padding:0 16px;font-size:16px;color:#23211C;">oz.avrahami@gmail.com</div></div>
+              <div><div style="font-size:13px;font-weight:700;color:#6E6A60;margin-bottom:7px;">סיסמה</div><div style="height:52px;background:#FBF9F3;border:1px solid #EAE4D8;border-radius:14px;display:flex;align-items:center;padding:0 16px;gap:10px;"><span style="flex:1;font-size:22px;letter-spacing:4px;color:#23211C;line-height:1;">••••••••</span><svg width="20" height="20" viewBox="0 0 24 24" fill="none"><path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7-10-7-10-7z" stroke="#9A9488" stroke-width="2"/><circle cx="12" cy="12" r="3" stroke="#9A9488" stroke-width="2"/></svg></div><div style="font-size:12px;color:#9A9488;margin-top:7px;">לפחות 8 תווים</div></div>
+              <div><div style="font-size:13px;font-weight:700;color:#6E6A60;margin-bottom:7px;">אימות סיסמה</div><div style="height:52px;background:#FBF9F3;border:1px solid #EAE4D8;border-radius:14px;display:flex;align-items:center;padding:0 16px;gap:10px;"><span style="flex:1;font-size:22px;letter-spacing:4px;color:#23211C;line-height:1;">••••••••</span><svg width="20" height="20" viewBox="0 0 24 24" fill="none"><path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7-10-7-10-7z" stroke="#9A9488" stroke-width="2"/><circle cx="12" cy="12" r="3" stroke="#9A9488" stroke-width="2"/></svg></div></div>
+            </div>
+            <button style="margin-top:20px;width:100%;height:54px;background:var(--ac);color:#fff;border:none;border-radius:15px;font-size:17px;font-weight:700;font-family:inherit;">יצירת חשבון</button>
+            <div style="flex:1;"></div>
+            <div style="text-align:center;font-size:15px;color:#6E6A60;">כבר יש חשבון? <span style="color:var(--ac);font-weight:700;">התחברות</span></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div style="display:flex;flex-direction:column;gap:16px;align-items:center;">
+      <div style="text-align:center;"><div style="font-size:16px;font-weight:700;">הרשמה · אימות</div><div style="font-size:13px;color:#8C8577;">סיסמאות שאינן תואמות</div></div>
+      <div style="width:402px;padding:6px;background:#141310;border-radius:52px;box-shadow:0 26px 60px -22px rgba(30,25,15,.4);">
+        <div style="position:relative;width:390px;height:844px;background:#F4F1EA;border-radius:46px;overflow:hidden;">
+          <div style="position:absolute;top:12px;left:50%;transform:translateX(-50%);width:118px;height:33px;background:#000;border-radius:20px;z-index:8;"></div>
+          <div style="height:54px;display:flex;align-items:center;justify-content:space-between;padding:0 26px;font-size:15px;font-weight:700;"><span><bdi>9:41</bdi></span><span style="display:flex;align-items:center;gap:6px;"><span style="display:flex;align-items:flex-end;gap:2px;"><i style="width:3px;height:5px;background:#23211C;border-radius:1px;"></i><i style="width:3px;height:7px;background:#23211C;border-radius:1px;"></i><i style="width:3px;height:9px;background:#23211C;border-radius:1px;"></i><i style="width:3px;height:11px;background:#23211C;border-radius:1px;"></i></span><span style="width:24px;height:12px;border:1.3px solid #23211C;border-radius:3px;padding:1.5px;"><span style="display:block;width:72%;height:100%;background:#23211C;border-radius:1px;"></span></span></span></div>
+          <div style="height:790px;padding:14px 30px 34px;display:flex;flex-direction:column;">
+            <button style="width:40px;height:40px;border-radius:50%;background:#FBF9F3;border:1px solid #EAE4D8;display:flex;align-items:center;justify-content:center;padding:0;"><svg width="18" height="18" viewBox="0 0 18 18" fill="none"><polyline points="7,4 12,9 7,14" stroke="#6E6A60" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
+            <div style="margin-top:16px;">
+              <div style="font-size:28px;font-weight:800;">יצירת חשבון</div>
+              <div style="font-size:15px;color:#6E6A60;margin-top:6px;">כמה פרטים ואפשר להתחיל</div>
+            </div>
+            <div style="margin-top:22px;display:flex;flex-direction:column;gap:14px;">
+              <div><div style="font-size:13px;font-weight:700;color:#6E6A60;margin-bottom:7px;">שם</div><div style="height:52px;background:#FBF9F3;border:1px solid #EAE4D8;border-radius:14px;display:flex;align-items:center;padding:0 16px;font-size:16px;color:#23211C;">עוז אברהמי</div></div>
+              <div><div style="font-size:13px;font-weight:700;color:#6E6A60;margin-bottom:7px;">אימייל</div><div style="height:52px;background:#FBF9F3;border:1px solid #EAE4D8;border-radius:14px;display:flex;align-items:center;padding:0 16px;font-size:16px;color:#23211C;">oz.avrahami@gmail.com</div></div>
+              <div><div style="font-size:13px;font-weight:700;color:#6E6A60;margin-bottom:7px;">סיסמה</div><div style="height:52px;background:#FBF9F3;border:1px solid #EAE4D8;border-radius:14px;display:flex;align-items:center;padding:0 16px;gap:10px;"><span style="flex:1;font-size:22px;letter-spacing:4px;color:#23211C;line-height:1;">••••••••</span><svg width="20" height="20" viewBox="0 0 24 24" fill="none"><path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7-10-7-10-7z" stroke="#9A9488" stroke-width="2"/><circle cx="12" cy="12" r="3" stroke="#9A9488" stroke-width="2"/></svg></div></div>
+              <div><div style="font-size:13px;font-weight:700;color:#6E6A60;margin-bottom:7px;">אימות סיסמה</div><div style="height:52px;background:#FBF3EF;border:1.5px solid #DDA588;border-radius:14px;display:flex;align-items:center;padding:0 16px;gap:10px;"><span style="flex:1;font-size:22px;letter-spacing:4px;color:#23211C;line-height:1;">•••••</span><svg width="20" height="20" viewBox="0 0 24 24" fill="none"><path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7-10-7-10-7z" stroke="#9A9488" stroke-width="2"/><circle cx="12" cy="12" r="3" stroke="#9A9488" stroke-width="2"/></svg></div><div style="font-size:13px;color:#B5623C;margin-top:7px;display:flex;align-items:center;gap:6px;"><span style="width:16px;height:16px;border-radius:50%;background:#C77A5A;display:flex;align-items:center;justify-content:center;flex:0 0 auto;"><span style="color:#fff;font-size:11px;font-weight:800;line-height:1;">!</span></span>הסיסמאות אינן תואמות</div></div>
+            </div>
+            <button style="margin-top:18px;width:100%;height:54px;background:var(--ac);color:#fff;border:none;border-radius:15px;font-size:17px;font-weight:700;font-family:inherit;">יצירת חשבון</button>
+            <div style="flex:1;"></div>
+            <div style="text-align:center;font-size:15px;color:#6E6A60;">כבר יש חשבון? <span style="color:var(--ac);font-weight:700;">התחברות</span></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div style="display:flex;flex-direction:column;gap:16px;align-items:center;">
+      <div style="text-align:center;"><div style="font-size:16px;font-weight:700;">אימות מייל</div><div style="font-size:13px;color:#8C8577;">כמעט בפנים · מרגיע וברור</div></div>
+      <div style="width:402px;padding:6px;background:#141310;border-radius:52px;box-shadow:0 26px 60px -22px rgba(30,25,15,.4);">
+        <div style="position:relative;width:390px;height:844px;background:#F4F1EA;border-radius:46px;overflow:hidden;">
+          <div style="position:absolute;top:12px;left:50%;transform:translateX(-50%);width:118px;height:33px;background:#000;border-radius:20px;z-index:8;"></div>
+          <div style="height:54px;display:flex;align-items:center;justify-content:space-between;padding:0 26px;font-size:15px;font-weight:700;"><span><bdi>9:41</bdi></span><span style="display:flex;align-items:center;gap:6px;"><span style="display:flex;align-items:flex-end;gap:2px;"><i style="width:3px;height:5px;background:#23211C;border-radius:1px;"></i><i style="width:3px;height:7px;background:#23211C;border-radius:1px;"></i><i style="width:3px;height:9px;background:#23211C;border-radius:1px;"></i><i style="width:3px;height:11px;background:#23211C;border-radius:1px;"></i></span><span style="width:24px;height:12px;border:1.3px solid #23211C;border-radius:3px;padding:1.5px;"><span style="display:block;width:72%;height:100%;background:#23211C;border-radius:1px;"></span></span></span></div>
+          <div style="height:790px;padding:14px 32px 40px;display:flex;flex-direction:column;">
+            <button style="width:40px;height:40px;border-radius:50%;background:#FBF9F3;border:1px solid #EAE4D8;display:flex;align-items:center;justify-content:center;padding:0;flex:0 0 auto;"><svg width="18" height="18" viewBox="0 0 18 18" fill="none"><polyline points="7,4 12,9 7,14" stroke="#6E6A60" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
+            <div style="flex:1;display:flex;flex-direction:column;justify-content:center;align-items:center;text-align:center;gap:16px;">
+              <span style="width:100px;height:100px;border-radius:50%;background:var(--ac-weak);display:flex;align-items:center;justify-content:center;"><svg width="46" height="46" viewBox="0 0 24 24" fill="none"><rect x="3" y="5" width="18" height="14" rx="3" stroke="var(--ac)" stroke-width="2"/><path d="M4 8l8 6 8-6" stroke="var(--ac)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
+              <div style="font-size:26px;font-weight:800;margin-top:4px;">החשבון כמעט מוכן</div>
+              <div style="font-size:16px;color:#6E6A60;line-height:1.6;max-width:290px;">שלחנו מייל אימות אל<br><span style="color:#23211C;font-weight:700;"><bdi>oz.avrahami@gmail.com</bdi></span><br>צריך ללחוץ על הקישור במייל כדי להמשיך.</div>
+            </div>
+            <div style="display:flex;flex-direction:column;gap:12px;">
+              <button style="width:100%;height:54px;background:var(--ac);color:#fff;border:none;border-radius:15px;font-size:17px;font-weight:700;font-family:inherit;">פתחו את המייל</button>
+              <button style="width:100%;height:52px;background:transparent;border:none;color:var(--ac);font-size:16px;font-weight:700;font-family:inherit;">שליחה מחדש</button>
+              <div style="text-align:center;font-size:15px;color:#6E6A60;margin-top:2px;"><span style="color:var(--ac);font-weight:700;">חזרה להתחברות</span></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div style="display:flex;flex-direction:column;gap:16px;align-items:center;">
+      <div style="text-align:center;"><div style="font-size:16px;font-weight:700;">שחזור סיסמה</div><div style="font-size:13px;color:#8C8577;">בקשת קישור לאיפוס</div></div>
+      <div style="width:402px;padding:6px;background:#141310;border-radius:52px;box-shadow:0 26px 60px -22px rgba(30,25,15,.4);">
+        <div style="position:relative;width:390px;height:844px;background:#F4F1EA;border-radius:46px;overflow:hidden;">
+          <div style="position:absolute;top:12px;left:50%;transform:translateX(-50%);width:118px;height:33px;background:#000;border-radius:20px;z-index:8;"></div>
+          <div style="height:54px;display:flex;align-items:center;justify-content:space-between;padding:0 26px;font-size:15px;font-weight:700;"><span><bdi>9:41</bdi></span><span style="display:flex;align-items:center;gap:6px;"><span style="display:flex;align-items:flex-end;gap:2px;"><i style="width:3px;height:5px;background:#23211C;border-radius:1px;"></i><i style="width:3px;height:7px;background:#23211C;border-radius:1px;"></i><i style="width:3px;height:9px;background:#23211C;border-radius:1px;"></i><i style="width:3px;height:11px;background:#23211C;border-radius:1px;"></i></span><span style="width:24px;height:12px;border:1.3px solid #23211C;border-radius:3px;padding:1.5px;"><span style="display:block;width:72%;height:100%;background:#23211C;border-radius:1px;"></span></span></span></div>
+          <div style="height:790px;padding:14px 30px 40px;display:flex;flex-direction:column;">
+            <button style="width:40px;height:40px;border-radius:50%;background:#FBF9F3;border:1px solid #EAE4D8;display:flex;align-items:center;justify-content:center;padding:0;"><svg width="18" height="18" viewBox="0 0 18 18" fill="none"><polyline points="7,4 12,9 7,14" stroke="#6E6A60" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
+            <div style="margin-top:18px;">
+              <div style="font-size:30px;font-weight:800;">איפוס סיסמה</div>
+              <div style="font-size:16px;color:#6E6A60;margin-top:6px;line-height:1.5;">נשלח אליך קישור לאיפוס. הזינו את המייל של החשבון.</div>
+            </div>
+            <div style="margin-top:28px;"><div style="font-size:13px;font-weight:700;color:#6E6A60;margin-bottom:8px;">אימייל</div><div style="height:54px;background:#FBF9F3;border:1px solid #EAE4D8;border-radius:14px;display:flex;align-items:center;padding:0 16px;font-size:16px;color:#9A9488;">name@example.com</div></div>
+            <button style="margin-top:22px;width:100%;height:54px;background:var(--ac);color:#fff;border:none;border-radius:15px;font-size:17px;font-weight:700;font-family:inherit;">שליחת קישור לאיפוס</button>
+            <div style="flex:1;"></div>
+            <div style="text-align:center;font-size:15px;color:#6E6A60;"><span style="color:var(--ac);font-weight:700;">חזרה להתחברות</span></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div style="display:flex;flex-direction:column;gap:16px;align-items:center;">
+      <div style="text-align:center;"><div style="font-size:16px;font-weight:700;">שחזור · נשלח</div><div style="font-size:13px;color:#8C8577;">הודעת הצלחה, ללא חשיפה</div></div>
+      <div style="width:402px;padding:6px;background:#141310;border-radius:52px;box-shadow:0 26px 60px -22px rgba(30,25,15,.4);">
+        <div style="position:relative;width:390px;height:844px;background:#F4F1EA;border-radius:46px;overflow:hidden;">
+          <div style="position:absolute;top:12px;left:50%;transform:translateX(-50%);width:118px;height:33px;background:#000;border-radius:20px;z-index:8;"></div>
+          <div style="height:54px;display:flex;align-items:center;justify-content:space-between;padding:0 26px;font-size:15px;font-weight:700;"><span><bdi>9:41</bdi></span><span style="display:flex;align-items:center;gap:6px;"><span style="display:flex;align-items:flex-end;gap:2px;"><i style="width:3px;height:5px;background:#23211C;border-radius:1px;"></i><i style="width:3px;height:7px;background:#23211C;border-radius:1px;"></i><i style="width:3px;height:9px;background:#23211C;border-radius:1px;"></i><i style="width:3px;height:11px;background:#23211C;border-radius:1px;"></i></span><span style="width:24px;height:12px;border:1.3px solid #23211C;border-radius:3px;padding:1.5px;"><span style="display:block;width:72%;height:100%;background:#23211C;border-radius:1px;"></span></span></span></div>
+          <div style="height:790px;padding:14px 32px 40px;display:flex;flex-direction:column;">
+            <button style="width:40px;height:40px;border-radius:50%;background:#FBF9F3;border:1px solid #EAE4D8;display:flex;align-items:center;justify-content:center;padding:0;flex:0 0 auto;"><svg width="18" height="18" viewBox="0 0 18 18" fill="none"><polyline points="7,4 12,9 7,14" stroke="#6E6A60" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
+            <div style="flex:1;display:flex;flex-direction:column;justify-content:center;align-items:center;text-align:center;gap:16px;">
+              <span style="width:100px;height:100px;border-radius:50%;background:var(--ac-weak);display:flex;align-items:center;justify-content:center;"><svg width="44" height="44" viewBox="0 0 24 24" fill="none"><polyline points="4,13 10,19 20,6" stroke="var(--ac)" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
+              <div style="font-size:26px;font-weight:800;margin-top:4px;">הקישור נשלח</div>
+              <div style="font-size:16px;color:#6E6A60;line-height:1.6;max-width:290px;">אם הכתובת קיימת אצלנו, שלחנו קישור לאיפוס הסיסמה. כדאי לבדוק גם בתיקיית הספאם.</div>
+            </div>
+            <div style="display:flex;flex-direction:column;gap:12px;">
+              <button style="width:100%;height:52px;background:transparent;border:1.5px solid #DCD6C9;color:#3A382F;border-radius:15px;font-size:16px;font-weight:600;font-family:inherit;">שליחה מחדש</button>
+              <div style="text-align:center;font-size:15px;color:#6E6A60;margin-top:2px;"><span style="color:var(--ac);font-weight:700;">חזרה להתחברות</span></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div style="display:flex;flex-direction:column;gap:16px;align-items:center;">
+      <div style="text-align:center;"><div style="font-size:16px;font-weight:700;">סיסמה חדשה</div><div style="font-size:13px;color:#8C8577;">מתוך קישור האיפוס</div></div>
+      <div style="width:402px;padding:6px;background:#141310;border-radius:52px;box-shadow:0 26px 60px -22px rgba(30,25,15,.4);">
+        <div style="position:relative;width:390px;height:844px;background:#F4F1EA;border-radius:46px;overflow:hidden;">
+          <div style="position:absolute;top:12px;left:50%;transform:translateX(-50%);width:118px;height:33px;background:#000;border-radius:20px;z-index:8;"></div>
+          <div style="height:54px;display:flex;align-items:center;justify-content:space-between;padding:0 26px;font-size:15px;font-weight:700;"><span><bdi>9:41</bdi></span><span style="display:flex;align-items:center;gap:6px;"><span style="display:flex;align-items:flex-end;gap:2px;"><i style="width:3px;height:5px;background:#23211C;border-radius:1px;"></i><i style="width:3px;height:7px;background:#23211C;border-radius:1px;"></i><i style="width:3px;height:9px;background:#23211C;border-radius:1px;"></i><i style="width:3px;height:11px;background:#23211C;border-radius:1px;"></i></span><span style="width:24px;height:12px;border:1.3px solid #23211C;border-radius:3px;padding:1.5px;"><span style="display:block;width:72%;height:100%;background:#23211C;border-radius:1px;"></span></span></span></div>
+          <div style="height:790px;padding:14px 30px 40px;display:flex;flex-direction:column;">
+            <div style="margin-top:18px;">
+              <div style="font-size:30px;font-weight:800;">סיסמה חדשה</div>
+              <div style="font-size:16px;color:#6E6A60;margin-top:6px;">בחרו סיסמה חדשה לחשבון.</div>
+            </div>
+            <div style="margin-top:28px;display:flex;flex-direction:column;gap:16px;">
+              <div><div style="font-size:13px;font-weight:700;color:#6E6A60;margin-bottom:8px;">סיסמה חדשה</div><div style="height:54px;background:#FBF9F3;border:1px solid #EAE4D8;border-radius:14px;display:flex;align-items:center;padding:0 16px;gap:10px;"><span style="flex:1;font-size:22px;letter-spacing:4px;color:#23211C;line-height:1;">••••••••</span><svg width="20" height="20" viewBox="0 0 24 24" fill="none"><path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7-10-7-10-7z" stroke="#9A9488" stroke-width="2"/><circle cx="12" cy="12" r="3" stroke="#9A9488" stroke-width="2"/></svg></div><div style="font-size:12px;color:#9A9488;margin-top:7px;">לפחות 8 תווים</div></div>
+              <div><div style="font-size:13px;font-weight:700;color:#6E6A60;margin-bottom:8px;">אימות סיסמה</div><div style="height:54px;background:#FBF9F3;border:1px solid #EAE4D8;border-radius:14px;display:flex;align-items:center;padding:0 16px;gap:10px;"><span style="flex:1;font-size:22px;letter-spacing:4px;color:#23211C;line-height:1;">••••••••</span><svg width="20" height="20" viewBox="0 0 24 24" fill="none"><path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7-10-7-10-7z" stroke="#9A9488" stroke-width="2"/><circle cx="12" cy="12" r="3" stroke="#9A9488" stroke-width="2"/></svg></div></div>
+            </div>
+            <button style="margin-top:24px;width:100%;height:54px;background:var(--ac);color:#fff;border:none;border-radius:15px;font-size:17px;font-weight:700;font-family:inherit;">שמירת סיסמה חדשה</button>
+            <div style="flex:1;"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div style="display:flex;flex-direction:column;gap:16px;align-items:center;">
+      <div style="text-align:center;"><div style="font-size:16px;font-weight:700;">הצלחה</div><div style="font-size:13px;color:#8C8577;">הסיסמה עודכנה</div></div>
+      <div style="width:402px;padding:6px;background:#141310;border-radius:52px;box-shadow:0 26px 60px -22px rgba(30,25,15,.4);">
+        <div style="position:relative;width:390px;height:844px;background:#F4F1EA;border-radius:46px;overflow:hidden;">
+          <div style="position:absolute;top:12px;left:50%;transform:translateX(-50%);width:118px;height:33px;background:#000;border-radius:20px;z-index:8;"></div>
+          <div style="height:54px;display:flex;align-items:center;justify-content:space-between;padding:0 26px;font-size:15px;font-weight:700;"><span><bdi>9:41</bdi></span><span style="display:flex;align-items:center;gap:6px;"><span style="display:flex;align-items:flex-end;gap:2px;"><i style="width:3px;height:5px;background:#23211C;border-radius:1px;"></i><i style="width:3px;height:7px;background:#23211C;border-radius:1px;"></i><i style="width:3px;height:9px;background:#23211C;border-radius:1px;"></i><i style="width:3px;height:11px;background:#23211C;border-radius:1px;"></i></span><span style="width:24px;height:12px;border:1.3px solid #23211C;border-radius:3px;padding:1.5px;"><span style="display:block;width:72%;height:100%;background:#23211C;border-radius:1px;"></span></span></span></div>
+          <div style="height:790px;padding:14px 32px 44px;display:flex;flex-direction:column;">
+            <div style="flex:1;display:flex;flex-direction:column;justify-content:center;align-items:center;text-align:center;gap:16px;">
+              <span style="width:104px;height:104px;border-radius:50%;background:var(--ac);display:flex;align-items:center;justify-content:center;box-shadow:0 16px 34px -12px rgba(47,143,134,.55);"><svg width="50" height="50" viewBox="0 0 24 24" fill="none"><polyline points="4,13 10,19 20,6" stroke="#fff" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
+              <div style="font-size:26px;font-weight:800;margin-top:4px;">הסיסמה עודכנה</div>
+              <div style="font-size:16px;color:#6E6A60;line-height:1.6;max-width:280px;">אפשר להתחבר עכשיו עם הסיסמה החדשה.</div>
+            </div>
+            <button style="width:100%;height:54px;background:var(--ac);color:#fff;border:none;border-radius:15px;font-size:17px;font-weight:700;font-family:inherit;">התחברות</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div style="display:flex;flex-direction:column;gap:16px;align-items:center;">
+      <div style="text-align:center;"><div style="font-size:16px;font-weight:700;">קישור לא בתוקף</div><div style="font-size:13px;color:#8C8577;">טיפול רגוע בקישור שפג</div></div>
+      <div style="width:402px;padding:6px;background:#141310;border-radius:52px;box-shadow:0 26px 60px -22px rgba(30,25,15,.4);">
+        <div style="position:relative;width:390px;height:844px;background:#F4F1EA;border-radius:46px;overflow:hidden;">
+          <div style="position:absolute;top:12px;left:50%;transform:translateX(-50%);width:118px;height:33px;background:#000;border-radius:20px;z-index:8;"></div>
+          <div style="height:54px;display:flex;align-items:center;justify-content:space-between;padding:0 26px;font-size:15px;font-weight:700;"><span><bdi>9:41</bdi></span><span style="display:flex;align-items:center;gap:6px;"><span style="display:flex;align-items:flex-end;gap:2px;"><i style="width:3px;height:5px;background:#23211C;border-radius:1px;"></i><i style="width:3px;height:7px;background:#23211C;border-radius:1px;"></i><i style="width:3px;height:9px;background:#23211C;border-radius:1px;"></i><i style="width:3px;height:11px;background:#23211C;border-radius:1px;"></i></span><span style="width:24px;height:12px;border:1.3px solid #23211C;border-radius:3px;padding:1.5px;"><span style="display:block;width:72%;height:100%;background:#23211C;border-radius:1px;"></span></span></span></div>
+          <div style="height:790px;padding:14px 32px 40px;display:flex;flex-direction:column;">
+            <div style="flex:1;display:flex;flex-direction:column;justify-content:center;align-items:center;text-align:center;gap:16px;">
+              <span style="width:100px;height:100px;border-radius:50%;background:#F4E9E2;display:flex;align-items:center;justify-content:center;"><svg width="44" height="44" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="9" stroke="#C77A5A" stroke-width="2"/><polyline points="12,7 12,12 15.5,14" stroke="#C77A5A" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
+              <div style="font-size:26px;font-weight:800;margin-top:4px;">הקישור כבר לא בתוקף</div>
+              <div style="font-size:16px;color:#6E6A60;line-height:1.6;max-width:290px;">קישורי איפוס תקפים ל־60 דקות. אפשר לבקש קישור חדש ולנסות שוב.</div>
+            </div>
+            <div style="display:flex;flex-direction:column;gap:12px;">
+              <button style="width:100%;height:54px;background:var(--ac);color:#fff;border:none;border-radius:15px;font-size:17px;font-weight:700;font-family:inherit;">בקשת קישור חדש</button>
+              <div style="text-align:center;font-size:15px;color:#6E6A60;margin-top:2px;"><span style="color:var(--ac);font-weight:700;">חזרה להתחברות</span></div>
+            </div>
           </div>
         </div>
       </div>
