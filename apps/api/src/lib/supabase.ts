@@ -29,11 +29,7 @@ export function createUserSupabaseClient(accessToken: string): SupabaseClient {
   const { publishableKey, url } = getSupabaseConfig();
 
   return createClient(url, publishableKey, {
+    accessToken: async () => accessToken,
     auth: supabaseAuthOptions,
-    global: {
-      headers: {
-        Authorization: `Bearer ${accessToken}`,
-      },
-    },
   });
 }

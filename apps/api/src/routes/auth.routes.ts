@@ -1,12 +1,18 @@
-import { Router } from 'express';
+import { RequestHandler, Router } from 'express';
 
 import { requireAuth } from '../middleware/auth.middleware.js';
 
-export const authRouter = Router();
+export function createAuthRouter(authMiddleware: RequestHandler = requireAuth) {
+  const router = Router();
 
-authRouter.get('/me', requireAuth, (request, response) => {
-  response.json({
-    email: request.auth.user.email ?? null,
-    id: request.auth.user.id,
+  router.get('/me', authMiddleware, (request, response) => {
+    response.json({
+      email: request.auth.user.email ?? null,
+      id: request.auth.user.id,
+    });
   });
-});
+
+  return router;
+}
+
+export const authRouter = createAuthRouter();

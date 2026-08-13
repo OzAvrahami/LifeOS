@@ -1,35 +1,52 @@
-import { NextFunction, Request, Response } from 'express';
+import { NextFunction, Request, RequestHandler, Response } from 'express';
+import { SupabaseClient, User } from '@supabase/supabase-js';
 
 import { createUserSupabaseClient, verifyAccessToken } from '../lib/supabase.js';
 
-function extractBearerToken(authorizationHeader: string | undefined): string | null {
+export function extractBearerToken(authorizationHeader: string | undefined): string | null {
   const match = authorizationHeader?.match(/^Bearer\s+(\S+)$/i);
   return match?.[1] ?? null;
 }
 
-export async function requireAuth(request: Request, response: Response, next: NextFunction) {
-  const accessToken = extractBearerToken(request.header('authorization'));
+type AuthDependencies = {
+  createUserClient: (accessToken: string) => SupabaseClient;
+  verifyToken: (accessToken: string) => Promise<User | null>;
+};
 
-  if (!accessToken) {
-    response.status(401).json({ error: 'Unauthorized' });
-    return;
-  }
+export function createRequireAuth({
+  createUserClient = createUserSupabaseClient,
+  verifyToken = verifyAccessToken,
+}: Partial<AuthDependencies> = {}): RequestHandler {
+  return async function authMiddleware(
+    request: Request,
+    response: Response,
+    next: NextFunction,
+  ) {
+    const accessToken = extractBearerToken(request.header('authorization'));
 
-  try {
-    const user = await verifyAccessToken(accessToken);
-
-    if (!user) {
+    if (!accessToken) {
       response.status(401).json({ error: 'Unauthorized' });
       return;
     }
 
-    request.auth = {
-      accessToken,
-      supabase: createUserSupabaseClient(accessToken),
-      user,
-    };
-    next();
-  } catch (error) {
-    next(error);
-  }
+    try {
+      const user = await verifyToken(accessToken);
+
+      if (!user) {
+        response.status(401).json({ error: 'Unauthorized' });
+        return;
+      }
+
+      request.auth = {
+        accessToken,
+        supabase: createUserClient(accessToken),
+        user,
+      };
+      next();
+    } catch (error) {
+      next(error);
+    }
+  };
 }
+
+export const requireAuth = createRequireAuth();
