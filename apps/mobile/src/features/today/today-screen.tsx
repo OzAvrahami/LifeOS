@@ -3,12 +3,13 @@ import { useState } from 'react';
 import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 
 import { MobileShell } from '@/components/mobile-shell';
-import {
-  CaptureDestination,
-  QuickCaptureSheet,
-} from '@/features/capture/quick-capture-sheet';
+import { QuickCaptureSheet } from '@/features/capture/quick-capture-sheet';
 import { useDemoTasks } from '@/features/tasks/demo-task-provider';
-import { DemoTask } from '@/features/tasks/demo-task.types';
+import { hebrewDateLabel, localDateKey } from '@/features/tasks/task-dates';
+import { TaskQueryNotice } from '@/features/tasks/task-query-notice';
+import { useTasks, useUpdateTask } from '@/features/tasks/task.queries';
+import { TaskSource } from '@/features/tasks/task.types';
+import { useTaskCapture } from '@/features/tasks/use-task-capture';
 import { colors, spacing, typography } from '@/theme/tokens';
 
 import { ActiveState } from './active-state';
@@ -32,43 +33,60 @@ export function TodayScreen({
   movedTaskId,
   onNavigateInbox,
   onNavigateWeek,
+  taskSource = 'preview',
 }: {
   initialState?: TodayDemoState;
   movedInboxTask?: { id: string; title: string };
   movedTaskId?: string;
   onNavigateInbox?: () => void;
   onNavigateWeek?: () => void;
+  taskSource?: TaskSource;
 }) {
   const [todayState, setTodayState] = useState<TodayDemoState>(initialState);
   const [captureOpen, setCaptureOpen] = useState(false);
-  const {
-    activeTask,
-    captureTask,
-    completeTask,
-    completedTodayTasks,
-    openTodayTasks,
-    startTask,
-    stopTask,
-    todayTasks,
-  } = useDemoTasks();
-  const integrated = initialState === 'normal';
+  const demo = useDemoTasks();
+  const serverTasks = taskSource === 'server';
+  const todayDate = localDateKey();
+  const todayQuery = useTasks({ plannedDate: todayDate }, serverTasks);
+  const updateMutation = useUpdateTask();
+  const { captureTask } = useTaskCapture(taskSource);
+  const [operationError, setOperationError] = useState(false);
+  const integrated = serverTasks || initialState === 'normal';
+  const sourceTasks = serverTasks ? (todayQuery.data ?? []) : demo.todayTasks;
+  const activeTask = sourceTasks.find((task) => task.status === 'in_progress');
+  const openTodayTasks = sourceTasks.filter((task) => task.status === 'open');
+  const completedTodayTasks = sourceTasks.filter((task) => task.status === 'completed');
+
+  const updateStatus = async (taskId: string, status: 'open' | 'in_progress' | 'completed') => {
+    if (!serverTasks) {
+      if (status === 'in_progress') demo.startTask(taskId);
+      if (status === 'open') demo.stopTask(taskId);
+      if (status === 'completed') demo.completeTask(taskId);
+      return;
+    }
+    setOperationError(false);
+    try {
+      await updateMutation.mutateAsync({ id: taskId, input: { status } });
+    } catch {
+      setOperationError(true);
+    }
+  };
 
   let content;
 
   if (integrated) {
-    const activeTodayTask = activeTask && todayTasks.some((task) => task.id === activeTask.id)
-      ? toTodayTask(activeTask)
-      : undefined;
-    const openTasks = openTodayTasks.map(toTodayTask);
-    const completedTasks = completedTodayTasks.map(toTodayTask);
+    const activeTodayTask = activeTask ? toPresentedTodayTask(activeTask) : undefined;
+    const openTasks = openTodayTasks.map(toPresentedTodayTask);
+    const completedTasks = completedTodayTasks.map(toPresentedTodayTask);
 
     if (activeTodayTask) {
       content = (
         <ActiveState
           laterTasks={openTasks}
-          onFinish={() => completeTask(activeTodayTask.id)}
-          onStartTask={startTask}
-          onStop={() => stopTask(activeTodayTask.id)}
+          dateLabel={serverTasks ? hebrewDateLabel() : undefined}
+          onFinish={() => void updateStatus(activeTodayTask.id, 'completed')}
+          onStartTask={(taskId) => void updateStatus(taskId, 'in_progress')}
+          onStop={() => void updateStatus(activeTodayTask.id, 'open')}
           task={activeTodayTask}
         />
       );
@@ -77,9 +95,10 @@ export function TodayScreen({
       content = (
         <PartiallyCompletedState
           completedTasks={completedTasks}
+          dateLabel={serverTasks ? hebrewDateLabel() : undefined}
           nextTask={nextTask}
           openTasks={openTasks}
-          onStart={() => nextTask && startTask(nextTask.id)}
+          onStart={() => nextTask && void updateStatus(nextTask.id, 'in_progress')}
         />
       );
     } else {
@@ -91,9 +110,12 @@ export function TodayScreen({
       content = (
         <NormalTodayContent
           focusTask={focusTask}
+          dateLabel={serverTasks ? hebrewDateLabel() : undefined}
           movedTaskId={movedTaskId ?? movedInboxTask?.id}
-          onStartFocus={() => focusTask && startTask(focusTask.id)}
-          onStartTask={startTask}
+          onStartFocus={() => focusTask && void updateStatus(focusTask.id, 'in_progress')}
+          onStartTask={(taskId) => void updateStatus(taskId, 'in_progress')}
+          serverTaskCount={serverTasks ? sourceTasks.length : undefined}
+          serverPlannedTime={serverTasks ? formatPlannedTime(sourceTasks) : undefined}
           tasks={tasks}
         />
       );
@@ -135,11 +157,16 @@ export function TodayScreen({
         onNavigateWeek={onNavigateWeek}
         onQuickCapture={() => setCaptureOpen(true)}
       >
+        <TaskQueryNotice
+          error={serverTasks && (todayQuery.isError || operationError)}
+          loading={serverTasks && todayQuery.isPending}
+          onRetry={() => void todayQuery.refetch()}
+        />
         {content}
       </MobileShell>
       <QuickCaptureSheet
         onClose={() => setCaptureOpen(false)}
-        onSave={(title, destination) => handleQuickCapture(title, destination, captureTask)}
+        onSave={captureTask}
         visible={captureOpen}
       />
     </>
@@ -147,21 +174,28 @@ export function TodayScreen({
 }
 
 function NormalTodayContent({
+  dateLabel,
   focusTask,
   movedTaskId,
   onStartFocus,
   onStartTask,
+  serverPlannedTime,
+  serverTaskCount,
   tasks,
 }: {
+  dateLabel?: string;
   focusTask?: TodayTask;
   movedTaskId?: string;
   onStartFocus: () => void;
   onStartTask?: (taskId: string) => void;
+  serverPlannedTime?: string;
+  serverTaskCount?: number;
   tasks: TodayTask[];
 }) {
   const today = normalTodayFixture;
   const showTransition = Boolean(movedTaskId && tasks.some((task) => task.id === movedTaskId));
-  const taskCount = today.summary.taskCount + Math.max(0, tasks.length - normalTodayFixture.tasks.length);
+  const taskCount = serverTaskCount
+    ?? today.summary.taskCount + Math.max(0, tasks.length - normalTodayFixture.tasks.length);
 
   return (
     <View style={styles.normalContainer}>
@@ -180,9 +214,9 @@ function NormalTodayContent({
       >
         <TodayHeader
           commitmentCount={today.summary.commitmentCount}
-          dateLabel={today.dateLabel}
+          dateLabel={dateLabel ?? today.dateLabel}
           greeting={today.greeting}
-          plannedTime={today.summary.plannedTime}
+          plannedTime={serverPlannedTime ?? today.summary.plannedTime}
           taskCount={taskCount}
           workload={today.summary.workload}
         />
@@ -252,7 +286,12 @@ const styles = StyleSheet.create({
   },
 });
 
-function toTodayTask(task: DemoTask): TodayTask {
+function toPresentedTodayTask(task: {
+  estimatedMinutes?: number | null;
+  id: string;
+  lifeArea?: TodayTask['lifeArea'];
+  title: string;
+}): TodayTask {
   return {
     durationMinutes: task.estimatedMinutes ?? 0,
     id: task.id,
@@ -261,10 +300,7 @@ function toTodayTask(task: DemoTask): TodayTask {
   };
 }
 
-function handleQuickCapture(
-  title: string,
-  destination: CaptureDestination,
-  captureTask: (title: string, destination: 'inbox' | 'today' | 'week') => void,
-) {
-  if (destination !== 'day') captureTask(title, destination);
+function formatPlannedTime(tasks: { estimatedMinutes?: number | null }[]) {
+  const minutes = tasks.reduce((total, task) => total + (task.estimatedMinutes ?? 0), 0);
+  return `${Math.floor(minutes / 60)}:${String(minutes % 60).padStart(2, '0')}`;
 }

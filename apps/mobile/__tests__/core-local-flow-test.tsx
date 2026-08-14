@@ -22,11 +22,13 @@ function CoreFlowHarness({ initialRoute = 'today' }: { initialRoute?: DemoRoute 
           movedTaskId={movedTaskId}
           onNavigateInbox={() => setRoute('inbox')}
           onNavigateWeek={() => setRoute('week')}
+          taskSource="preview"
         />
       ) : route === 'week' ? (
         <WeekScreen
           onNavigateInbox={() => setRoute('inbox')}
           onNavigateToday={() => setRoute('today')}
+          taskSource="preview"
         />
       ) : (
         <InboxScreen
@@ -36,6 +38,7 @@ function CoreFlowHarness({ initialRoute = 'today' }: { initialRoute?: DemoRoute 
           }}
           onNavigateToday={() => setRoute('today')}
           onNavigateWeek={() => setRoute('week')}
+          taskSource="preview"
         />
       )}
       <TaskStateProbe />
@@ -85,7 +88,7 @@ async function capture(title: string, destination?: 'Inbox' | 'היום' | 'הש
   await user.press(within(sheet).getByText('שמירה'));
 }
 
-describe('core local Task flow', () => {
+describe('canonical preview-fixture Task flow', () => {
   it('moves one captured task through Inbox, Week, Today, Active, Stop, and Done', async () => {
     const user = userEvent.setup();
     const title = 'לתאם בדיקת רכב';

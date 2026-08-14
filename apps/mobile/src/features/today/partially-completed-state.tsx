@@ -8,11 +8,13 @@ import { TodayTask } from './today.types';
 
 export function PartiallyCompletedState({
   completedTasks,
+  dateLabel,
   nextTask,
   openTasks,
   onStart,
 }: {
   completedTasks?: TodayTask[];
+  dateLabel?: string;
   nextTask?: TodayTask | null;
   openTasks?: TodayTask[];
   onStart: () => void;
@@ -29,7 +31,7 @@ export function PartiallyCompletedState({
 
   return (
     <ScrollView contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
-      <Text style={styles.date}>{today.dateLabel}</Text>
+      <Text style={styles.date}>{dateLabel ?? today.dateLabel}</Text>
       <View accessibilityLabel="התקדמות היום" style={styles.progressRow}>
         <View style={styles.dots}>
           {visibleCompletedTasks.map((task) => <View key={task.id} style={styles.doneDot} />)}

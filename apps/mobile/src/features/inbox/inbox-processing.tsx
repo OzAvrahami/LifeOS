@@ -18,21 +18,32 @@ export function InboxProcessingView({
   initialIndex?: number;
   items?: InboxTask[];
   onExit: () => void;
-  onMove: (task: InboxTask, destination: InboxDestination, day?: string) => void;
+  onMove: (task: InboxTask, destination: InboxDestination, day?: string) => Promise<void> | void;
 }) {
   const [queue] = useState(items);
   const [index, setIndex] = useState(initialIndex);
   const [choosingDay, setChoosingDay] = useState(false);
+  const [error, setError] = useState(false);
+  const [pending, setPending] = useState(false);
   const task = queue[index];
 
-  const advance = (destination?: InboxDestination, day?: string) => {
-    if (destination) onMove(task, destination, day);
-    setChoosingDay(false);
-    if (index >= queue.length - 1) {
-      onExit();
-      return;
+  const advance = async (destination?: InboxDestination, day?: string) => {
+    if (pending) return;
+    setError(false);
+    setPending(true);
+    try {
+      if (destination) await onMove(task, destination, day);
+      setChoosingDay(false);
+      if (index >= queue.length - 1) {
+        onExit();
+        return;
+      }
+      setIndex((current) => current + 1);
+    } catch {
+      setError(true);
+    } finally {
+      setPending(false);
     }
-    setIndex((current) => current + 1);
   };
 
   const progress = ((index + 1) / queue.length) * 100;
@@ -70,39 +81,41 @@ export function InboxProcessingView({
               <Pressable
                 accessibilityRole="button"
                 key={day}
-                onPress={() => advance('day', day)}
+                disabled={pending}
+                onPress={() => void advance('day', day)}
                 style={styles.secondaryAction}
               >
                 <Text style={styles.secondaryActionText}>{day}</Text>
               </Pressable>
             ))}
-            <Pressable accessibilityRole="button" onPress={() => setChoosingDay(false)} style={styles.inlineAction}>
+            <Pressable accessibilityRole="button" disabled={pending} onPress={() => setChoosingDay(false)} style={styles.inlineAction}>
               <Text style={styles.skipText}>חזרה</Text>
             </Pressable>
           </View>
         ) : (
           <View style={styles.actions}>
             <View style={styles.destinationRow}>
-              <Pressable accessibilityRole="button" onPress={() => advance('today')} style={styles.primaryAction}>
+              <Pressable accessibilityRole="button" disabled={pending} onPress={() => void advance('today')} style={styles.primaryAction}>
                 <Text style={styles.primaryActionText}>היום</Text>
               </Pressable>
-              <Pressable accessibilityRole="button" onPress={() => advance('week')} style={styles.secondaryActionHalf}>
+              <Pressable accessibilityRole="button" disabled={pending} onPress={() => void advance('week')} style={styles.secondaryActionHalf}>
                 <Text style={styles.secondaryActionText}>השבוע</Text>
               </Pressable>
             </View>
-            <Pressable accessibilityRole="button" onPress={() => setChoosingDay(true)} style={styles.secondaryAction}>
+            <Pressable accessibilityRole="button" disabled={pending} onPress={() => setChoosingDay(true)} style={styles.secondaryAction}>
               <Text style={styles.secondaryActionText}>לבחור יום</Text>
             </Pressable>
             <View style={styles.secondaryRow}>
-              <Pressable accessibilityRole="button" onPress={() => advance('deleted')} style={styles.inlineAction}>
+              <Pressable accessibilityRole="button" disabled={pending} onPress={() => void advance('deleted')} style={styles.inlineAction}>
                 <Text style={styles.deleteText}>מחק</Text>
               </Pressable>
-              <Pressable accessibilityRole="button" onPress={() => advance()} style={styles.inlineAction}>
+              <Pressable accessibilityRole="button" disabled={pending} onPress={() => void advance()} style={styles.inlineAction}>
                 <Text style={styles.skipText}>דלג ←</Text>
               </Pressable>
             </View>
           </View>
         )}
+        {error ? <Text accessibilityRole="alert" style={styles.error}>לא הצלחנו לעדכן. אפשר לנסות שוב.</Text> : null}
       </View>
     </SafeAreaView>
   );
@@ -231,4 +244,5 @@ const styles = StyleSheet.create({
     fontSize: typography.size.body,
     writingDirection: 'rtl',
   },
+  error: { color: '#A8502F', fontFamily: typography.family.semibold, fontSize: typography.size.label, paddingBottom: spacing.xs, textAlign: 'center', writingDirection: 'rtl' },
 });

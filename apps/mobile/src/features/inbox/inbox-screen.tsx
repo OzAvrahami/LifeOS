@@ -2,12 +2,18 @@ import { useState } from 'react';
 import { ScrollView, StyleSheet, View } from 'react-native';
 
 import { MobileShell } from '@/components/mobile-shell';
-import {
-  CaptureDestination,
-  QuickCaptureSheet,
-} from '@/features/capture/quick-capture-sheet';
-import { DEMO_TODAY } from '@/features/tasks/demo-task.fixture';
+import { QuickCaptureSheet } from '@/features/capture/quick-capture-sheet';
 import { useDemoTasks } from '@/features/tasks/demo-task-provider';
+import {
+  currentWeekStart,
+  dateFromApprovedDayChoice,
+  localDateKey,
+} from '@/features/tasks/task-dates';
+import { toInboxTask } from '@/features/tasks/task-presenters';
+import { TaskQueryNotice } from '@/features/tasks/task-query-notice';
+import { useCancelTask, useTasks, useUpdateTask } from '@/features/tasks/task.queries';
+import { TaskSource } from '@/features/tasks/task.types';
+import { useTaskCapture } from '@/features/tasks/use-task-capture';
 import { spacing } from '@/theme/tokens';
 
 import {
@@ -28,23 +34,30 @@ export function InboxScreen({
   onMoveToToday,
   onNavigateToday,
   onNavigateWeek,
+  taskSource = 'preview',
 }: {
   initialState?: InboxDemoState;
   onMoveToToday?: (task: InboxTask) => void;
   onNavigateToday?: () => void;
   onNavigateWeek?: () => void;
+  taskSource?: TaskSource;
 }) {
+  const demo = useDemoTasks();
   const {
-    cancelTask,
-    captureTask,
+    cancelTask: cancelDemoTask,
     inboxTasks,
     moveTaskToInbox,
     moveTaskToToday,
     moveTaskToWeek,
     scheduleTask,
     updateTaskTitle,
-  } = useDemoTasks();
-  const integrated = initialState === 'normal';
+  } = demo;
+  const serverTasks = taskSource === 'server';
+  const demoIntegrated = taskSource === 'preview' && initialState === 'normal';
+  const inboxQuery = useTasks({ placement: 'inbox' }, serverTasks);
+  const updateMutation = useUpdateTask();
+  const cancelMutation = useCancelTask();
+  const { captureTask } = useTaskCapture(taskSource);
   const [screenState, setScreenState] = useState<InboxDemoState>(initialState);
   const [fixtureItems, setFixtureItems] = useState<InboxTask[]>(() => {
     if (initialState === 'empty') return [];
@@ -56,15 +69,29 @@ export function InboxScreen({
   const [selectedTask, setSelectedTask] = useState<InboxTask | null>(null);
   const [resolvedTaskId, setResolvedTaskId] = useState<string | null>(null);
   const [confirmation, setConfirmation] = useState<string | null>(null);
+  const [operationError, setOperationError] = useState(false);
   const [captureOpen, setCaptureOpen] = useState(false);
-  const sharedItems: InboxTask[] = inboxTasks.map((task) => ({
-    compactCreatedLabel: task.compactCreatedLabel,
-    createdLabel: task.createdLabel,
-    id: task.id,
-    title: task.title,
-  }));
-  const items = integrated ? sharedItems : fixtureItems;
-  const totalCount = integrated ? items.length : fixtureTotalCount;
+  const sharedItems: InboxTask[] = serverTasks
+    ? (inboxQuery.data ?? []).map((task) => toInboxTask(task))
+    : inboxTasks.map((task) => ({
+        compactCreatedLabel: task.compactCreatedLabel,
+        createdLabel: task.createdLabel,
+        id: task.id,
+        title: task.title,
+      }));
+  const items = serverTasks || demoIntegrated ? sharedItems : fixtureItems;
+  const totalCount = serverTasks || demoIntegrated ? items.length : fixtureTotalCount;
+
+  const runServerAction = async (action: () => Promise<unknown>) => {
+    setOperationError(false);
+    try {
+      await action();
+      return true;
+    } catch {
+      setOperationError(true);
+      return false;
+    }
+  };
 
   const removeTask = (task: InboxTask, closeSheet = true) => {
     setFixtureItems((current) => current.filter((item) => item.id !== task.id));
@@ -72,39 +99,66 @@ export function InboxScreen({
     if (closeSheet) setSelectedTask(null);
   };
 
-  const moveToToday = (task: InboxTask) => {
-    if (integrated) moveTaskToToday(task.id);
+  const moveToToday = async (task: InboxTask) => {
+    if (serverTasks) {
+      const moved = await runServerAction(() => updateMutation.mutateAsync({
+        id: task.id,
+        input: { planning: { plannedDate: localDateKey(), type: 'day' } },
+      }));
+      if (!moved) return;
+    } else if (demoIntegrated) moveTaskToToday(task.id);
     else if (resolvedTaskId !== task.id) removeTask(task);
     setSelectedTask(null);
     setResolvedTaskId(null);
     onMoveToToday?.(task);
   };
 
-  const moveToWeek = (task: InboxTask) => {
-    if (integrated) moveTaskToWeek(task.id);
+  const moveToWeek = async (task: InboxTask) => {
+    if (serverTasks) {
+      const moved = await runServerAction(() => updateMutation.mutateAsync({
+        id: task.id,
+        input: { planning: { type: 'week', weekStart: currentWeekStart() } },
+      }));
+      if (!moved) return;
+    } else if (demoIntegrated) moveTaskToWeek(task.id);
     else if (resolvedTaskId !== task.id) removeTask(task, false);
     setResolvedTaskId(task.id);
     setConfirmation('נשלח לשבוע · אותה משימה, עכשיו בתכנון');
   };
 
-  const chooseDay = (task: InboxTask, day: string) => {
-    if (integrated) scheduleTask(task.id, dayToDemoDate(day));
+  const chooseDay = async (task: InboxTask, day: string) => {
+    if (serverTasks) {
+      const moved = await runServerAction(() => updateMutation.mutateAsync({
+        id: task.id,
+        input: { planning: { plannedDate: dateFromApprovedDayChoice(day), type: 'day' } },
+      }));
+      if (!moved) return;
+    } else if (demoIntegrated) scheduleTask(task.id, dayToPreviewDate(day));
     else if (resolvedTaskId !== task.id) removeTask(task);
     setSelectedTask(null);
     setResolvedTaskId(null);
     setConfirmation(`נקבע ל${day} · אותה משימה`);
   };
 
-  const deleteTask = (task: InboxTask) => {
-    if (integrated) cancelTask(task.id);
+  const deleteTask = async (task: InboxTask) => {
+    if (serverTasks) {
+      const cancelled = await runServerAction(() => cancelMutation.mutateAsync(task.id));
+      if (!cancelled) return;
+    } else if (demoIntegrated) cancelDemoTask(task.id);
     else if (resolvedTaskId !== task.id) removeTask(task);
     setSelectedTask(null);
     setResolvedTaskId(null);
     setConfirmation('הפריט נמחק מה־Inbox');
   };
 
-  const editTask = (task: InboxTask, title: string) => {
-    if (integrated) updateTaskTitle(task.id, title);
+  const editTask = async (task: InboxTask, title: string) => {
+    if (serverTasks) {
+      const updated = await runServerAction(() => updateMutation.mutateAsync({
+        id: task.id,
+        input: { title },
+      }));
+      if (!updated) return;
+    } else if (demoIntegrated) updateTaskTitle(task.id, title);
     else {
       setFixtureItems((current) =>
         current.map((item) => (item.id === task.id ? { ...item, title } : item)),
@@ -115,9 +169,15 @@ export function InboxScreen({
     setConfirmation('הכותרת עודכנה');
   };
 
-  const stayInInbox = (task: InboxTask) => {
+  const stayInInbox = async (task: InboxTask) => {
     if (resolvedTaskId === task.id) {
-      if (integrated) moveTaskToInbox(task.id);
+      if (serverTasks) {
+        const moved = await runServerAction(() => updateMutation.mutateAsync({
+          id: task.id,
+          input: { planning: { type: 'inbox' } },
+        }));
+        if (!moved) return;
+      } else if (demoIntegrated) moveTaskToInbox(task.id);
       else {
         setFixtureItems((current) =>
           current.some((item) => item.id === task.id) ? current : [task, ...current],
@@ -135,9 +195,20 @@ export function InboxScreen({
     setSelectedTask(null);
   };
 
-  const addTask = (title: string) => {
-    if (integrated) {
-      captureTask(title, 'inbox');
+  const addTask = async (title: string) => {
+    if (serverTasks) {
+      setOperationError(false);
+      try {
+        await captureTask(title, 'inbox');
+      } catch (error) {
+        setOperationError(true);
+        throw error;
+      }
+      setConfirmation('נוסף ל־Inbox');
+      return;
+    }
+    if (demoIntegrated) {
+      await captureTask(title, 'inbox');
       setConfirmation('נוסף ל־Inbox');
       return;
     }
@@ -153,12 +224,27 @@ export function InboxScreen({
     setConfirmation('נוסף ל־Inbox');
   };
 
-  const processMove = (task: InboxTask, destination: InboxDestination, day?: string) => {
-    if (integrated) {
+  const processMove = async (task: InboxTask, destination: InboxDestination, day?: string) => {
+    if (serverTasks) {
+      const moved = await runServerAction(() => {
+        if (destination === 'deleted') return cancelMutation.mutateAsync(task.id);
+        return updateMutation.mutateAsync({
+          id: task.id,
+          input: {
+            planning: destination === 'today'
+              ? { plannedDate: localDateKey(), type: 'day' }
+              : destination === 'week'
+                ? { type: 'week', weekStart: currentWeekStart() }
+                : { plannedDate: dateFromApprovedDayChoice(day ?? ''), type: 'day' },
+          },
+        });
+      });
+      if (!moved) throw new Error('Task operation failed');
+    } else if (demoIntegrated) {
       if (destination === 'today') moveTaskToToday(task.id);
       if (destination === 'week') moveTaskToWeek(task.id);
-      if (destination === 'day' && day) scheduleTask(task.id, dayToDemoDate(day));
-      if (destination === 'deleted') cancelTask(task.id);
+      if (destination === 'day' && day) scheduleTask(task.id, dayToPreviewDate(day));
+      if (destination === 'deleted') cancelDemoTask(task.id);
     } else {
       setFixtureItems((current) => current.filter((item) => item.id !== task.id));
       setFixtureTotalCount((current) => Math.max(0, current - 1));
@@ -172,8 +258,8 @@ export function InboxScreen({
   if (screenState === 'processing') {
     return (
       <InboxProcessingView
-        initialIndex={integrated ? 0 : undefined}
-        items={integrated ? items : undefined}
+        initialIndex={serverTasks || demoIntegrated ? 0 : undefined}
+        items={serverTasks || demoIntegrated ? items : undefined}
         onExit={() => setScreenState(items.length ? 'normal' : 'empty')}
         onMove={processMove}
       />
@@ -181,7 +267,8 @@ export function InboxScreen({
   }
 
   const isBusy = screenState === 'busy';
-  const isEmpty = items.length === 0;
+  const isLoading = serverTasks && inboxQuery.isPending;
+  const isEmpty = !isLoading && items.length === 0;
 
   return (
     <>
@@ -209,7 +296,12 @@ export function InboxScreen({
               onProcess={() => setScreenState('processing')}
             />
             <InboxCapture onAdd={addTask} />
-            {isEmpty ? (
+            <TaskQueryNotice
+              error={serverTasks && (inboxQuery.isError || operationError)}
+              loading={isLoading}
+              onRetry={() => void inboxQuery.refetch()}
+            />
+            {isLoading ? null : isEmpty ? (
               <InboxEmptyState />
             ) : isBusy ? (
               <InboxBusyList items={items} onOpen={setSelectedTask} />
@@ -221,7 +313,7 @@ export function InboxScreen({
       </MobileShell>
       <QuickCaptureSheet
         onClose={() => setCaptureOpen(false)}
-        onSave={(title, destination) => handleQuickCapture(title, destination, captureTask)}
+        onSave={captureTask}
         visible={captureOpen}
       />
       {selectedTask ? (
@@ -229,6 +321,7 @@ export function InboxScreen({
           key={selectedTask.id}
           confirmation={resolvedTaskId === selectedTask.id ? confirmation : null}
           confirmedDestination={resolvedTaskId === selectedTask.id ? 'week' : undefined}
+          error={operationError}
           onChooseDay={chooseDay}
           onClose={closeActionSheet}
           onDelete={deleteTask}
@@ -250,16 +343,8 @@ const styles = StyleSheet.create({
   contentWithConfirmation: { paddingTop: 64 },
 });
 
-function dayToDemoDate(day: string) {
+function dayToPreviewDate(day: string) {
   if (day.startsWith('שני')) return '2026-08-10';
   if (day.startsWith('שלישי')) return '2026-08-11';
-  return DEMO_TODAY;
-}
-
-function handleQuickCapture(
-  title: string,
-  destination: CaptureDestination,
-  captureTask: (title: string, destination: 'inbox' | 'today' | 'week') => void,
-) {
-  if (destination !== 'day') captureTask(title, destination);
+  return '2026-08-09';
 }

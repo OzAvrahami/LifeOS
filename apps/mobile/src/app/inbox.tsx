@@ -5,8 +5,13 @@ import { isInboxDemoState } from '@/features/inbox/inbox.types';
 
 export default function InboxRoute() {
   const router = useRouter();
-  const { state } = useLocalSearchParams<{ state?: string | string[] }>();
+  const { preview, state } = useLocalSearchParams<{
+    preview?: string | string[];
+    state?: string | string[];
+  }>();
   const requestedState = Array.isArray(state) ? state[0] : state;
+  const requestedPreview = Array.isArray(preview) ? preview[0] : preview;
+  const developmentPreview = __DEV__ && (requestedPreview === '1' || requestedState !== undefined);
   const previewState = __DEV__ && isInboxDemoState(requestedState) ? requestedState : 'normal';
 
   return (
@@ -20,7 +25,8 @@ export default function InboxRoute() {
         } as Href)
       }
       onNavigateToday={() => router.replace('/')}
-      onNavigateWeek={() => router.push('/week' as Href)}
+      onNavigateWeek={() => router.navigate('/week' as Href)}
+      taskSource={developmentPreview ? 'preview' : 'server'}
     />
   );
 }

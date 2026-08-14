@@ -6,12 +6,14 @@ import { activeTodayFixture } from './today.fixture';
 import { TodayTask } from './today.types';
 
 export function ActiveState({
+  dateLabel,
   laterTasks,
   onFinish,
   onStartTask,
   onStop,
   task,
 }: {
+  dateLabel?: string;
   laterTasks?: TodayTask[];
   onFinish: () => void;
   onStartTask?: (taskId: string) => void;
@@ -24,7 +26,7 @@ export function ActiveState({
 
   return (
     <ScrollView contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
-      <Text style={styles.date}>{today.dateLabel}</Text>
+      <Text style={styles.date}>{dateLabel ?? today.dateLabel}</Text>
       <Text style={styles.summary}>משימה אחת פעילה עכשיו</Text>
 
       <View accessibilityLabel="פעיל עכשיו" style={styles.activeCard}>

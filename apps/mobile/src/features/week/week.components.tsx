@@ -14,8 +14,8 @@ const workloadColors: Record<WeekWorkload, { background: string; text: string }>
   'עמוס מדי': { background: colors.warningBadge, text: '#A8502F' },
 };
 
-export function WeekHeader({ showLabel = true }: { showLabel?: boolean }) {
-  const [numericRange, ...hebrewDateParts] = weekDateRange.split(' ');
+export function WeekHeader({ dateRange = weekDateRange, showLabel = true }: { dateRange?: string; showLabel?: boolean }) {
+  const [numericRange, ...hebrewDateParts] = dateRange.split(' ');
 
   return (
     <View>

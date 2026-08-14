@@ -13,6 +13,7 @@ import { AuthProvider, useAuth } from '@/features/auth/auth-provider';
 import { AuthLoadingScreen } from '@/features/auth/auth-loading-screen';
 import { getAuthGateState } from '@/features/auth/auth-gate';
 import { DemoTaskProvider } from '@/features/tasks/demo-task-provider';
+import { TaskQueryScopeProvider } from '@/features/tasks/task-query-scope';
 import { QueryProvider } from '@/lib/query/query-provider';
 
 export default function RootLayout() {
@@ -51,8 +52,9 @@ function AuthenticatedStack() {
   if (gate.showLoading) return <AuthLoadingScreen label="פותח את LifeOS…" />;
 
   return (
-    <DemoTaskProvider>
-      <Stack screenOptions={{ headerShown: false }}>
+    <TaskQueryScopeProvider userId={session?.user.id}>
+      <DemoTaskProvider>
+        <Stack screenOptions={{ headerShown: false }}>
         <Stack.Protected guard={gate.publicAuthAvailable}>
           <Stack.Screen name="welcome" />
           <Stack.Screen name="sign-in" />
@@ -70,8 +72,9 @@ function AuthenticatedStack() {
         <Stack.Protected guard={__DEV__}>
           <Stack.Screen name="auth-dev" />
         </Stack.Protected>
-      </Stack>
-      <StatusBar style="dark" />
-    </DemoTaskProvider>
+        </Stack>
+        <StatusBar style="dark" />
+      </DemoTaskProvider>
+    </TaskQueryScopeProvider>
   );
 }

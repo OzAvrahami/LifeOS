@@ -1,4 +1,5 @@
-import { PropsWithChildren } from 'react';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { PropsWithChildren, useEffect, useState } from 'react';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 
 import { DemoTaskProvider } from '@/features/tasks/demo-task-provider';
@@ -13,9 +14,19 @@ export function TestProviders({
   children,
   initialTaskState,
 }: PropsWithChildren<{ initialTaskState?: DemoTaskState }>) {
+  const [queryClient] = useState(() => new QueryClient({
+    defaultOptions: {
+      mutations: { gcTime: Infinity, retry: false },
+      queries: { gcTime: Infinity, retry: false },
+    },
+  }));
+  useEffect(() => () => queryClient.clear(), [queryClient]);
+
   return (
     <SafeAreaProvider initialMetrics={initialMetrics}>
-      <DemoTaskProvider initialState={initialTaskState}>{children}</DemoTaskProvider>
+      <QueryClientProvider client={queryClient}>
+        <DemoTaskProvider initialState={initialTaskState}>{children}</DemoTaskProvider>
+      </QueryClientProvider>
     </SafeAreaProvider>
   );
 }

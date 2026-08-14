@@ -42,28 +42,37 @@ export function InboxHeader({
   );
 }
 
-export function InboxCapture({ onAdd }: { onAdd: (title: string) => void }) {
+export function InboxCapture({ onAdd }: { onAdd: (title: string) => Promise<void> | void }) {
   const [title, setTitle] = useState('');
+  const [saving, setSaving] = useState(false);
 
-  const submit = () => {
+  const submit = async () => {
     const nextTitle = title.trim();
-    if (!nextTitle) return;
-    onAdd(nextTitle);
-    setTitle('');
+    if (!nextTitle || saving) return;
+    setSaving(true);
+    try {
+      await onAdd(nextTitle);
+      setTitle('');
+    } catch {
+      // The screen renders the shared restrained Task error treatment.
+    } finally {
+      setSaving(false);
+    }
   };
 
   return (
     <View accessibilityLabel="הוספה מהירה ל-Inbox" style={styles.capture}>
-      <Pressable accessibilityLabel="הוסף ל-Inbox" accessibilityRole="button" onPress={submit}>
+      <Pressable accessibilityLabel="הוסף ל-Inbox" accessibilityRole="button" disabled={saving} onPress={() => void submit()}>
         <View style={styles.captureIcon}>
           <Ionicons color={colors.accent} name="add" size={18} />
         </View>
       </Pressable>
       <TextInput
         accessibilityLabel="מה צריך לזכור"
+        editable={!saving}
         enterKeyHint="done"
         onChangeText={setTitle}
-        onSubmitEditing={submit}
+        onSubmitEditing={() => void submit()}
         placeholder="מה צריך לזכור?"
         placeholderTextColor={colors.textFaint}
         returnKeyType="done"
@@ -85,17 +94,21 @@ export function InboxItemList({
   return (
     <View accessibilityLabel="דברים שמחכים להחלטה" style={styles.itemList}>
       {items.map((item, index) => (
-        <Pressable
-          accessibilityLabel={`פריט Inbox: ${item.title}`}
-          accessibilityRole="button"
+        <View
           key={item.id}
-          onPress={() => onOpen(item)}
           style={[styles.itemRow, index < items.length - 1 && styles.itemDivider]}
         >
-          <View style={styles.itemBody}>
-            <Text style={styles.itemTitle}>{item.title}</Text>
-            <Text style={styles.itemMetadata}>{item.createdLabel}</Text>
-          </View>
+          <Pressable
+            accessibilityLabel={`פריט Inbox: ${item.title}`}
+            accessibilityRole="button"
+            onPress={() => onOpen(item)}
+            style={styles.itemBodyButton}
+          >
+            <View style={styles.itemBody}>
+              <Text style={styles.itemTitle}>{item.title}</Text>
+              <Text style={styles.itemMetadata}>{item.createdLabel}</Text>
+            </View>
+          </Pressable>
           <Pressable
             accessibilityLabel={`פתח פעולות עבור ${item.title}`}
             accessibilityRole="button"
@@ -105,7 +118,7 @@ export function InboxItemList({
           >
             <Ionicons color="#B8B2A6" name="ellipsis-vertical" size={20} />
           </Pressable>
-        </Pressable>
+        </View>
       ))}
     </View>
   );
@@ -245,6 +258,7 @@ const styles = StyleSheet.create({
     paddingVertical: 15,
   },
   itemDivider: { borderBottomColor: colors.divider, borderBottomWidth: StyleSheet.hairlineWidth },
+  itemBodyButton: { flex: 1 },
   itemBody: { flex: 1 },
   itemTitle: {
     color: colors.text,

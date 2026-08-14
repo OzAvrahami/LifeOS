@@ -1,13 +1,21 @@
 import { Ionicons } from '@expo/vector-icons';
-import { useState } from 'react';
+import { ReactNode, useState } from 'react';
 import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 
 import { MobileShell } from '@/components/mobile-shell';
-import {
-  CaptureDestination,
-  QuickCaptureSheet,
-} from '@/features/capture/quick-capture-sheet';
+import { QuickCaptureSheet } from '@/features/capture/quick-capture-sheet';
 import { useDemoTasks } from '@/features/tasks/demo-task-provider';
+import {
+  currentWeekDates,
+  currentWeekStart,
+  hebrewWeekRange,
+  localDateKey,
+} from '@/features/tasks/task-dates';
+import { toWeekTask } from '@/features/tasks/task-presenters';
+import { TaskQueryNotice } from '@/features/tasks/task-query-notice';
+import { useTasks, useUpdateTask } from '@/features/tasks/task.queries';
+import { TaskSource } from '@/features/tasks/task.types';
+import { useTaskCapture } from '@/features/tasks/use-task-capture';
 import { colors, radius, spacing, typography } from '@/theme/tokens';
 
 import {
@@ -33,15 +41,38 @@ export function WeekScreen({
   initialState = 'normal',
   onNavigateInbox,
   onNavigateToday,
+  taskSource = 'preview',
 }: {
   initialState?: WeekDemoState;
   onNavigateInbox?: () => void;
   onNavigateToday?: () => void;
+  taskSource?: TaskSource;
 }) {
   const [weekState, setWeekState] = useState<WeekDemoState>(initialState);
   const [planningInitialStep, setPlanningInitialStep] = useState(initialState === 'planning' ? 2 : 0);
   const [captureOpen, setCaptureOpen] = useState(false);
-  const { captureTask, moveTaskToToday, weekTasks } = useDemoTasks();
+  const demo = useDemoTasks();
+  const serverTasks = taskSource === 'server';
+  const weekQuery = useTasks({ weekStart: currentWeekStart() }, serverTasks);
+  const updateMutation = useUpdateTask();
+  const { captureTask } = useTaskCapture(taskSource);
+  const [operationError, setOperationError] = useState(false);
+  const weekTasks = serverTasks
+    ? (weekQuery.data ?? []).map(toWeekTask)
+    : demo.weekTasks.map((task) => ({
+        durationMinutes: task.estimatedMinutes ?? 0,
+        id: task.id,
+        title: task.title,
+      }));
+  const currentDays = currentWeekDates();
+  const weekDays = serverTasks
+    ? normalWeekDays.map((day, index) => ({
+        ...day,
+        date: currentDays[index].getDate(),
+        isPast: localDateKey(currentDays[index]) < localDateKey(),
+        isToday: localDateKey(currentDays[index]) === localDateKey(),
+      }))
+    : normalWeekDays;
 
   if (weekState === 'planning') {
     return <WeekPlanningFlow initialStep={planningInitialStep} onDone={() => setWeekState('normal')} />;
@@ -61,21 +92,39 @@ export function WeekScreen({
           <OverloadedWeek />
         ) : (
           <NormalWeek
-            onMoveToToday={(taskId) => {
-              moveTaskToToday(taskId);
+            dateRange={serverTasks ? hebrewWeekRange() : undefined}
+            days={weekDays}
+            notice={
+              <TaskQueryNotice
+                error={serverTasks && (weekQuery.isError || operationError)}
+                loading={serverTasks && weekQuery.isPending}
+                onRetry={() => void weekQuery.refetch()}
+              />
+            }
+            onMoveToToday={async (taskId) => {
+              if (serverTasks) {
+                setOperationError(false);
+                try {
+                  await updateMutation.mutateAsync({
+                    id: taskId,
+                    input: { planning: { plannedDate: localDateKey(), type: 'day' } },
+                  });
+                } catch {
+                  setOperationError(true);
+                  return;
+                }
+              } else {
+                demo.moveTaskToToday(taskId);
+              }
               onNavigateToday?.();
             }}
-            tasks={weekTasks.map((task) => ({
-              durationMinutes: task.estimatedMinutes ?? 0,
-              id: task.id,
-              title: task.title,
-            }))}
+            tasks={weekTasks}
           />
         )}
       </MobileShell>
       <QuickCaptureSheet
         onClose={() => setCaptureOpen(false)}
-        onSave={(title, destination) => handleQuickCapture(title, destination, captureTask)}
+        onSave={captureTask}
         visible={captureOpen}
       />
     </>
@@ -83,19 +132,26 @@ export function WeekScreen({
 }
 
 function NormalWeek({
+  dateRange,
+  days,
+  notice,
   onMoveToToday,
   tasks,
 }: {
-  onMoveToToday: (taskId: string) => void;
+  dateRange?: string;
+  days: typeof normalWeekDays;
+  notice?: ReactNode;
+  onMoveToToday: (taskId: string) => Promise<void> | void;
   tasks: typeof unscheduledWeekTasks;
 }) {
   return (
     <ScrollView contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
-      <WeekHeader />
+      <WeekHeader dateRange={dateRange} />
+      {notice}
       <WeeklyFocusCard focuses={weeklyFocuses} />
       <WeekSectionLabel>השבוע שלך</WeekSectionLabel>
       <View accessibilityLabel="סקירת שבעת ימי השבוע" style={styles.days}>
-        {normalWeekDays.map((day) => <WeekDayRow day={day} key={day.id} />)}
+        {days.map((day) => <WeekDayRow day={day} key={day.id} />)}
       </View>
       <WeekSectionLabel>לתכנן השבוע</WeekSectionLabel>
       <UnscheduledWeekTasks onMoveToToday={onMoveToToday} tasks={tasks} />
@@ -186,11 +242,3 @@ const styles = StyleSheet.create({
   commitmentTitle: { color: colors.text, flex: 1, fontFamily: typography.family.regular, fontSize: typography.size.meta, textAlign: 'right', writingDirection: 'rtl' },
   commitmentTime: { color: colors.textFaint, fontFamily: typography.family.regular, fontSize: typography.size.label, writingDirection: 'ltr' },
 });
-
-function handleQuickCapture(
-  title: string,
-  destination: CaptureDestination,
-  captureTask: (title: string, destination: 'inbox' | 'today' | 'week') => void,
-) {
-  if (destination !== 'day') captureTask(title, destination);
-}

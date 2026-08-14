@@ -28,6 +28,19 @@ describe('<InboxScreen />', () => {
     expect(screen.queryAllByText('מיון')).toHaveLength(0);
   });
 
+  it('keeps the row body and kebab as sibling actions and opens only once per press', async () => {
+    const user = userEvent.setup();
+    await renderInbox();
+    const row = screen.getByLabelText('פריט Inbox: לקבוע תור לרופא');
+    const disclosure = screen.getByLabelText('פתח פעולות עבור לקבוע תור לרופא');
+
+    expect(row.parent).toBe(disclosure.parent);
+    expect(row.parent?.props.accessibilityRole).toBeUndefined();
+
+    await user.press(disclosure);
+    expect(screen.getAllByLabelText('מה צריך לקרות עם זה')).toHaveLength(1);
+  });
+
   it('renders the quiet empty state and keeps capture available', async () => {
     await renderInbox('empty');
 

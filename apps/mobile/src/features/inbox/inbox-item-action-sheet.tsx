@@ -22,6 +22,7 @@ type SheetMode = 'actions' | 'choose-day' | 'edit';
 export function InboxItemActionSheet({
   confirmation,
   confirmedDestination,
+  error = false,
   onChooseDay,
   onClose,
   onDelete,
@@ -33,6 +34,7 @@ export function InboxItemActionSheet({
 }: {
   confirmation?: string | null;
   confirmedDestination?: 'week';
+  error?: boolean;
   onChooseDay: (task: InboxTask, day: string) => void;
   onClose: () => void;
   onDelete: (task: InboxTask) => void;
@@ -80,6 +82,7 @@ export function InboxItemActionSheet({
           style={[styles.sheet, { paddingBottom: Math.max(insets.bottom, spacing.lg) }]}
         >
           <View style={styles.handle} />
+          {error ? <Text accessibilityRole="alert" style={styles.error}>לא הצלחנו לעדכן. אפשר לנסות שוב.</Text> : null}
           {mode === 'actions' ? (
             <ActionChoices
               onChooseDay={() => setMode('choose-day')}
@@ -281,6 +284,14 @@ const styles = StyleSheet.create({
     flex: 1,
     fontFamily: typography.family.regular,
     fontSize: typography.size.meta,
+    textAlign: 'right',
+    writingDirection: 'rtl',
+  },
+  error: {
+    color: colors.warningText,
+    fontFamily: typography.family.semibold,
+    fontSize: typography.size.label,
+    marginTop: spacing.sm,
     textAlign: 'right',
     writingDirection: 'rtl',
   },
