@@ -6,6 +6,7 @@ export type WeekDay = {
   id: string;
   weekday: string;
   date: number;
+  dateKey?: string;
   taskCount: number;
   plannedTime: string;
   workload: WeekWorkload;

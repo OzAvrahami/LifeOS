@@ -60,17 +60,14 @@ export function WorkloadBadge({ workload }: { workload: WeekWorkload }) {
   );
 }
 
-export function WeekDayRow({ children, day, expanded = false }: { children?: React.ReactNode; day: WeekDay; expanded?: boolean }) {
-  return (
-    <View
-      accessibilityLabel={`יום ${day.weekday}`}
-      accessibilityState={{ selected: day.isToday ?? false }}
-      style={[
-        styles.dayRow,
-        day.isToday && styles.todayRow,
-        expanded && styles.overloadedRow,
-      ]}
-    >
+export function WeekDayRow({ children, day, expanded = false, onAddCommitment }: { children?: React.ReactNode; day: WeekDay; expanded?: boolean; onAddCommitment?: (date: string) => void }) {
+  const style = [
+    styles.dayRow,
+    day.isToday && styles.todayRow,
+    expanded && styles.overloadedRow,
+  ];
+  const content = (
+    <>
       <View style={styles.dayMainRow}>
         <View style={styles.dayIdentity}>
           <Text style={[styles.weekday, day.isPast && styles.pastText, day.isToday && styles.todayText]}>
@@ -90,6 +87,24 @@ export function WeekDayRow({ children, day, expanded = false }: { children?: Rea
         <WorkloadBadge workload={day.workload} />
       </View>
       {children}
+    </>
+  );
+  if (onAddCommitment && day.dateKey) {
+    return (
+      <Pressable
+        accessibilityLabel={`הוסף התחייבות ליום ${day.weekday}`}
+        accessibilityRole="button"
+        accessibilityState={{ selected: day.isToday ?? false }}
+        onPress={() => onAddCommitment(day.dateKey!)}
+        style={style}
+      >
+        {content}
+      </Pressable>
+    );
+  }
+  return (
+    <View accessibilityLabel={`יום ${day.weekday}`} accessibilityState={{ selected: day.isToday ?? false }} style={style}>
+      {content}
     </View>
   );
 }

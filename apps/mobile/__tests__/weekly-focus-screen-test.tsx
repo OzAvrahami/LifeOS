@@ -1,6 +1,7 @@
 import { render, screen, userEvent, waitFor } from '@testing-library/react-native';
 import { notifyManager } from '@tanstack/react-query';
 
+import * as commitmentApi from '@/features/commitments/commitment.api';
 import * as planningApi from '@/features/planning/planning.api';
 import type { WeeklyFocus } from '@/features/planning/planning.types';
 import * as taskApi from '@/features/tasks/task.api';
@@ -20,10 +21,17 @@ jest.mock('@/features/planning/planning.api', () => ({
   putDailyPlan: jest.fn(),
   replaceWeeklyFocuses: jest.fn(),
 }));
+jest.mock('@/features/commitments/commitment.api', () => ({
+  createCommitment: jest.fn(),
+  deleteCommitment: jest.fn(),
+  listCommitments: jest.fn(),
+  updateCommitment: jest.fn(),
+}));
 
 const listTasksMock = jest.mocked(taskApi.listTasks);
 const getWeeklyFocusesMock = jest.mocked(planningApi.getWeeklyFocuses);
 const replaceWeeklyFocusesMock = jest.mocked(planningApi.replaceWeeklyFocuses);
+const listCommitmentsMock = jest.mocked(commitmentApi.listCommitments);
 
 beforeAll(() => notifyManager.setScheduler((callback) => callback()));
 afterAll(() => notifyManager.setScheduler((callback) => setTimeout(callback, 0)));
@@ -39,6 +47,7 @@ describe('Week persisted WeeklyFocus', () => {
       weekPlanId: 'week-plan-1',
     }];
     listTasksMock.mockResolvedValue([]);
+    listCommitmentsMock.mockResolvedValue([]);
     getWeeklyFocusesMock.mockImplementation(async () => focuses);
     replaceWeeklyFocusesMock.mockImplementation(async ({ titles }) => {
       focuses = titles.map((title, position) => ({

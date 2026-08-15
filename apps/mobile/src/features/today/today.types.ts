@@ -1,3 +1,5 @@
+import type { CommitmentLifeArea } from '@/features/commitments/commitment.types';
+
 export type LifeArea = 'work' | 'family' | 'home';
 
 export type TodayDemoState =
@@ -30,7 +32,7 @@ export type Commitment = {
   id: string;
   time: string;
   title: string;
-  lifeArea: LifeArea;
+  lifeArea: CommitmentLifeArea;
 };
 
 export type TodayFixture = {

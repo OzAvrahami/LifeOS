@@ -4,15 +4,12 @@ import { Pressable, StyleSheet, Text, View } from 'react-native';
 
 import { colors, radius, spacing, typography } from '@/theme/tokens';
 
-import { Commitment, LifeArea, TodayTask } from './today.types';
+import { Commitment, TodayTask } from './today.types';
 
-const lifeAreaColor: Record<LifeArea, string> = {
-  work: colors.lifeArea.work,
-  family: colors.lifeArea.family,
-  home: colors.lifeArea.home,
-};
+const lifeAreaColor: Record<Commitment['lifeArea'], string> = colors.lifeArea;
 
 export function TodayHeader({
+  availableTime,
   commitmentCount,
   dateLabel,
   greeting,
@@ -20,6 +17,7 @@ export function TodayHeader({
   taskCount,
   workload,
 }: {
+  availableTime?: string;
   commitmentCount: number;
   dateLabel: string;
   greeting: string;
@@ -35,10 +33,10 @@ export function TodayHeader({
         <View style={styles.summaryItems}>
           <Text style={styles.summaryText}>{taskCount} משימות</Text>
           <Text style={styles.summaryDivider}>·</Text>
-          <Text style={styles.summaryText}>{commitmentCount} פגישות</Text>
+          <Text style={styles.summaryText}>{commitmentCount} התחייבויות</Text>
           <Text style={styles.summaryDivider}>·</Text>
           <Text style={styles.summaryText}>
-            <Text style={styles.ltr}>{plannedTime}</Text> שעות
+            <Text style={styles.ltr}>{plannedTime}{availableTime ? ` / ${availableTime}` : ''}</Text> שעות
           </Text>
         </View>
         <WorkloadBadge label={workload} />
@@ -75,16 +73,37 @@ export function SectionLabel({ children }: { children: string }) {
   return <Text style={styles.sectionLabel}>{children}</Text>;
 }
 
-export function Commitments({ items }: { items: Commitment[] }) {
+export function CommitmentSectionHeader({ onAdd }: { onAdd?: () => void }) {
+  return (
+    <View style={styles.commitmentHeading}>
+      <Text style={styles.sectionLabelInline}>התחייבויות</Text>
+      {onAdd ? (
+        <Pressable accessibilityLabel="הוספת התחייבות" accessibilityRole="button" onPress={onAdd} style={styles.addCommitmentButton}>
+          <Ionicons color={colors.accent} name="add" size={16} />
+          <Text style={styles.addCommitmentText}>התחייבות</Text>
+        </Pressable>
+      ) : null}
+    </View>
+  );
+}
+
+export function Commitments({ items, onPress }: { items: Commitment[]; onPress?: (id: string) => void }) {
   return (
     <View accessibilityLabel="התחייבויות" style={styles.timeline}>
       <View style={styles.timelineLine} />
       {items.map((item) => (
-        <View key={item.id} style={styles.commitmentRow}>
+        <Pressable
+          accessibilityLabel={`עריכת התחייבות: ${item.title}`}
+          accessibilityRole={onPress ? 'button' : undefined}
+          disabled={!onPress}
+          key={item.id}
+          onPress={() => onPress?.(item.id)}
+          style={styles.commitmentRow}
+        >
           <View style={[styles.timelineDot, { backgroundColor: lifeAreaColor[item.lifeArea] }]} />
           <Text style={styles.commitmentTime}>{item.time}</Text>
           <Text style={styles.commitmentTitle}>{item.title}</Text>
-        </View>
+        </Pressable>
       ))}
     </View>
   );
@@ -318,6 +337,10 @@ const styles = StyleSheet.create({
     paddingVertical: 2,
     writingDirection: 'rtl',
   },
+  commitmentHeading: { alignItems: 'center', flexDirection: 'row-reverse', justifyContent: 'space-between', marginBottom: spacing.xxs, marginTop: 22 },
+  sectionLabelInline: { color: colors.textSubtle, fontFamily: typography.family.extraBold, fontSize: typography.size.label, letterSpacing: 0.5, writingDirection: 'rtl' },
+  addCommitmentButton: { alignItems: 'center', flexDirection: 'row-reverse', gap: 5, minHeight: 36, paddingHorizontal: 2 },
+  addCommitmentText: { color: colors.accent, fontFamily: typography.family.bold, fontSize: typography.size.meta, writingDirection: 'rtl' },
   taskDivider: { borderBottomColor: colors.divider, borderBottomWidth: StyleSheet.hairlineWidth },
   checkbox: { borderColor: '#C9C3B5', borderRadius: 11, borderWidth: 1.75, height: 22, width: 22 },
   taskTitle: {

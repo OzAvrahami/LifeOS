@@ -842,6 +842,14 @@ created_at
 updated_at
 ```
 
+במימוש הראשוני של Commitment בלבד, ועד שתיבנה ישות `LifeArea`, המטא־דאטה נשמר כמפתח אופציונלי מוגבל:
+
+```text
+life_area: work | family | home | health | personal | projects
+```
+
+זהו ייצוג זמני ומוגבל של תחום החיים עבור Commitments, ולא תחליף לישות `LifeArea` העתידית. Tasks אינן משתמשות בייצוג הזה.
+
 ---
 
 ## למה Commitment נפרד מ־Task?

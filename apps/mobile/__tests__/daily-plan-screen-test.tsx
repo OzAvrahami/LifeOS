@@ -1,6 +1,7 @@
 import { render, screen, within } from '@testing-library/react-native';
 import { notifyManager } from '@tanstack/react-query';
 
+import * as commitmentApi from '@/features/commitments/commitment.api';
 import * as planningApi from '@/features/planning/planning.api';
 import type { DailyPlan } from '@/features/planning/planning.types';
 import * as taskApi from '@/features/tasks/task.api';
@@ -22,9 +23,16 @@ jest.mock('@/features/planning/planning.api', () => ({
   putDailyPlan: jest.fn(),
   replaceWeeklyFocuses: jest.fn(),
 }));
+jest.mock('@/features/commitments/commitment.api', () => ({
+  createCommitment: jest.fn(),
+  deleteCommitment: jest.fn(),
+  listCommitments: jest.fn(),
+  updateCommitment: jest.fn(),
+}));
 
 const listTasksMock = jest.mocked(taskApi.listTasks);
 const getDailyPlanMock = jest.mocked(planningApi.getDailyPlan);
+const listCommitmentsMock = jest.mocked(commitmentApi.listCommitments);
 const today = localDateKey();
 const task: Task = {
   completedAt: null,
@@ -56,6 +64,7 @@ describe('Today persisted Daily Focus', () => {
       updatedAt: '2026-08-14T09:00:00.000Z',
     };
     listTasksMock.mockResolvedValue([task]);
+    listCommitmentsMock.mockResolvedValue([]);
     getDailyPlanMock.mockResolvedValue(dailyPlan);
 
     const first = await render(

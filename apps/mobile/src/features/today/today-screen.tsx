@@ -4,6 +4,15 @@ import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 
 import { MobileShell } from '@/components/mobile-shell';
 import { QuickCaptureSheet } from '@/features/capture/quick-capture-sheet';
+import { CommitmentEditor } from '@/features/commitments/commitment-editor';
+import { formatMinutes, plannedMinutes, workloadState } from '@/features/commitments/commitment.metrics';
+import {
+  useCommitments,
+  useCreateCommitment,
+  useDeleteCommitment,
+  useUpdateCommitment,
+} from '@/features/commitments/commitment.queries';
+import type { Commitment as ServerCommitment, CreateCommitmentInput } from '@/features/commitments/commitment.types';
 import { useDailyPlan, usePutDailyPlan } from '@/features/planning/planning.queries';
 import { useDemoTasks } from '@/features/tasks/demo-task-provider';
 import { hebrewDateLabel, localDateKey } from '@/features/tasks/task-dates';
@@ -17,6 +26,7 @@ import { ActiveState } from './active-state';
 import { OverloadedState } from './overloaded-state';
 import { PartiallyCompletedState } from './partially-completed-state';
 import {
+  CommitmentSectionHeader,
   Commitments,
   FocusCard,
   SectionLabel,
@@ -45,13 +55,19 @@ export function TodayScreen({
 }) {
   const [todayState, setTodayState] = useState<TodayDemoState>(initialState);
   const [captureOpen, setCaptureOpen] = useState(false);
+  const [commitmentEditorOpen, setCommitmentEditorOpen] = useState(false);
+  const [editingCommitment, setEditingCommitment] = useState<ServerCommitment | null>(null);
   const demo = useDemoTasks();
   const serverTasks = taskSource === 'server';
   const todayDate = localDateKey();
   const todayQuery = useTasks({ plannedDate: todayDate }, serverTasks);
+  const commitmentQuery = useCommitments({ date: todayDate }, serverTasks);
   const dailyPlanQuery = useDailyPlan(todayDate, serverTasks);
   const dailyPlanMutation = usePutDailyPlan();
   const updateMutation = useUpdateTask();
+  const createCommitmentMutation = useCreateCommitment();
+  const updateCommitmentMutation = useUpdateCommitment();
+  const deleteCommitmentMutation = useDeleteCommitment();
   const { captureTask } = useTaskCapture(taskSource);
   const [operationError, setOperationError] = useState(false);
   const integrated = serverTasks || initialState === 'normal';
@@ -59,6 +75,36 @@ export function TodayScreen({
   const activeTask = sourceTasks.find((task) => task.status === 'in_progress');
   const openTodayTasks = sourceTasks.filter((task) => task.status === 'open');
   const completedTodayTasks = sourceTasks.filter((task) => task.status === 'completed');
+  const serverCommitments = serverTasks ? commitmentQuery.data ?? [] : [];
+  const presentedCommitments = serverCommitments.map((commitment) => ({
+    id: commitment.id,
+    lifeArea: commitment.lifeArea ?? 'personal' as const,
+    time: commitment.startTime,
+    title: commitment.title,
+  }));
+  const availableMinutes = dailyPlanQuery.data?.availableMinutes ?? 360;
+  const combinedPlannedMinutes = plannedMinutes(sourceTasks, serverCommitments);
+  const serverWorkload = workloadState(combinedPlannedMinutes, availableMinutes);
+
+  const openNewCommitment = () => {
+    setEditingCommitment(null);
+    setCommitmentEditorOpen(true);
+  };
+
+  const openExistingCommitment = (id: string) => {
+    const commitment = serverCommitments.find((item) => item.id === id);
+    if (!commitment) return;
+    setEditingCommitment(commitment);
+    setCommitmentEditorOpen(true);
+  };
+
+  const saveCommitment = async (input: CreateCommitmentInput) => {
+    if (editingCommitment) {
+      await updateCommitmentMutation.mutateAsync({ id: editingCommitment.id, input });
+    } else {
+      await createCommitmentMutation.mutateAsync(input);
+    }
+  };
 
   const selectDailyFocus = async (taskId: string) => {
     if (!serverTasks) return;
@@ -101,6 +147,7 @@ export function TodayScreen({
     if (activeTodayTask) {
       content = (
         <ActiveState
+          commitment={serverTasks ? presentedCommitments[0] ?? null : undefined}
           laterTasks={openTasks}
           dateLabel={serverTasks ? hebrewDateLabel() : undefined}
           onFinish={() => void updateStatus(activeTodayTask.id, 'completed')}
@@ -137,8 +184,14 @@ export function TodayScreen({
           onStartFocus={() => focusTask && void updateStatus(focusTask.id, 'in_progress')}
           onStartTask={(taskId) => void updateStatus(taskId, 'in_progress')}
           onToggleFocus={serverTasks ? (taskId) => void selectDailyFocus(taskId) : undefined}
+          commitments={serverTasks ? presentedCommitments : undefined}
+          onAddCommitment={serverTasks ? openNewCommitment : undefined}
+          onEditCommitment={serverTasks ? openExistingCommitment : undefined}
+          serverAvailableTime={serverTasks ? formatMinutes(availableMinutes) : undefined}
+          serverCommitmentCount={serverTasks ? serverCommitments.length : undefined}
           serverTaskCount={serverTasks ? sourceTasks.length : undefined}
-          serverPlannedTime={serverTasks ? formatPlannedTime(sourceTasks) : undefined}
+          serverPlannedTime={serverTasks ? formatMinutes(combinedPlannedMinutes) : undefined}
+          serverWorkload={serverTasks ? serverWorkload : undefined}
           tasks={tasks}
         />
       );
@@ -181,9 +234,9 @@ export function TodayScreen({
         onQuickCapture={() => setCaptureOpen(true)}
       >
         <TaskQueryNotice
-          error={serverTasks && (todayQuery.isError || dailyPlanQuery.isError || operationError)}
-          loading={serverTasks && (todayQuery.isPending || dailyPlanQuery.isPending)}
-          onRetry={() => void Promise.all([todayQuery.refetch(), dailyPlanQuery.refetch()])}
+          error={serverTasks && (todayQuery.isError || commitmentQuery.isError || dailyPlanQuery.isError || operationError)}
+          loading={serverTasks && (todayQuery.isPending || commitmentQuery.isPending || dailyPlanQuery.isPending)}
+          onRetry={() => void Promise.all([todayQuery.refetch(), commitmentQuery.refetch(), dailyPlanQuery.refetch()])}
         />
         {content}
       </MobileShell>
@@ -192,31 +245,53 @@ export function TodayScreen({
         onSave={captureTask}
         visible={captureOpen}
       />
+      {serverTasks && commitmentEditorOpen ? (
+        <CommitmentEditor
+          commitment={editingCommitment}
+          initialDate={todayDate}
+          onClose={() => setCommitmentEditorOpen(false)}
+          onDelete={async (id) => { await deleteCommitmentMutation.mutateAsync(id); }}
+          onSave={saveCommitment}
+          visible
+        />
+      ) : null}
     </>
   );
 }
 
 function NormalTodayContent({
+  commitments,
   dateLabel,
   focusTask,
   focusedTaskId,
   movedTaskId,
+  onAddCommitment,
+  onEditCommitment,
   onStartFocus,
   onStartTask,
   onToggleFocus,
+  serverAvailableTime,
+  serverCommitmentCount,
   serverPlannedTime,
   serverTaskCount,
+  serverWorkload,
   tasks,
 }: {
+  commitments?: typeof normalTodayFixture.commitments;
   dateLabel?: string;
   focusTask?: TodayTask;
   focusedTaskId?: string;
   movedTaskId?: string;
+  onAddCommitment?: () => void;
+  onEditCommitment?: (id: string) => void;
   onStartFocus: () => void;
   onStartTask?: (taskId: string) => void;
   onToggleFocus?: (taskId: string) => void;
+  serverAvailableTime?: string;
+  serverCommitmentCount?: number;
   serverPlannedTime?: string;
   serverTaskCount?: number;
+  serverWorkload?: string;
   tasks: TodayTask[];
 }) {
   const today = normalTodayFixture;
@@ -240,17 +315,18 @@ function NormalTodayContent({
         showsVerticalScrollIndicator={false}
       >
         <TodayHeader
-          commitmentCount={today.summary.commitmentCount}
+          availableTime={serverAvailableTime}
+          commitmentCount={serverCommitmentCount ?? today.summary.commitmentCount}
           dateLabel={dateLabel ?? today.dateLabel}
           greeting={today.greeting}
           plannedTime={serverPlannedTime ?? today.summary.plannedTime}
           taskCount={taskCount}
-          workload={today.summary.workload}
+          workload={serverWorkload ?? today.summary.workload}
         />
         {focusTask ? <FocusCard onStart={onStartFocus} task={focusTask} /> : null}
 
-        <SectionLabel>התחייבויות</SectionLabel>
-        <Commitments items={today.commitments} />
+        {onAddCommitment ? <CommitmentSectionHeader onAdd={onAddCommitment} /> : <SectionLabel>התחייבויות</SectionLabel>}
+        <Commitments items={commitments ?? today.commitments} onPress={onEditCommitment} />
 
         <SectionLabel>המשימות שלי</SectionLabel>
         <TaskList
@@ -331,9 +407,4 @@ function toPresentedTodayTask(task: {
     lifeArea: task.lifeArea ?? 'work',
     title: task.title,
   };
-}
-
-function formatPlannedTime(tasks: { estimatedMinutes?: number | null }[]) {
-  const minutes = tasks.reduce((total, task) => total + (task.estimatedMinutes ?? 0), 0);
-  return `${Math.floor(minutes / 60)}:${String(minutes % 60).padStart(2, '0')}`;
 }

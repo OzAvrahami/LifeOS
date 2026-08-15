@@ -1,5 +1,7 @@
 import { render, screen, userEvent, waitFor, within } from '@testing-library/react-native';
 import { notifyManager } from '@tanstack/react-query';
+
+import * as commitmentApi from '@/features/commitments/commitment.api';
 import { useState } from 'react';
 
 import { InboxScreen } from '@/features/inbox/inbox-screen';
@@ -25,6 +27,12 @@ jest.mock('@/features/planning/planning.api', () => ({
   putDailyPlan: jest.fn(),
   replaceWeeklyFocuses: jest.fn(),
 }));
+jest.mock('@/features/commitments/commitment.api', () => ({
+  createCommitment: jest.fn(),
+  deleteCommitment: jest.fn(),
+  listCommitments: jest.fn(),
+  updateCommitment: jest.fn(),
+}));
 
 const listTasksMock = jest.mocked(taskApi.listTasks);
 const createTaskMock = jest.mocked(taskApi.createTask);
@@ -34,6 +42,7 @@ const getDailyPlanMock = jest.mocked(planningApi.getDailyPlan);
 const getWeeklyFocusesMock = jest.mocked(planningApi.getWeeklyFocuses);
 const putDailyPlanMock = jest.mocked(planningApi.putDailyPlan);
 const replaceWeeklyFocusesMock = jest.mocked(planningApi.replaceWeeklyFocuses);
+const listCommitmentsMock = jest.mocked(commitmentApi.listCommitments);
 
 let tasks: Task[];
 let nextId: number;
@@ -222,6 +231,7 @@ beforeEach(() => {
   jest.clearAllMocks();
   installFakeTaskApi();
   installFakePlanningApi();
+  listCommitmentsMock.mockResolvedValue([]);
 });
 
 describe('persistent server Task experience', () => {

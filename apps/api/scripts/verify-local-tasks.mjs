@@ -347,6 +347,94 @@ async function main() {
     assert.equal(localSql(docker, databaseContainer, `select count(*) from public.weekly_focuses where week_plan_id = '${weekPlanId}'::uuid;`), '3');
     assert.equal(localSql(docker, databaseContainer, `select count(*) from public.tasks where id = '${originalTaskId}'::uuid;`), '1');
 
+    const commitmentDate = '2026-08-17';
+    const commitmentA = (await apiRequest('POST', '/commitments', tokenA, {
+      date: commitmentDate,
+      endTime: '10:30',
+      lifeArea: 'health',
+      startTime: '09:30',
+      title: 'User A doctor appointment',
+    }, 201)).commitment;
+    const commitmentAId = assertUuid(commitmentA.id);
+    const commitmentALater = (await apiRequest('POST', '/commitments', tokenA, {
+      date: commitmentDate,
+      startTime: '14:00',
+      title: 'User A later commitment',
+    }, 201)).commitment;
+    const commitmentANextDay = (await apiRequest('POST', '/commitments', tokenA, {
+      date: '2026-08-18',
+      startTime: '08:00',
+      title: 'User A next-day commitment',
+    }, 201)).commitment;
+    const commitmentB = (await apiRequest('POST', '/commitments', tokenB, {
+      date: commitmentDate,
+      startTime: '08:30',
+      title: 'User B private commitment',
+    }, 201)).commitment;
+    const commitmentBId = assertUuid(commitmentB.id);
+
+    assert.deepEqual(
+      (await apiRequest('GET', `/commitments?date=${commitmentDate}`, tokenA)).commitments.map((item) => item.id),
+      [commitmentAId, commitmentALater.id],
+    );
+    assert.deepEqual(
+      (await apiRequest('GET', '/commitments?dateFrom=2026-08-17&dateTo=2026-08-18', tokenA)).commitments.map((item) => item.id),
+      [commitmentAId, commitmentALater.id, commitmentANextDay.id],
+    );
+    assert.equal((await apiRequest('GET', '/commitments', tokenB)).commitments.some((item) => item.id === commitmentAId), false);
+    await apiRequest('PATCH', `/commitments/${commitmentAId}`, tokenB, { title: 'blocked' }, 404);
+    await apiRequest('DELETE', `/commitments/${commitmentAId}`, tokenB, undefined, 404);
+    await apiRequest('POST', '/commitments', tokenA, {
+      date: commitmentDate,
+      endTime: '09:00',
+      startTime: '09:30',
+      title: 'Invalid time',
+    }, 400);
+
+    const directCommitmentsA = await callerA.from('commitments').select('id,user_id').order('start_time');
+    const directCommitmentsB = await callerB.from('commitments').select('id,user_id').order('start_time');
+    assert.ifError(directCommitmentsA.error);
+    assert.ifError(directCommitmentsB.error);
+    assert.deepEqual(new Set(directCommitmentsA.data.map((row) => row.user_id)), new Set([users[0].id]));
+    assert.deepEqual(new Set(directCommitmentsB.data.map((row) => row.user_id)), new Set([users[1].id]));
+    assert.equal(directCommitmentsA.data.some((row) => row.id === commitmentBId), false);
+    assert.equal(directCommitmentsB.data.some((row) => row.id === commitmentAId), false);
+
+    const crossCommitmentUpdate = await callerB
+      .from('commitments')
+      .update({ title: 'blocked direct update' })
+      .eq('id', commitmentAId)
+      .select('id');
+    const crossCommitmentDelete = await callerB
+      .from('commitments')
+      .delete()
+      .eq('id', commitmentAId)
+      .select('id');
+    assert.ifError(crossCommitmentUpdate.error);
+    assert.ifError(crossCommitmentDelete.error);
+    assert.deepEqual(crossCommitmentUpdate.data, []);
+    assert.deepEqual(crossCommitmentDelete.data, []);
+    const invalidDirectCommitment = await callerA.from('commitments').insert({
+      date: commitmentDate,
+      end_time: '09:00',
+      start_time: '09:30',
+      title: 'Invalid direct range',
+      user_id: users[0].id,
+    });
+    assert.ok(invalidDirectCommitment.error, 'PostgreSQL unexpectedly accepted an invalid Commitment range');
+
+    const updatedCommitment = (await apiRequest('PATCH', `/commitments/${commitmentAId}`, tokenA, {
+      endTime: '11:15',
+      startTime: '10:15',
+      title: 'User A updated appointment',
+    })).commitment;
+    assert.equal(updatedCommitment.id, commitmentAId);
+    assert.equal(updatedCommitment.startTime, '10:15');
+    assert.equal(localSql(docker, databaseContainer, `select count(*) from public.commitments where id = '${commitmentAId}'::uuid;`), '1');
+    const deletedCommitment = (await apiRequest('DELETE', `/commitments/${commitmentALater.id}`, tokenA)).commitment;
+    assert.equal(deletedCommitment.id, commitmentALater.id);
+    assert.equal(localSql(docker, databaseContainer, `select count(*) from public.commitments where id = '${commitmentALater.id}'::uuid;`), '0');
+
     const started = (await apiRequest('PATCH', `/tasks/${originalTaskId}`, tokenA, { status: 'in_progress' })).task;
     const stopped = (await apiRequest('PATCH', `/tasks/${originalTaskId}`, tokenA, { status: 'open' })).task;
     const restarted = (await apiRequest('PATCH', `/tasks/${originalTaskId}`, tokenA, { status: 'in_progress' })).task;
@@ -402,6 +490,7 @@ async function main() {
     console.log('PASS retained cancellation and PostgreSQL persistence');
     console.log('PASS DailyPlan ownership, focus ownership, upsert, capacity, and clearing');
     console.log('PASS ordered WeeklyFocus replacement, maximum, and WeekPlan-derived RLS');
+    console.log('PASS one-time Commitment CRUD, ordering, physical delete, constraints, and caller RLS');
   } finally {
     if (apiProcess && apiProcess.exitCode === null) {
       apiProcess.kill();

@@ -4,6 +4,8 @@ import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 
 import { MobileShell } from '@/components/mobile-shell';
 import { QuickCaptureSheet } from '@/features/capture/quick-capture-sheet';
+import { CommitmentEditor } from '@/features/commitments/commitment-editor';
+import { useCommitments, useCreateCommitment } from '@/features/commitments/commitment.queries';
 import {
   useReplaceWeeklyFocuses,
   useWeeklyFocuses,
@@ -55,12 +57,17 @@ export function WeekScreen({
   const [weekState, setWeekState] = useState<WeekDemoState>(initialState);
   const [planningInitialStep, setPlanningInitialStep] = useState(initialState === 'planning' ? 2 : 0);
   const [captureOpen, setCaptureOpen] = useState(false);
+  const [commitmentEditorDate, setCommitmentEditorDate] = useState<string | null>(null);
   const demo = useDemoTasks();
   const serverTasks = taskSource === 'server';
   const weekStart = currentWeekStart();
+  const currentDays = currentWeekDates();
+  const weekEnd = localDateKey(currentDays[6]);
   const weekQuery = useTasks({ weekStart }, serverTasks);
+  const commitmentQuery = useCommitments({ dateFrom: weekStart, dateTo: weekEnd }, serverTasks);
   const weeklyFocusQuery = useWeeklyFocuses(weekStart, serverTasks);
   const replaceWeeklyFocusMutation = useReplaceWeeklyFocuses();
+  const createCommitmentMutation = useCreateCommitment();
   const updateMutation = useUpdateTask();
   const { captureTask } = useTaskCapture(taskSource);
   const [operationError, setOperationError] = useState(false);
@@ -71,11 +78,19 @@ export function WeekScreen({
         id: task.id,
         title: task.title,
       }));
-  const currentDays = currentWeekDates();
   const weekDays = serverTasks
     ? normalWeekDays.map((day, index) => ({
         ...day,
+        commitmentTime: commitmentQuery.data
+          ?.filter((commitment) => commitment.date === localDateKey(currentDays[index]))
+          .reduce<string | undefined>(
+            (earliest, commitment) => !earliest || commitment.startTime < earliest
+              ? commitment.startTime
+              : earliest,
+            undefined,
+          ),
         date: currentDays[index].getDate(),
+        dateKey: localDateKey(currentDays[index]),
         isPast: localDateKey(currentDays[index]) < localDateKey(),
         isToday: localDateKey(currentDays[index]) === localDateKey(),
       }))
@@ -112,13 +127,14 @@ export function WeekScreen({
             days={weekDays}
             notice={
               <TaskQueryNotice
-                error={serverTasks && (weekQuery.isError || weeklyFocusQuery.isError || operationError)}
-                loading={serverTasks && (weekQuery.isPending || weeklyFocusQuery.isPending)}
-                onRetry={() => void Promise.all([weekQuery.refetch(), weeklyFocusQuery.refetch()])}
+                error={serverTasks && (weekQuery.isError || commitmentQuery.isError || weeklyFocusQuery.isError || operationError)}
+                loading={serverTasks && (weekQuery.isPending || commitmentQuery.isPending || weeklyFocusQuery.isPending)}
+                onRetry={() => void Promise.all([weekQuery.refetch(), commitmentQuery.refetch(), weeklyFocusQuery.refetch()])}
               />
             }
             focuses={serverTasks ? weeklyFocusQuery.data ?? [] : weeklyFocuses}
             onEditFocuses={() => { setPlanningInitialStep(2); setWeekState('planning'); }}
+            onAddCommitment={serverTasks ? setCommitmentEditorDate : undefined}
             onMoveToToday={async (taskId) => {
               if (serverTasks) {
                 setOperationError(false);
@@ -145,6 +161,14 @@ export function WeekScreen({
         onSave={captureTask}
         visible={captureOpen}
       />
+      {serverTasks && commitmentEditorDate ? (
+        <CommitmentEditor
+          initialDate={commitmentEditorDate}
+          onClose={() => setCommitmentEditorDate(null)}
+          onSave={async (input) => { await createCommitmentMutation.mutateAsync(input); }}
+          visible
+        />
+      ) : null}
     </>
   );
 }
@@ -155,6 +179,7 @@ function NormalWeek({
   focuses,
   notice,
   onEditFocuses,
+  onAddCommitment,
   onMoveToToday,
   tasks,
 }: {
@@ -163,6 +188,7 @@ function NormalWeek({
   focuses: typeof weeklyFocuses;
   notice?: ReactNode;
   onEditFocuses: () => void;
+  onAddCommitment?: (date: string) => void;
   onMoveToToday: (taskId: string) => Promise<void> | void;
   tasks: typeof unscheduledWeekTasks;
 }) {
@@ -173,7 +199,7 @@ function NormalWeek({
       <WeeklyFocusCard focuses={focuses} onEdit={onEditFocuses} />
       <WeekSectionLabel>השבוע שלך</WeekSectionLabel>
       <View accessibilityLabel="סקירת שבעת ימי השבוע" style={styles.days}>
-        {days.map((day) => <WeekDayRow day={day} key={day.id} />)}
+        {days.map((day) => <WeekDayRow day={day} key={day.id} onAddCommitment={onAddCommitment} />)}
       </View>
       <WeekSectionLabel>לתכנן השבוע</WeekSectionLabel>
       <UnscheduledWeekTasks onMoveToToday={onMoveToToday} tasks={tasks} />

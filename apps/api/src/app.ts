@@ -1,16 +1,18 @@
 import express, { NextFunction, Request, Response, Router } from 'express';
 
+import { commitmentRouter } from './features/commitments/commitment.routes.js';
+import { planningRouter } from './features/planning/planning.routes.js';
+import { taskRouter } from './features/tasks/task.routes.js';
+import { localDevelopmentCors } from './middleware/cors.middleware.js';
 import { authRouter } from './routes/auth.routes.js';
 import { healthRouter } from './routes/health.routes.js';
-import { localDevelopmentCors } from './middleware/cors.middleware.js';
-import { taskRouter } from './features/tasks/task.routes.js';
-import { planningRouter } from './features/planning/planning.routes.js';
 
 export function createApp({
   auth = authRouter,
+  commitments = commitmentRouter,
   planning = planningRouter,
   tasks = taskRouter,
-}: { auth?: Router; planning?: Router; tasks?: Router } = {}) {
+}: { auth?: Router; commitments?: Router; planning?: Router; tasks?: Router } = {}) {
   const application = express();
 
   application.disable('x-powered-by');
@@ -18,6 +20,7 @@ export function createApp({
   application.use(express.json());
   application.use('/health', healthRouter);
   application.use('/auth', auth);
+  application.use('/commitments', commitments);
   application.use(planning);
   application.use('/tasks', tasks);
 

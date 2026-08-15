@@ -6,6 +6,7 @@ import { activeTodayFixture } from './today.fixture';
 import { TodayTask } from './today.types';
 
 export function ActiveState({
+  commitment,
   dateLabel,
   laterTasks,
   onFinish,
@@ -13,6 +14,7 @@ export function ActiveState({
   onStop,
   task,
 }: {
+  commitment?: { time: string; title: string } | null;
   dateLabel?: string;
   laterTasks?: TodayTask[];
   onFinish: () => void;
@@ -63,10 +65,12 @@ export function ActiveState({
         ))}
       </View>
 
-      <View accessibilityLabel="התחייבות קרובה" style={styles.commitment}>
-        <Text style={styles.time}>{today.commitment.time}</Text>
-        <Text style={styles.commitmentTitle}>{today.commitment.title}</Text>
-      </View>
+      {(commitment === undefined ? today.commitment : commitment) ? (
+        <View accessibilityLabel="התחייבות קרובה" style={styles.commitment}>
+          <Text style={styles.time}>{(commitment ?? today.commitment).time}</Text>
+          <Text style={styles.commitmentTitle}>{(commitment ?? today.commitment).title}</Text>
+        </View>
+      ) : null}
     </ScrollView>
   );
 }
