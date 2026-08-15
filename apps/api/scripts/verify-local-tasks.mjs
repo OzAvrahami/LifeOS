@@ -174,6 +174,38 @@ async function main() {
 
     const callerA = quietClient(supabaseUrl, publishableKey, tokenA);
     const callerB = quietClient(supabaseUrl, publishableKey, tokenB);
+    const anonymous = quietClient(supabaseUrl, publishableKey);
+
+    for (const table of [
+      'tasks',
+      'week_plans',
+      'daily_plans',
+      'weekly_focuses',
+      'commitments',
+      'user_settings',
+    ]) {
+      const anonymousRead = await anonymous.from(table).select('*').limit(1);
+      assert.ok(anonymousRead.error, `Anonymous SELECT unexpectedly succeeded for ${table}`);
+    }
+
+    const anonymousTaskInsert = await anonymous.from('tasks').insert({
+      title: 'Anonymous task must be rejected',
+      user_id: users[0].id,
+    });
+    assert.ok(anonymousTaskInsert.error, 'Anonymous Task insert unexpectedly succeeded');
+
+    const anonymousStartTask = await anonymous.rpc('start_task', {
+      p_task_id: '00000000-0000-4000-8000-000000000000',
+    });
+    const anonymousReplaceFocuses = await anonymous.rpc('replace_weekly_focuses', {
+      p_titles: ['Anonymous focus must be rejected'],
+      p_week_start: '2026-08-09',
+    });
+    assert.ok(anonymousStartTask.error, 'Anonymous start_task execution unexpectedly succeeded');
+    assert.ok(
+      anonymousReplaceFocuses.error,
+      'Anonymous replace_weekly_focuses execution unexpectedly succeeded',
+    );
 
     const defaultSettingsA = (await apiRequest('GET', '/settings', tokenA)).settings;
     const defaultSettingsB = (await apiRequest('GET', '/settings', tokenB)).settings;
@@ -293,9 +325,9 @@ async function main() {
       .eq('id', originalTaskId)
       .select('id');
     assert.ifError(directCrossUpdate.error);
-    assert.ifError(directCrossDelete.error);
+    assert.equal(directCrossDelete.error?.code, '42501');
     assert.deepEqual(directCrossUpdate.data, []);
-    assert.deepEqual(directCrossDelete.data, []);
+    assert.equal(directCrossDelete.data, null);
     const userATaskAfterDirectCrossWrites = await callerA
       .from('tasks')
       .select('id,title')
@@ -508,6 +540,7 @@ async function main() {
     })).commitment;
     assert.equal(updatedCommitment.id, commitmentAId);
     assert.equal(updatedCommitment.startTime, '10:15');
+    assert.notEqual(updatedCommitment.updatedAt, commitmentA.updatedAt);
     assert.equal(localSql(docker, databaseContainer, `select count(*) from public.commitments where id = '${commitmentAId}'::uuid;`), '1');
     const deletedCommitment = (await apiRequest('DELETE', `/commitments/${commitmentALater.id}`, tokenA)).commitment;
     assert.equal(deletedCommitment.id, commitmentALater.id);
@@ -561,7 +594,34 @@ async function main() {
     assert.deepEqual(new Set(finalDirectA.data.map((row) => row.user_id)), new Set([users[0].id]));
     assert.deepEqual(new Set(finalDirectB.data.map((row) => row.user_id)), new Set([users[1].id]));
 
+    const anonymousTaskUpdate = await anonymous
+      .from('tasks')
+      .update({ title: 'Anonymous update must be rejected' })
+      .eq('id', originalTaskId);
+    const anonymousWeekPlanUpdate = await anonymous
+      .from('week_plans')
+      .update({ week_start: '2026-08-10' })
+      .eq('id', weekPlanId);
+    const anonymousFocusDelete = await anonymous
+      .from('weekly_focuses')
+      .delete()
+      .eq('id', savedFocuses[0].id);
+    const anonymousCommitmentDelete = await anonymous
+      .from('commitments')
+      .delete()
+      .eq('id', commitmentAId);
+    const anonymousSettingsUpdate = await anonymous
+      .from('user_settings')
+      .update({ default_daily_capacity_minutes: 60 })
+      .eq('user_id', users[0].id);
+    assert.ok(anonymousTaskUpdate.error, 'Anonymous Task update unexpectedly succeeded');
+    assert.ok(anonymousWeekPlanUpdate.error, 'Anonymous WeekPlan update unexpectedly succeeded');
+    assert.ok(anonymousFocusDelete.error, 'Anonymous WeeklyFocus delete unexpectedly succeeded');
+    assert.ok(anonymousCommitmentDelete.error, 'Anonymous Commitment delete unexpectedly succeeded');
+    assert.ok(anonymousSettingsUpdate.error, 'Anonymous Settings update unexpectedly succeeded');
+
     console.log('PASS local stack and real Auth sessions');
+    console.log('PASS anonymous table and application RPC privileges are denied');
     console.log('PASS caller-scoped Task and WeekPlan RLS isolation');
     console.log('PASS stable Task planning and execution transitions');
     console.log('PASS atomic active-task handoff and database unique index');
