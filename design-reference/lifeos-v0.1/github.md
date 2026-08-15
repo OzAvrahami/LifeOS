@@ -3,14 +3,15 @@ branch: main
 path: docs/
 
 ## Last sync
-date: 2026-08-13T00:00:00Z
+date: 2026-08-15T00:00:00Z
 
 ### Updated in this project
-- Foundation + Today states (normal, unplanned, active, overloaded, partial, capture, dark)
-- Extended the approved system to Week (4 states + planning flow) and Inbox (normal, empty, busy, processing, transitions)
-- Extended the approved system to Auth (welcome, sign in + error, sign up + validation, email verification, forgot + sent, reset + success, expired link) + auth foundations board
+- Added section 06 · Commitments (התחייבויות): 7 states extending the approved system without redesigning Today/Week
+- Today entry affordance (+ התחייבות + dashed add row), Add sheet (empty), Add with date/time + native wheel picker, calm end-before-start validation
+- Edit sheet with progressive disclosure + life area, calm delete confirmation, Week → add commitment with date pre-filled from selected day
 
 ## Sync history
+- 2026-08-13T00:00:00Z — Foundation/Today/Week/Inbox/Auth
 - 2026-08-08T12:05:00Z — Foundation/Today/Week/Inbox
 
 ## Screen map
@@ -20,3 +21,4 @@ date: 2026-08-13T00:00:00Z
 | Week states + planning flow | docs/WEEK_SCREEN_SPEC.md, docs/wireframes/WEEK.md, docs/CORE_FLOW.md |
 | Inbox states + processing + transitions | docs/INBOX_SCREEN_SPEC.md, docs/wireframes/INBOX.md, docs/CORE_FLOW.md |
 | Auth flow + foundations (section 05) | (net-new; no repo spec yet) design brief provided in chat |
+| Commitments states (section 06) | (net-new; no repo spec yet) design brief provided in chat |
