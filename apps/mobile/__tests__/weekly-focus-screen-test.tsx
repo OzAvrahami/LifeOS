@@ -57,6 +57,12 @@ describe('Week persisted WeeklyFocus', () => {
     expect(await screen.findByText('מיקוד קיים')).toBeTruthy();
     await user.press(screen.getByText('עריכה'));
     await user.type(screen.getByLabelText('מיקוד חדש'), 'מיקוד נוסף');
+    expect(screen.queryByLabelText('מיקוד נוסף')).toBeNull();
+    await user.press(screen.getByLabelText('הוסף מיקוד'));
+    expect(screen.getByLabelText('מיקוד נוסף').props.accessibilityState.checked).toBe(false);
+    expect(screen.getByLabelText('מיקוד חדש').props.value).toBe('');
+    await user.press(screen.getByLabelText('מיקוד נוסף'));
+    expect(screen.getByLabelText('מיקוד נוסף').props.accessibilityState.checked).toBe(true);
     await user.press(screen.getByText('המשך'));
     await waitFor(() => expect(focuses.map((focus) => focus.title)).toEqual([
       'מיקוד קיים',
@@ -66,6 +72,11 @@ describe('Week persisted WeeklyFocus', () => {
     await user.press(screen.getByText('סיום התכנון'));
     expect(await screen.findByText('מיקוד נוסף')).toBeTruthy();
     expect(getWeeklyFocusesMock).toHaveBeenCalledTimes(1);
-    first.unmount();
+    await first.unmount();
+
+    const refreshed = await render(<TestProviders><WeekScreen taskSource="server" /></TestProviders>);
+    expect(await screen.findByText('מיקוד נוסף')).toBeTruthy();
+    expect(getWeeklyFocusesMock).toHaveBeenCalledTimes(2);
+    await refreshed.unmount();
   });
 });

@@ -1,5 +1,5 @@
 import { Ionicons } from '@expo/vector-icons';
-import { useState } from 'react';
+import { useRef, useState } from 'react';
 import { Pressable, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
@@ -15,6 +15,13 @@ const steps = [
   { title: 'מתי נכון לעשות כל דבר?', subtitle: 'בחר יום מתאים לדברים החשובים — בלי למלא כל שעה.' },
 ] as const;
 
+const maxFocusMessage = 'אפשר לבחור עד 3 מיקודים. כדי לבחור מיקוד נוסף, בטל קודם אחד מהמיקודים שנבחרו.';
+const duplicateFocusMessage = 'המיקוד הזה כבר נמצא ברשימה.';
+
+function normalizedFocusTitle(title: string) {
+  return title.trim().replace(/\s+/g, ' ').toLocaleLowerCase('he-IL');
+}
+
 export function WeekPlanningFlow({
   focuses,
   initialStep = 0,
@@ -26,7 +33,7 @@ export function WeekPlanningFlow({
   onDone: () => void;
   onSaveFocuses?: (titles: string[]) => Promise<WeeklyFocus[]>;
 }) {
-  const focusCandidates = onSaveFocuses
+  const baseFocusCandidates = onSaveFocuses
     ? focuses?.length ? focuses : weeklyFocuses.slice(0, 2)
     : weeklyFocuses.slice(0, 2);
   const [step, setStep] = useState(initialStep);
@@ -34,19 +41,55 @@ export function WeekPlanningFlow({
     (onSaveFocuses && focuses?.length ? focuses : weeklyFocuses.slice(0, 2)).map((focus) => focus.id),
   );
   const [newFocus, setNewFocus] = useState('');
+  const [customFocuses, setCustomFocuses] = useState<{ id: string; title: string }[]>([]);
   const [focusError, setFocusError] = useState(false);
+  const [focusSelectionMessage, setFocusSelectionMessage] = useState<string | null>(null);
   const [savedFocusTitles, setSavedFocusTitles] = useState<string[]>(
     focuses?.map((focus) => focus.title) ?? weeklyFocuses.slice(0, 3).map((focus) => focus.title),
   );
   const [saving, setSaving] = useState(false);
+  const nextCustomFocusId = useRef(1);
+  const baseFocusTitles = new Set(baseFocusCandidates.map((focus) => normalizedFocusTitle(focus.title)));
+  const focusCandidates = [
+    ...baseFocusCandidates,
+    ...customFocuses.filter((focus) => !baseFocusTitles.has(normalizedFocusTitle(focus.title))),
+  ];
+
+  const toggleFocus = (id: string) => {
+    setSelectedFocuses((current) => {
+      if (current.includes(id)) {
+        setFocusSelectionMessage(null);
+        return current.filter((item) => item !== id);
+      }
+      if (current.length >= 3) {
+        setFocusSelectionMessage(maxFocusMessage);
+        return current;
+      }
+      setFocusSelectionMessage(null);
+      return [...current, id];
+    });
+  };
+
+  const addCustomFocus = () => {
+    const title = newFocus.trim().replace(/\s+/g, ' ');
+    if (!title) return;
+    const normalizedTitle = normalizedFocusTitle(title);
+    if (focusCandidates.some((focus) => normalizedFocusTitle(focus.title) === normalizedTitle)) {
+      setFocusSelectionMessage(duplicateFocusMessage);
+      return;
+    }
+
+    const focus = { id: `custom-focus-${nextCustomFocusId.current++}`, title };
+    setCustomFocuses((current) => [...current, focus]);
+    setNewFocus('');
+    setFocusSelectionMessage(null);
+  };
 
   const next = async () => {
     if (step === 2 && onSaveFocuses) {
       const titles = focusCandidates
         .filter((focus) => selectedFocuses.includes(focus.id))
         .map((focus) => focus.title);
-      const customTitle = newFocus.trim();
-      if (customTitle && titles.length < 3 && !titles.includes(customTitle)) titles.push(customTitle);
       setFocusError(false);
       setSaving(true);
       try {
@@ -86,9 +129,14 @@ export function WeekPlanningFlow({
           {step === 2 ? (
             <FocusStep
               focuses={focusCandidates}
+              message={focusSelectionMessage}
               newFocus={newFocus}
-              onChangeNewFocus={setNewFocus}
-              onToggle={(id) => setSelectedFocuses((current) => current.includes(id) ? current.filter((item) => item !== id) : current.length < 3 ? [...current, id] : current)}
+              onAddFocus={addCustomFocus}
+              onChangeNewFocus={(value) => {
+                setNewFocus(value);
+                setFocusSelectionMessage(null);
+              }}
+              onToggle={toggleFocus}
               selected={selectedFocuses}
             />
           ) : null}
@@ -133,19 +181,22 @@ function CommitmentsStep() {
   );
 }
 
-function FocusStep({ focuses, newFocus, onChangeNewFocus, onToggle, selected }: { focuses: { id: string; title: string }[]; newFocus: string; onChangeNewFocus: (value: string) => void; onToggle: (id: string) => void; selected: string[] }) {
+function FocusStep({ focuses, message, newFocus, onAddFocus, onChangeNewFocus, onToggle, selected }: { focuses: { id: string; title: string }[]; message: string | null; newFocus: string; onAddFocus: () => void; onChangeNewFocus: (value: string) => void; onToggle: (id: string) => void; selected: string[] }) {
   return (
     <View style={styles.options}>
       {focuses.map((focus) => (
-        <Pressable accessibilityRole="checkbox" accessibilityState={{ checked: selected.includes(focus.id) }} key={focus.id} onPress={() => onToggle(focus.id)}>
+        <Pressable accessibilityLabel={focus.title} accessibilityRole="checkbox" accessibilityState={{ checked: selected.includes(focus.id) }} key={focus.id} onPress={() => onToggle(focus.id)}>
           <SelectableRow selected={selected.includes(focus.id)} title={focus.title} />
         </Pressable>
       ))}
       <SelectableRow selected={false} title="נשאר משבוע שעבר · להכין הצעת מחיר" />
       <View style={styles.newFocusRow}>
-        <Text style={styles.plus}>+</Text>
-        <TextInput accessibilityLabel="מיקוד חדש" onChangeText={onChangeNewFocus} placeholder="מיקוד חדש…" placeholderTextColor={colors.textFaint} style={styles.newFocusInput} textAlign="right" value={newFocus} />
+        <Pressable accessibilityLabel="הוסף מיקוד" accessibilityRole="button" onPress={onAddFocus} style={styles.addFocusButton}>
+          <Text style={styles.plus}>+</Text>
+        </Pressable>
+        <TextInput accessibilityLabel="מיקוד חדש" onChangeText={onChangeNewFocus} onSubmitEditing={onAddFocus} placeholder="מיקוד חדש…" placeholderTextColor={colors.textFaint} returnKeyType="done" style={styles.newFocusInput} textAlign="right" value={newFocus} />
       </View>
+      {message ? <Text accessibilityLiveRegion="polite" style={styles.focusSelectionMessage}>{message}</Text> : null}
     </View>
   );
 }
@@ -199,8 +250,10 @@ const styles = StyleSheet.create({
   commitmentDay: { color: colors.textSubtle, fontFamily: typography.family.bold, fontSize: typography.size.label, writingDirection: 'rtl' },
   commitmentTime: { color: colors.textFaint, fontFamily: typography.family.regular, fontSize: typography.size.label, writingDirection: 'ltr' },
   newFocusRow: { alignItems: 'center', backgroundColor: colors.surface, borderRadius: radius.md, flexDirection: 'row-reverse', gap: 11, minHeight: 52, paddingHorizontal: 14 },
+  addFocusButton: { alignItems: 'center', height: 44, justifyContent: 'center', width: 32 },
   plus: { color: colors.accent, fontFamily: typography.family.regular, fontSize: 20 },
   newFocusInput: { color: colors.text, flex: 1, fontFamily: typography.family.regular, fontSize: typography.size.button, writingDirection: 'rtl' },
+  focusSelectionMessage: { color: colors.textSubtle, fontFamily: typography.family.regular, fontSize: typography.size.meta, textAlign: 'right', writingDirection: 'rtl' },
   scheduleRow: { alignItems: 'center', backgroundColor: colors.surface, borderRadius: radius.md, flexDirection: 'row-reverse', gap: spacing.sm, minHeight: 58, padding: 14 },
   dayChoice: { backgroundColor: colors.accentWeak, borderRadius: radius.sm, paddingHorizontal: spacing.sm, paddingVertical: spacing.xs },
   dayChoiceText: { color: colors.accent, fontFamily: typography.family.bold, fontSize: typography.size.label, writingDirection: 'rtl' },
