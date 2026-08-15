@@ -3,6 +3,7 @@ import { useState } from 'react';
 import { Pressable, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
+import type { WeeklyFocus } from '@/features/planning/planning.types';
 import { colors, radius, spacing, typography } from '@/theme/tokens';
 
 import { planningCarryover, unplannedWeekCommitments, weeklyFocuses } from './week.fixture';
@@ -14,12 +15,51 @@ const steps = [
   { title: 'מתי נכון לעשות כל דבר?', subtitle: 'בחר יום מתאים לדברים החשובים — בלי למלא כל שעה.' },
 ] as const;
 
-export function WeekPlanningFlow({ initialStep = 0, onDone }: { initialStep?: number; onDone: () => void }) {
+export function WeekPlanningFlow({
+  focuses,
+  initialStep = 0,
+  onDone,
+  onSaveFocuses,
+}: {
+  focuses?: WeeklyFocus[];
+  initialStep?: number;
+  onDone: () => void;
+  onSaveFocuses?: (titles: string[]) => Promise<WeeklyFocus[]>;
+}) {
+  const focusCandidates = onSaveFocuses
+    ? focuses?.length ? focuses : weeklyFocuses.slice(0, 2)
+    : weeklyFocuses.slice(0, 2);
   const [step, setStep] = useState(initialStep);
-  const [selectedFocuses, setSelectedFocuses] = useState<string[]>(weeklyFocuses.slice(0, 2).map((focus) => focus.id));
+  const [selectedFocuses, setSelectedFocuses] = useState<string[]>(
+    (onSaveFocuses && focuses?.length ? focuses : weeklyFocuses.slice(0, 2)).map((focus) => focus.id),
+  );
   const [newFocus, setNewFocus] = useState('');
+  const [focusError, setFocusError] = useState(false);
+  const [savedFocusTitles, setSavedFocusTitles] = useState<string[]>(
+    focuses?.map((focus) => focus.title) ?? weeklyFocuses.slice(0, 3).map((focus) => focus.title),
+  );
+  const [saving, setSaving] = useState(false);
 
-  const next = () => {
+  const next = async () => {
+    if (step === 2 && onSaveFocuses) {
+      const titles = focusCandidates
+        .filter((focus) => selectedFocuses.includes(focus.id))
+        .map((focus) => focus.title);
+      const customTitle = newFocus.trim();
+      if (customTitle && titles.length < 3 && !titles.includes(customTitle)) titles.push(customTitle);
+      setFocusError(false);
+      setSaving(true);
+      try {
+        const savedFocuses = await onSaveFocuses(titles);
+        setSelectedFocuses(savedFocuses.map((focus) => focus.id));
+        setSavedFocusTitles(titles);
+      } catch {
+        setFocusError(true);
+        return;
+      } finally {
+        setSaving(false);
+      }
+    }
     if (step === steps.length - 1) onDone();
     else setStep((current) => current + 1);
   };
@@ -45,17 +85,19 @@ export function WeekPlanningFlow({ initialStep = 0, onDone }: { initialStep?: nu
           {step === 1 ? <CommitmentsStep /> : null}
           {step === 2 ? (
             <FocusStep
+              focuses={focusCandidates}
               newFocus={newFocus}
               onChangeNewFocus={setNewFocus}
               onToggle={(id) => setSelectedFocuses((current) => current.includes(id) ? current.filter((item) => item !== id) : current.length < 3 ? [...current, id] : current)}
               selected={selectedFocuses}
             />
           ) : null}
-          {step === 3 ? <ScheduleStep /> : null}
+          {step === 3 ? <ScheduleStep titles={onSaveFocuses ? savedFocusTitles : undefined} /> : null}
+          {focusError ? <Text style={styles.errorText}>לא הצלחנו לשמור. אפשר לנסות שוב.</Text> : null}
         </ScrollView>
 
         <View style={styles.footer}>
-          <Pressable accessibilityRole="button" onPress={next} style={styles.continueButton}>
+          <Pressable accessibilityRole="button" disabled={saving} onPress={() => void next()} style={styles.continueButton}>
             <Text style={styles.continueText}>{step === 3 ? 'סיום התכנון' : 'המשך'}</Text>
           </Pressable>
           {step > 0 ? (
@@ -63,7 +105,7 @@ export function WeekPlanningFlow({ initialStep = 0, onDone }: { initialStep?: nu
               <Text style={styles.secondaryText}>חזרה</Text>
             </Pressable>
           ) : (
-            <Pressable accessibilityRole="button" onPress={next} style={styles.secondaryButton}>
+            <Pressable accessibilityRole="button" disabled={saving} onPress={() => void next()} style={styles.secondaryButton}>
               <Text style={styles.secondaryText}>דלג לשלב הבא</Text>
             </Pressable>
           )}
@@ -91,10 +133,10 @@ function CommitmentsStep() {
   );
 }
 
-function FocusStep({ newFocus, onChangeNewFocus, onToggle, selected }: { newFocus: string; onChangeNewFocus: (value: string) => void; onToggle: (id: string) => void; selected: string[] }) {
+function FocusStep({ focuses, newFocus, onChangeNewFocus, onToggle, selected }: { focuses: { id: string; title: string }[]; newFocus: string; onChangeNewFocus: (value: string) => void; onToggle: (id: string) => void; selected: string[] }) {
   return (
     <View style={styles.options}>
-      {weeklyFocuses.slice(0, 2).map((focus) => (
+      {focuses.map((focus) => (
         <Pressable accessibilityRole="checkbox" accessibilityState={{ checked: selected.includes(focus.id) }} key={focus.id} onPress={() => onToggle(focus.id)}>
           <SelectableRow selected={selected.includes(focus.id)} title={focus.title} />
         </Pressable>
@@ -108,10 +150,12 @@ function FocusStep({ newFocus, onChangeNewFocus, onToggle, selected }: { newFocu
   );
 }
 
-function ScheduleStep() {
+function ScheduleStep({ titles }: { titles?: string[] }) {
+  const scheduledFocuses = titles?.map((title, index) => ({ id: `saved-${index}`, title }))
+    ?? weeklyFocuses.slice(0, 3);
   return (
     <View style={styles.options}>
-      {weeklyFocuses.slice(0, 3).map((focus, index) => (
+      {scheduledFocuses.map((focus, index) => (
         <View key={focus.id} style={styles.scheduleRow}>
           <Text style={styles.optionTitle}>{focus.title}</Text>
           <View style={styles.dayChoice}><Text style={styles.dayChoiceText}>{['שלישי', 'חמישי', 'שישי'][index]}</Text></View>
@@ -165,4 +209,5 @@ const styles = StyleSheet.create({
   continueText: { color: colors.white, fontFamily: typography.family.bold, fontSize: typography.size.button, writingDirection: 'rtl' },
   secondaryButton: { alignItems: 'center', minHeight: 32, justifyContent: 'center' },
   secondaryText: { color: colors.textSubtle, fontFamily: typography.family.semibold, fontSize: typography.size.body, writingDirection: 'rtl' },
+  errorText: { color: colors.warningText, fontFamily: typography.family.regular, fontSize: typography.size.meta, marginTop: spacing.xs, textAlign: 'right', writingDirection: 'rtl' },
 });

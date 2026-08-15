@@ -1,4 +1,5 @@
 import { Ionicons } from '@expo/vector-icons';
+import { useRef } from 'react';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 
 import { colors, radius, spacing, typography } from '@/theme/tokens';
@@ -90,22 +91,37 @@ export function Commitments({ items }: { items: Commitment[] }) {
 }
 
 export function TaskList({
+  focusedTaskId,
   newTaskId,
   onStartTask,
+  onToggleFocus,
   tasks,
 }: {
+  focusedTaskId?: string;
   newTaskId?: string;
   onStartTask?: (taskId: string) => void;
+  onToggleFocus?: (taskId: string) => void;
   tasks: TodayTask[];
 }) {
+  const longPressedTaskIds = useRef(new Set<string>()).current;
   return (
     <View accessibilityLabel="המשימות שלי" style={styles.taskList}>
       {tasks.map((task, index) => (
         <Pressable
           accessibilityLabel={`התחל משימה: ${task.title}`}
+          accessibilityHint={onToggleFocus ? 'לחיצה ארוכה בוחרת או מסירה מיקוד יומי' : undefined}
           accessibilityRole="button"
+          accessibilityState={{ selected: task.id === focusedTaskId }}
           key={task.id}
-          onPress={() => onStartTask?.(task.id)}
+          onLongPress={() => {
+            longPressedTaskIds.add(task.id);
+            onToggleFocus?.(task.id);
+          }}
+          onPress={() => {
+            if (longPressedTaskIds.delete(task.id)) return;
+            onStartTask?.(task.id);
+          }}
+          onPressIn={() => longPressedTaskIds.delete(task.id)}
           style={[
             styles.taskRow,
             task.id === newTaskId && styles.newTaskRow,

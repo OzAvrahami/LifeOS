@@ -266,6 +266,87 @@ async function main() {
     assert.equal((await apiRequest('GET', `/tasks?plannedDate=${plannedDate}`, tokenA)).tasks.some((task) => task.id === originalTaskId), true);
     assert.equal(localSql(docker, databaseContainer, `select count(*) from public.tasks where id = '${originalTaskId}'::uuid;`), '1');
 
+    const dailyPlan = (await apiRequest('PUT', `/daily-plans/${plannedDate}`, tokenA, {
+      availableMinutes: 420,
+      focusTaskId: originalTaskId,
+    })).dailyPlan;
+    const dailyPlanId = assertUuid(dailyPlan.id);
+    assert.equal(dailyPlan.focusTaskId, originalTaskId);
+    assert.equal(dailyPlan.availableMinutes, 420);
+    assert.equal((await apiRequest('GET', `/daily-plans/${plannedDate}`, tokenA)).dailyPlan.id, dailyPlanId);
+    assert.equal((await apiRequest('GET', `/daily-plans/${plannedDate}`, tokenB)).dailyPlan, null);
+    await apiRequest('PUT', `/daily-plans/${plannedDate}`, tokenB, {
+      availableMinutes: null,
+      focusTaskId: originalTaskId,
+    }, 400);
+
+    const directDailyA = await callerA.from('daily_plans').select('id,user_id,focus_task_id');
+    const directDailyB = await callerB.from('daily_plans').select('id,user_id,focus_task_id');
+    assert.ifError(directDailyA.error);
+    assert.ifError(directDailyB.error);
+    assert.deepEqual(directDailyA.data.map((row) => row.id), [dailyPlanId]);
+    assert.deepEqual(directDailyB.data, []);
+    const crossDailyInsert = await callerB.from('daily_plans').insert({
+      date: plannedDate,
+      focus_task_id: originalTaskId,
+      user_id: users[1].id,
+    });
+    assert.ok(crossDailyInsert.error, 'Cross-user Daily Focus association unexpectedly succeeded');
+
+    const updatedDailyPlan = (await apiRequest('PUT', `/daily-plans/${plannedDate}`, tokenA, {
+      availableMinutes: 480,
+      focusTaskId: originalTaskId,
+    })).dailyPlan;
+    assert.equal(updatedDailyPlan.id, dailyPlanId);
+    assert.equal(localSql(docker, databaseContainer, `select count(*) from public.daily_plans where user_id = '${users[0].id}'::uuid and date = '${plannedDate}'::date;`), '1');
+    const capacityOnly = (await apiRequest('PUT', `/daily-plans/${plannedDate}`, tokenA, {
+      availableMinutes: 480,
+      focusTaskId: null,
+    })).dailyPlan;
+    assert.equal(capacityOnly.id, dailyPlanId);
+    assert.equal(capacityOnly.focusTaskId, null);
+    assert.equal((await apiRequest('PUT', `/daily-plans/${plannedDate}`, tokenA, {
+      availableMinutes: null,
+      focusTaskId: null,
+    })).dailyPlan, null);
+    assert.equal(localSql(docker, databaseContainer, `select count(*) from public.daily_plans where id = '${dailyPlanId}'::uuid;`), '0');
+
+    const focusTitles = ['User A focus one', 'User A focus two', 'User A focus three'];
+    const savedFocuses = (await apiRequest('PUT', `/week-plans/${weekStart}/focuses`, tokenA, {
+      titles: focusTitles,
+    })).focuses;
+    assert.deepEqual(savedFocuses.map((focus) => focus.position), [0, 1, 2]);
+    assert.deepEqual(savedFocuses.map((focus) => focus.title), focusTitles);
+    assert.deepEqual(
+      (await apiRequest('GET', `/week-plans/${weekStart}/focuses`, tokenA)).focuses.map((focus) => focus.title),
+      focusTitles,
+    );
+    assert.deepEqual((await apiRequest('GET', `/week-plans/${weekStart}/focuses`, tokenB)).focuses, []);
+    await apiRequest('PUT', `/week-plans/${weekStart}/focuses`, tokenA, {
+      titles: [...focusTitles, 'Too many'],
+    }, 400);
+
+    const directFocusA = await callerA.from('weekly_focuses').select('id,week_plan_id,title,position').order('position');
+    const directFocusB = await callerB.from('weekly_focuses').select('id,week_plan_id,title,position').order('position');
+    assert.ifError(directFocusA.error);
+    assert.ifError(directFocusB.error);
+    assert.deepEqual(directFocusA.data.map((focus) => focus.title), focusTitles);
+    assert.deepEqual(directFocusB.data, []);
+    const fourthFocus = await callerA.from('weekly_focuses').insert({
+      position: 3,
+      title: 'Blocked fourth focus',
+      week_plan_id: weekPlanId,
+    });
+    assert.ok(fourthFocus.error, 'PostgreSQL unexpectedly accepted a fourth WeeklyFocus');
+    const crossFocusInsert = await callerB.from('weekly_focuses').insert({
+      position: 0,
+      title: 'Blocked focus',
+      week_plan_id: weekPlanId,
+    });
+    assert.ok(crossFocusInsert.error, 'Cross-user WeeklyFocus association unexpectedly succeeded');
+    assert.equal(localSql(docker, databaseContainer, `select count(*) from public.weekly_focuses where week_plan_id = '${weekPlanId}'::uuid;`), '3');
+    assert.equal(localSql(docker, databaseContainer, `select count(*) from public.tasks where id = '${originalTaskId}'::uuid;`), '1');
+
     const started = (await apiRequest('PATCH', `/tasks/${originalTaskId}`, tokenA, { status: 'in_progress' })).task;
     const stopped = (await apiRequest('PATCH', `/tasks/${originalTaskId}`, tokenA, { status: 'open' })).task;
     const restarted = (await apiRequest('PATCH', `/tasks/${originalTaskId}`, tokenA, { status: 'in_progress' })).task;
@@ -319,6 +400,8 @@ async function main() {
     console.log('PASS stable Task planning and execution transitions');
     console.log('PASS atomic active-task handoff and database unique index');
     console.log('PASS retained cancellation and PostgreSQL persistence');
+    console.log('PASS DailyPlan ownership, focus ownership, upsert, capacity, and clearing');
+    console.log('PASS ordered WeeklyFocus replacement, maximum, and WeekPlan-derived RLS');
   } finally {
     if (apiProcess && apiProcess.exitCode === null) {
       apiProcess.kill();

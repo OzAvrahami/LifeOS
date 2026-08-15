@@ -4,6 +4,10 @@ import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 
 import { MobileShell } from '@/components/mobile-shell';
 import { QuickCaptureSheet } from '@/features/capture/quick-capture-sheet';
+import {
+  useReplaceWeeklyFocuses,
+  useWeeklyFocuses,
+} from '@/features/planning/planning.queries';
 import { useDemoTasks } from '@/features/tasks/demo-task-provider';
 import {
   currentWeekDates,
@@ -53,7 +57,10 @@ export function WeekScreen({
   const [captureOpen, setCaptureOpen] = useState(false);
   const demo = useDemoTasks();
   const serverTasks = taskSource === 'server';
-  const weekQuery = useTasks({ weekStart: currentWeekStart() }, serverTasks);
+  const weekStart = currentWeekStart();
+  const weekQuery = useTasks({ weekStart }, serverTasks);
+  const weeklyFocusQuery = useWeeklyFocuses(weekStart, serverTasks);
+  const replaceWeeklyFocusMutation = useReplaceWeeklyFocuses();
   const updateMutation = useUpdateTask();
   const { captureTask } = useTaskCapture(taskSource);
   const [operationError, setOperationError] = useState(false);
@@ -75,7 +82,16 @@ export function WeekScreen({
     : normalWeekDays;
 
   if (weekState === 'planning') {
-    return <WeekPlanningFlow initialStep={planningInitialStep} onDone={() => setWeekState('normal')} />;
+    return (
+      <WeekPlanningFlow
+        focuses={serverTasks ? weeklyFocusQuery.data ?? [] : undefined}
+        initialStep={planningInitialStep}
+        onDone={() => setWeekState('normal')}
+        onSaveFocuses={serverTasks ? async (titles) => {
+          return replaceWeeklyFocusMutation.mutateAsync({ titles, weekStart });
+        } : undefined}
+      />
+    );
   }
 
   return (
@@ -96,11 +112,13 @@ export function WeekScreen({
             days={weekDays}
             notice={
               <TaskQueryNotice
-                error={serverTasks && (weekQuery.isError || operationError)}
-                loading={serverTasks && weekQuery.isPending}
-                onRetry={() => void weekQuery.refetch()}
+                error={serverTasks && (weekQuery.isError || weeklyFocusQuery.isError || operationError)}
+                loading={serverTasks && (weekQuery.isPending || weeklyFocusQuery.isPending)}
+                onRetry={() => void Promise.all([weekQuery.refetch(), weeklyFocusQuery.refetch()])}
               />
             }
+            focuses={serverTasks ? weeklyFocusQuery.data ?? [] : weeklyFocuses}
+            onEditFocuses={() => { setPlanningInitialStep(2); setWeekState('planning'); }}
             onMoveToToday={async (taskId) => {
               if (serverTasks) {
                 setOperationError(false);
@@ -134,13 +152,17 @@ export function WeekScreen({
 function NormalWeek({
   dateRange,
   days,
+  focuses,
   notice,
+  onEditFocuses,
   onMoveToToday,
   tasks,
 }: {
   dateRange?: string;
   days: typeof normalWeekDays;
+  focuses: typeof weeklyFocuses;
   notice?: ReactNode;
+  onEditFocuses: () => void;
   onMoveToToday: (taskId: string) => Promise<void> | void;
   tasks: typeof unscheduledWeekTasks;
 }) {
@@ -148,7 +170,7 @@ function NormalWeek({
     <ScrollView contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
       <WeekHeader dateRange={dateRange} />
       {notice}
-      <WeeklyFocusCard focuses={weeklyFocuses} />
+      <WeeklyFocusCard focuses={focuses} onEdit={onEditFocuses} />
       <WeekSectionLabel>השבוע שלך</WeekSectionLabel>
       <View accessibilityLabel="סקירת שבעת ימי השבוע" style={styles.days}>
         {days.map((day) => <WeekDayRow day={day} key={day.id} />)}

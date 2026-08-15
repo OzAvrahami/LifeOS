@@ -28,12 +28,12 @@ export function WeekHeader({ dateRange = weekDateRange, showLabel = true }: { da
   );
 }
 
-export function WeeklyFocusCard({ focuses }: { focuses: WeeklyFocus[] }) {
+export function WeeklyFocusCard({ focuses, onEdit }: { focuses: WeeklyFocus[]; onEdit?: () => void }) {
   return (
     <View accessibilityLabel="המיקוד השבועי" style={styles.focusCard}>
       <View style={styles.focusHeading}>
         <Text style={styles.focusLabel}>המיקוד השבועי</Text>
-        <Pressable accessibilityRole="button"><Text style={styles.edit}>עריכה</Text></Pressable>
+        <Pressable accessibilityRole="button" onPress={onEdit}><Text style={styles.edit}>עריכה</Text></Pressable>
       </View>
       <View style={styles.focusList}>
         {focuses.map((focus, index) => (

@@ -3,6 +3,8 @@ import { notifyManager } from '@tanstack/react-query';
 import { useState } from 'react';
 
 import { InboxScreen } from '@/features/inbox/inbox-screen';
+import * as planningApi from '@/features/planning/planning.api';
+import type { DailyPlan, WeeklyFocus } from '@/features/planning/planning.types';
 import * as taskApi from '@/features/tasks/task.api';
 import { localDateKey } from '@/features/tasks/task-dates';
 import { CreateTaskInput, Task, TaskListFilters, UpdateTaskInput } from '@/features/tasks/task.types';
@@ -17,14 +19,26 @@ jest.mock('@/features/tasks/task.api', () => ({
   listTasks: jest.fn(),
   updateTask: jest.fn(),
 }));
+jest.mock('@/features/planning/planning.api', () => ({
+  getDailyPlan: jest.fn(),
+  getWeeklyFocuses: jest.fn(),
+  putDailyPlan: jest.fn(),
+  replaceWeeklyFocuses: jest.fn(),
+}));
 
 const listTasksMock = jest.mocked(taskApi.listTasks);
 const createTaskMock = jest.mocked(taskApi.createTask);
 const updateTaskMock = jest.mocked(taskApi.updateTask);
 const cancelTaskMock = jest.mocked(taskApi.cancelTask);
+const getDailyPlanMock = jest.mocked(planningApi.getDailyPlan);
+const getWeeklyFocusesMock = jest.mocked(planningApi.getWeeklyFocuses);
+const putDailyPlanMock = jest.mocked(planningApi.putDailyPlan);
+const replaceWeeklyFocusesMock = jest.mocked(planningApi.replaceWeeklyFocuses);
 
 let tasks: Task[];
 let nextId: number;
+let dailyPlan: DailyPlan | null;
+let focuses: WeeklyFocus[];
 
 beforeAll(() => {
   notifyManager.setScheduler((callback) => callback());
@@ -118,6 +132,33 @@ function installFakeTaskApi() {
   });
 }
 
+function installFakePlanningApi() {
+  getDailyPlanMock.mockImplementation(async () => dailyPlan);
+  putDailyPlanMock.mockImplementation(async ({ date, input }) => {
+    dailyPlan = input.focusTaskId === null && input.availableMinutes === null ? null : {
+      availableMinutes: input.availableMinutes,
+      createdAt: dailyPlan?.createdAt ?? new Date().toISOString(),
+      date,
+      focusTaskId: input.focusTaskId,
+      id: dailyPlan?.id ?? 'daily-plan-1',
+      updatedAt: new Date().toISOString(),
+    };
+    return dailyPlan;
+  });
+  getWeeklyFocusesMock.mockImplementation(async () => focuses);
+  replaceWeeklyFocusesMock.mockImplementation(async ({ titles }) => {
+    focuses = titles.map((title, position) => ({
+      createdAt: new Date().toISOString(),
+      id: `focus-${position}`,
+      position,
+      title,
+      updatedAt: new Date().toISOString(),
+      weekPlanId: 'week-plan-1',
+    }));
+    return focuses;
+  });
+}
+
 type Route = 'today' | 'week' | 'inbox';
 
 function ServerFlowHarness({ initialRoute = 'today' }: { initialRoute?: Route }) {
@@ -176,8 +217,11 @@ async function capture(title: string, destination?: 'היום' | 'השבוע') {
 beforeEach(() => {
   tasks = [];
   nextId = 1;
+  dailyPlan = null;
+  focuses = [];
   jest.clearAllMocks();
   installFakeTaskApi();
+  installFakePlanningApi();
 });
 
 describe('persistent server Task experience', () => {
@@ -288,4 +332,5 @@ describe('persistent server Task experience', () => {
 
     expect(await screen.findByText('לא הצלחנו לטעון את המשימות · נסו שוב')).toBeTruthy();
   });
+
 });

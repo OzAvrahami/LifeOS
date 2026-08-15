@@ -4,6 +4,7 @@ import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 
 import { MobileShell } from '@/components/mobile-shell';
 import { QuickCaptureSheet } from '@/features/capture/quick-capture-sheet';
+import { useDailyPlan, usePutDailyPlan } from '@/features/planning/planning.queries';
 import { useDemoTasks } from '@/features/tasks/demo-task-provider';
 import { hebrewDateLabel, localDateKey } from '@/features/tasks/task-dates';
 import { TaskQueryNotice } from '@/features/tasks/task-query-notice';
@@ -48,6 +49,8 @@ export function TodayScreen({
   const serverTasks = taskSource === 'server';
   const todayDate = localDateKey();
   const todayQuery = useTasks({ plannedDate: todayDate }, serverTasks);
+  const dailyPlanQuery = useDailyPlan(todayDate, serverTasks);
+  const dailyPlanMutation = usePutDailyPlan();
   const updateMutation = useUpdateTask();
   const { captureTask } = useTaskCapture(taskSource);
   const [operationError, setOperationError] = useState(false);
@@ -56,6 +59,22 @@ export function TodayScreen({
   const activeTask = sourceTasks.find((task) => task.status === 'in_progress');
   const openTodayTasks = sourceTasks.filter((task) => task.status === 'open');
   const completedTodayTasks = sourceTasks.filter((task) => task.status === 'completed');
+
+  const selectDailyFocus = async (taskId: string) => {
+    if (!serverTasks) return;
+    setOperationError(false);
+    try {
+      await dailyPlanMutation.mutateAsync({
+        date: todayDate,
+        input: {
+          availableMinutes: dailyPlanQuery.data?.availableMinutes ?? null,
+          focusTaskId: dailyPlanQuery.data?.focusTaskId === taskId ? null : taskId,
+        },
+      });
+    } catch {
+      setOperationError(true);
+    }
+  };
 
   const updateStatus = async (taskId: string, status: 'open' | 'in_progress' | 'completed') => {
     if (!serverTasks) {
@@ -106,14 +125,18 @@ export function TodayScreen({
         ? { ...movedInboxTask, durationMinutes: 0, lifeArea: 'work' as const }
         : undefined;
       const tasks = legacyTask ? [legacyTask, ...openTasks] : openTasks;
-      const focusTask = tasks.find((task) => task.id === normalTodayFixture.focus.id) ?? tasks[0];
+      const focusTask = serverTasks
+        ? tasks.find((task) => task.id === dailyPlanQuery.data?.focusTaskId)
+        : tasks.find((task) => task.id === normalTodayFixture.focus.id) ?? tasks[0];
       content = (
         <NormalTodayContent
           focusTask={focusTask}
+          focusedTaskId={serverTasks ? dailyPlanQuery.data?.focusTaskId ?? undefined : undefined}
           dateLabel={serverTasks ? hebrewDateLabel() : undefined}
           movedTaskId={movedTaskId ?? movedInboxTask?.id}
           onStartFocus={() => focusTask && void updateStatus(focusTask.id, 'in_progress')}
           onStartTask={(taskId) => void updateStatus(taskId, 'in_progress')}
+          onToggleFocus={serverTasks ? (taskId) => void selectDailyFocus(taskId) : undefined}
           serverTaskCount={serverTasks ? sourceTasks.length : undefined}
           serverPlannedTime={serverTasks ? formatPlannedTime(sourceTasks) : undefined}
           tasks={tasks}
@@ -158,9 +181,9 @@ export function TodayScreen({
         onQuickCapture={() => setCaptureOpen(true)}
       >
         <TaskQueryNotice
-          error={serverTasks && (todayQuery.isError || operationError)}
-          loading={serverTasks && todayQuery.isPending}
-          onRetry={() => void todayQuery.refetch()}
+          error={serverTasks && (todayQuery.isError || dailyPlanQuery.isError || operationError)}
+          loading={serverTasks && (todayQuery.isPending || dailyPlanQuery.isPending)}
+          onRetry={() => void Promise.all([todayQuery.refetch(), dailyPlanQuery.refetch()])}
         />
         {content}
       </MobileShell>
@@ -176,18 +199,22 @@ export function TodayScreen({
 function NormalTodayContent({
   dateLabel,
   focusTask,
+  focusedTaskId,
   movedTaskId,
   onStartFocus,
   onStartTask,
+  onToggleFocus,
   serverPlannedTime,
   serverTaskCount,
   tasks,
 }: {
   dateLabel?: string;
   focusTask?: TodayTask;
+  focusedTaskId?: string;
   movedTaskId?: string;
   onStartFocus: () => void;
   onStartTask?: (taskId: string) => void;
+  onToggleFocus?: (taskId: string) => void;
   serverPlannedTime?: string;
   serverTaskCount?: number;
   tasks: TodayTask[];
@@ -226,7 +253,13 @@ function NormalTodayContent({
         <Commitments items={today.commitments} />
 
         <SectionLabel>המשימות שלי</SectionLabel>
-        <TaskList newTaskId={movedTaskId} onStartTask={onStartTask} tasks={tasks} />
+        <TaskList
+          focusedTaskId={focusedTaskId}
+          newTaskId={movedTaskId}
+          onStartTask={onStartTask}
+          onToggleFocus={onToggleFocus}
+          tasks={tasks}
+        />
         <Pressable accessibilityRole="button" style={styles.addTaskButton}>
           <Text style={styles.addTaskText}>+ הוסף משימה</Text>
         </Pressable>
