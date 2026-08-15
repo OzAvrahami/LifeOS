@@ -12,8 +12,14 @@ Mobile / future Web → REST API → Supabase PostgreSQL
 
 - `apps/mobile` — Expo, React Native, TypeScript, Expo Router
 - `apps/api` — Node.js, Express, TypeScript REST API
-- `supabase` — future migrations and database-owned artifacts
+- `supabase` — local Supabase configuration and versioned database migrations
 - `docs` — product and architecture documentation
+
+Current planning and release status:
+
+- [Roadmap](docs/ROADMAP.md)
+- [Implementation status](docs/IMPLEMENTATION_STATUS.md)
+- [Changelog](CHANGELOG.md)
 
 Node 24 LTS is the preferred runtime. The current foundation also validates successfully on Node 26.
 

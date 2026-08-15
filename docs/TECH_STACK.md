@@ -43,7 +43,7 @@ lifeOS/
 ├── apps/
 │   ├── mobile/   Expo / React Native client
 │   └── api/      Node.js / Express REST API
-├── supabase/     future migrations and database-owned artifacts
+├── supabase/     versioned migrations and database-owned artifacts
 ├── docs/         product and architecture documentation
 ├── package.json
 └── package-lock.json
@@ -89,7 +89,7 @@ REST
 
 * Business logic
 * validation של פעולות מוצר
-* orchestration של תהליכי Today / Week / Inbox בעתיד
+* orchestration של תהליכי Today / Week / Inbox
 * גישה רגילה לנתוני המוצר
 * גבולות authorization נוספים מעבר ל־RLS כאשר נדרשים
 
@@ -124,7 +124,7 @@ supabase.from('tasks')
 
 # 6. Database
 
-מסד הנתונים יהיה PostgreSQL באמצעות Supabase.
+מסד הנתונים הוא PostgreSQL באמצעות Supabase.
 
 מודל הדומיין ייגזר מ:
 
@@ -134,7 +134,7 @@ docs/DATA_MODEL_V0.1.md
 
 המסמך מגדיר את הדומיין ללא תלות בפרוטוקול REST או במבנה ה־Client.
 
-הספרייה `supabase/` תהיה הבעלים של migrations, seed data, database configuration ו־functions אם וכאשר יתווספו. ב־foundation הנוכחי לא נוצרת schema ולא נוצרים migrations פיקטיביים.
+הספרייה `supabase/` היא הבעלים של migrations, seed data, database configuration ו־functions. הסטטוס המדויק של ה־schema והאימות מופיע ב־`IMPLEMENTATION_STATUS.md`; עצם קיום migration אינו מוכיח שהוא הוחל על סביבת Cloud כלשהי.
 
 ---
 
@@ -173,7 +173,7 @@ Supabase / PostgreSQL
 * Supabase publishable key
 * ה־access token של המשתמש ב־`Authorization` header
 
-כך בקשות עתידיות ל־Supabase פועלות בהקשר המשתמש ו־Row Level Security נשארת משמעותית.
+כך בקשות ל־Supabase פועלות בהקשר המשתמש ו־Row Level Security נשארת משמעותית.
 
 כל טבלה השייכת למשתמש תכלול קשר ל־`user_id`, ו־RLS policies יגבילו גישה לנתונים המותרים למשתמש המאומת.
 
@@ -202,7 +202,7 @@ mutations
 cache invalidation
 ```
 
-ה־queries וה־mutations העתידיים יקראו ל־LifeOS REST API ולא ישירות לטבלאות Supabase.
+ה־queries וה־mutations קוראים ל־LifeOS REST API ולא ישירות לטבלאות Supabase.
 
 State מקומי יישאר ב־React באמצעות:
 

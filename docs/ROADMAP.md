@@ -1,116 +1,147 @@
-# LifeOS — Roadmap
+# LifeOS Roadmap
 
-## Phase 1 — Product Definition
+This is the authoritative path from the project foundation to the first usable LifeOS release. Product intent lives in `VISION.md` and `PRODUCT_SPEC_V0.1.md`; current implementation truth lives in `IMPLEMENTATION_STATUS.md`.
 
-מטרת השלב: להבין בדיוק מה אנחנו בונים לפני כתיבת קוד.
+Status is based on repository evidence. A phase can contain implemented code while remaining **IN PROGRESS** until its required runtime or release verification is recorded.
 
-* [x] הגדרת חזון המוצר
-* [x] הגדרת גרסה 0.1
-* [x] אפיון ראשוני של מסך היום
-* [ ] Wireframe למסך היום
-* [ ] אפיון מסך השבוע
-* [ ] אפיון Inbox
-* [ ] הגדרת מודל הנתונים הראשוני
+## Release strategy
 
-**תוצאה:** יש לנו מוצר מוגדר מספיק כדי להתחיל לעצב ולבנות.
+- **v0.1.0-alpha.1** — first official development snapshot of the existing LifeOS implementation.
+- **v0.1.0-alpha.N** — additional internal snapshots while the core flow is completed and stabilized.
+- **v0.1.0** — first internal MVP where the daily/weekly planning loop works end to end on a real iPhone with persisted authenticated data.
+- **v1.0.0** — a later stable-product milestone; it is not the current target.
 
----
+Git tags are the authoritative release markers. Expo/App Store build numbering remains unchanged until a separate release workflow requires it.
 
-## Phase 2 — Mobile-First Design
+## Phase 1 — Product definition
 
-מטרת השלב: להחליט איך LifeOS נראית ומתנהגת.
+**Goal:** Define the focused mobile-first problem and v0.1 planning loop.
 
-* [ ] הגדרת שפה עיצובית Mobile-first
-* [ ] עיצוב ניווט ראשי לטלפון
-* [ ] עיצוב מסך היום
-* [ ] עיצוב מסך השבוע
-* [ ] עיצוב Inbox
-* [ ] עיצוב Quick Capture
-* [ ] מצבי Empty / Loading / Error בסיסיים
+**Scope:** Vision, product specification, Today/Week/Inbox behavior, core flow, data model, and technical boundaries.
 
-**תוצאה:** יש לנו עיצוב ברור לגרסה הראשונה.
+**Exit criteria:** The initial product question, scope exclusions, core flow, platform priority, and domain concepts are documented.
 
----
+**Current status: DONE**
 
-## Phase 3 — Foundation
+Repository evidence: `docs/VISION.md`, `PRODUCT_SPEC_V0.1.md`, `CORE_FLOW.md`, screen specifications, wireframes, `DATA_MODEL_V0.1.md`, and `TECH_STACK.md`.
 
-מטרת השלב: להקים את התשתית הטכנית של LifeOS.
+## Phase 2 — Mobile design and interactive prototype
 
-* [x] בחירת Expo / React Native / TypeScript ל־Client ו־Node / Express / TypeScript ל־API
-* [x] יצירת Mobile workspace עם Expo Router
-* [x] יצירת API workspace ו־REST foundation
-* [x] הגדרת Supabase Auth / Bearer token / RLS boundary
-* [x] מבנה npm workspaces ראשוני
-* [ ] Database
-* [ ] מודל משתמש
-* [ ] מודל משימות
-* [x] תשתית UI בסיסית
+**Goal:** Establish and validate the Hebrew-first mobile experience before persistence.
 
-**תוצאה:** הפרויקט רץ ואפשר להתחיל לפתח פיצ'רים.
+**Scope:** Design system, mobile shell, Today, Week, Inbox, Quick Capture, bottom navigation, weekly planning, canonical preview states, and the in-memory task flow.
 
----
+**Exit criteria:** Approved states exist, main routes work, the same local task moves through Capture → Inbox → Week/Today → Active → Done, and component tests protect the behavior.
 
-## Phase 4 — Core MVP
+**Current status: DONE**
 
-מטרת השלב: לבנות מערכת שאפשר באמת להשתמש בה.
+Repository evidence: the committed Claude Design export, feature implementations under `apps/mobile/src/features`, Expo Router routes, fixture previews, and mobile UI/local-flow tests.
 
-* [ ] יצירה ועריכה של משימות
-* [ ] Inbox
-* [ ] מסך היום
-* [ ] תכנון שבועי
-* [ ] תכנון משימה ליום מסוים
-* [ ] השלמת משימות
-* [ ] העברה ודחייה של משימות
-* [ ] הערכת זמן למשימות
-* [ ] חישוב עומס יומי
-* [ ] סיכום יום בסיסי
+## Phase 3 — Application and authentication foundation
 
-**תוצאה:** אפשר לנהל שבוע שלם באמצעות LifeOS.
+**Goal:** Establish the real client/API/Auth boundary without inventing product data shortcuts.
 
----
+**Scope:** npm workspaces, Expo/React Native, Expo Router, Express API, Supabase Auth client/session restoration, production Auth screens, email/deep-link flows, Bearer injection, `/auth/me`, route gating, and caller-scoped Supabase clients.
 
-## Phase 5 — Real-Life Test
+**Exit criteria:** Automated Auth tests pass, API tokens are verified rather than decoded and trusted, signed-out routes are gated, and signup/recovery/API identity are verified in the intended runtime.
 
-מטרת השלב: להשתמש ב־LifeOS בחיים האמיתיים לפני שמוסיפים עוד יכולות.
+**Current status: IN PROGRESS**
 
-במשך לפחות שבוע:
+Implementation and automated verification exist. The repository does not contain durable evidence of the current remote Supabase configuration or a repeatable real-device Auth smoke result, so production/runtime verification remains open.
 
-* [ ] כל המשימות נכנסות ל־LifeOS
-* [ ] מתכננים כל בוקר דרך LifeOS
-* [ ] מבצעים תכנון שבועי
-* [ ] מתעדים דברים שמפריעים או חסרים
-* [ ] בודקים אילו יכולות באמת שימושיות
-* [ ] מסירים דברים שלא נותנים ערך
+## Phase 4 — Persistent core Task foundation
 
-**תוצאה:** רשימת שיפורים שמבוססת על שימוש אמיתי ולא על השערות.
+**Goal:** Make one stable Task identity persist through the LifeOS planning and execution states.
 
----
+**Scope:** `tasks`, minimal `week_plans`, RLS, ownership, REST CRUD, Inbox/Week/Today filters, retained cancellation, `start_task()`, single-active enforcement, TanStack Query integration, and targeted cache synchronization.
 
-## Phase 6 — Version 0.2
+**Exit criteria:** Migration replay succeeds locally; real local Auth JWTs prove RLS isolation; Capture, moves, Start/Stop/Complete preserve IDs; normal Mobile flows use the Node API; and the same behavior passes against the designated remote environment.
 
-השלב הזה יוגדר רק לאחר השימוש בגרסה 0.1.
+**Current status: IN PROGRESS**
 
-לא נכניס אליו פיצ'רים מראש.
+Implementation, unit/component tests, migration replay, and an opt-in local real-JWT/RLS harness exist. Remote schema/application state and cloud-backed restart/login verification are not proven by tracked repository evidence.
 
-החלטות לגבי:
+## Phase 5 — Planning context, Commitments, and Settings
 
-* Calendar integrations
-* AI
-* Habits
-* Goals
-* Automations
-* Notifications
-* תחומי חיים מתקדמים
+**Goal:** Persist the minimum context needed for realistic daily and weekly planning.
 
-יתקבלו רק לאחר שנדע מה באמת חסר לנו.
+**Scope:** DailyPlan/Daily Focus, WeeklyFocus, one-time Commitments, workload calculation, More, Account, daily capacity, week start, timezone, and sign-out cache clearing.
 
----
+**Exit criteria:** Migrations and RLS pass local replay/integration tests; Mobile reads and mutates these resources through the API; settings affect Today/Week correctly; and remote/device persistence is verified.
 
-# כלל העבודה
+**Current status: IN PROGRESS**
 
-> לא מתחילים את השלב הבא לפני שיש לנו מספיק מידע מהשלב הנוכחי.
+The tracked implementation and automated/local verification exist. Remote application of all migrations and real-device persistence are not established by repository evidence.
 
-והכי חשוב:
+## Phase 6 — Authoritative alpha baseline
 
-> אנחנו לא בונים את LifeOS שאנחנו מדמיינים שנצטרך בעוד שנתיים.
-> אנחנו בונים את LifeOS שאנחנו רוצים להשתמש בה מחר בבוקר.
+**Goal:** Create a coherent, auditable first development-snapshot baseline.
+
+**Scope:** Roadmap, current implementation matrix, changelog, release policy, full non-destructive validation, build smoke checks, and explicit separation of implementation from verification.
+
+**Exit criteria:** Documentation agrees with the repository; typecheck, lint, Mobile/API tests, and build smoke checks pass; no critical regression is known; and the tree is ready for the user’s manual release commit/tag.
+
+**Current status: DONE**
+
+The authoritative documents, full TypeScript/lint/test pass, local real-JWT integration harness, Expo Doctor, and iOS/Web export smoke checks passed on 2026-08-15. The user alone creates the release commit and Git tag.
+
+## Phase 7 — Production-real core-flow verification
+
+**Goal:** Prove the core product loop against the designated Supabase environment and primary device.
+
+**Scope:** Safe migration reconciliation, authenticated cloud data, Capture → Inbox → Week/Today → Active → Completed, reload/restart, logout/login, cross-screen consistency, settings, and a real iPhone smoke test.
+
+**Exit criteria:** The full v0.1.0 release gate below is recorded as passed with no release-blocking bug.
+
+**Current status: IN PROGRESS**
+
+This is the current critical path after the validated alpha baseline. It is verification and stabilization work, not a redesign.
+
+## Phase 8 — First internal MVP usage
+
+**Goal:** Use LifeOS as the primary daily/weekly planning tool and validate its usefulness.
+
+**Scope:** At least one week of real use, defect fixes, missing-flow observations, and removal of release-blocking friction.
+
+**Exit criteria:** v0.1.0 is tagged and the product can support one authenticated user’s real planning loop for a full week.
+
+**Current status: NOT STARTED**
+
+## Phase 9 — Post-v0.1 product expansion
+
+**Goal:** Add only capabilities justified by real v0.1 usage.
+
+**Scope:** Possible calendar integration, notifications, Life Areas, recurring commitments, AI, habits, goals, or automation.
+
+**Exit criteria:** Defined only after v0.1 usage evidence exists.
+
+**Current status: DEFERRED**
+
+## Release gate — v0.1.0-alpha.1
+
+The release is ready only when all of these are true:
+
+- Repository/documentation baseline is coherent.
+- Current implementation is verified by the repository’s automated and local checks.
+- No known critical regression exists in the current application.
+- Smoke tests of the existing Mobile build pass.
+- The user creates the first official LifeOS development-snapshot commit and tag.
+
+## Release gate — v0.1.0
+
+The release is ready only when all of these are verified end to end:
+
+- The complete core flow works: Quick Capture → Inbox → Today/Week → Active → Completed.
+- Authenticated user data persists.
+- Quick Capture persists.
+- Inbox sorting persists.
+- Today/Week planning persists.
+- Active/completed transitions persist.
+- Cross-screen state stays consistent.
+- App restart retains data.
+- Logout/login restores the correct user’s data without leaking another user’s cache.
+- Basic Settings persist and affect planning correctly.
+- A real iPhone smoke test passes.
+- No known release-blocking bug remains.
+
+Unrelated nice-to-have features are not part of this gate.
