@@ -21,16 +21,18 @@ const navigationItems: NavigationItem[] = [
 
 export function BottomNavigation({
   onNavigateInbox,
+  onNavigateMore,
   onNavigateToday,
   onNavigateWeek,
   onQuickCapture,
   selected,
 }: {
   onNavigateInbox?: () => void;
+  onNavigateMore?: () => void;
   onNavigateToday?: () => void;
   onNavigateWeek?: () => void;
   onQuickCapture?: () => void;
-  selected: 'today' | 'week' | 'inbox';
+  selected: 'today' | 'week' | 'inbox' | 'more';
 }) {
   const insets = useSafeAreaInsets();
 
@@ -65,7 +67,9 @@ export function BottomNavigation({
                     ? onNavigateWeek
                     : item.id === 'inbox'
                       ? onNavigateInbox
-                      : undefined
+                      : item.id === 'more'
+                        ? onNavigateMore
+                        : undefined
               }
               style={styles.navigationItem}
             >

@@ -3,21 +3,18 @@ import { TodayTask } from '@/features/today/today.types';
 import { UnscheduledWeekTask } from '@/features/week/week.types';
 
 import { Task } from './task.types';
+import { addDaysToDateKey, localDateKey } from './task-dates';
 
-function sameLocalDay(value: Date, reference: Date) {
-  return value.getFullYear() === reference.getFullYear()
-    && value.getMonth() === reference.getMonth()
-    && value.getDate() === reference.getDate();
-}
-
-export function toInboxTask(task: Task, now = new Date()): InboxTask {
+export function toInboxTask(task: Task, now = new Date(), timeZone?: string): InboxTask {
   const created = new Date(task.createdAt);
-  const yesterday = new Date(now.getFullYear(), now.getMonth(), now.getDate() - 1);
-  if (sameLocalDay(created, now)) {
+  const todayKey = localDateKey(now, timeZone);
+  const createdKey = localDateKey(created, timeZone);
+  if (createdKey === todayKey) {
     const time = new Intl.DateTimeFormat('he-IL', {
       hour: '2-digit',
       hour12: false,
       minute: '2-digit',
+      timeZone,
     }).format(created);
     return {
       compactCreatedLabel: 'היום',
@@ -26,7 +23,7 @@ export function toInboxTask(task: Task, now = new Date()): InboxTask {
       title: task.title,
     };
   }
-  if (sameLocalDay(created, yesterday)) {
+  if (createdKey === addDaysToDateKey(todayKey, -1)) {
     return {
       compactCreatedLabel: 'אתמול',
       createdLabel: 'נוסף אתמול',
@@ -35,8 +32,8 @@ export function toInboxTask(task: Task, now = new Date()): InboxTask {
     };
   }
   return {
-    compactCreatedLabel: new Intl.DateTimeFormat('he-IL', { day: 'numeric', month: 'numeric' }).format(created),
-    createdLabel: `נוסף ב־${new Intl.DateTimeFormat('he-IL', { day: 'numeric', month: 'numeric' }).format(created)}`,
+    compactCreatedLabel: new Intl.DateTimeFormat('he-IL', { day: 'numeric', month: 'numeric', timeZone }).format(created),
+    createdLabel: `נוסף ב־${new Intl.DateTimeFormat('he-IL', { day: 'numeric', month: 'numeric', timeZone }).format(created)}`,
     id: task.id,
     title: task.title,
   };

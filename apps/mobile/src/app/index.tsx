@@ -22,6 +22,7 @@ export default function IndexRoute() {
       key={previewState}
       movedTaskId={movedTaskId}
       onNavigateInbox={() => router.navigate('/inbox' as Href)}
+      onNavigateMore={() => router.navigate('/more' as Href)}
       onNavigateWeek={() => router.navigate('/week' as Href)}
       taskSource={developmentPreview ? 'preview' : 'server'}
     />

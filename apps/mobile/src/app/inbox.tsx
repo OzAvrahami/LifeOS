@@ -25,6 +25,7 @@ export default function InboxRoute() {
         } as Href)
       }
       onNavigateToday={() => router.replace('/')}
+      onNavigateMore={() => router.navigate('/more' as Href)}
       onNavigateWeek={() => router.navigate('/week' as Href)}
       taskSource={developmentPreview ? 'preview' : 'server'}
     />

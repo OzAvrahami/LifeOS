@@ -19,6 +19,7 @@ export default function WeekRoute() {
       initialState={previewState}
       key={previewState}
       onNavigateInbox={() => router.navigate('/inbox' as Href)}
+      onNavigateMore={() => router.navigate('/more' as Href)}
       onNavigateToday={() => router.replace('/')}
       taskSource={developmentPreview ? 'preview' : 'server'}
     />

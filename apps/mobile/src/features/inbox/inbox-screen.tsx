@@ -3,6 +3,7 @@ import { ScrollView, StyleSheet, View } from 'react-native';
 
 import { MobileShell } from '@/components/mobile-shell';
 import { QuickCaptureSheet } from '@/features/capture/quick-capture-sheet';
+import { useEffectiveSettings } from '@/features/settings/settings.queries';
 import { useDemoTasks } from '@/features/tasks/demo-task-provider';
 import {
   currentWeekStart,
@@ -33,12 +34,14 @@ export function InboxScreen({
   initialState = 'normal',
   onMoveToToday,
   onNavigateToday,
+  onNavigateMore,
   onNavigateWeek,
   taskSource = 'preview',
 }: {
   initialState?: InboxDemoState;
   onMoveToToday?: (task: InboxTask) => void;
   onNavigateToday?: () => void;
+  onNavigateMore?: () => void;
   onNavigateWeek?: () => void;
   taskSource?: TaskSource;
 }) {
@@ -53,6 +56,9 @@ export function InboxScreen({
     updateTaskTitle,
   } = demo;
   const serverTasks = taskSource === 'server';
+  const { effective: settings, query: settingsQuery } = useEffectiveSettings(serverTasks);
+  const todayDate = localDateKey(undefined, settings.timezone);
+  const weekStart = currentWeekStart(undefined, settings);
   const demoIntegrated = taskSource === 'preview' && initialState === 'normal';
   const inboxQuery = useTasks({ placement: 'inbox' }, serverTasks);
   const updateMutation = useUpdateTask();
@@ -72,7 +78,7 @@ export function InboxScreen({
   const [operationError, setOperationError] = useState(false);
   const [captureOpen, setCaptureOpen] = useState(false);
   const sharedItems: InboxTask[] = serverTasks
-    ? (inboxQuery.data ?? []).map((task) => toInboxTask(task))
+    ? (inboxQuery.data ?? []).map((task) => toInboxTask(task, undefined, settings.timezone))
     : inboxTasks.map((task) => ({
         compactCreatedLabel: task.compactCreatedLabel,
         createdLabel: task.createdLabel,
@@ -103,7 +109,7 @@ export function InboxScreen({
     if (serverTasks) {
       const moved = await runServerAction(() => updateMutation.mutateAsync({
         id: task.id,
-        input: { planning: { plannedDate: localDateKey(), type: 'day' } },
+        input: { planning: { plannedDate: todayDate, type: 'day' } },
       }));
       if (!moved) return;
     } else if (demoIntegrated) moveTaskToToday(task.id);
@@ -117,7 +123,7 @@ export function InboxScreen({
     if (serverTasks) {
       const moved = await runServerAction(() => updateMutation.mutateAsync({
         id: task.id,
-        input: { planning: { type: 'week', weekStart: currentWeekStart() } },
+        input: { planning: { type: 'week', weekStart } },
       }));
       if (!moved) return;
     } else if (demoIntegrated) moveTaskToWeek(task.id);
@@ -130,7 +136,7 @@ export function InboxScreen({
     if (serverTasks) {
       const moved = await runServerAction(() => updateMutation.mutateAsync({
         id: task.id,
-        input: { planning: { plannedDate: dateFromApprovedDayChoice(day), type: 'day' } },
+        input: { planning: { plannedDate: dateFromApprovedDayChoice(day, undefined, settings.timezone), type: 'day' } },
       }));
       if (!moved) return;
     } else if (demoIntegrated) scheduleTask(task.id, dayToPreviewDate(day));
@@ -232,10 +238,10 @@ export function InboxScreen({
           id: task.id,
           input: {
             planning: destination === 'today'
-              ? { plannedDate: localDateKey(), type: 'day' }
+              ? { plannedDate: todayDate, type: 'day' }
               : destination === 'week'
-                ? { type: 'week', weekStart: currentWeekStart() }
-                : { plannedDate: dateFromApprovedDayChoice(day ?? ''), type: 'day' },
+                ? { type: 'week', weekStart }
+                : { plannedDate: dateFromApprovedDayChoice(day ?? '', undefined, settings.timezone), type: 'day' },
           },
         });
       });
@@ -274,6 +280,7 @@ export function InboxScreen({
     <>
       <MobileShell
         onNavigateToday={onNavigateToday}
+        onNavigateMore={onNavigateMore}
         onNavigateWeek={onNavigateWeek}
         onQuickCapture={() => setCaptureOpen(true)}
         selected="inbox"
@@ -297,9 +304,9 @@ export function InboxScreen({
             />
             <InboxCapture onAdd={addTask} />
             <TaskQueryNotice
-              error={serverTasks && (inboxQuery.isError || operationError)}
-              loading={isLoading}
-              onRetry={() => void inboxQuery.refetch()}
+              error={serverTasks && (inboxQuery.isError || settingsQuery.isError || operationError)}
+              loading={isLoading || (serverTasks && settingsQuery.isPending)}
+              onRetry={() => void Promise.all([inboxQuery.refetch(), settingsQuery.refetch()])}
             />
             {isLoading ? null : isEmpty ? (
               <InboxEmptyState />

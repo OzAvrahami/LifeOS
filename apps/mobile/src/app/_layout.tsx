@@ -12,6 +12,7 @@ import {
 import { AuthProvider, useAuth } from '@/features/auth/auth-provider';
 import { AuthLoadingScreen } from '@/features/auth/auth-loading-screen';
 import { getAuthGateState } from '@/features/auth/auth-gate';
+import { SessionQueryCacheBoundary } from '@/features/auth/session-query-cache';
 import { DemoTaskProvider } from '@/features/tasks/demo-task-provider';
 import { TaskQueryScopeProvider } from '@/features/tasks/task-query-scope';
 import { QueryProvider } from '@/lib/query/query-provider';
@@ -32,7 +33,9 @@ export default function RootLayout() {
   return (
     <QueryProvider>
       <AuthProvider>
-        <AuthenticatedStack />
+        <SessionQueryCacheBoundary>
+          <AuthenticatedStack />
+        </SessionQueryCacheBoundary>
       </AuthProvider>
     </QueryProvider>
   );
@@ -67,6 +70,9 @@ function AuthenticatedStack() {
           <Stack.Screen name="index" />
           <Stack.Screen name="week" />
           <Stack.Screen name="inbox" />
+          <Stack.Screen name="more" />
+          <Stack.Screen name="settings" />
+          <Stack.Screen name="account" />
         </Stack.Protected>
         <Stack.Screen name="auth/callback" />
         <Stack.Protected guard={__DEV__}>

@@ -14,6 +14,7 @@ import {
 } from '@/features/commitments/commitment.queries';
 import type { Commitment as ServerCommitment, CreateCommitmentInput } from '@/features/commitments/commitment.types';
 import { useDailyPlan, usePutDailyPlan } from '@/features/planning/planning.queries';
+import { useEffectiveSettings } from '@/features/settings/settings.queries';
 import { useDemoTasks } from '@/features/tasks/demo-task-provider';
 import { hebrewDateLabel, localDateKey } from '@/features/tasks/task-dates';
 import { TaskQueryNotice } from '@/features/tasks/task-query-notice';
@@ -43,6 +44,7 @@ export function TodayScreen({
   movedInboxTask,
   movedTaskId,
   onNavigateInbox,
+  onNavigateMore,
   onNavigateWeek,
   taskSource = 'preview',
 }: {
@@ -50,6 +52,7 @@ export function TodayScreen({
   movedInboxTask?: { id: string; title: string };
   movedTaskId?: string;
   onNavigateInbox?: () => void;
+  onNavigateMore?: () => void;
   onNavigateWeek?: () => void;
   taskSource?: TaskSource;
 }) {
@@ -59,7 +62,8 @@ export function TodayScreen({
   const [editingCommitment, setEditingCommitment] = useState<ServerCommitment | null>(null);
   const demo = useDemoTasks();
   const serverTasks = taskSource === 'server';
-  const todayDate = localDateKey();
+  const { effective: settings, query: settingsQuery } = useEffectiveSettings(serverTasks);
+  const todayDate = localDateKey(undefined, settings.timezone);
   const todayQuery = useTasks({ plannedDate: todayDate }, serverTasks);
   const commitmentQuery = useCommitments({ date: todayDate }, serverTasks);
   const dailyPlanQuery = useDailyPlan(todayDate, serverTasks);
@@ -82,7 +86,8 @@ export function TodayScreen({
     time: commitment.startTime,
     title: commitment.title,
   }));
-  const availableMinutes = dailyPlanQuery.data?.availableMinutes ?? 360;
+  const availableMinutes = dailyPlanQuery.data?.availableMinutes
+    ?? settings.defaultDailyCapacityMinutes;
   const combinedPlannedMinutes = plannedMinutes(sourceTasks, serverCommitments);
   const serverWorkload = workloadState(combinedPlannedMinutes, availableMinutes);
 
@@ -149,7 +154,7 @@ export function TodayScreen({
         <ActiveState
           commitment={serverTasks ? presentedCommitments[0] ?? null : undefined}
           laterTasks={openTasks}
-          dateLabel={serverTasks ? hebrewDateLabel() : undefined}
+          dateLabel={serverTasks ? hebrewDateLabel(undefined, settings.timezone) : undefined}
           onFinish={() => void updateStatus(activeTodayTask.id, 'completed')}
           onStartTask={(taskId) => void updateStatus(taskId, 'in_progress')}
           onStop={() => void updateStatus(activeTodayTask.id, 'open')}
@@ -161,7 +166,7 @@ export function TodayScreen({
       content = (
         <PartiallyCompletedState
           completedTasks={completedTasks}
-          dateLabel={serverTasks ? hebrewDateLabel() : undefined}
+          dateLabel={serverTasks ? hebrewDateLabel(undefined, settings.timezone) : undefined}
           nextTask={nextTask}
           openTasks={openTasks}
           onStart={() => nextTask && void updateStatus(nextTask.id, 'in_progress')}
@@ -179,7 +184,7 @@ export function TodayScreen({
         <NormalTodayContent
           focusTask={focusTask}
           focusedTaskId={serverTasks ? dailyPlanQuery.data?.focusTaskId ?? undefined : undefined}
-          dateLabel={serverTasks ? hebrewDateLabel() : undefined}
+          dateLabel={serverTasks ? hebrewDateLabel(undefined, settings.timezone) : undefined}
           movedTaskId={movedTaskId ?? movedInboxTask?.id}
           onStartFocus={() => focusTask && void updateStatus(focusTask.id, 'in_progress')}
           onStartTask={(taskId) => void updateStatus(taskId, 'in_progress')}
@@ -230,13 +235,14 @@ export function TodayScreen({
     <>
       <MobileShell
         onNavigateInbox={onNavigateInbox}
+        onNavigateMore={onNavigateMore}
         onNavigateWeek={onNavigateWeek}
         onQuickCapture={() => setCaptureOpen(true)}
       >
         <TaskQueryNotice
-          error={serverTasks && (todayQuery.isError || commitmentQuery.isError || dailyPlanQuery.isError || operationError)}
-          loading={serverTasks && (todayQuery.isPending || commitmentQuery.isPending || dailyPlanQuery.isPending)}
-          onRetry={() => void Promise.all([todayQuery.refetch(), commitmentQuery.refetch(), dailyPlanQuery.refetch()])}
+          error={serverTasks && (todayQuery.isError || commitmentQuery.isError || dailyPlanQuery.isError || settingsQuery.isError || operationError)}
+          loading={serverTasks && (todayQuery.isPending || commitmentQuery.isPending || dailyPlanQuery.isPending || settingsQuery.isPending)}
+          onRetry={() => void Promise.all([todayQuery.refetch(), commitmentQuery.refetch(), dailyPlanQuery.refetch(), settingsQuery.refetch()])}
         />
         {content}
       </MobileShell>

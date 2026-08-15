@@ -10,12 +10,15 @@ import {
   useReplaceWeeklyFocuses,
   useWeeklyFocuses,
 } from '@/features/planning/planning.queries';
+import { useEffectiveSettings } from '@/features/settings/settings.queries';
+import { weekdayLabels } from '@/features/settings/settings.types';
 import { useDemoTasks } from '@/features/tasks/demo-task-provider';
 import {
-  currentWeekDates,
+  currentWeekDateKeys,
   currentWeekStart,
   hebrewWeekRange,
   localDateKey,
+  weekdayForDateKey,
 } from '@/features/tasks/task-dates';
 import { toWeekTask } from '@/features/tasks/task-presenters';
 import { TaskQueryNotice } from '@/features/tasks/task-query-notice';
@@ -46,11 +49,13 @@ import { WeekDemoState } from './week.types';
 export function WeekScreen({
   initialState = 'normal',
   onNavigateInbox,
+  onNavigateMore,
   onNavigateToday,
   taskSource = 'preview',
 }: {
   initialState?: WeekDemoState;
   onNavigateInbox?: () => void;
+  onNavigateMore?: () => void;
   onNavigateToday?: () => void;
   taskSource?: TaskSource;
 }) {
@@ -60,9 +65,11 @@ export function WeekScreen({
   const [commitmentEditorDate, setCommitmentEditorDate] = useState<string | null>(null);
   const demo = useDemoTasks();
   const serverTasks = taskSource === 'server';
-  const weekStart = currentWeekStart();
-  const currentDays = currentWeekDates();
-  const weekEnd = localDateKey(currentDays[6]);
+  const { effective: settings, query: settingsQuery } = useEffectiveSettings(serverTasks);
+  const weekStart = currentWeekStart(undefined, settings);
+  const currentDateKeys = currentWeekDateKeys(undefined, settings);
+  const weekEnd = currentDateKeys[6]!;
+  const todayDate = localDateKey(undefined, settings.timezone);
   const weekQuery = useTasks({ weekStart }, serverTasks);
   const commitmentQuery = useCommitments({ dateFrom: weekStart, dateTo: weekEnd }, serverTasks);
   const weeklyFocusQuery = useWeeklyFocuses(weekStart, serverTasks);
@@ -82,17 +89,19 @@ export function WeekScreen({
     ? normalWeekDays.map((day, index) => ({
         ...day,
         commitmentTime: commitmentQuery.data
-          ?.filter((commitment) => commitment.date === localDateKey(currentDays[index]))
+          ?.filter((commitment) => commitment.date === currentDateKeys[index])
           .reduce<string | undefined>(
             (earliest, commitment) => !earliest || commitment.startTime < earliest
               ? commitment.startTime
               : earliest,
             undefined,
           ),
-        date: currentDays[index].getDate(),
-        dateKey: localDateKey(currentDays[index]),
-        isPast: localDateKey(currentDays[index]) < localDateKey(),
-        isToday: localDateKey(currentDays[index]) === localDateKey(),
+        date: Number(currentDateKeys[index]!.slice(8)),
+        dateKey: currentDateKeys[index],
+        id: currentDateKeys[index]!,
+        isPast: currentDateKeys[index]! < todayDate,
+        isToday: currentDateKeys[index] === todayDate,
+        weekday: weekdayLabels[weekdayForDateKey(currentDateKeys[index]!)]!,
       }))
     : normalWeekDays;
 
@@ -113,6 +122,7 @@ export function WeekScreen({
     <>
       <MobileShell
         onNavigateInbox={onNavigateInbox}
+        onNavigateMore={onNavigateMore}
         onNavigateToday={onNavigateToday}
         onQuickCapture={() => setCaptureOpen(true)}
         selected="week"
@@ -123,13 +133,13 @@ export function WeekScreen({
           <OverloadedWeek />
         ) : (
           <NormalWeek
-            dateRange={serverTasks ? hebrewWeekRange() : undefined}
+            dateRange={serverTasks ? hebrewWeekRange(undefined, settings) : undefined}
             days={weekDays}
             notice={
               <TaskQueryNotice
-                error={serverTasks && (weekQuery.isError || commitmentQuery.isError || weeklyFocusQuery.isError || operationError)}
-                loading={serverTasks && (weekQuery.isPending || commitmentQuery.isPending || weeklyFocusQuery.isPending)}
-                onRetry={() => void Promise.all([weekQuery.refetch(), commitmentQuery.refetch(), weeklyFocusQuery.refetch()])}
+                error={serverTasks && (weekQuery.isError || commitmentQuery.isError || weeklyFocusQuery.isError || settingsQuery.isError || operationError)}
+                loading={serverTasks && (weekQuery.isPending || commitmentQuery.isPending || weeklyFocusQuery.isPending || settingsQuery.isPending)}
+                onRetry={() => void Promise.all([weekQuery.refetch(), commitmentQuery.refetch(), weeklyFocusQuery.refetch(), settingsQuery.refetch()])}
               />
             }
             focuses={serverTasks ? weeklyFocusQuery.data ?? [] : weeklyFocuses}
@@ -141,7 +151,7 @@ export function WeekScreen({
                 try {
                   await updateMutation.mutateAsync({
                     id: taskId,
-                    input: { planning: { plannedDate: localDateKey(), type: 'day' } },
+                    input: { planning: { plannedDate: todayDate, type: 'day' } },
                   });
                 } catch {
                   setOperationError(true);

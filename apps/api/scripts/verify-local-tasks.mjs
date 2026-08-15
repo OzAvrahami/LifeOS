@@ -175,6 +175,84 @@ async function main() {
     const callerA = quietClient(supabaseUrl, publishableKey, tokenA);
     const callerB = quietClient(supabaseUrl, publishableKey, tokenB);
 
+    const defaultSettingsA = (await apiRequest('GET', '/settings', tokenA)).settings;
+    const defaultSettingsB = (await apiRequest('GET', '/settings', tokenB)).settings;
+    assert.deepEqual(defaultSettingsA, {
+      defaultDailyCapacityMinutes: 360,
+      persisted: false,
+      timezone: null,
+      weekStartDay: 0,
+    });
+    assert.deepEqual(defaultSettingsB, defaultSettingsA);
+    assert.equal(localSql(docker, databaseContainer, 'select count(*) from public.user_settings;'), '0');
+
+    const savedSettingsA = (await apiRequest('PUT', '/settings', tokenA, {
+      defaultDailyCapacityMinutes: 480,
+      timezone: 'Asia/Jerusalem',
+      weekStartDay: 1,
+    })).settings;
+    assert.deepEqual(savedSettingsA, {
+      defaultDailyCapacityMinutes: 480,
+      persisted: true,
+      timezone: 'Asia/Jerusalem',
+      weekStartDay: 1,
+    });
+    assert.deepEqual((await apiRequest('GET', '/settings', tokenA)).settings, savedSettingsA);
+    assert.deepEqual((await apiRequest('GET', '/settings', tokenB)).settings, defaultSettingsB);
+    assert.equal(localSql(docker, databaseContainer, `select count(*) from public.user_settings where user_id = '${users[0].id}'::uuid;`), '1');
+
+    const directSettingsA = await callerA.from('user_settings').select('user_id,default_daily_capacity_minutes,week_start_day,timezone');
+    const directSettingsB = await callerB.from('user_settings').select('user_id,default_daily_capacity_minutes,week_start_day,timezone');
+    assert.ifError(directSettingsA.error);
+    assert.ifError(directSettingsB.error);
+    assert.deepEqual(directSettingsA.data.map((row) => row.user_id), [users[0].id]);
+    assert.deepEqual(directSettingsB.data, []);
+    const crossSettingsUpdate = await callerB
+      .from('user_settings')
+      .update({ default_daily_capacity_minutes: 60 })
+      .eq('user_id', users[0].id)
+      .select('user_id');
+    assert.ifError(crossSettingsUpdate.error);
+    assert.deepEqual(crossSettingsUpdate.data, []);
+    const crossSettingsInsert = await callerB.from('user_settings').insert({
+      default_daily_capacity_minutes: 60,
+      timezone: 'Europe/London',
+      user_id: users[0].id,
+      week_start_day: 0,
+    });
+    assert.ok(crossSettingsInsert.error, 'Cross-user Settings insert unexpectedly succeeded');
+
+    await apiRequest('PUT', '/settings', tokenB, {
+      defaultDailyCapacityMinutes: 300,
+      timezone: 'America/New_York',
+      weekStartDay: 6,
+    });
+    assert.equal(localSql(docker, databaseContainer, 'select count(*) from public.user_settings;'), '2');
+    await apiRequest('PUT', '/settings', tokenA, {
+      defaultDailyCapacityMinutes: 1441,
+      timezone: 'Asia/Jerusalem',
+      weekStartDay: 1,
+    }, 400);
+    await apiRequest('PUT', '/settings', tokenA, {
+      defaultDailyCapacityMinutes: 360,
+      timezone: 'Asia/Jerusalem',
+      weekStartDay: 7,
+    }, 400);
+    await apiRequest('PUT', '/settings', tokenA, {
+      defaultDailyCapacityMinutes: 360,
+      timezone: 'Not/A_Real_Zone',
+      weekStartDay: 0,
+    }, 400);
+    const invalidCapacity = await callerB.from('user_settings')
+      .update({ default_daily_capacity_minutes: -1 })
+      .eq('user_id', users[1].id);
+    const invalidWeekday = await callerB.from('user_settings')
+      .update({ week_start_day: 7 })
+      .eq('user_id', users[1].id);
+    assert.ok(invalidCapacity.error, 'PostgreSQL unexpectedly accepted invalid Settings capacity');
+    assert.ok(invalidWeekday.error, 'PostgreSQL unexpectedly accepted invalid Settings weekday');
+    assert.deepEqual((await apiRequest('GET', '/settings', tokenA)).settings, savedSettingsA);
+
     const createdA = (await apiRequest('POST', '/tasks', tokenA, {
       title: 'User A integration task',
     }, 201)).task;
@@ -491,6 +569,7 @@ async function main() {
     console.log('PASS DailyPlan ownership, focus ownership, upsert, capacity, and clearing');
     console.log('PASS ordered WeeklyFocus replacement, maximum, and WeekPlan-derived RLS');
     console.log('PASS one-time Commitment CRUD, ordering, physical delete, constraints, and caller RLS');
+    console.log('PASS UserSettings defaults, persistence, validation, one-row ownership, and caller RLS');
   } finally {
     if (apiProcess && apiProcess.exitCode === null) {
       apiProcess.kill();
