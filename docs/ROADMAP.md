@@ -47,7 +47,7 @@ Repository evidence: the committed Claude Design export, feature implementations
 
 **Current status: IN PROGRESS**
 
-Implementation and automated verification exist. The repository does not contain durable evidence of the current remote Supabase configuration or a repeatable real-device Auth smoke result, so production/runtime verification remains open.
+Implementation and automated verification exist. Phase 7C verified two normal remote password sessions, API identity, logout, and fresh login; the real-device Auth smoke remains open.
 
 ## Phase 4 — Persistent core Task foundation
 
@@ -57,9 +57,9 @@ Implementation and automated verification exist. The repository does not contain
 
 **Exit criteria:** Migration replay succeeds locally; real local Auth JWTs prove RLS isolation; Capture, moves, Start/Stop/Complete preserve IDs; normal Mobile flows use the Node API; and the same behavior passes against the designated remote environment.
 
-**Current status: IN PROGRESS**
+**Current status: DONE**
 
-Implementation, unit/component tests, migration replay, and an opt-in local real-JWT/RLS harness exist. Remote schema/application state and cloud-backed restart/login verification are not proven by tracked repository evidence.
+Implementation, unit/component tests, migration replay, and an opt-in local real-JWT/RLS harness exist. Phase 7C verified the remote Task/WeekPlan Core Flow, restart/login persistence, two-user isolation, and single-active invariant.
 
 ## Phase 5 — Planning context, Commitments, and Settings
 
@@ -71,7 +71,7 @@ Implementation, unit/component tests, migration replay, and an opt-in local real
 
 **Current status: IN PROGRESS**
 
-The tracked implementation and automated/local verification exist. Remote application of all migrations and real-device persistence are not established by repository evidence.
+The tracked implementation and automated/local verification exist, all five migrations are deployed remotely, and Phase 7C verified authenticated remote planning, Commitment, and Settings persistence. Real-device behavior remains open.
 
 ## Phase 6 — Authoritative alpha baseline
 
@@ -83,7 +83,7 @@ The tracked implementation and automated/local verification exist. Remote applic
 
 **Current status: DONE**
 
-The authoritative documents, full TypeScript/lint/test pass, local real-JWT integration harness, Expo Doctor, and iOS/Web export smoke checks passed on 2026-08-15. The user alone creates the release commit and Git tag.
+The authoritative documents, full TypeScript/lint/test pass, local real-JWT integration harness, Expo Doctor, and iOS/Web export smoke checks passed on 2026-08-15. Tag `v0.1.0-alpha.1` records the released baseline.
 
 ## Phase 7 — Production-real core-flow verification
 
@@ -95,7 +95,7 @@ The authoritative documents, full TypeScript/lint/test pass, local real-JWT inte
 
 **Current status: IN PROGRESS**
 
-This is the current critical path after the validated alpha baseline. It is verification and stabilization work, not a redesign.
+Migration reconciliation, privilege normalization, and Phase 7C remote Auth/RLS/Core Flow verification are complete. The exact remaining Phase 7 release gate is the real-iPhone development-build smoke test.
 
 ## Phase 8 — First internal MVP usage
 
@@ -119,7 +119,7 @@ This is the current critical path after the validated alpha baseline. It is veri
 
 ## Release gate — v0.1.0-alpha.1
 
-The release is ready only when all of these are true:
+This release gate passed on 2026-08-15:
 
 - Repository/documentation baseline is coherent.
 - Current implementation is verified by the repository’s automated and local checks.
@@ -131,16 +131,16 @@ The release is ready only when all of these are true:
 
 The release is ready only when all of these are verified end to end:
 
-- The complete core flow works: Quick Capture → Inbox → Today/Week → Active → Completed.
-- Authenticated user data persists.
-- Quick Capture persists.
-- Inbox sorting persists.
-- Today/Week planning persists.
-- Active/completed transitions persist.
-- Cross-screen state stays consistent.
-- App restart retains data.
-- Logout/login restores the correct user’s data without leaking another user’s cache.
-- Basic Settings persist and affect planning correctly.
+- [x] The complete core flow works remotely: Quick Capture → Inbox → Today/Week → Active → Completed.
+- [x] Authenticated user data persists remotely.
+- [x] Quick Capture persists remotely.
+- [x] Inbox placement persists remotely.
+- [x] Today/Week planning persists remotely.
+- [x] Active/completed transitions persist remotely.
+- [x] A fresh API process reconstructs remote state.
+- [x] Logout/login restores the correct user's remote data, with direct two-user RLS isolation verified.
+- [x] Basic Settings persist across fresh fetch and logout/login.
+- [ ] Cross-screen state stays consistent on the target device.
 - A real iPhone smoke test passes.
 - No known release-blocking bug remains.
 

@@ -1,9 +1,9 @@
 # LifeOS Implementation Status
 
 - **Last updated:** 2026-08-15
-- **Current target release:** v0.1.0-alpha.1 — release being cut now; alpha baseline complete
-- **Current phase:** Phase 7 — Production-real core-flow verification
-- **Next exact task:** Execute one cloud-backed core-flow verification increment: safely reconcile the four tracked migrations with the designated Supabase project, then verify the authenticated Capture → Inbox → Week/Today → Active → Completed flow across reload and logout/login without adding features.
+- **Current target release:** v0.1.0
+- **Current phase:** Phase 7 — real-iPhone release-gate verification
+- **Next exact task:** Run the authenticated v0.1.0 release smoke on a real iPhone development build, including Capture → Inbox → Week/Today → Active → Completed, restart, logout/login, and Settings persistence.
 
 This document is the current source of truth for implementation status. “Verified” means supported by tracked code plus a repeatable repository check; it does not imply remote or real-device verification unless stated.
 
@@ -13,19 +13,19 @@ This document is the current source of truth for implementation status. “Verif
 | --- | --- | --- | --- | --- |
 | Product/UI foundation | ✅ Verified | N/A | Mobile visual-state/component coverage | Hebrew/RTL, mobile-first tokens, approved design export, and canonical previews are committed. Pixel-perfect device verification is separate. |
 | Mobile navigation | ✅ Verified | Session route state | Mobile navigation/Auth-gate tests | Expo Router routes exist for Auth, Today, Week, Inbox, More, Settings, and Account. |
-| Tasks | 🟡 Partial / verification required | PostgreSQL schema + API implemented | API, Mobile, local real-JWT/RLS harness | Stable UUIDs, planning fields, statuses, cancellation, and single-active enforcement exist. Remote/current-device persistence is not repository-proven. |
-| Quick Capture | 🟡 Partial / verification required | Creates through Task API in normal authenticated flow | Mobile API/cache/flow tests | Inbox/Today/Week destinations are implemented. `Choose day` remains intentionally limited to the approved lightweight behavior. |
-| Inbox | 🟡 Partial / verification required | Server-backed in normal flow | UI, processing, routing, Task flow tests | Processing, Inbox → Today/Week, capture, empty/busy previews, and no-duplicate behavior exist. Cloud/restart verification remains. |
-| Today | 🟡 Partial / verification required | Tasks, DailyPlan, Commitments, Settings use APIs | Today, task-flow, planning, commitment, settings tests | Active/Stop/Complete, Daily Focus, real workload, commitments, and capacity fallback are implemented. End-of-day rescheduling is not complete. |
-| Week | 🟡 Partial / verification required | Tasks, WeekPlan, WeeklyFocus, Commitments use APIs | Week, planning, commitments, settings-boundary tests | Week-unscheduled Tasks, Week → Today, focus planning, week-start semantics, and commitment hints exist. Remote/device verification remains. |
-| Daily/Weekly planning | 🟡 Partial / verification required | DailyPlan/WeeklyFocus migrations + APIs | API, cache, UI, local RLS tests | Daily Focus and up to three ordered WeeklyFocus rows persist locally. Full planning ritual state is intentionally not persisted. |
-| Commitments | 🟡 Partial / verification required | Commitment migration + API | API, UI/cache/workload, local RLS tests | One-time create/edit/delete and Today/Week integration exist. Recurrence and calendar sync are deferred. |
+| Tasks | ✅ Verified remotely | Remote migration and authenticated API persistence verified | API, Mobile, local real-JWT/RLS harness, remote Phase 7C E2E | Stable UUIDs survived the remote Core Flow; single-active handoff and two-user isolation passed. Real-device UI verification remains separate. |
+| Quick Capture | 🟡 Partial / real-device verification required | Remote API capture persistence verified | Mobile API/cache/flow tests; remote Phase 7C E2E | Capture persisted through fresh reads, API restart, and logout/login. `Choose day` remains intentionally limited to the approved lightweight behavior. |
+| Inbox | 🟡 Partial / real-device verification required | Remote API persistence verified | UI, processing, routing, Task flow tests; remote Phase 7C E2E | The same remote Task persisted through Inbox → Week/Today without duplication. Real-iPhone UI verification remains. |
+| Today | 🟡 Partial / real-device verification required | Tasks, DailyPlan, Commitments, Settings verified remotely | Today, task-flow, planning, commitment, settings tests; remote Phase 7C E2E | Today → Active → Completed and related planning state persisted remotely. End-of-day rescheduling is not complete. |
+| Week | 🟡 Partial / real-device verification required | Tasks, WeekPlan, WeeklyFocus, Commitments verified remotely | Week, planning, commitments, settings-boundary tests; remote Phase 7C E2E | Inbox → Week → Today and ordered WeeklyFocus persistence passed remotely. Real-iPhone UI verification remains. |
+| Daily/Weekly planning | 🟡 Partial / real-device verification required | DailyPlan/WeeklyFocus migrations + APIs verified remotely | API, cache, UI, local and remote RLS checks | DailyPlan and ordered WeeklyFocus persistence survived restart and logout/login. Full planning ritual state is intentionally not persisted. |
+| Commitments | 🟡 Partial / real-device verification required | Commitment migration + API verified remotely | API, UI/cache/workload, local and remote RLS checks | One-time remote persistence and two-user isolation passed. Recurrence and calendar sync are deferred. |
 | Workload/availability | ✅ Verified | DailyPlan override + UserSettings default | Metrics and screen integration tests | Task estimates plus timed Commitments drive Today status; missing durations contribute zero. Real-use calibration remains product validation. |
-| More / Settings | 🟡 Partial / verification required | UserSettings migration + API | API, UI/cache/date, local RLS tests | Capacity, week start, timezone, Account, and secure sign-out cache clearing exist. Remote migration state is unknown. |
+| More / Settings | 🟡 Partial / real-device verification required | UserSettings remote persistence verified | API, UI/cache/date, local RLS tests; remote Phase 7C E2E | A reversible capacity change survived fresh fetch and logout/login; two-user Settings isolation passed. Real-iPhone UI verification remains. |
 | API | ✅ Verified | Stateless REST over caller-scoped Supabase | API unit/integration suite | Health, Auth identity, Tasks, planning, Commitments, and Settings routes exist with validation and safe errors. |
-| Authentication | 🟡 Partial / verification required | Supabase Auth session persistence | Auth provider/UI/callback/API tests | Signup, verification, sign-in, recovery, gating, token injection, and `/auth/me` exist. Current remote configuration and real-iPhone Auth smoke are not tracked evidence. |
-| Supabase/database | 🟡 Partial / verification required | Four versioned migrations | Reset/lint and opt-in local integration harness | Tasks/WeekPlans, DailyPlans/WeeklyFocuses, Commitments, and UserSettings exist locally. Migration files do not prove cloud application. |
-| RLS/security | ✅ Verified locally | Caller-JWT RLS policies on all user data | Two-user real local Auth/JWT harness | Ownership, cross-user blocking, focus ownership, and single-active DB protection are tested locally. Remote policy deployment remains unverified. |
+| Authentication | 🟡 Partial / real-device verification required | Remote Supabase Auth session flow verified | Auth provider/UI/callback/API tests; remote Phase 7C E2E | Two distinct confirmed users signed in normally; `/auth/me`, logout, fresh password login, and caller-owned data restoration passed. Real-iPhone Auth remains. |
+| Supabase/database | ✅ Verified | Five versioned migrations deployed remotely | Local reset/lint, remote history/dry-run/lint, opt-in local integration harness | Remote history matches all five migrations, linked dry-run is up to date, and remote public-schema lint passes. |
+| RLS/security | ✅ Verified locally and remotely | Caller-JWT RLS policies on all user data | Two-user local harness; anonymous and authenticated remote checks | Bidirectional remote read/write isolation passed for Tasks, WeekPlans, DailyPlans, WeeklyFocuses, Commitments, and UserSettings; anonymous table/RPC denial remains verified with `42501`. |
 | Cross-screen synchronization | ✅ Verified in automated Mobile tests | TanStack Query user-scoped caches | Cache membership/request-audit tests | Targeted cache updates prevent copies and request multipliers. Real cloud/restart observation remains. |
 | Automated tests | ✅ Verified | N/A | 109 Mobile + 37 API tests; local harness opt-in | Standard tests mock external cloud boundaries; local harness exercises actual Docker PostgreSQL/Auth/RLS. |
 | Real-device verification | ⏭️ Next | Not established | No repeatable result in repository | A real iPhone development-build smoke test is required for v0.1.0. |
@@ -69,36 +69,31 @@ This document is the current source of truth for implementation status. “Verif
 
 ## Known gaps / risks
 
-1. Tracked migrations do not prove which migrations are currently applied to the remote Supabase project.
-2. There is no committed, repeatable cloud-backed core-flow smoke result.
-3. There is no recorded real-iPhone smoke result for the current complete application.
-4. App restart and logout/login restoration are covered structurally and by automated cache tests, but not yet verified together against remote persisted data.
-5. End-of-day review/rescheduling and a full arbitrary-date picker are not complete v0.1 behaviors.
-6. The Product Spec mentions an “All Tasks” screen and Life Areas, but neither is part of the narrow current release gate; Life Areas are explicitly disabled/deferred.
-7. Expo Web is a secondary review/development target, not the v0.1 release platform.
+1. There is no recorded real-iPhone smoke result for the current complete application; this is the exact remaining v0.1.0 release gate.
+2. Phase 7C is recorded as a dated remote release verification, not an always-on CI job; its dedicated E2E rows remain available as persistence evidence.
+3. End-of-day review/rescheduling and a full arbitrary-date picker are not complete v0.1 behaviors.
+4. The Product Spec mentions an “All Tasks” screen and Life Areas, but neither is part of the narrow current release gate; Life Areas are explicitly disabled/deferred.
+5. Expo Web is a secondary review/development target, not the v0.1 release platform.
 
 ## Current Critical Path
 
-1. User manually creates the v0.1.0-alpha.1 release commit/tag when satisfied.
-2. Safely reconcile/apply the four tracked migrations to the designated Supabase project and record the exact remote migration state.
-3. Run the authenticated cloud core-flow smoke: Capture → Inbox → Week → Today → Active → Completed.
-4. Repeat across reload, app restart, logout/login, and a second user to verify ownership and cache isolation.
-5. Run the same release smoke on a real iPhone development build.
-6. Fix only release-blocking defects, repeat the gate, and tag v0.1.0.
+1. Run the authenticated release smoke on a real iPhone development build.
+2. Confirm device restart, logout/login, cross-screen state, and Settings behavior against the already verified remote project.
+3. Fix only release-blocking defects, repeat the gate, and tag v0.1.0.
 
 ## Current release gate
 
 ### v0.1.0-alpha.1
 
-**Status: READY.** On 2026-08-15, root TypeScript and lint passed; 109 Mobile and 37 API tests passed; the local two-user real-JWT/RLS harness passed; Expo Doctor passed 21/21 checks; and iOS/Web exports succeeded. No release tag exists yet because the user performs the release commit/tag manually.
+**Status: RELEASED.** Tag `v0.1.0-alpha.1` marks the first development baseline. On 2026-08-15, root TypeScript and lint passed; 109 Mobile and 37 API tests passed; the local two-user real-JWT/RLS harness passed; Expo Doctor passed 21/21 checks; and iOS/Web exports succeeded.
 
 ### v0.1.0
 
-**Status: NOT READY.** Core implementation exists, but the required cloud-backed restart/login flow and real-iPhone smoke test are not repository-verified.
+**Status: NOT READY.** Phase 7C passed the cloud-backed Auth/RLS/Core Flow, API-restart, and logout/login requirements. The exact remaining release gate is the real-iPhone development-build smoke test.
 
 ## Next Action
 
-**Execute the cloud-backed core-flow verification increment described at the top of this document.** Do not add a new feature during that increment.
+**Run the v0.1.0 release smoke on a real iPhone development build against the verified remote project.** Do not add a product feature during that increment.
 
 ## Validation baseline — 2026-08-15
 
@@ -112,4 +107,12 @@ This document is the current source of truth for implementation status. “Verif
 | Expo iOS export | Passed |
 | Expo Web export | Passed |
 
-These results verify the tracked implementation and local database boundary. They do not prove the current remote Supabase schema or real-iPhone behavior.
+These results verify the tracked implementation and local database boundary. The Phase 7 evidence below separately records remote schema, security, Auth, and Core Flow checks; real-iPhone behavior remains unproven.
+
+## Phase 7 remote evidence — 2026-08-15
+
+- **Phase 7A complete:** linked project identity was confirmed; migration history matched; dry run was up to date; remote schema/lint were audited without writes.
+- **Phase 7B complete:** application-facing privileges were normalized, deployed, and verified; five migrations now match remote history and remote lint passes.
+- **Phase 7C complete:** two distinct users authenticated through normal `signInWithPassword`; bidirectional read/write isolation passed for Tasks, WeekPlans, DailyPlans, WeeklyFocuses, Commitments, and UserSettings; and User A completed Quick Capture → Inbox → Week/Today → Active → Completed through the real LifeOS API.
+- **Persistence evidence:** unique run marker `lifeos-remote-e2e-20260815204540` survived fresh reads, an API restart, normal logout/fresh password login, and Settings reload. Starting Task 2 returned Task 1 to `open` with `completed_at = null`; User B's active Task remained independent.
+- **Retained E2E data:** the two pre-existing Auth users remain. For the unique run, User A retains four Tasks (one completed, three open), one WeekPlan, one DailyPlan, two WeeklyFocuses, one Commitment, and one UserSettings row; User B retains three open Tasks, one WeekPlan, one DailyPlan, two WeeklyFocuses, one Commitment, and one UserSettings row. No test Task remains active.
