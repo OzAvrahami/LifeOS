@@ -1,8 +1,9 @@
 # LifeOS Implementation Status
 
-- **Last updated:** 2026-08-15
-- **Current target release:** v0.1.0
+- **Last updated:** 2026-08-16
+- **Current target release:** v0.1.0-alpha.2 — Cloud Core Flow E2E verified snapshot being prepared
 - **Current phase:** Phase 7 — real-iPhone release-gate verification
+- **Phase 7C status:** PASSED — Remote Auth/RLS/Core Flow E2E verified
 - **Next exact task:** Run the authenticated v0.1.0 release smoke on a real iPhone development build, including Capture → Inbox → Week/Today → Active → Completed, restart, logout/login, and Settings persistence.
 
 This document is the current source of truth for implementation status. “Verified” means supported by tracked code plus a repeatable repository check; it does not imply remote or real-device verification unless stated.
@@ -87,9 +88,13 @@ This document is the current source of truth for implementation status. “Verif
 
 **Status: RELEASED.** Tag `v0.1.0-alpha.1` marks the first development baseline. On 2026-08-15, root TypeScript and lint passed; 109 Mobile and 37 API tests passed; the local two-user real-JWT/RLS harness passed; Expo Doctor passed 21/21 checks; and iOS/Web exports succeeded.
 
+### v0.1.0-alpha.2
+
+**Status: READY FOR COMMIT/TAG.** This snapshot records completed Phase 7C remote Auth/RLS/Core Flow E2E verification and the deployed Data API privilege normalization. The release commit and tag have not been created.
+
 ### v0.1.0
 
-**Status: NOT READY.** Phase 7C passed the cloud-backed Auth/RLS/Core Flow, API-restart, and logout/login requirements. The exact remaining release gate is the real-iPhone development-build smoke test.
+**Status: NOT RELEASED / NOT READY.** Phase 7C passed the cloud-backed Auth/RLS/Core Flow, API-restart, and logout/login requirements. The exact remaining release gate is the authenticated real-iPhone development-build smoke test.
 
 ## Next Action
 

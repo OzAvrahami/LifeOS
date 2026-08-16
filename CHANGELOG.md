@@ -6,14 +6,24 @@ LifeOS follows Semantic Versioning for development and release tags.
 
 ## [Unreleased]
 
-### Validation
+## [0.1.0-alpha.2] - 2026-08-16
 
-- Completed Phase 7C against the designated remote LifeOS project with two normally authenticated users: verified caller isolation for Tasks, WeekPlans, DailyPlans, WeeklyFocuses, Commitments, and UserSettings; exercised Quick Capture → Inbox → Week/Today → Active → Completed through the real API; and confirmed persistence after an API restart and User A logout/login.
-- Verified remotely that starting a second User A Task atomically returns Task 1 to `open` with no completion timestamp, leaves only Task 2 active for User A, and does not affect User B's independent active Task.
+### Added
+
+- Remote authenticated Core Flow E2E verification through the real LifeOS API: Quick Capture → Inbox → Week/Today → Active → Completed with one stable Task identity.
+- Remote two-user RLS and isolation verification for Tasks, WeekPlans, DailyPlans, WeeklyFocuses, Commitments, and UserSettings, including independent single-active-task behavior.
+- Remote persistence verification across fresh API state, API restart, and User A logout/login.
+
+### Changed
+
+- Updated implementation and release-status documentation to record Phase 7C as complete and make the authenticated real-iPhone v0.1.0 smoke test the next release gate.
 
 ### Security
 
-- Normalized remote Data API privileges so `anon` has no direct access to LifeOS user-owned tables or authenticated RPCs, while `authenticated` retains only the operations required by the application and RLS remains enforced.
+- Normalized LifeOS Data API privileges explicitly for every user-owned application table and authenticated RPC.
+- Denied `anon` access to LifeOS user-owned tables and authenticated RPC operations.
+- Limited `authenticated` to the table operations and RPC execution privileges required by the application, with RLS continuing to enforce caller ownership.
+- Left `service_role` as Supabase-managed administrative state without changing its privileges.
 
 ## [0.1.0-alpha.1] - 2026-08-15
 
