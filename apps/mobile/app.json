@@ -8,7 +8,7 @@
     "userInterfaceStyle": "light",
     "ios": {
       "supportsTablet": false,
-      "bundleIdentifier": "com.lifeos.mobile"
+      "bundleIdentifier": "il.co.ozavrahami.lifeos"
     },
     "android": {
       "package": "com.lifeos.mobile",

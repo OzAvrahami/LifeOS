@@ -75,6 +75,12 @@ export function TodayScreen({
   const { captureTask } = useTaskCapture(taskSource);
   const [operationError, setOperationError] = useState(false);
   const integrated = serverTasks || initialState === 'normal';
+  const isHydrating = serverTasks && (
+    todayQuery.isPending
+    || commitmentQuery.isPending
+    || dailyPlanQuery.isPending
+    || settingsQuery.isPending
+  );
   const sourceTasks = serverTasks ? (todayQuery.data ?? []) : demo.todayTasks;
   const activeTask = sourceTasks.find((task) => task.status === 'in_progress');
   const openTodayTasks = sourceTasks.filter((task) => task.status === 'open');
@@ -241,10 +247,10 @@ export function TodayScreen({
       >
         <TaskQueryNotice
           error={serverTasks && (todayQuery.isError || commitmentQuery.isError || dailyPlanQuery.isError || settingsQuery.isError || operationError)}
-          loading={serverTasks && (todayQuery.isPending || commitmentQuery.isPending || dailyPlanQuery.isPending || settingsQuery.isPending)}
+          loading={isHydrating}
           onRetry={() => void Promise.all([todayQuery.refetch(), commitmentQuery.refetch(), dailyPlanQuery.refetch(), settingsQuery.refetch()])}
         />
-        {content}
+        {isHydrating ? null : content}
       </MobileShell>
       <QuickCaptureSheet
         onClose={() => setCaptureOpen(false)}

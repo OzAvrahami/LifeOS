@@ -79,6 +79,35 @@ function TestAuthProvider({
 }
 
 describe('mobile Auth infrastructure', () => {
+  it('does not let a stale bootstrap result overwrite a newer signed-in session', async () => {
+    let resolveSession: ((value: unknown) => void) | undefined;
+    const mock = createMockSupabaseClient(null);
+    mock.auth.getSession.mockReturnValueOnce(
+      new Promise((resolve) => {
+        resolveSession = resolve;
+      }),
+    );
+
+    await render(
+      <TestAuthProvider client={mock.client}>
+        <AuthProbe />
+      </TestAuthProvider>,
+    );
+
+    expect(screen.getByText('loading')).toBeTruthy();
+
+    await act(async () => {
+      mock.emit('SIGNED_IN', testSession);
+    });
+    expect(screen.getByText('signed in: person@example.com')).toBeTruthy();
+
+    await act(async () => {
+      resolveSession?.({ data: { session: null }, error: null });
+    });
+
+    expect(screen.getByText('signed in: person@example.com')).toBeTruthy();
+  });
+
   it('starts in loading state and restores the persisted session', async () => {
     let resolveSession: ((value: unknown) => void) | undefined;
     const mock = createMockSupabaseClient(null);

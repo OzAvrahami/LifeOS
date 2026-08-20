@@ -18,10 +18,12 @@ export function AuthProvider({
 
   useEffect(() => {
     let isMounted = true;
+    let hasReceivedAuthEvent = false;
     const {
       data: { subscription },
     } = client.auth.onAuthStateChange((event, nextSession) => {
       if (!isMounted) return;
+      hasReceivedAuthEvent = true;
       setSession(nextSession);
       if (event === 'PASSWORD_RECOVERY') setIsRecovery(true);
       if (event === 'SIGNED_OUT') setIsRecovery(false);
@@ -31,12 +33,12 @@ export function AuthProvider({
     void client.auth
       .getSession()
       .then(({ data, error }) => {
-        if (!isMounted) return;
+        if (!isMounted || hasReceivedAuthEvent) return;
         setSession(error ? null : data.session);
         setIsLoading(false);
       })
       .catch(() => {
-        if (!isMounted) return;
+        if (!isMounted || hasReceivedAuthEvent) return;
         setSession(null);
         setIsLoading(false);
       });
