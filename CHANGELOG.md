@@ -6,6 +6,23 @@ LifeOS follows Semantic Versioning for development and release tags.
 
 ## [Unreleased]
 
+## [0.1.1] - 2026-08-20
+
+### Added
+
+- Deployed the production API as the Railway `lifeos-api` HTTPS service and verified both public health and authenticated identity requests.
+- Created and verified a standalone iPhone Release build using bundle identifier `il.co.ozavrahami.lifeos`.
+
+### Changed
+
+- Changed the API production start path to run compiled JavaScript with `node dist/src/server.js`.
+- Pointed the Mobile deployment environment at the Railway HTTPS API.
+- Removed the installed iPhone build's normal-use dependency on the local Mac, Metro, and local LifeOS API; standalone cellular operation now uses Railway and Supabase Cloud.
+
+### Security
+
+- Preserved the publishable-key + caller JWT + RLS architecture in production; the application does not use `service_role`.
+
 ## [0.1.0] - 2026-08-20
 
 ### Added

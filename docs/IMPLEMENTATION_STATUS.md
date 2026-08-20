@@ -1,10 +1,10 @@
 # LifeOS Implementation Status
 
 - **Last updated:** 2026-08-20
-- **Current release:** v0.1.0 — release gate passed; ready to tag
-- **Current phase:** Phase 7 complete — production-real Core Flow verified
-- **Phase 7 status:** PASSED — remote Auth/RLS/Core Flow and real-iPhone development-build smoke verified
-- **Next engineering phase:** Begin Phase 8 internal MVP usage after the v0.1.0 release tag.
+- **Current release being cut:** v0.1.1 — standalone internal deployment milestone; ready for release commit and tag
+- **Current phase:** Phase 8 complete — standalone internal MVP deployment verified
+- **Phase 8 status:** PASSED — Railway HTTPS API and standalone real-iPhone Release build verified over cellular networking
+- **Next engineering phase:** Real-world usage and high-level v0.2.0 planning.
 
 This document is the current source of truth for implementation status. “Verified” means supported by tracked code plus a repeatable repository check; it does not imply remote or real-device verification unless stated.
 
@@ -23,13 +23,13 @@ This document is the current source of truth for implementation status. “Verif
 | Commitments | ✅ Verified remotely | Commitment migration + API verified remotely | API, UI/cache/workload, local and remote RLS checks | One-time remote persistence and two-user isolation passed. Recurrence and calendar sync are deferred. |
 | Workload/availability | ✅ Verified | DailyPlan override + UserSettings default | Metrics and screen integration tests | Task estimates plus timed Commitments drive Today status; missing durations contribute zero. Real-use calibration remains product validation. |
 | More / Settings | ✅ Verified remotely and on device | UserSettings remote persistence verified | API, UI/cache/date, local RLS tests; remote Phase 7C E2E | Settings survived fresh fetch, logout/login, app restart, and the final real-iPhone smoke; two-user isolation passed. |
-| API | ✅ Verified | Stateless REST over caller-scoped Supabase | API unit/integration suite | Health, Auth identity, Tasks, planning, Commitments, and Settings routes exist with validation and safe errors. |
+| API | ✅ Deployed and verified | Stateless Railway HTTPS service over caller-scoped Supabase | API unit/integration suite; Railway health and authenticated identity checks | `lifeos-api` runs compiled JavaScript on Railway; public health and authenticated `/auth/me` checks passed. |
 | Authentication | ✅ Verified remotely and on device | Remote Supabase Auth session flow verified | Auth provider/UI/callback/API and bootstrap-race tests; remote Phase 7C E2E | Remote and real-iPhone login, logout/login restoration, and restart persistence passed; the stale-bootstrap session race is fixed. |
 | Supabase/database | ✅ Verified | Five versioned migrations deployed remotely | Local reset/lint, remote history/dry-run/lint, opt-in local integration harness | Remote history matches all five migrations, linked dry-run is up to date, and remote public-schema lint passes. |
 | RLS/security | ✅ Verified locally and remotely | Caller-JWT RLS policies on all user data | Two-user local harness; anonymous and authenticated remote checks | Bidirectional remote read/write isolation passed for Tasks, WeekPlans, DailyPlans, WeeklyFocuses, Commitments, and UserSettings; anonymous table/RPC denial remains verified with `42501`. |
 | Cross-screen synchronization | ✅ Verified in automation, remotely, and on device | TanStack Query user-scoped caches | Cache membership/request-audit tests | Targeted cache updates prevent copies and request multipliers; remote and real-device Core Flow remained consistent. |
 | Automated tests | ✅ Verified | N/A | 113 Mobile across 26 suites + 37 API tests; local harness opt-in | Standard tests mock external cloud boundaries; local harness exercises actual Docker PostgreSQL/Auth/RLS. |
-| Real-device verification | ✅ Verified | Remote authenticated persistence observed on device | Real-iPhone development-build smoke | Core Flow, restart, logout/login, Settings, and final post-dependency-alignment smoke passed. |
+| Real-device verification | ✅ Standalone internal use verified | Remote authenticated persistence observed on device | Real-iPhone development and Release-build smokes | The installed Release build operated over cellular with Metro, the local API, and the Mac unavailable. It remains development-signed and is not a TestFlight or App Store release. |
 | Life Areas and broader product modules | ⏸️ Deferred | None | None | Life Areas UI remains disabled; recurring schedules, external calendars, notifications, AI, projects, habits, and billing are outside the current gate. |
 
 ## Evidence by subsystem
@@ -74,15 +74,20 @@ This document is the current source of truth for implementation status. “Verif
 2. End-of-day review/rescheduling and a full arbitrary-date picker are not complete v0.1 behaviors.
 3. The Product Spec mentions an “All Tasks” screen and Life Areas, but neither is part of the narrow v0.1 release gate; Life Areas are explicitly disabled/deferred.
 4. Expo Web is a secondary review/development target, not the v0.1 release platform.
-5. No known release-blocking product bug remains.
+5. The standalone iPhone build uses the current Apple Personal Team/development-distribution setup. TestFlight and App Store distribution are not complete.
+6. No known release-blocking product bug remains.
 
 ## Current Critical Path
 
-1. Review and commit the final v0.1.0 release documentation.
-2. Create the authoritative `v0.1.0` Git tag.
-3. Begin Phase 8 internal MVP usage.
+1. Use the standalone internal MVP in real daily and weekly planning.
+2. Record product friction, defects, and missing-flow evidence.
+3. Use that evidence to plan v0.2.0 at a high level.
 
 ## Current release gate
+
+### v0.1.1
+
+**Status: READY FOR RELEASE COMMIT AND TAG.** Phase 8 is complete: the Railway HTTPS API, authenticated Railway identity request, Railway-backed Mobile configuration, and standalone real-iPhone Release operation have been verified. The deployed architecture is iPhone → Railway HTTPS API → Supabase Cloud. This release does not represent TestFlight or App Store distribution.
 
 ### v0.1.0-alpha.1
 
@@ -94,11 +99,20 @@ This document is the current source of truth for implementation status. “Verif
 
 ### v0.1.0
 
-**Status: NOT YET TAGGED / READY TO TAG.** Phase 7A migration alignment, Phase 7B privilege normalization, Phase 7C remote Auth/RLS/Core Flow, real-iPhone persistence smokes, the two device-discovered regression fixes, Expo SDK patch alignment, and the final fresh-build smoke all passed. No known release-blocking product bug remains.
+**Status: RELEASED.** Phase 7A migration alignment, Phase 7B privilege normalization, Phase 7C remote Auth/RLS/Core Flow, real-iPhone persistence smokes, the two device-discovered regression fixes, Expo SDK patch alignment, and the final fresh-build smoke all passed. Tag `v0.1.0` is the authoritative first internal MVP release.
 
 ## Next Action
 
-**Commit the reviewed release documentation and create the authoritative `v0.1.0` Git tag.**
+**Begin real-world standalone usage and collect evidence for v0.2.0 planning.**
+
+## Phase 8 standalone deployment evidence — 2026-08-20
+
+- The compiled API starts with `node dist/src/server.js` and is deployed as the Railway service `lifeos-api` at `https://lifeosapi-production-0362.up.railway.app`.
+- Railway `GET /health` returned `{"service":"lifeos-api","status":"ok"}`, and authenticated `GET /auth/me` succeeded with a real Supabase JWT.
+- Railway supplies `PORT`; the service uses the remote Supabase URL, publishable key, caller JWT, and RLS. The application does not use `service_role`.
+- Mobile targets the Railway HTTPS API in the deployment environment. A real-device Release build was created with `npx expo run:ios --device --configuration Release` using bundle identifier `il.co.ozavrahami.lifeos`.
+- Standalone operation passed on the real iPhone over cellular networking with Metro stopped, the local API stopped, and the Mac disconnected: iPhone → Railway API → Supabase Cloud.
+- This proves standalone internal usage only. The build is signed through the current Apple development setup and has not been distributed through TestFlight or the App Store.
 
 ## Validation baseline — 2026-08-20
 

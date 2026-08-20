@@ -19,6 +19,7 @@ Current planning and release status:
 
 - [Roadmap](docs/ROADMAP.md)
 - [Implementation status](docs/IMPLEMENTATION_STATUS.md)
+- [Deployment](docs/DEPLOYMENT.md)
 - [Changelog](CHANGELOG.md)
 
 Node 24 LTS is the preferred runtime. The current foundation also validates successfully on Node 26.

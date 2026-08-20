@@ -9,6 +9,7 @@ Status is based on repository evidence. A phase can contain implemented code whi
 - **v0.1.0-alpha.1** — first official development snapshot of the existing LifeOS implementation.
 - **v0.1.0-alpha.N** — additional internal snapshots while the core flow is completed and stabilized.
 - **v0.1.0** — first internal MVP where the daily/weekly planning loop works end to end on a real iPhone with persisted authenticated data.
+- **v0.1.1** — standalone internal deployment milestone: Railway HTTPS API and a Release iPhone build that operates without the development Mac, Metro, or local API.
 - **v1.0.0** — a later stable-product milestone; it is not the current target.
 
 Git tags are the authoritative release markers. Expo/App Store build numbering remains unchanged until a separate release workflow requires it.
@@ -97,21 +98,25 @@ The authoritative documents, full TypeScript/lint/test pass, local real-JWT inte
 
 Migration reconciliation, privilege normalization, Phase 7C remote Auth/RLS/Core Flow verification, real-iPhone persistence smokes, and the final fresh-development-build smoke are complete. The Auth bootstrap race and Today hydration flicker found on device were fixed and regression-tested; no known release-blocking product bug remains.
 
-## Phase 8 — First internal MVP usage
+## Phase 8 — Standalone internal MVP deployment
 
-**Goal:** Use the v0.1.0 internal MVP as the primary daily/weekly planning tool and validate its usefulness.
+**Goal:** Remove the installed iPhone build's runtime dependency on the development Mac and expose the API securely over HTTPS.
 
-**Scope:** At least one week of real use, defect fixes, missing-flow observations, and removal of release-blocking friction.
+**Scope:** Railway production API execution, HTTPS public networking, deployment health verification, Mobile deployment API configuration, and a standalone real-iPhone Release build.
 
-**Exit criteria:** The product supports one authenticated user’s real planning loop for a full week and produces actionable usage evidence.
+**Exit criteria:** The Railway API health and authenticated identity routes pass, and the installed iPhone build operates through Railway and Supabase with Metro, the local API, and the Mac unavailable.
 
-**Current status: NOT STARTED**
+**Current status: DONE**
 
-## Phase 9 — Post-v0.1 product expansion
+The `lifeos-api` Railway service runs the compiled API behind HTTPS. A Release iOS build completed and standalone operation passed over cellular networking: iPhone → Railway API → Supabase Cloud. This is an internal development-signed build, not completed TestFlight or App Store distribution.
 
-**Goal:** Add only capabilities justified by real v0.1 usage.
+**Release milestone:** v0.1.1 — ready for its release commit and tag.
 
-**Scope:** Possible calendar integration, notifications, Life Areas, recurring commitments, AI, habits, goals, or automation.
+## Phase 9 — Real-world usage and v0.2.0 planning
+
+**Goal:** Use the standalone v0.1 MVP in real planning and identify only the next capabilities justified by evidence.
+
+**Scope:** Real daily/weekly usage, defect and friction capture, missing-flow observations, and high-level v0.2.0 planning. Possible later expansion includes calendar integration, notifications, Life Areas, recurring commitments, AI, habits, goals, or automation.
 
 **Exit criteria:** Defined only after v0.1 usage evidence exists.
 
