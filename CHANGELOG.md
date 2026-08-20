@@ -6,6 +6,23 @@ LifeOS follows Semantic Versioning for development and release tags.
 
 ## [Unreleased]
 
+## [0.1.0] - 2026-08-20
+
+### Added
+
+- Final real-iPhone development-build verification of authenticated login, the Core Flow, restart and logout/login persistence, Settings persistence, and correct Today hydration.
+- Deterministic AuthProvider bootstrap-race and Today server-hydration regression coverage.
+
+### Changed
+
+- Aligned Expo SDK 57 patch dependencies with Expo Doctor compatibility expectations and verified a fresh iOS development build.
+- Established `il.co.ozavrahami.lifeos` as the iOS bundle identifier.
+
+### Fixed
+
+- Prevented a stale bootstrap `getSession()` result from overwriting a newer `SIGNED_IN` session in AuthProvider.
+- Prevented Today from rendering a false empty-day state before its initial server-backed data finished hydrating.
+
 ## [0.1.0-alpha.2] - 2026-08-16
 
 ### Added

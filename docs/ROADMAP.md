@@ -45,9 +45,9 @@ Repository evidence: the committed Claude Design export, feature implementations
 
 **Exit criteria:** Automated Auth tests pass, API tokens are verified rather than decoded and trusted, signed-out routes are gated, and signup/recovery/API identity are verified in the intended runtime.
 
-**Current status: IN PROGRESS**
+**Current status: DONE**
 
-Implementation and automated verification exist. Phase 7C verified two normal remote password sessions, API identity, logout, and fresh login; the real-device Auth smoke remains open.
+Implementation and automated verification exist. Phase 7C verified two normal remote password sessions, API identity, logout, and fresh login; authenticated real-iPhone login, restart, and logout/login persistence also passed.
 
 ## Phase 4 — Persistent core Task foundation
 
@@ -69,9 +69,9 @@ Implementation, unit/component tests, migration replay, and an opt-in local real
 
 **Exit criteria:** Migrations and RLS pass local replay/integration tests; Mobile reads and mutates these resources through the API; settings affect Today/Week correctly; and remote/device persistence is verified.
 
-**Current status: IN PROGRESS**
+**Current status: DONE**
 
-The tracked implementation and automated/local verification exist, all five migrations are deployed remotely, and Phase 7C verified authenticated remote planning, Commitment, and Settings persistence. Real-device behavior remains open.
+The tracked implementation and automated/local verification exist, all five migrations are deployed remotely, Phase 7C verified authenticated remote planning, Commitment, and Settings persistence, and real-iPhone Settings persistence passed.
 
 ## Phase 6 — Authoritative alpha baseline
 
@@ -93,17 +93,17 @@ The authoritative documents, full TypeScript/lint/test pass, local real-JWT inte
 
 **Exit criteria:** The full v0.1.0 release gate below is recorded as passed with no release-blocking bug.
 
-**Current status: IN PROGRESS**
+**Current status: DONE**
 
-Migration reconciliation, privilege normalization, and Phase 7C remote Auth/RLS/Core Flow verification are complete. The exact remaining Phase 7 release gate is the real-iPhone development-build smoke test.
+Migration reconciliation, privilege normalization, Phase 7C remote Auth/RLS/Core Flow verification, real-iPhone persistence smokes, and the final fresh-development-build smoke are complete. The Auth bootstrap race and Today hydration flicker found on device were fixed and regression-tested; no known release-blocking product bug remains.
 
 ## Phase 8 — First internal MVP usage
 
-**Goal:** Use LifeOS as the primary daily/weekly planning tool and validate its usefulness.
+**Goal:** Use the v0.1.0 internal MVP as the primary daily/weekly planning tool and validate its usefulness.
 
 **Scope:** At least one week of real use, defect fixes, missing-flow observations, and removal of release-blocking friction.
 
-**Exit criteria:** v0.1.0 is tagged and the product can support one authenticated user’s real planning loop for a full week.
+**Exit criteria:** The product supports one authenticated user’s real planning loop for a full week and produces actionable usage evidence.
 
 **Current status: NOT STARTED**
 
@@ -140,8 +140,10 @@ The release is ready only when all of these are verified end to end:
 - [x] A fresh API process reconstructs remote state.
 - [x] Logout/login restores the correct user's remote data, with direct two-user RLS isolation verified.
 - [x] Basic Settings persist across fresh fetch and logout/login.
-- [ ] Cross-screen state stays consistent on the target device.
-- A real iPhone smoke test passes.
-- No known release-blocking bug remains.
+- [x] Cross-screen state stays consistent on the target device.
+- [x] A real iPhone development-build smoke test passes, including a final smoke after Expo SDK patch alignment.
+- [x] No known release-blocking bug remains.
+
+**Status: PASSED — v0.1.0 is the completed first internal MVP milestone and is ready for its release commit and authoritative Git tag.**
 
 Unrelated nice-to-have features are not part of this gate.
