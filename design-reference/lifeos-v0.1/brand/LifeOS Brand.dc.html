@@ -1,0 +1,336 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Schibsted+Grotesk:wght@400;500;600;700&family=Instrument+Sans:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<meta name="design_doc_mode" content="canvas">
+<style>
+ *{box-sizing:border-box}
+ body{margin:0;background:#131315;color:#EAE7E0;font-family:'Instrument Sans',system-ui,sans-serif;-webkit-font-smoothing:antialiased;text-rendering:optimizeLegibility}
+ a{color:#E89A2A;text-decoration:none}a:hover{color:#F2B24E}
+ h1,h2,h3{font-family:'Schibsted Grotesk',sans-serif;margin:0}
+ p{margin:0;text-wrap:pretty}
+ .mono{font-family:'JetBrains Mono',monospace}
+ .eyebrow{font-size:11px;letter-spacing:.2em;text-transform:uppercase;color:#8C887E;font-weight:600}
+ .card{background:#1B1C1F;border:1px solid rgba(255,255,255,.07);border-radius:22px}
+</style>
+</helmet>
+
+<div style="max-width:1200px;margin:0 auto;padding:70px 56px 130px">
+
+  <!-- MASTHEAD -->
+  <header style="margin-bottom:64px">
+    <div style="display:flex;align-items:center;gap:26px;margin-bottom:30px">
+      <div style="width:112px;height:112px;flex:none;border-radius:25px;background:#241B3A;position:relative;overflow:hidden;box-shadow:0 20px 44px -16px rgba(0,0,0,.65),inset 0 1px 0 rgba(255,255,255,.1)">
+        <div style="position:absolute;inset:0;background:radial-gradient(120% 90% at 50% 0%,rgba(255,255,255,.12),transparent 55%)"></div>
+        <svg viewBox="0 0 100 100" style="position:absolute;inset:20%;overflow:visible">
+          <path d="M78.25,34.98 A32,32 0 1 1 48.88,18.02" fill="none" stroke="#F0EADD" stroke-width="10" stroke-linecap="round"/>
+          <circle cx="50" cy="50" r="11" fill="#F0EADD"/>
+          <circle cx="66" cy="22.29" r="7" fill="#E89A2A"/>
+        </svg>
+      </div>
+      <div>
+        <div class="eyebrow" style="color:#E89A2A">Production identity · v1.0</div>
+        <h1 style="font-size:52px;font-weight:600;letter-spacing:-.03em;margin:10px 0 0;line-height:1">LifeOS Brand</h1>
+      </div>
+    </div>
+    <p style="font-size:18px;line-height:1.6;color:#B6B2A8;max-width:680px">The approved M1 · <em>Anchored Now</em> direction, locked for development. The present moment — the amber point — held within the larger rhythm of the open track. Everything here is handoff-ready.</p>
+  </header>
+
+  <!-- 1. GEOMETRY LOCK -->
+  <section style="margin-bottom:60px">
+    <div class="eyebrow" style="margin-bottom:6px">01 — Final geometry</div>
+    <h2 style="font-size:30px;font-weight:600;letter-spacing:-.02em;margin-bottom:8px">The dot is anchored, not orbiting</h2>
+    <p style="font-size:15px;line-height:1.6;color:#B0ACA2;max-width:620px;margin-bottom:30px">The opening of the track was rotated to the upper-right and widened, and the focus point now sits cradled inside that opening — on the same radius as the track, clearly a point on the rhythm. A deliberate counter-gap on each side keeps the dot and the arc terminals from merging into one blob at small sizes.</p>
+    <div style="display:grid;grid-template-columns:1.3fr 1fr;gap:24px">
+      <div class="card" style="padding:34px;display:flex;gap:34px;align-items:center">
+        <div style="width:200px;height:200px;flex:none;position:relative">
+          <svg viewBox="0 0 100 100" style="position:absolute;inset:0;overflow:visible">
+            <circle cx="50" cy="50" r="32" fill="none" stroke="rgba(255,255,255,.09)" stroke-width="1"/>
+            <line x1="50" y1="6" x2="50" y2="94" stroke="rgba(255,255,255,.08)" stroke-width="1"/>
+            <line x1="6" y1="50" x2="94" y2="50" stroke="rgba(255,255,255,.08)" stroke-width="1"/>
+            <path d="M78.25,34.98 A32,32 0 1 1 48.88,18.02" fill="none" stroke="#F0EADD" stroke-width="10" stroke-linecap="round"/>
+            <circle cx="50" cy="50" r="11" fill="#F0EADD"/>
+            <circle cx="66" cy="22.29" r="7" fill="#E89A2A"/>
+            <circle cx="66" cy="22.29" r="7" fill="none" stroke="rgba(232,154,42,.4)" stroke-width="0.6" transform="scale(1.9)" transform-origin="66 22.29"/>
+          </svg>
+        </div>
+        <div style="font-size:13.5px;line-height:1.9;color:#B0ACA2">
+          <div style="display:flex;justify-content:space-between;gap:24px;border-bottom:1px solid rgba(255,255,255,.07);padding:6px 0"><span>Track radius</span><span class="mono" style="color:#EAE7E0">32</span></div>
+          <div style="display:flex;justify-content:space-between;gap:24px;border-bottom:1px solid rgba(255,255,255,.07);padding:6px 0"><span>Stroke weight</span><span class="mono" style="color:#EAE7E0">10</span></div>
+          <div style="display:flex;justify-content:space-between;gap:24px;border-bottom:1px solid rgba(255,255,255,.07);padding:6px 0"><span>Opening</span><span class="mono" style="color:#EAE7E0">64°</span></div>
+          <div style="display:flex;justify-content:space-between;gap:24px;border-bottom:1px solid rgba(255,255,255,.07);padding:6px 0"><span>Center dot</span><span class="mono" style="color:#EAE7E0">r 11</span></div>
+          <div style="display:flex;justify-content:space-between;gap:24px;border-bottom:1px solid rgba(255,255,255,.07);padding:6px 0"><span>Focus dot</span><span class="mono" style="color:#EAE7E0">r 7</span></div>
+          <div style="display:flex;justify-content:space-between;gap:24px;padding:6px 0"><span>Counter-gap</span><span class="mono" style="color:#E89A2A">≈ 5.9</span></div>
+        </div>
+      </div>
+      <div class="card" style="padding:34px;display:flex;flex-direction:column;justify-content:center;gap:26px">
+        <div style="display:flex;gap:30px;align-items:center">
+          <div style="width:40px;height:40px;flex:none;border-radius:9px;background:#241B3A;position:relative;overflow:hidden">
+            <svg viewBox="0 0 100 100" style="position:absolute;inset:20%"><path d="M62.89,19.62 A33,33 0 1 1 37.11,19.62" fill="none" stroke="#F0EADD" stroke-width="10" stroke-linecap="round"/><circle cx="50" cy="50" r="11" fill="#F0EADD"/><circle cx="62.89" cy="19.62" r="6" fill="#E89A2A"/></svg>
+          </div>
+          <div><div style="font-size:13px;color:#8C887E;text-decoration:line-through">Before · 40px</div><div style="font-size:13px;color:#B0ACA2;margin-top:2px">dot fused to the arc cap</div></div>
+        </div>
+        <div style="height:1px;background:rgba(255,255,255,.07)"></div>
+        <div style="display:flex;gap:30px;align-items:center">
+          <div style="width:40px;height:40px;flex:none;border-radius:9px;background:#241B3A;position:relative;overflow:hidden">
+            <svg viewBox="0 0 100 100" style="position:absolute;inset:20%"><path d="M78.25,34.98 A32,32 0 1 1 48.88,18.02" fill="none" stroke="#F0EADD" stroke-width="10" stroke-linecap="round"/><circle cx="50" cy="50" r="11" fill="#F0EADD"/><circle cx="66" cy="22.29" r="7" fill="#E89A2A"/></svg>
+          </div>
+          <div><div style="font-size:13px;color:#E89A2A">After · 40px</div><div style="font-size:13px;color:#B0ACA2;margin-top:2px">focus point reads distinctly</div></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 2. SIZE LADDER -->
+  <section style="margin-bottom:60px">
+    <div class="eyebrow" style="margin-bottom:6px">02 — Small-size behaviour</div>
+    <h2 style="font-size:30px;font-weight:600;letter-spacing:-.02em;margin-bottom:8px">Holds from App Store to status bar</h2>
+    <p style="font-size:15px;line-height:1.6;color:#B0ACA2;max-width:620px;margin-bottom:32px">Rendered at true pixel size. Down to 32px the three signals survive: one open system, one center, one anchored focus point.</p>
+    <div class="card" style="padding:40px 34px;display:flex;gap:40px;align-items:flex-end;flex-wrap:wrap;justify-content:center">
+      <div style="text-align:center"><div style="width:130px;height:130px;border-radius:29px;background:#241B3A;position:relative;overflow:hidden;box-shadow:0 12px 26px -10px rgba(0,0,0,.6)"><svg viewBox="0 0 100 100" style="position:absolute;inset:20%"><path d="M78.25,34.98 A32,32 0 1 1 48.88,18.02" fill="none" stroke="#F0EADD" stroke-width="10" stroke-linecap="round"/><circle cx="50" cy="50" r="11" fill="#F0EADD"/><circle cx="66" cy="22.29" r="7" fill="#E89A2A"/></svg></div><div style="font-size:11px;color:#8C887E;margin-top:12px" class="mono">1024 <span style="opacity:.5">· shown 130</span></div></div>
+      <div style="text-align:center"><div style="width:90px;height:90px;border-radius:20px;background:#241B3A;position:relative;overflow:hidden;box-shadow:0 10px 22px -10px rgba(0,0,0,.6)"><svg viewBox="0 0 100 100" style="position:absolute;inset:20%"><path d="M78.25,34.98 A32,32 0 1 1 48.88,18.02" fill="none" stroke="#F0EADD" stroke-width="10" stroke-linecap="round"/><circle cx="50" cy="50" r="11" fill="#F0EADD"/><circle cx="66" cy="22.29" r="7" fill="#E89A2A"/></svg></div><div style="font-size:11px;color:#8C887E;margin-top:12px" class="mono">180</div></div>
+      <div style="text-align:center"><div style="width:60px;height:60px;border-radius:14px;background:#241B3A;position:relative;overflow:hidden;box-shadow:0 8px 18px -8px rgba(0,0,0,.6)"><svg viewBox="0 0 100 100" style="position:absolute;inset:20%"><path d="M78.25,34.98 A32,32 0 1 1 48.88,18.02" fill="none" stroke="#F0EADD" stroke-width="10" stroke-linecap="round"/><circle cx="50" cy="50" r="11" fill="#F0EADD"/><circle cx="66" cy="22.29" r="7" fill="#E89A2A"/></svg></div><div style="font-size:11px;color:#8C887E;margin-top:12px" class="mono">120</div></div>
+      <div style="text-align:center"><div style="width:60px;height:60px;border-radius:14px;background:#241B3A;position:relative;overflow:hidden"><svg viewBox="0 0 100 100" style="position:absolute;inset:20%"><path d="M78.25,34.98 A32,32 0 1 1 48.88,18.02" fill="none" stroke="#F0EADD" stroke-width="10" stroke-linecap="round"/><circle cx="50" cy="50" r="11" fill="#F0EADD"/><circle cx="66" cy="22.29" r="7" fill="#E89A2A"/></svg></div><div style="font-size:11px;color:#8C887E;margin-top:12px" class="mono">60</div></div>
+      <div style="text-align:center"><div style="width:40px;height:40px;border-radius:9px;background:#241B3A;position:relative;overflow:hidden"><svg viewBox="0 0 100 100" style="position:absolute;inset:20%"><path d="M78.25,34.98 A32,32 0 1 1 48.88,18.02" fill="none" stroke="#F0EADD" stroke-width="10" stroke-linecap="round"/><circle cx="50" cy="50" r="11" fill="#F0EADD"/><circle cx="66" cy="22.29" r="7" fill="#E89A2A"/></svg></div><div style="font-size:11px;color:#8C887E;margin-top:12px" class="mono">40</div></div>
+      <div style="text-align:center"><div style="width:32px;height:32px;border-radius:7.5px;background:#241B3A;position:relative;overflow:hidden"><svg viewBox="0 0 100 100" style="position:absolute;inset:19%"><path d="M78.25,34.98 A32,32 0 1 1 48.88,18.02" fill="none" stroke="#F0EADD" stroke-width="11" stroke-linecap="round"/><circle cx="50" cy="50" r="11.5" fill="#F0EADD"/><circle cx="66" cy="22.29" r="7.5" fill="#E89A2A"/></svg></div><div style="font-size:11px;color:#8C887E;margin-top:12px" class="mono">32 <span style="opacity:.5">· opt.</span></div></div>
+    </div>
+    <p style="font-size:13px;line-height:1.6;color:#77746C;margin-top:16px;max-width:620px">At 32px an optical build is used — stroke and dots grow ~10% and the counter-gap widens — so the forms stay separate rather than scaling mathematically.</p>
+  </section>
+
+  <!-- 3. COLOR -->
+  <section style="margin-bottom:60px">
+    <div class="eyebrow" style="margin-bottom:6px">03 — Colour system</div>
+    <h2 style="font-size:30px;font-weight:600;letter-spacing:-.02em;margin-bottom:32px">Three colours, one job each</h2>
+    <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:20px">
+      <div class="card" style="overflow:hidden">
+        <div style="height:130px;background:#241B3A"></div>
+        <div style="padding:22px 24px">
+          <div style="font-family:'Schibsted Grotesk';font-weight:600;font-size:19px">Deep Purple</div>
+          <div style="font-size:12.5px;color:#8C887E;margin-bottom:14px">Primary background</div>
+          <div class="mono" style="font-size:12.5px;line-height:2;color:#B0ACA2"><div>HEX <span style="color:#EAE7E0">#241B3A</span></div><div>RGB <span style="color:#EAE7E0">36 · 27 · 58</span></div><div>HSL <span style="color:#EAE7E0">257° 36% 17%</span></div></div>
+        </div>
+      </div>
+      <div class="card" style="overflow:hidden">
+        <div style="height:130px;background:#F0EADD"></div>
+        <div style="padding:22px 24px">
+          <div style="font-family:'Schibsted Grotesk';font-weight:600;font-size:19px">Warm Cream</div>
+          <div style="font-size:12.5px;color:#8C887E;margin-bottom:14px">Primary mark</div>
+          <div class="mono" style="font-size:12.5px;line-height:2;color:#B0ACA2"><div>HEX <span style="color:#EAE7E0">#F0EADD</span></div><div>RGB <span style="color:#EAE7E0">240 · 234 · 221</span></div><div>HSL <span style="color:#EAE7E0">41° 39% 90%</span></div></div>
+        </div>
+      </div>
+      <div class="card" style="overflow:hidden">
+        <div style="height:130px;background:#E89A2A"></div>
+        <div style="padding:22px 24px">
+          <div style="font-family:'Schibsted Grotesk';font-weight:600;font-size:19px">Amber</div>
+          <div style="font-size:12.5px;color:#8C887E;margin-bottom:14px">Focus · "now" accent</div>
+          <div class="mono" style="font-size:12.5px;line-height:2;color:#B0ACA2"><div>HEX <span style="color:#EAE7E0">#E89A2A</span></div><div>RGB <span style="color:#EAE7E0">232 · 154 · 42</span></div><div>HSL <span style="color:#EAE7E0">35° 80% 54%</span></div></div>
+        </div>
+      </div>
+    </div>
+    <div class="card" style="margin-top:20px;padding:24px 28px;display:flex;align-items:center;gap:28px">
+      <div style="display:flex;gap:14px">
+        <div style="width:56px;height:56px;border-radius:12px;background:#23201C;position:relative;overflow:hidden"><svg viewBox="0 0 100 100" style="position:absolute;inset:20%"><path d="M78.25,34.98 A32,32 0 1 1 48.88,18.02" fill="none" stroke="#F0EADD" stroke-width="10" stroke-linecap="round"/><circle cx="50" cy="50" r="11" fill="#F0EADD"/><circle cx="66" cy="22.29" r="7" fill="#F0EADD"/></svg></div>
+        <div style="width:56px;height:56px;border-radius:12px;background:#EDE7DA;position:relative;overflow:hidden"><svg viewBox="0 0 100 100" style="position:absolute;inset:20%"><path d="M78.25,34.98 A32,32 0 1 1 48.88,18.02" fill="none" stroke="#23201C" stroke-width="10" stroke-linecap="round"/><circle cx="50" cy="50" r="11" fill="#23201C"/><circle cx="66" cy="22.29" r="7" fill="#23201C"/></svg></div>
+      </div>
+      <div>
+        <div style="font-family:'Schibsted Grotesk';font-weight:600;font-size:16px;margin-bottom:4px">Monochrome</div>
+        <p style="font-size:13.5px;line-height:1.55;color:#B0ACA2;max-width:520px">Single ink — <span class="mono" style="color:#EAE7E0">#23201C</span> on light, <span class="mono" style="color:#EAE7E0">#F0EADD</span> on dark. The focus point drops the amber and matches the mark; geometry alone carries the meaning.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- 4. APP ICON -->
+  <section style="margin-bottom:60px">
+    <div class="eyebrow" style="margin-bottom:6px">04 — The app icon</div>
+    <h2 style="font-size:30px;font-weight:600;letter-spacing:-.02em;margin-bottom:32px">Symbol only. Optically centered.</h2>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:24px;align-items:stretch">
+      <div class="card" style="padding:40px;display:flex;align-items:center;justify-content:center">
+        <div style="width:300px;height:300px;border-radius:67px;background:#241B3A;position:relative;overflow:hidden;box-shadow:0 30px 60px -20px rgba(0,0,0,.7),inset 0 1px 0 rgba(255,255,255,.1)">
+          <div style="position:absolute;inset:0;background:radial-gradient(120% 90% at 50% 0%,rgba(255,255,255,.11),transparent 55%)"></div>
+          <svg viewBox="0 0 100 100" style="position:absolute;inset:20%;overflow:visible">
+            <path d="M78.25,34.98 A32,32 0 1 1 48.88,18.02" fill="none" stroke="#F0EADD" stroke-width="10" stroke-linecap="round"/>
+            <circle cx="50" cy="50" r="11" fill="#F0EADD"/>
+            <circle cx="66" cy="22.29" r="7" fill="#E89A2A"/>
+          </svg>
+        </div>
+      </div>
+      <div class="card" style="padding:40px;display:flex;align-items:center;justify-content:center">
+        <div style="width:300px;height:300px;border-radius:67px;background:#241B3A;position:relative;overflow:hidden;outline:1px dashed rgba(232,154,42,.35);outline-offset:-1px">
+          <div style="position:absolute;inset:20%;border:1px dashed rgba(240,234,221,.28);border-radius:12px"></div>
+          <div style="position:absolute;inset:20%;overflow:visible">
+            <svg viewBox="0 0 100 100" style="position:absolute;inset:0;overflow:visible">
+              <path d="M78.25,34.98 A32,32 0 1 1 48.88,18.02" fill="none" stroke="rgba(240,234,221,.55)" stroke-width="10" stroke-linecap="round"/>
+              <circle cx="50" cy="50" r="11" fill="rgba(240,234,221,.55)"/>
+              <circle cx="66" cy="22.29" r="7" fill="rgba(232,154,42,.7)"/>
+            </svg>
+          </div>
+          <div style="position:absolute;left:50%;top:12px;transform:translateX(-50%);font-size:10px;color:rgba(240,234,221,.5)" class="mono">safe area · 20%</div>
+        </div>
+      </div>
+    </div>
+    <p style="font-size:13px;line-height:1.6;color:#77746C;margin-top:16px;max-width:640px">Exported as a full-bleed 1024×1024 square with the purple as artwork — no baked rounded-rectangle mask, no transparency. iOS applies the superellipse mask at the OS level. The corner radius shown is illustrative only.</p>
+  </section>
+
+  <!-- 5. VARIANTS -->
+  <section style="margin-bottom:60px">
+    <div class="eyebrow" style="margin-bottom:6px">05 — Approved variants</div>
+    <h2 style="font-size:30px;font-weight:600;letter-spacing:-.02em;margin-bottom:32px">Four treatments, nothing more</h2>
+    <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:20px">
+      <div class="card" style="padding:28px 24px;text-align:center"><div style="width:110px;height:110px;margin:0 auto 18px;border-radius:25px;background:#241B3A;position:relative;overflow:hidden;box-shadow:0 12px 26px -12px rgba(0,0,0,.6)"><svg viewBox="0 0 100 100" style="position:absolute;inset:20%"><path d="M78.25,34.98 A32,32 0 1 1 48.88,18.02" fill="none" stroke="#F0EADD" stroke-width="10" stroke-linecap="round"/><circle cx="50" cy="50" r="11" fill="#F0EADD"/><circle cx="66" cy="22.29" r="7" fill="#E89A2A"/></svg></div><div style="font-family:'Schibsted Grotesk';font-weight:600;font-size:15px">Primary</div><div style="font-size:12px;color:#8C887E;margin-top:3px">Purple · cream · amber</div></div>
+      <div class="card" style="padding:28px 24px;text-align:center"><div style="width:110px;height:110px;margin:0 auto 18px;border-radius:25px;background:#F1EBDE;position:relative;overflow:hidden;box-shadow:0 12px 26px -12px rgba(0,0,0,.55)"><svg viewBox="0 0 100 100" style="position:absolute;inset:20%"><path d="M78.25,34.98 A32,32 0 1 1 48.88,18.02" fill="none" stroke="#241B3A" stroke-width="10" stroke-linecap="round"/><circle cx="50" cy="50" r="11" fill="#241B3A"/><circle cx="66" cy="22.29" r="7" fill="#E89A2A"/></svg></div><div style="font-family:'Schibsted Grotesk';font-weight:600;font-size:15px">Light</div><div style="font-size:12px;color:#8C887E;margin-top:3px">Cream · purple mark</div></div>
+      <div class="card" style="padding:28px 24px;text-align:center"><div style="width:110px;height:110px;margin:0 auto 18px;border-radius:25px;background:#17161B;position:relative;overflow:hidden;box-shadow:0 12px 26px -12px rgba(0,0,0,.6)"><svg viewBox="0 0 100 100" style="position:absolute;inset:20%"><path d="M78.25,34.98 A32,32 0 1 1 48.88,18.02" fill="none" stroke="#F0EADD" stroke-width="10" stroke-linecap="round"/><circle cx="50" cy="50" r="11" fill="#F0EADD"/><circle cx="66" cy="22.29" r="7" fill="#E89A2A"/></svg></div><div style="font-family:'Schibsted Grotesk';font-weight:600;font-size:15px">Dark</div><div style="font-size:12px;color:#8C887E;margin-top:3px">Ink · cream mark</div></div>
+      <div class="card" style="padding:28px 24px;text-align:center"><div style="width:110px;height:110px;margin:0 auto 18px;border-radius:25px;background:#EDE7DA;position:relative;overflow:hidden;box-shadow:0 12px 26px -12px rgba(0,0,0,.55)"><svg viewBox="0 0 100 100" style="position:absolute;inset:20%"><path d="M78.25,34.98 A32,32 0 1 1 48.88,18.02" fill="none" stroke="#23201C" stroke-width="10" stroke-linecap="round"/><circle cx="50" cy="50" r="11" fill="#23201C"/><circle cx="66" cy="22.29" r="7" fill="#23201C"/></svg></div><div style="font-family:'Schibsted Grotesk';font-weight:600;font-size:15px">Monochrome</div><div style="font-size:12px;color:#8C887E;margin-top:3px">Single ink</div></div>
+    </div>
+  </section>
+
+  <!-- 6. LOGO SYSTEM -->
+  <section style="margin-bottom:60px">
+    <div class="eyebrow" style="margin-bottom:6px">06 — Logo system</div>
+    <h2 style="font-size:30px;font-weight:600;letter-spacing:-.02em;margin-bottom:32px">Symbol, lockup, wordmark</h2>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:20px">
+      <div class="card" style="padding:40px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:18px;min-height:220px">
+        <svg viewBox="0 0 100 100" style="width:96px;height:96px;overflow:visible"><path d="M78.25,34.98 A32,32 0 1 1 48.88,18.02" fill="none" stroke="#F0EADD" stroke-width="10" stroke-linecap="round"/><circle cx="50" cy="50" r="11" fill="#F0EADD"/><circle cx="66" cy="22.29" r="7" fill="#E89A2A"/></svg>
+        <div class="eyebrow">Symbol</div>
+      </div>
+      <div class="card" style="padding:40px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:18px;min-height:220px">
+        <div style="font-family:'Schibsted Grotesk';font-weight:600;font-size:52px;letter-spacing:-.035em;color:#F0EADD">LifeOS</div>
+        <div class="eyebrow">Wordmark · Schibsted Grotesk Semibold</div>
+      </div>
+    </div>
+    <div class="card" style="padding:44px;margin-top:20px;display:flex;flex-direction:column;align-items:center;gap:22px">
+      <div style="display:flex;align-items:center;gap:22px">
+        <svg viewBox="0 0 100 100" style="width:74px;height:74px;overflow:visible"><path d="M78.25,34.98 A32,32 0 1 1 48.88,18.02" fill="none" stroke="#F0EADD" stroke-width="10" stroke-linecap="round"/><circle cx="50" cy="50" r="11" fill="#F0EADD"/><circle cx="66" cy="22.29" r="7" fill="#E89A2A"/></svg>
+        <div style="width:1px;height:52px;background:rgba(255,255,255,.12)"></div>
+        <div style="font-family:'Schibsted Grotesk';font-weight:600;font-size:50px;letter-spacing:-.035em;color:#F0EADD">LifeOS</div>
+      </div>
+      <div class="eyebrow">Horizontal lockup</div>
+    </div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:20px;margin-top:20px">
+      <div class="card" style="padding:30px 34px">
+        <div style="font-family:'Schibsted Grotesk';font-weight:600;font-size:15px;margin-bottom:10px">Spacing</div>
+        <p style="font-size:13.5px;line-height:1.65;color:#B0ACA2">Gap between symbol and wordmark = <span class="mono" style="color:#EAE7E0">0.5×</span> the symbol height. The wordmark's cap-height aligns to the symbol's optical center. A hairline divider is optional, not required.</p>
+      </div>
+      <div class="card" style="padding:30px 34px">
+        <div style="font-family:'Schibsted Grotesk';font-weight:600;font-size:15px;margin-bottom:10px">Clear space</div>
+        <p style="font-size:13.5px;line-height:1.65;color:#B0ACA2">Keep clear space on all sides equal to the diameter of the center dot (<span class="mono" style="color:#EAE7E0">≈ 0.34×</span> symbol height). Nothing — type, edges, other marks — enters this zone.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- 7. MINI-SPEC: misuse -->
+  <section style="margin-bottom:60px">
+    <div class="eyebrow" style="margin-bottom:6px">07 — Correct use</div>
+    <h2 style="font-size:30px;font-weight:600;letter-spacing:-.02em;margin-bottom:8px">Keep the relationship intact</h2>
+    <p style="font-size:15px;line-height:1.6;color:#B0ACA2;max-width:600px;margin-bottom:20px">Minimum size <span class="mono" style="color:#EAE7E0">32px</span> on screen, <span class="mono" style="color:#EAE7E0">10mm</span> in print. The six things never to do:</p>
+    <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:16px">
+      <!-- rotate -->
+      <div class="card" style="padding:22px;display:flex;align-items:center;gap:16px">
+        <div style="width:64px;height:64px;flex:none;border-radius:14px;background:#241B3A;position:relative;overflow:hidden"><svg viewBox="0 0 100 100" style="position:absolute;inset:20%;transform:rotate(40deg);transform-origin:center"><path d="M78.25,34.98 A32,32 0 1 1 48.88,18.02" fill="none" stroke="#F0EADD" stroke-width="10" stroke-linecap="round"/><circle cx="50" cy="50" r="11" fill="#F0EADD"/><circle cx="66" cy="22.29" r="7" fill="#E89A2A"/></svg><div style="position:absolute;inset:0;background:linear-gradient(to top right,transparent calc(50% - 1px),rgba(233,90,80,.85),transparent calc(50% + 1px))"></div></div>
+        <div style="font-size:13px;color:#B0ACA2"><span style="color:#E95A50;font-weight:600">Don't</span> rotate the mark</div>
+      </div>
+      <!-- move dot -->
+      <div class="card" style="padding:22px;display:flex;align-items:center;gap:16px">
+        <div style="width:64px;height:64px;flex:none;border-radius:14px;background:#241B3A;position:relative;overflow:hidden"><svg viewBox="0 0 100 100" style="position:absolute;inset:20%"><path d="M78.25,34.98 A32,32 0 1 1 48.88,18.02" fill="none" stroke="#F0EADD" stroke-width="10" stroke-linecap="round"/><circle cx="50" cy="50" r="11" fill="#F0EADD"/><circle cx="30" cy="72" r="7" fill="#E89A2A"/></svg><div style="position:absolute;inset:0;background:linear-gradient(to top right,transparent calc(50% - 1px),rgba(233,90,80,.85),transparent calc(50% + 1px))"></div></div>
+        <div style="font-size:13px;color:#B0ACA2"><span style="color:#E95A50;font-weight:600">Don't</span> move the focus point</div>
+      </div>
+      <!-- alter relationship -->
+      <div class="card" style="padding:22px;display:flex;align-items:center;gap:16px">
+        <div style="width:64px;height:64px;flex:none;border-radius:14px;background:#241B3A;position:relative;overflow:hidden"><svg viewBox="0 0 100 100" style="position:absolute;inset:20%"><path d="M78.25,34.98 A32,32 0 1 1 48.88,18.02" fill="none" stroke="#F0EADD" stroke-width="10" stroke-linecap="round"/><circle cx="50" cy="50" r="11" fill="#F0EADD"/><circle cx="90" cy="10" r="7" fill="#E89A2A"/></svg><div style="position:absolute;inset:0;background:linear-gradient(to top right,transparent calc(50% - 1px),rgba(233,90,80,.85),transparent calc(50% + 1px))"></div></div>
+        <div style="font-size:13px;color:#B0ACA2"><span style="color:#E95A50;font-weight:600">Don't</span> detach dot from track</div>
+      </div>
+      <!-- wrong colors -->
+      <div class="card" style="padding:22px;display:flex;align-items:center;gap:16px">
+        <div style="width:64px;height:64px;flex:none;border-radius:14px;background:#1E6FE0;position:relative;overflow:hidden"><svg viewBox="0 0 100 100" style="position:absolute;inset:20%"><path d="M78.25,34.98 A32,32 0 1 1 48.88,18.02" fill="none" stroke="#fff" stroke-width="10" stroke-linecap="round"/><circle cx="50" cy="50" r="11" fill="#fff"/><circle cx="66" cy="22.29" r="7" fill="#37E06B"/></svg><div style="position:absolute;inset:0;background:linear-gradient(to top right,transparent calc(50% - 1px),rgba(233,90,80,.85),transparent calc(50% + 1px))"></div></div>
+        <div style="font-size:13px;color:#B0ACA2"><span style="color:#E95A50;font-weight:600">Don't</span> substitute colours</div>
+      </div>
+      <!-- shadow/effects -->
+      <div class="card" style="padding:22px;display:flex;align-items:center;gap:16px">
+        <div style="width:64px;height:64px;flex:none;border-radius:14px;background:#241B3A;position:relative;overflow:hidden"><svg viewBox="0 0 100 100" style="position:absolute;inset:20%;filter:drop-shadow(3px 4px 3px rgba(0,0,0,.7))"><path d="M78.25,34.98 A32,32 0 1 1 48.88,18.02" fill="none" stroke="#F0EADD" stroke-width="10" stroke-linecap="round"/><circle cx="50" cy="50" r="11" fill="#F0EADD"/><circle cx="66" cy="22.29" r="7" fill="#E89A2A"/></svg><div style="position:absolute;inset:0;background:linear-gradient(to top right,transparent calc(50% - 1px),rgba(233,90,80,.85),transparent calc(50% + 1px))"></div></div>
+        <div style="font-size:13px;color:#B0ACA2"><span style="color:#E95A50;font-weight:600">Don't</span> add shadows or effects</div>
+      </div>
+      <!-- stretch -->
+      <div class="card" style="padding:22px;display:flex;align-items:center;gap:16px">
+        <div style="width:64px;height:64px;flex:none;border-radius:14px;background:#241B3A;position:relative;overflow:hidden"><svg viewBox="0 0 100 100" preserveAspectRatio="none" style="position:absolute;inset:20% 8%"><path d="M78.25,34.98 A32,32 0 1 1 48.88,18.02" fill="none" stroke="#F0EADD" stroke-width="10" stroke-linecap="round"/><circle cx="50" cy="50" r="11" fill="#F0EADD"/><circle cx="66" cy="22.29" r="7" fill="#E89A2A"/></svg><div style="position:absolute;inset:0;background:linear-gradient(to top right,transparent calc(50% - 1px),rgba(233,90,80,.85),transparent calc(50% + 1px))"></div></div>
+        <div style="font-size:13px;color:#B0ACA2"><span style="color:#E95A50;font-weight:600">Don't</span> stretch or distort</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 8. VALIDATION BOARD -->
+  <section style="margin-bottom:50px">
+    <div class="eyebrow" style="margin-bottom:6px">08 — Final validation</div>
+    <h2 style="font-size:30px;font-weight:600;letter-spacing:-.02em;margin-bottom:32px">One icon, in the wild</h2>
+    <div style="display:flex;gap:48px;align-items:flex-start;flex-wrap:wrap">
+      <div style="width:290px;height:610px;flex:none;border-radius:50px;padding:11px;background:#0A0A0B;box-shadow:0 40px 80px -30px rgba(0,0,0,.8),inset 0 0 0 2px rgba(255,255,255,.06)">
+        <div style="width:100%;height:100%;border-radius:40px;overflow:hidden;background:linear-gradient(165deg,#3a2f52,#241d38 46%,#1c2230);position:relative;padding:54px 24px 22px">
+          <div style="position:absolute;top:13px;left:50%;transform:translateX(-50%);width:100px;height:25px;background:#0A0A0B;border-radius:13px"></div>
+          <div style="position:absolute;top:19px;left:28px;font-size:13px;font-weight:600;color:#fff;font-family:'Schibsted Grotesk'">9:41</div>
+          <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:20px 16px">
+            <div style="text-align:center"><div style="width:54px;height:54px;margin:0 auto;border-radius:12.5px;background:#241B3A;position:relative;overflow:hidden;box-shadow:0 4px 10px rgba(0,0,0,.35)"><svg viewBox="0 0 100 100" style="position:absolute;inset:20%"><path d="M78.25,34.98 A32,32 0 1 1 48.88,18.02" fill="none" stroke="#F0EADD" stroke-width="10" stroke-linecap="round"/><circle cx="50" cy="50" r="11" fill="#F0EADD"/><circle cx="66" cy="22.29" r="7" fill="#E89A2A"/></svg></div><div style="font-size:9.5px;color:#fff;margin-top:5px;text-shadow:0 1px 2px rgba(0,0,0,.5)">LifeOS</div></div>
+            <div style="text-align:center"><div style="width:54px;height:54px;margin:0 auto;border-radius:12.5px;background:linear-gradient(150deg,#4b8f6b,#2f7a58)"></div></div>
+            <div style="text-align:center"><div style="width:54px;height:54px;margin:0 auto;border-radius:12.5px;background:linear-gradient(150deg,#e86a6a,#c14b4b)"></div></div>
+            <div style="text-align:center"><div style="width:54px;height:54px;margin:0 auto;border-radius:12.5px;background:linear-gradient(150deg,#5b7cf0,#3f57c1)"></div></div>
+            <div style="text-align:center"><div style="width:54px;height:54px;margin:0 auto;border-radius:12.5px;background:linear-gradient(150deg,#7a6a5a,#54483d)"></div></div>
+            <div style="text-align:center"><div style="width:54px;height:54px;margin:0 auto;border-radius:12.5px;background:linear-gradient(150deg,#4f5a5a,#374040)"></div></div>
+            <div style="text-align:center"><div style="width:54px;height:54px;margin:0 auto;border-radius:12.5px;background:linear-gradient(150deg,#d8a24a,#b47e2e)"></div></div>
+            <div style="text-align:center"><div style="width:54px;height:54px;margin:0 auto;border-radius:12.5px;background:linear-gradient(150deg,#655a6b,#453d4a)"></div></div>
+            <div style="text-align:center"><div style="width:54px;height:54px;margin:0 auto;border-radius:12.5px;background:linear-gradient(150deg,#5a6360,#3d4442)"></div></div>
+            <div style="text-align:center"><div style="width:54px;height:54px;margin:0 auto;border-radius:12.5px;background:linear-gradient(150deg,#6e6558,#4a4339)"></div></div>
+            <div style="text-align:center"><div style="width:54px;height:54px;margin:0 auto;border-radius:12.5px;background:linear-gradient(150deg,#585866,#3c3c47)"></div></div>
+            <div style="text-align:center"><div style="width:54px;height:54px;margin:0 auto;border-radius:12.5px;background:linear-gradient(150deg,#8a5a6b,#63404a)"></div></div>
+          </div>
+          <div style="position:absolute;left:15px;right:15px;bottom:15px;height:70px;border-radius:24px;background:rgba(255,255,255,.14);backdrop-filter:blur(8px);display:flex;align-items:center;justify-content:space-around;padding:0 12px">
+            <div style="width:50px;height:50px;border-radius:11.5px;background:linear-gradient(150deg,#5b7cf0,#3f57c1)"></div>
+            <div style="width:50px;height:50px;border-radius:11.5px;background:linear-gradient(150deg,#4b8f6b,#2f7a58)"></div>
+            <div style="width:50px;height:50px;border-radius:11.5px;background:linear-gradient(150deg,#e86a6a,#c14b4b)"></div>
+            <div style="width:50px;height:50px;border-radius:11.5px;background:#241B3A;position:relative;overflow:hidden"><svg viewBox="0 0 100 100" style="position:absolute;inset:20%"><path d="M78.25,34.98 A32,32 0 1 1 48.88,18.02" fill="none" stroke="#F0EADD" stroke-width="10" stroke-linecap="round"/><circle cx="50" cy="50" r="11" fill="#F0EADD"/><circle cx="66" cy="22.29" r="7" fill="#E89A2A"/></svg></div>
+          </div>
+        </div>
+      </div>
+
+      <div style="flex:1;min-width:300px">
+        <div class="eyebrow" style="margin-bottom:20px">Scale check</div>
+        <div style="display:flex;gap:30px;align-items:flex-end;margin-bottom:38px">
+          <div style="text-align:center"><div style="width:60px;height:60px;border-radius:14px;background:#241B3A;position:relative;overflow:hidden"><svg viewBox="0 0 100 100" style="position:absolute;inset:20%"><path d="M78.25,34.98 A32,32 0 1 1 48.88,18.02" fill="none" stroke="#F0EADD" stroke-width="10" stroke-linecap="round"/><circle cx="50" cy="50" r="11" fill="#F0EADD"/><circle cx="66" cy="22.29" r="7" fill="#E89A2A"/></svg></div><div class="mono" style="font-size:10px;color:#77746C;margin-top:8px">60</div></div>
+          <div style="text-align:center"><div style="width:40px;height:40px;border-radius:9px;background:#241B3A;position:relative;overflow:hidden"><svg viewBox="0 0 100 100" style="position:absolute;inset:20%"><path d="M78.25,34.98 A32,32 0 1 1 48.88,18.02" fill="none" stroke="#F0EADD" stroke-width="10" stroke-linecap="round"/><circle cx="50" cy="50" r="11" fill="#F0EADD"/><circle cx="66" cy="22.29" r="7" fill="#E89A2A"/></svg></div><div class="mono" style="font-size:10px;color:#77746C;margin-top:8px">40</div></div>
+          <div style="text-align:center"><div style="width:32px;height:32px;border-radius:7.5px;background:#241B3A;position:relative;overflow:hidden"><svg viewBox="0 0 100 100" style="position:absolute;inset:19%"><path d="M78.25,34.98 A32,32 0 1 1 48.88,18.02" fill="none" stroke="#F0EADD" stroke-width="11" stroke-linecap="round"/><circle cx="50" cy="50" r="11.5" fill="#F0EADD"/><circle cx="66" cy="22.29" r="7.5" fill="#E89A2A"/></svg></div><div class="mono" style="font-size:10px;color:#77746C;margin-top:8px">32</div></div>
+        </div>
+        <div class="eyebrow" style="margin-bottom:20px">Environments</div>
+        <div style="display:flex;gap:20px;flex-wrap:wrap">
+          <div style="text-align:center"><div style="width:88px;height:88px;border-radius:20px;background:#F1EBDE;position:relative;overflow:hidden;box-shadow:0 10px 22px -12px rgba(0,0,0,.5)"><svg viewBox="0 0 100 100" style="position:absolute;inset:20%"><path d="M78.25,34.98 A32,32 0 1 1 48.88,18.02" fill="none" stroke="#241B3A" stroke-width="10" stroke-linecap="round"/><circle cx="50" cy="50" r="11" fill="#241B3A"/><circle cx="66" cy="22.29" r="7" fill="#E89A2A"/></svg></div><div style="font-size:11px;color:#8C887E;margin-top:10px">Light</div></div>
+          <div style="text-align:center"><div style="width:88px;height:88px;border-radius:20px;background:#17161B;position:relative;overflow:hidden;box-shadow:0 10px 22px -12px rgba(0,0,0,.6)"><svg viewBox="0 0 100 100" style="position:absolute;inset:20%"><path d="M78.25,34.98 A32,32 0 1 1 48.88,18.02" fill="none" stroke="#F0EADD" stroke-width="10" stroke-linecap="round"/><circle cx="50" cy="50" r="11" fill="#F0EADD"/><circle cx="66" cy="22.29" r="7" fill="#E89A2A"/></svg></div><div style="font-size:11px;color:#8C887E;margin-top:10px">Dark</div></div>
+          <div style="text-align:center"><div style="width:88px;height:88px;border-radius:20px;background:#EDE7DA;position:relative;overflow:hidden;box-shadow:0 10px 22px -12px rgba(0,0,0,.5)"><svg viewBox="0 0 100 100" style="position:absolute;inset:20%"><path d="M78.25,34.98 A32,32 0 1 1 48.88,18.02" fill="none" stroke="#23201C" stroke-width="10" stroke-linecap="round"/><circle cx="50" cy="50" r="11" fill="#23201C"/><circle cx="66" cy="22.29" r="7" fill="#23201C"/></svg></div><div style="font-size:11px;color:#8C887E;margin-top:10px">Monochrome</div></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- FINAL + ASSETS -->
+  <section class="card" style="padding:40px 44px;background:linear-gradient(155deg,#241B3A,#1a1530)">
+    <div style="font-family:'Schibsted Grotesk';font-weight:700;font-size:13px;letter-spacing:.14em;color:#E89A2A;margin-bottom:10px">FINAL: LifeOS — M1 ANCHORED NOW</div>
+    <p style="font-size:16px;line-height:1.6;color:#CFC9BB;max-width:640px;margin-bottom:26px">Approved and locked. Production assets below are clean vector paths — no masks, filters, or embedded raster. For the Expo pipeline, supply the 1024 source icon; the build tooling generates the platform sizes.</p>
+    <div style="display:grid;grid-template-columns:repeat(2,1fr);gap:10px 28px;max-width:720px">
+      <a href="assets/lifeos-symbol.svg" style="display:flex;justify-content:space-between;padding:11px 0;border-bottom:1px solid rgba(255,255,255,.1);font-size:14px"><span style="color:#EAE7E0">Symbol — primary</span><span class="mono" style="color:#E89A2A">symbol.svg</span></a>
+      <a href="assets/lifeos-symbol-mono.svg" style="display:flex;justify-content:space-between;padding:11px 0;border-bottom:1px solid rgba(255,255,255,.1);font-size:14px"><span style="color:#EAE7E0">Symbol — monochrome</span><span class="mono" style="color:#E89A2A">symbol-mono.svg</span></a>
+      <a href="assets/lifeos-logo-horizontal.svg" style="display:flex;justify-content:space-between;padding:11px 0;border-bottom:1px solid rgba(255,255,255,.1);font-size:14px"><span style="color:#EAE7E0">Horizontal lockup</span><span class="mono" style="color:#E89A2A">logo-horizontal.svg</span></a>
+      <a href="assets/lifeos-wordmark.svg" style="display:flex;justify-content:space-between;padding:11px 0;border-bottom:1px solid rgba(255,255,255,.1);font-size:14px"><span style="color:#EAE7E0">Wordmark</span><span class="mono" style="color:#E89A2A">wordmark.svg</span></a>
+      <a href="assets/lifeos-icon.svg" style="display:flex;justify-content:space-between;padding:11px 0;border-bottom:1px solid rgba(255,255,255,.1);font-size:14px"><span style="color:#EAE7E0">App icon — vector source</span><span class="mono" style="color:#E89A2A">icon.svg</span></a>
+      <a href="assets/lifeos-icon-1024.png" style="display:flex;justify-content:space-between;padding:11px 0;border-bottom:1px solid rgba(255,255,255,.1);font-size:14px"><span style="color:#EAE7E0">App icon — 1024 PNG</span><span class="mono" style="color:#E89A2A">icon-1024.png</span></a>
+      <a href="assets/lifeos-mark-1024.png" style="display:flex;justify-content:space-between;padding:11px 0;border-bottom:1px solid rgba(255,255,255,.1);font-size:14px"><span style="color:#EAE7E0">Mark — transparent 1024 PNG</span><span class="mono" style="color:#E89A2A">mark-1024.png</span></a>
+      <a href="assets/lifeos-symbol-light.svg" style="display:flex;justify-content:space-between;padding:11px 0;border-bottom:1px solid rgba(255,255,255,.1);font-size:14px"><span style="color:#EAE7E0">Symbol — light variant</span><span class="mono" style="color:#E89A2A">symbol-light.svg</span></a>
+    </div>
+  </section>
+
+</div>
+</x-dc>
+</body>
+</html>

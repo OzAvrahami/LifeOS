@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 470 100" width="470" height="100" fill="none">
+  <g>
+  <path d="M78.25,34.98 A32,32 0 1 1 48.88,18.02" fill="none" stroke="#F0EADD" stroke-width="10" stroke-linecap="round"></path>
+  <circle cx="50" cy="50" r="11" fill="#F0EADD"></circle>
+  <circle cx="66" cy="22.29" r="7" fill="#E89A2A"></circle>
+  </g>
+  <text x="170" y="68" font-family="'Schibsted Grotesk', sans-serif" font-weight="600" font-size="70" letter-spacing="-2.4" fill="#F0EADD">LifeOS</text>
+</svg>
