@@ -26,6 +26,8 @@ export type TaskPlanningInput =
 export type TaskListFilters = {
   status?: TaskStatus;
   plannedDate?: string;
+  plannedDateFrom?: string;
+  plannedDateTo?: string;
   weekStart?: string;
   placement?: 'inbox';
 };

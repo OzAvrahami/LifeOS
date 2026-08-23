@@ -15,6 +15,8 @@ function taskQuery(filters: TaskListFilters) {
   const query = new URLSearchParams();
   if (filters.status) query.set('status', filters.status);
   if (filters.plannedDate) query.set('plannedDate', filters.plannedDate);
+  if (filters.plannedDateFrom) query.set('plannedDateFrom', filters.plannedDateFrom);
+  if (filters.plannedDateTo) query.set('plannedDateTo', filters.plannedDateTo);
   if (filters.weekStart) query.set('weekStart', filters.weekStart);
   if (filters.placement) query.set('placement', filters.placement);
   const value = query.toString();

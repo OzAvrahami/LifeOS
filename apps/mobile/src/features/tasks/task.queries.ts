@@ -10,6 +10,8 @@ function normalizedFilters(filters: TaskListFilters) {
   return {
     placement: filters.placement ?? null,
     plannedDate: filters.plannedDate ?? null,
+    plannedDateFrom: filters.plannedDateFrom ?? null,
+    plannedDateTo: filters.plannedDateTo ?? null,
     status: filters.status ?? null,
     weekStart: filters.weekStart ?? null,
   };
@@ -71,6 +73,11 @@ function taskBelongsInList(
     return task.status === 'open' && task.plannedDate === null && task.weekPlanId === null;
   }
   if (filters.plannedDate) return task.plannedDate === filters.plannedDate;
+  if (filters.plannedDateFrom && filters.plannedDateTo) {
+    return task.plannedDate !== null
+      && task.plannedDate >= filters.plannedDateFrom
+      && task.plannedDate <= filters.plannedDateTo;
+  }
   if (filters.weekStart) {
     if (planning?.type === 'week') return planning.weekStart === filters.weekStart;
     if (planning) return false;

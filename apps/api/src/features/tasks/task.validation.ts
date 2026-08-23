@@ -160,16 +160,44 @@ export function parseUpdateTask(value: unknown): UpdateTaskInput {
 }
 
 export function parseTaskFilters(query: Record<string, unknown>): TaskListFilters {
-  rejectUnknownKeys(query, new Set(['status', 'plannedDate', 'weekStart', 'placement']));
+  rejectUnknownKeys(query, new Set([
+    'status',
+    'plannedDate',
+    'plannedDateFrom',
+    'plannedDateTo',
+    'weekStart',
+    'placement',
+  ]));
   const filters: TaskListFilters = {};
   if (query.status !== undefined) filters.status = parseStatus(query.status);
   if (query.plannedDate !== undefined) filters.plannedDate = parseDate(query.plannedDate, 'plannedDate');
+  if (query.plannedDateFrom !== undefined) {
+    filters.plannedDateFrom = parseDate(query.plannedDateFrom, 'plannedDateFrom');
+  }
+  if (query.plannedDateTo !== undefined) {
+    filters.plannedDateTo = parseDate(query.plannedDateTo, 'plannedDateTo');
+  }
   if (query.weekStart !== undefined) filters.weekStart = parseDate(query.weekStart, 'weekStart');
   if (query.placement !== undefined) {
     if (query.placement !== 'inbox') invalid('Invalid placement');
     filters.placement = 'inbox';
   }
-  const planningFilters = [filters.plannedDate, filters.weekStart, filters.placement].filter(Boolean);
+  if (Boolean(filters.plannedDateFrom) !== Boolean(filters.plannedDateTo)) {
+    invalid('Use plannedDateFrom and plannedDateTo together');
+  }
+  if (
+    filters.plannedDateFrom
+    && filters.plannedDateTo
+    && filters.plannedDateFrom > filters.plannedDateTo
+  ) {
+    invalid('Invalid planned date range');
+  }
+  const planningFilters = [
+    filters.plannedDate,
+    filters.plannedDateFrom,
+    filters.weekStart,
+    filters.placement,
+  ].filter(Boolean);
   if (planningFilters.length > 1) invalid('Use only one planning filter');
   return filters;
 }

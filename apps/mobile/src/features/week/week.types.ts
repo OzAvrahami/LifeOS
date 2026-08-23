@@ -9,7 +9,7 @@ export type WeekDay = {
   dateKey?: string;
   taskCount: number;
   plannedTime: string;
-  workload: WeekWorkload;
+  workload?: WeekWorkload;
   commitmentTime?: string;
   isPast?: boolean;
   isToday?: boolean;

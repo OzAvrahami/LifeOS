@@ -84,7 +84,7 @@ export function WeekDayRow({ children, day, expanded = false, onAddCommitment }:
             <Text style={styles.commitmentTime}>{day.commitmentTime}</Text>
           </View>
         ) : null}
-        <WorkloadBadge workload={day.workload} />
+        {day.workload ? <WorkloadBadge workload={day.workload} /> : null}
       </View>
       {children}
     </>

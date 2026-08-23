@@ -41,6 +41,17 @@ describe('Task API client', () => {
     });
   });
 
+  it('maps an inclusive planned-date range', async () => {
+    request.mockResolvedValueOnce({ tasks: [task] });
+
+    await listTasks({ plannedDateFrom: '2026-08-23', plannedDateTo: '2026-08-29' });
+
+    expect(request).toHaveBeenCalledWith(
+      '/tasks?plannedDateFrom=2026-08-23&plannedDateTo=2026-08-29',
+      { auth: 'required' },
+    );
+  });
+
   it('creates, updates, and cancels through the Node REST contract', async () => {
     request
       .mockResolvedValueOnce({ task })

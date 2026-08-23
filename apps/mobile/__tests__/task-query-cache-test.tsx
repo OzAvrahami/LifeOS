@@ -111,6 +111,32 @@ describe('Task query cache synchronization', () => {
     queryClient.clear();
   });
 
+  it('synchronizes date-range caches for moves, duration changes, completion, and cancellation', () => {
+    const queryClient = makeQueryClient();
+    const tomorrow = '2026-08-15';
+    const filters = { plannedDateFrom: today, plannedDateTo: tomorrow };
+    const task = makeTask({ estimatedMinutes: 30, plannedDate: today });
+    queryClient.setQueryData(taskKeys.list(userId, filters), [task]);
+
+    const moved = { ...task, plannedDate: tomorrow };
+    synchronizeTaskCaches(queryClient, userId, moved, {
+      ensurePlanning: { plannedDate: tomorrow, type: 'day' },
+    });
+    expect(queryClient.getQueryData<Task[]>(taskKeys.list(userId, filters))).toEqual([moved]);
+
+    const resized = { ...moved, estimatedMinutes: 75 };
+    synchronizeTaskCaches(queryClient, userId, resized);
+    expect(queryClient.getQueryData<Task[]>(taskKeys.list(userId, filters))?.[0]?.estimatedMinutes).toBe(75);
+
+    const completed = { ...resized, completedAt: '2026-08-15T09:00:00.000Z', status: 'completed' as const };
+    synchronizeTaskCaches(queryClient, userId, completed);
+    expect(queryClient.getQueryData<Task[]>(taskKeys.list(userId, filters))?.[0]?.status).toBe('completed');
+
+    synchronizeTaskCaches(queryClient, userId, { ...completed, completedAt: null, status: 'cancelled' });
+    expect(queryClient.getQueryData<Task[]>(taskKeys.list(userId, filters))).toEqual([]);
+    queryClient.clear();
+  });
+
   it('retains cached UI data when a mutation fails', async () => {
     const queryClient = makeQueryClient();
     const task = makeTask({ plannedDate: today });

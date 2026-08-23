@@ -56,6 +56,8 @@ class MemoryTaskStore implements TaskStore {
       if (task.user_id !== this.userId) return false;
       if (filters.status ? task.status !== filters.status : task.status === 'cancelled') return false;
       if (filters.plannedDate && task.planned_date !== filters.plannedDate) return false;
+      if (filters.plannedDateFrom && (!task.planned_date || task.planned_date < filters.plannedDateFrom)) return false;
+      if (filters.plannedDateTo && (!task.planned_date || task.planned_date > filters.plannedDateTo)) return false;
       if (filters.weekPlanId && task.week_plan_id !== filters.weekPlanId) return false;
       if (
         filters.placement === 'inbox' &&
@@ -199,6 +201,49 @@ describe('Task API', () => {
     assert.deepEqual(listA.body.tasks.map((task: { id: string }) => task.id), [taskA.id]);
     await authenticated(app).patch(`/tasks/${taskB.id}`).send({ title: 'stolen' }).expect(404);
     await authenticated(app).delete(`/tasks/${taskB.id}`).expect(404);
+  });
+
+  it('lists identifiable Tasks in an inclusive planned-date range', async () => {
+    const data = database();
+    const app = createTaskTestApp(data);
+    const before = (await authenticated(app).post('/tasks').send({
+      planning: { plannedDate: '2026-08-22', type: 'day' }, title: 'Before',
+    }).expect(201)).body.task;
+    const first = (await authenticated(app).post('/tasks').send({
+      planning: { plannedDate: '2026-08-23', type: 'day' }, title: 'First',
+    }).expect(201)).body.task;
+    const last = (await authenticated(app).post('/tasks').send({
+      planning: { plannedDate: '2026-08-29', type: 'day' }, title: 'Last',
+    }).expect(201)).body.task;
+    await authenticated(app).post('/tasks').send({
+      planning: { plannedDate: '2026-08-30', type: 'day' }, title: 'After',
+    }).expect(201);
+    await authenticated(app, 'token-b').post('/tasks').send({
+      planning: { plannedDate: '2026-08-24', type: 'day' }, title: 'Other user',
+    }).expect(201);
+    await authenticated(app).delete(`/tasks/${last.id}`).expect(200);
+
+    const response = await authenticated(app)
+      .get('/tasks?plannedDateFrom=2026-08-23&plannedDateTo=2026-08-29')
+      .expect(200);
+
+    assert.deepEqual(response.body.tasks.map((task: { id: string }) => task.id), [first.id]);
+    assert.equal(response.body.tasks.some((task: { id: string }) => task.id === before.id), false);
+  });
+
+  it('validates planned-date ranges and preserves existing planning filter modes', async () => {
+    const app = createTaskTestApp(database());
+    await authenticated(app).get('/tasks?plannedDateFrom=2026-08-23').expect(400);
+    await authenticated(app).get('/tasks?plannedDateTo=2026-08-29').expect(400);
+    await authenticated(app)
+      .get('/tasks?plannedDateFrom=2026-08-29&plannedDateTo=2026-08-23')
+      .expect(400);
+    await authenticated(app)
+      .get('/tasks?plannedDate=2026-08-23&plannedDateFrom=2026-08-23&plannedDateTo=2026-08-29')
+      .expect(400);
+    await authenticated(app).get('/tasks?plannedDate=2026-08-23').expect(200);
+    await authenticated(app).get('/tasks?weekStart=2026-08-23').expect(200);
+    await authenticated(app).get('/tasks?placement=inbox').expect(200);
   });
 
   it('moves the same Task Inbox → Week → Today without creating duplicates', async () => {

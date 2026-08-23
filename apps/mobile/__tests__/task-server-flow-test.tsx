@@ -8,7 +8,7 @@ import { InboxScreen } from '@/features/inbox/inbox-screen';
 import * as planningApi from '@/features/planning/planning.api';
 import type { DailyPlan, WeeklyFocus } from '@/features/planning/planning.types';
 import * as taskApi from '@/features/tasks/task.api';
-import { localDateKey } from '@/features/tasks/task-dates';
+import { addDaysToDateKey, currentWeekStart, localDateKey } from '@/features/tasks/task-dates';
 import { CreateTaskInput, Task, TaskListFilters, UpdateTaskInput } from '@/features/tasks/task.types';
 import { TodayScreen } from '@/features/today/today-screen';
 import { WeekScreen } from '@/features/week/week-screen';
@@ -83,6 +83,7 @@ function applyUpdate(task: Task, input: UpdateTaskInput) {
   return {
     ...task,
     ...(input.title !== undefined ? { title: input.title } : {}),
+    ...(input.estimatedMinutes !== undefined ? { estimatedMinutes: input.estimatedMinutes } : {}),
     ...(input.status ? {
       completedAt: input.status === 'completed' ? new Date().toISOString() : null,
       status: input.status,
@@ -116,6 +117,11 @@ function installFakeTaskApi() {
       return task.status === 'open' && task.plannedDate === null && task.weekPlanId === null;
     }
     if (filters.plannedDate) return task.plannedDate === filters.plannedDate;
+    if (filters.plannedDateFrom && filters.plannedDateTo) {
+      return task.plannedDate !== null
+        && task.plannedDate >= filters.plannedDateFrom
+        && task.plannedDate <= filters.plannedDateTo;
+    }
     if (filters.weekStart) return task.weekPlanId === `week:${filters.weekStart}`;
     if (filters.status) return task.status === filters.status;
     return true;
@@ -235,6 +241,37 @@ beforeEach(() => {
 });
 
 describe('persistent server Task experience', () => {
+  it('renders production Week summaries from active date-planned Tasks, not fixtures or focuses', async () => {
+    const firstDate = currentWeekStart();
+    const secondDate = addDaysToDateKey(firstDate, 1);
+    tasks = [
+      makeTask({ estimatedMinutes: 45, planning: { plannedDate: firstDate, type: 'day' }, title: 'Open' }, 'open'),
+      makeTask({ planning: { plannedDate: firstDate, type: 'day' }, title: 'No duration' }, 'no-duration'),
+      { ...makeTask({ estimatedMinutes: 20, planning: { plannedDate: firstDate, type: 'day' }, title: 'Active' }, 'active'), status: 'in_progress' },
+      { ...makeTask({ estimatedMinutes: 90, planning: { plannedDate: firstDate, type: 'day' }, title: 'Done' }, 'done'), completedAt: new Date().toISOString(), status: 'completed' },
+      makeTask({ estimatedMinutes: 15, planning: { plannedDate: secondDate, type: 'day' }, title: 'Tomorrow' }, 'tomorrow'),
+    ];
+    focuses = [{
+      createdAt: new Date().toISOString(), id: 'focus-1', position: 0,
+      title: 'Focus is not a Task', updatedAt: new Date().toISOString(), weekPlanId: 'week-plan-1',
+    }];
+
+    await renderFlow('week');
+
+    expect(await screen.findByText('3 משימות · 1:05')).toBeTruthy();
+    expect(screen.getByText('1 משימה · 0:15')).toBeTruthy();
+    expect(screen.getAllByText('0 משימות · 0:00')).toHaveLength(5);
+    expect(screen.getByText('Focus is not a Task')).toBeTruthy();
+    expect(screen.queryByText('5 משימות · 4:30')).toBeNull();
+    expect(screen.queryByText('פנוי')).toBeNull();
+    expect(screen.queryByText('מאוזן')).toBeNull();
+    expect(screen.queryByText('עמוס')).toBeNull();
+    expect(listTasksMock).toHaveBeenCalledWith({
+      plannedDateFrom: firstDate,
+      plannedDateTo: addDaysToDateKey(firstDate, 6),
+    });
+  });
+
   it('moves one stable Task through Capture → Inbox → Week → Today → Active → Done', async () => {
     const user = userEvent.setup();
     const title = 'משימת API מלאה';

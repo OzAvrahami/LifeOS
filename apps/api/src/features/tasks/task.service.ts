@@ -76,6 +76,8 @@ export class SupabaseTaskStore implements TaskStore {
     if (filters.status) query = query.eq('status', filters.status);
     else query = query.neq('status', 'cancelled');
     if (filters.plannedDate) query = query.eq('planned_date', filters.plannedDate);
+    if (filters.plannedDateFrom) query = query.gte('planned_date', filters.plannedDateFrom);
+    if (filters.plannedDateTo) query = query.lte('planned_date', filters.plannedDateTo);
     if (filters.weekPlanId) query = query.eq('week_plan_id', filters.weekPlanId);
     if (filters.placement === 'inbox') {
       query = query.eq('status', 'open').is('planned_date', null).is('week_plan_id', null);
