@@ -5,7 +5,7 @@ import { TodayScreen } from '@/features/today/today-screen';
 import { TestProviders } from '../test-utils/test-providers';
 
 describe('<TodayScreen />', () => {
-  it('renders the normal day hierarchy and fixture content', async () => {
+  it('renders the normal development preview including its fixture suggestion', async () => {
     await render(
       <TestProviders>
         <TodayScreen />
@@ -18,6 +18,7 @@ describe('<TodayScreen />', () => {
     expect(screen.getByLabelText('התחייבויות')).toBeTruthy();
     expect(screen.getByLabelText('המשימות שלי')).toBeTruthy();
     expect(screen.getByLabelText('אפשר להוסיף להיום')).toBeTruthy();
+    expect(screen.getByText('משימה חשובה מהשבוע · להכין הצעת מחיר')).toBeTruthy();
     expect(screen.getByText('זמן משימות מתוכנן: שעה ו־45 דקות')).toBeTruthy();
     expect(screen.queryByText(/\d+:\d+ \/ \d+:\d+|פנוי|מאוזן|עמוס מדי/)).toBeNull();
   });

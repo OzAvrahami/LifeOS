@@ -205,6 +205,7 @@ export function TodayScreen({
           serverTaskCount={serverTasks ? sourceTasks.length : undefined}
           serverPlannedTaskTime={serverTaskTime ? formatTaskMinutesHebrew(serverTaskTime.knownMinutes) : undefined}
           serverUnknownEstimateCount={serverTaskTime?.unknownEstimateCount}
+          suggestion={serverTasks ? undefined : normalTodayFixture.suggestion}
           tasks={tasks}
         />
       );
@@ -233,6 +234,7 @@ export function TodayScreen({
           <NormalTodayContent
             focusTask={normalTodayFixture.focus}
             onStartFocus={() => setTodayState('active')}
+            suggestion={normalTodayFixture.suggestion}
             tasks={normalTodayFixture.tasks}
           />
         );
@@ -288,6 +290,7 @@ function NormalTodayContent({
   serverPlannedTaskTime,
   serverTaskCount,
   serverUnknownEstimateCount,
+  suggestion,
   tasks,
 }: {
   commitments?: typeof normalTodayFixture.commitments;
@@ -304,6 +307,7 @@ function NormalTodayContent({
   serverPlannedTaskTime?: string;
   serverTaskCount?: number;
   serverUnknownEstimateCount?: number;
+  suggestion?: string;
   tasks: TodayTask[];
 }) {
   const today = normalTodayFixture;
@@ -351,8 +355,12 @@ function NormalTodayContent({
           <Text style={styles.addTaskText}>+ הוסף משימה</Text>
         </Pressable>
 
-        <SectionLabel>אפשר להוסיף להיום</SectionLabel>
-        <TodaySuggestion title={today.suggestion} />
+        {suggestion ? (
+          <>
+            <SectionLabel>אפשר להוסיף להיום</SectionLabel>
+            <TodaySuggestion title={suggestion} />
+          </>
+        ) : null}
       </ScrollView>
     </View>
   );

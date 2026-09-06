@@ -17,6 +17,7 @@ LifeOS follows Semantic Versioning for development and release tags.
 
 ### Fixed
 
+- Prevented Today development-fixture suggestions from appearing as user Tasks in normal server-backed usage.
 - Preserved inherited/null/zero daily-capacity semantics and ensured Daily Focus edits do not create or erase legacy capacity overrides.
 
 ## [0.1.1] - 2026-08-20

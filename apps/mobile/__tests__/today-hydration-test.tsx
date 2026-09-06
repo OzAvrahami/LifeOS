@@ -93,7 +93,7 @@ describe('Today server hydration', () => {
     expect(screen.getByText(completedTask.title)).toBeTruthy();
   });
 
-  it('renders the existing empty day only after an empty response resolves', async () => {
+  it('renders the existing empty day without any fixture suggestion after an empty response resolves', async () => {
     let resolveTasks: ((tasks: Task[]) => void) | undefined;
     jest.mocked(taskApi.listTasks).mockReturnValue(new Promise((resolve) => {
       resolveTasks = resolve;
@@ -110,7 +110,9 @@ describe('Today server hydration', () => {
 
     expect(await screen.findByText('0 משימות')).toBeTruthy();
     expect(screen.getByLabelText('המשימות שלי')).toBeTruthy();
-    expect(screen.getByLabelText('אפשר להוסיף להיום')).toBeTruthy();
+    expect(screen.queryByLabelText('אפשר להוסיף להיום')).toBeNull();
+    expect(screen.queryByText('אפשר להוסיף להיום')).toBeNull();
+    expect(screen.queryByText('משימה חשובה מהשבוע · להכין הצעת מחיר')).toBeNull();
   });
 
   it('renders a populated open day after server hydration', async () => {
@@ -121,6 +123,8 @@ describe('Today server hydration', () => {
     expect(await screen.findByText(openTask.title)).toBeTruthy();
     expect(screen.getByText('1 משימות')).toBeTruthy();
     expect(screen.getByLabelText(`התחל משימה: ${openTask.title}`)).toBeTruthy();
+    expect(screen.queryByLabelText('אפשר להוסיף להיום')).toBeNull();
+    expect(screen.queryByText('משימה חשובה מהשבוע · להכין הצעת מחיר')).toBeNull();
   });
 
   it('summarizes only identifiable Task estimates and discloses unknown estimates', async () => {
