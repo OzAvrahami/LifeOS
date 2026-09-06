@@ -4,11 +4,16 @@ All notable changes to LifeOS will be documented in this file.
 
 LifeOS follows Semantic Versioning for development and release tags.
 
-## [Unreleased]
+## [0.2.0] — Unreleased preparation
+
+Prepared for the next standalone internal iPhone build; not published and pending physical-iPhone acceptance. Scope reviewed against `v0.1.1..5a18f28`, plus this release preparation. The user reported that the Day Window migration was applied and browser checks passed; this is user-reported evidence, not a new remote verification or acceptance of this binary.
 
 ### Added
 
 - Added an account-persisted, optional “My day” window with recurring local start/end clock times and explicit overnight behavior.
+- Added LifeOS branding assets and the configured application icon.
+- Added a read-only Hebrew/RTL Settings version/build footer using Expo metadata and the actual native iOS build number when available; development/web fallbacks do not substitute a configured build number.
+- Adopted GitHub issue forms, release-note categories, and the LifeOS Development Project workflow.
 
 ### Changed
 
@@ -17,13 +22,23 @@ LifeOS follows Semantic Versioning for development and release tags.
 - Made Week’s “More Tasks” action expand and collapse all remaining week-planned Tasks with the same scheduling controls.
 - Replaced Today’s arbitrary capacity denominator and capacity-derived status with an honest planned Task-time summary; Commitments remain visibly separate and Tasks without estimates are disclosed.
 - Retired daily capacity as the primary Settings concept while preserving its stored values and older-client compatibility. This intentionally supersedes Issue #6’s Today capacity notice, not its persistence semantics.
+- Aligned root, API, Mobile, lockfile, and Expo versions from `0.1.0` to `0.2.0`; configured iOS build `2`, following local native and cached Debug/Release build `1` evidence. The installed iPhone build was not inspected.
 
 ### Fixed
 
 - Prevented Today development-fixture suggestions from appearing as user Tasks in normal server-backed usage.
 - Preserved inherited/null/zero daily-capacity semantics and ensured Daily Focus edits do not create or erase legacy capacity overrides.
+- Derived Week day counts and duration summaries from actual planned Tasks, excluding Weekly Focus items and invented durations.
+- Stabilized authenticated Weekly Focus loading, cancel/clear, failed-save/retry, and account/week isolation while keeping fixture content in development previews.
 
-## [0.1.1] - 2026-08-20
+### Acceptance still pending
+
+- Install a new standalone Release binary and verify Day Window persistence, Today summaries and fixture exclusion (#8), capture entry points, Week expansion, Weekly Focus, and the version footer on the physical iPhone.
+- Keep #8 open in Verify. Issue #3 remains open in In Progress: the full planning lifecycle, persisted progress, resume, and completed-plan review/edit behavior are incomplete. Issue #4 remains open in In Progress: previous/next/current-week navigation and broader day-detail/task-access behavior are incomplete.
+
+## [0.1.1] - 2026-08-27
+
+Published on GitHub on 2026-08-27; the deployment and standalone-iPhone verification below were recorded on 2026-08-20.
 
 ### Added
 

@@ -1,12 +1,13 @@
 # LifeOS Implementation Status
 
 - **Last updated:** 2026-09-06
-- **Current work item:** A limited Issue #3 Weekly Focus stabilization is implemented locally; the full Weekly Planning lifecycle remains incomplete. Issue #7 schema/API rollout and browser/iPhone acceptance are also still pending.
-- **Suggested next project status:** Issue #3 remains In Progress because this stabilization does not complete its broader lifecycle scope. Issue #8 remains in Verify pending real-iPhone acceptance.
-- **Current release being cut:** v0.1.1 — standalone internal deployment milestone; ready for release commit and tag
-- **Current phase:** Phase 8 complete — standalone internal MVP deployment verified
-- **Phase 8 status:** PASSED — Railway HTTPS API and standalone real-iPhone Release build verified over cellular networking
-- **Next engineering phase:** Real-world usage and high-level v0.2.0 planning.
+- **Current work item:** Prepare v0.2.0 for a new standalone internal iPhone build from `main` at `5a18f28`. Day Window, Today fixes, capture/Week expansion, and Weekly Focus stabilization are committed. The user reported the Day Window migration applied and browser checks passed; physical-iPhone acceptance of the new build remains pending.
+- **Required project status:** Keep #8 open in Verify pending physical-iPhone acceptance; keep #3 and #4 open in In Progress because their broader scope remains incomplete. All three issue open states were read back during preparation. Project Status could not be independently read: the local GitHub CLI token lacks `read:project`. No issue or project states were changed.
+- **Latest published release:** [v0.1.1](https://github.com/OzAvrahami/LifeOS/releases/tag/v0.1.1), published 2026-08-27 (verified through GitHub Releases).
+- **Prepared version:** v0.2.0, iOS build 2 — unreleased; manual commit/push, build/install, and physical-iPhone acceptance pending.
+- **Current phase:** Phase 9 in progress — standalone usage fixes and v0.2.0 preparation; Phase 8 remains historically complete.
+- **Phase 8 status:** PASSED on 2026-08-20 — historical Railway HTTPS and standalone real-iPhone verification over cellular; not acceptance of v0.2.0.
+- **Next engineering action:** Manually build/install v0.2.0 and record the physical-iPhone checklist in `DEPLOYMENT.md`.
 
 This document is the current source of truth for implementation status. “Verified” means supported by tracked code plus a repeatable repository check; it does not imply remote or real-device verification unless stated.
 
@@ -19,19 +20,19 @@ This document is the current source of truth for implementation status. “Verif
 | Tasks | ✅ Verified remotely and on device | Remote migration and authenticated API persistence verified | API, Mobile, local real-JWT/RLS harness, remote Phase 7C E2E | Stable UUIDs survived the remote Core Flow; single-active handoff, two-user isolation, and real-device Core Flow passed. |
 | Quick Capture | ✅ Verified remotely and on device | Remote API capture persistence verified | Mobile API/cache/flow tests; remote Phase 7C E2E | Capture persisted through fresh reads, API restart, logout/login, app restart, and the final real-iPhone smoke. `Choose day` remains intentionally limited to the approved lightweight behavior. |
 | Inbox | ✅ Verified remotely and on device | Remote API persistence verified | UI, processing, routing, Task flow tests; remote Phase 7C E2E | The same Task persisted through Inbox → Week/Today without duplication; the real-iPhone Core Flow passed. |
-| Today | 🟡 Issue #7 local verification pending | Tasks, DailyPlan, Commitments, Settings previously verified remotely | Today, hydration, task-flow, planning, commitment, settings tests | Local source now shows planned Task time without a capacity denominator and discloses missing estimates. Browser/iPhone acceptance of this change is pending. |
-| Week | 🟡 Weekly Focus cleanup pending acceptance | Tasks, WeekPlan, WeeklyFocus, Commitments verified remotely | Week, planning, commitments, settings-boundary tests; remote Phase 7C E2E | Normal authenticated use now exposes an account/week-scoped Weekly Focus editor; fixture planning content is development-preview-only. Browser/iPhone acceptance of this local UI change is pending. |
+| Today | 🟡 New-build acceptance pending | Tasks, DailyPlan, Commitments, Settings previously verified remotely | Today, hydration, task-flow, planning, commitment, settings tests | Committed source shows planned Task time without a capacity denominator, discloses missing estimates, and excludes fixture suggestions. The user reported Day Window/browser checks passed; new-build iPhone acceptance remains pending. |
+| Week | 🟡 Weekly Focus cleanup pending acceptance | Tasks, WeekPlan, WeeklyFocus, Commitments verified remotely | Week, planning, commitments, settings-boundary tests; remote Phase 7C E2E | Normal authenticated use now exposes an account/week-scoped Weekly Focus editor; fixture planning content is development-preview-only. The stabilization is committed at `5a18f28`; new-build iPhone acceptance remains pending. Task expansion does not complete Issue #4 navigation/day-detail scope. |
 | Daily/Weekly planning | 🟡 Partial | DailyPlan/WeeklyFocus migrations + APIs verified remotely | API, cache, UI, local and remote RLS checks | DailyPlan and ordered WeeklyFocus persistence survived restart and logout/login. The focused Weekly Focus editor is implemented; Issue #3's full not-started/in-progress/completed lifecycle and resume behavior remain incomplete. |
 | Commitments | ✅ Verified remotely | Commitment migration + API verified remotely | API, UI/cache/workload, local and remote RLS checks | One-time remote persistence and two-user isolation passed. Recurrence and calendar sync are deferred. |
 | Workload/availability | 🟡 Retired from Today | Legacy DailyPlan override + UserSettings default retained | Legacy metrics/data-integrity tests | Today no longer claims availability or capacity-derived status. Commitments remain separate; missing Task estimates are disclosed rather than treated as known time. |
-| More / Settings | 🟡 Issue #7 rollout pending | Legacy UserSettings verified remotely; Day Window additive migration is local only | API, UI/cache/date, local RLS tests | “היום שלי” stores nullable recurring local clock times after schema/API rollout. Pre-upgrade servers are detected and no device-only save is claimed. |
+| More / Settings | 🟡 New-build acceptance pending | Legacy UserSettings verified remotely; user reports Day Window migration applied and browser checks passed | API, UI/cache/date, local RLS tests | “היום שלי” stores nullable recurring local clock times. Pre-upgrade servers are detected and no device-only save is claimed. Version/build footer prepared for v0.2.0; device acceptance pending. |
 | API | ✅ Deployed and verified | Stateless Railway HTTPS service over caller-scoped Supabase | API unit/integration suite; Railway health and authenticated identity checks | `lifeos-api` runs compiled JavaScript on Railway; public health and authenticated `/auth/me` checks passed. |
 | Authentication | ✅ Verified remotely and on device | Remote Supabase Auth session flow verified | Auth provider/UI/callback/API and bootstrap-race tests; remote Phase 7C E2E | Remote and real-iPhone login, logout/login restoration, and restart persistence passed; the stale-bootstrap session race is fixed. |
-| Supabase/database | ✅ Verified | Five versioned migrations deployed remotely | Local reset/lint, remote history/dry-run/lint, opt-in local integration harness | Remote history matches all five migrations, linked dry-run is up to date, and remote public-schema lint passes. |
+| Supabase/database | ✅ Historical verification + user-reported Day Window rollout | Five baseline migrations verified remotely; sixth Day Window migration reported applied by user | Local reset/lint, remote history/dry-run/lint, opt-in local integration harness | Phase 7 history/dry-run/lint verified the five baseline migrations. Day Window rollout is user-reported; no production migration or fresh remote schema audit was run during v0.2.0 preparation. |
 | RLS/security | ✅ Verified locally and remotely | Caller-JWT RLS policies on all user data | Two-user local harness; anonymous and authenticated remote checks | Bidirectional remote read/write isolation passed for Tasks, WeekPlans, DailyPlans, WeeklyFocuses, Commitments, and UserSettings; anonymous table/RPC denial remains verified with `42501`. |
 | Cross-screen synchronization | ✅ Verified in automation, remotely, and on device | TanStack Query user-scoped caches | Cache membership/request-audit tests | Targeted cache updates prevent copies and request multipliers; remote and real-device Core Flow remained consistent. |
-| Automated tests | ✅ Verified | N/A | 166 Mobile across 30 suites + 44 API tests; local harness opt-in | Standard tests mock external cloud boundaries; local harness exercises actual Docker PostgreSQL/Auth/RLS. |
-| Real-device verification | ✅ Standalone internal use verified | Remote authenticated persistence observed on device | Real-iPhone development and Release-build smokes | The installed Release build operated over cellular with Metro, the local API, and the Mac unavailable. It remains development-signed and is not a TestFlight or App Store release. |
+| Automated tests | ✅ Preparation checks passed | N/A | 171 Mobile tests across 31 suites + 44 API tests; local harness opt-in | Standard tests mock external cloud boundaries; local harness exercises actual Docker PostgreSQL/Auth/RLS and was not rerun in release preparation. |
+| Real-device verification | ✅ Historical standalone verification; v0.2.0 pending | Remote authenticated persistence observed on device | Real-iPhone development and Release-build smokes | The installed Release build operated over cellular with Metro, the local API, and the Mac unavailable. It remains development-signed and is not a TestFlight or App Store release. |
 | Life Areas and broader product modules | ⏸️ Deferred | None | None | Life Areas UI remains disabled; recurring schedules, external calendars, notifications, AI, projects, habits, and billing are outside the current gate. |
 
 ## Evidence by subsystem
@@ -81,20 +82,27 @@ This document is the current source of truth for implementation status. “Verif
 3. The Product Spec mentions an “All Tasks” screen and Life Areas, but neither is part of the narrow v0.1 release gate; Life Areas are explicitly disabled/deferred.
 4. Expo Web is a secondary review/development target, not the v0.1 release platform.
 5. The standalone iPhone build uses the current Apple Personal Team/development-distribution setup. TestFlight and App Store distribution are not complete.
-6. Issue #7 still requires additive database/API rollout and browser/iPhone acceptance before it can be considered complete or released.
+6. The user reported Issue #7’s Day Window migration applied and browser checks passed. This task did not repeat migrations or independently verify the deployed API/schema; new-build physical-iPhone acceptance remains required.
 7. Issue #3 still requires an explicit Weekly Planning lifecycle, persisted progress, and resume/review behavior; the focused Weekly Focus editor is only a stabilization slice.
+8. Issue #4 still requires previous/next/current-week navigation, selected-week state, full day-task discovery/detail and individual task access, including RTL iPhone acceptance. Task-backed summaries and expansion are partial progress.
 
 ## Current Critical Path
 
-1. Use the standalone internal MVP in real daily and weekly planning.
-2. Record product friction, defects, and missing-flow evidence.
-3. Use that evidence to plan v0.2.0 at a high level.
+1. Manually review, commit, and push the prepared v0.2.0 changes.
+2. Build/install a new standalone Release binary from `apps/mobile` using the existing signing setup.
+3. Record physical-iPhone acceptance; preserve #3/#4’s incomplete broader scope.
 
 ## Current release gate
 
+### v0.2.0
+
+**Status: UNRELEASED PREPARATION — PHYSICAL-IPHONE ACCEPTANCE PENDING.** Package/Expo metadata is `0.2.0`, with iOS build `2`. This Mac’s ignored native Info.plist and Debug/Release version settings were synchronized without regenerating the native project. Local cached Debug and Release artifacts were `0.1.0 (1)`; that evidence does not identify the installed iPhone binary. No build/install, production migration, deployment, tag, or publication was performed. See `DEPLOYMENT.md` for commands and acceptance.
+
+## Historical release gates
+
 ### v0.1.1
 
-**Status: READY FOR RELEASE COMMIT AND TAG.** Phase 8 is complete: the Railway HTTPS API, authenticated Railway identity request, Railway-backed Mobile configuration, and standalone real-iPhone Release operation have been verified. The deployed architecture is iPhone → Railway HTTPS API → Supabase Cloud. This release does not represent TestFlight or App Store distribution.
+**Status: PUBLISHED on GitHub, 2026-08-27.** Phase 8 is complete: the Railway HTTPS API, authenticated Railway identity request, Railway-backed Mobile configuration, and standalone real-iPhone Release operation have been verified. The deployed architecture is iPhone → Railway HTTPS API → Supabase Cloud. This release does not represent TestFlight or App Store distribution.
 
 ### v0.1.0-alpha.1
 
@@ -106,11 +114,27 @@ This document is the current source of truth for implementation status. “Verif
 
 ### v0.1.0
 
-**Status: RELEASED.** Phase 7A migration alignment, Phase 7B privilege normalization, Phase 7C remote Auth/RLS/Core Flow, real-iPhone persistence smokes, the two device-discovered regression fixes, Expo SDK patch alignment, and the final fresh-build smoke all passed. Tag `v0.1.0` is the authoritative first internal MVP release.
+**Status: RELEASED.** Phase 7A migration alignment, Phase 7B privilege normalization, Phase 7C remote Auth/RLS/Core Flow, real-iPhone persistence smokes, the two device-discovered regression fixes, Expo SDK patch alignment, and the final fresh-build smoke all passed. The published v0.1.0 release records the first internal MVP milestone.
 
 ## Next Action
 
-**Begin real-world standalone usage and collect evidence for v0.2.0 planning.**
+**Manually commit/push, then build/install v0.2.0 and perform physical-iPhone acceptance.** A development refresh or git push does not update the installed standalone Release binary.
+
+## v0.2.0 preparation validation — 2026-09-06
+
+| Check | Result |
+| --- | --- |
+| Repository baseline | Clean `main` at `5a18f28` before edits; HEAD and branch unchanged; release-preparation files remain unstaged |
+| `npm run typecheck` | Passed for API and Mobile |
+| `npm run lint` | Passed for API and Mobile |
+| `npm test` | Passed: 44 API tests and 171 Mobile tests across 31 suites |
+| Settings footer coverage | Native/config build mismatch, release/development labels, web fallback, missing metadata, and Settings integration passed; focused suite rerun after a test-only TypeScript correction |
+| Version/config consistency | Package and resolved Expo versions `0.2.0`; iOS build `2`; exactly four lockfile version fields changed, no dependency changes |
+| Native metadata | Info.plist and project plist syntax passed; comparison with originals confirms only version/build fields changed, including Debug/Release settings |
+| Environment | Effective production API matches documented Railway HTTPS URL; required public Supabase variables present; values not printed |
+| `git diff --check` | Passed |
+
+These are local preparation checks. No production migrations, deployments, device builds/installs, or new remote/device acceptance were performed. Expo Doctor's historical result below was not rerun. The user-reported Day Window migration/browser results remain separate from acceptance of the prepared iPhone build.
 
 ## Phase 8 standalone deployment evidence — 2026-08-20
 
@@ -121,7 +145,7 @@ This document is the current source of truth for implementation status. “Verif
 - Standalone operation passed on the real iPhone over cellular networking with Metro stopped, the local API stopped, and the Mac disconnected: iPhone → Railway API → Supabase Cloud.
 - This proves standalone internal usage only. The build is signed through the current Apple development setup and has not been distributed through TestFlight or the App Store.
 
-## Validation baseline — 2026-08-20
+## Historical validation baseline — 2026-08-20
 
 | Check | Result |
 | --- | --- |

@@ -10,9 +10,10 @@ Status is based on repository evidence. A phase can contain implemented code whi
 - **v0.1.0-alpha.N** — additional internal snapshots while the core flow is completed and stabilized.
 - **v0.1.0** — first internal MVP where the daily/weekly planning loop works end to end on a real iPhone with persisted authenticated data.
 - **v0.1.1** — standalone internal deployment milestone: Railway HTTPS API and a Release iPhone build that operates without the development Mac, Metro, or local API.
+- **v0.2.0** — next standalone internal iPhone build: Day Window, task-backed summaries, capture/Week fixes, Weekly Focus stabilization, and visible version metadata; preparation in progress, physical-iPhone acceptance pending.
 - **v1.0.0** — a later stable-product milestone; it is not the current target.
 
-Git tags are the authoritative release markers. Expo/App Store build numbering remains unchanged until a separate release workflow requires it.
+Published GitHub Releases are authoritative for released versions, as defined in `github-development-standard.md`. v0.1.1 is published; v0.2.0 is unreleased preparation with package/Expo version 0.2.0 and iOS build 2.
 
 ## Phase 1 — Product definition
 
@@ -110,17 +111,17 @@ Migration reconciliation, privilege normalization, Phase 7C remote Auth/RLS/Core
 
 The `lifeos-api` Railway service runs the compiled API behind HTTPS. A Release iOS build completed and standalone operation passed over cellular networking: iPhone → Railway API → Supabase Cloud. This is an internal development-signed build, not completed TestFlight or App Store distribution.
 
-**Release milestone:** v0.1.1 — ready for its release commit and tag.
+**Release milestone:** v0.1.1 — published on GitHub on 2026-08-27; standalone verification was recorded on 2026-08-20.
 
-## Phase 9 — Real-world usage and v0.2.0 planning
+## Phase 9 — Real-world usage and v0.2.0 preparation
 
 **Goal:** Use the standalone v0.1 MVP in real planning and identify only the next capabilities justified by evidence.
 
 **Scope:** Real daily/weekly usage, defect and friction capture, missing-flow observations, and high-level v0.2.0 planning. Possible later expansion includes calendar integration, notifications, Life Areas, recurring commitments, AI, habits, goals, or automation.
 
-**Exit criteria:** Defined only after v0.1 usage evidence exists.
+**Exit criteria:** Build/install the prepared v0.2.0 standalone iPhone app and record physical-device acceptance in `DEPLOYMENT.md`. The user reports Day Window migration/browser checks passed; this does not accept the new binary. Issue #3’s full planning lifecycle and Issue #4’s broader week navigation/day-detail scope remain incomplete and In Progress; #8 remains open in Verify.
 
-**Current status: DEFERRED**
+**Current status: IN PROGRESS**
 
 ## Release gate — v0.1.0-alpha.1
 
@@ -149,6 +150,6 @@ The release is ready only when all of these are verified end to end:
 - [x] A real iPhone development-build smoke test passes, including a final smoke after Expo SDK patch alignment.
 - [x] No known release-blocking bug remains.
 
-**Status: PASSED — v0.1.0 is the completed first internal MVP milestone and is ready for its release commit and authoritative Git tag.**
+**Status: PASSED — v0.1.0 is the published first internal MVP milestone. This historical acceptance does not cover v0.2.0.**
 
 Unrelated nice-to-have features are not part of this gate.

@@ -3,6 +3,7 @@ import { Text } from 'react-native';
 import { TaskQueryNotice } from '@/features/tasks/task-query-notice';
 import { colors, spacing, typography } from '@/theme/tokens';
 
+import { AppVersionFooter } from './app-version-footer';
 import { SettingsCard, SettingsPage, SettingsRow, SettingsSectionLabel } from './settings.components';
 import { useEffectiveSettings } from './settings.queries';
 import { dayWindowValue, timezoneOffsetLabel } from './settings-time';
@@ -23,7 +24,7 @@ export function SettingsScreen({
   const timezoneLabel = timezoneOptions.find((item) => item.timezone === effective.timezone)?.label
     ?? effective.timezone;
   return (
-    <SettingsPage onBack={onBack} title="הגדרות">
+    <SettingsPage footer={<AppVersionFooter />} onBack={onBack} title="הגדרות">
       <TaskQueryNotice error={query.isError} loading={query.isPending} onRetry={() => void query.refetch()} />
       <SettingsSectionLabel>היום שלי</SettingsSectionLabel>
       <SettingsCard>

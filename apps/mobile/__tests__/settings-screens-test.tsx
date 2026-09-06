@@ -129,6 +129,7 @@ describe('More and Settings screens', () => {
     expect(screen.getAllByText('לא הוגדר')).toHaveLength(2);
     expect(screen.getByText('ראשון')).toBeTruthy();
     expect(screen.getByText(/ישראל · GMT\+/)).toBeTruthy();
+    expect(screen.getByText(/גרסת פיתוח .* · מספר בנייה לא זמין/)).toBeTruthy();
     await user.press(screen.getByLabelText('תחילת היום: לא הוגדר'));
     await user.press(screen.getByLabelText('תחילת שבוע: ראשון'));
     expect(dayWindow).toHaveBeenCalledTimes(1);
