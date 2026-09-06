@@ -8,6 +8,8 @@ import { QuickCaptureSheet } from '@/features/capture/quick-capture-sheet';
 import { useTaskCapture } from '@/features/tasks/use-task-capture';
 import { colors, radius, spacing, typography } from '@/theme/tokens';
 
+import { AppVersionFooter } from './app-version-footer';
+
 export function authDisplayName(metadata: Record<string, unknown> | undefined) {
   return typeof metadata?.name === 'string' && metadata.name.trim()
     ? metadata.name.trim()
@@ -52,7 +54,10 @@ export function MoreScreen({
           <View style={styles.card}>
             <MoreRow icon="person-outline" label="חשבון" onPress={onNavigateAccount} subtitle={authDisplayName(user?.user_metadata)} />
           </View>
-          <Text style={styles.version}>LifeOS · גרסה 0.1</Text>
+          <View style={styles.footer}>
+            <Text style={styles.brand}>LifeOS</Text>
+            <AppVersionFooter />
+          </View>
         </ScrollView>
       </MobileShell>
       <QuickCaptureSheet onClose={() => setCaptureOpen(false)} onSave={captureTask} visible={captureOpen} />
@@ -86,5 +91,6 @@ const styles = StyleSheet.create({
   rowSubtitle: { color: colors.textFaint, fontFamily: typography.family.regular, fontSize: typography.size.label, marginTop: 2, textAlign: 'right' },
   divider: { backgroundColor: colors.divider, height: StyleSheet.hairlineWidth, marginLeft: 0, marginRight: 54 },
   soon: { backgroundColor: '#EFEAE0', borderRadius: radius.round, color: '#A8A296', fontFamily: typography.family.bold, fontSize: 12, paddingHorizontal: 10, paddingVertical: 4 },
-  version: { color: '#B0AA9E', fontFamily: typography.family.regular, fontSize: typography.size.label, marginTop: 34, textAlign: 'center', writingDirection: 'ltr' },
+  footer: { gap: spacing.xxs, marginTop: 34 },
+  brand: { color: '#B0AA9E', fontFamily: typography.family.regular, fontSize: typography.size.label, textAlign: 'center', writingDirection: 'ltr' },
 });

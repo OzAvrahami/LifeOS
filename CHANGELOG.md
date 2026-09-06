@@ -4,6 +4,12 @@ All notable changes to LifeOS will be documented in this file.
 
 LifeOS follows Semantic Versioning for development and release tags.
 
+## [Unreleased]
+
+### Fixed
+
+- Replaced More’s stale hardcoded version label with the shared metadata-derived version/build footer, preserving LifeOS branding, Hebrew/RTL styling, and development/web fallbacks.
+
 ## [0.2.0] — Unreleased preparation
 
 Prepared for the next standalone internal iPhone build; not published and pending physical-iPhone acceptance. Scope reviewed against `v0.1.1..5a18f28`, plus this release preparation. The user reported that the Day Window migration was applied and browser checks passed; this is user-reported evidence, not a new remote verification or acceptance of this binary.

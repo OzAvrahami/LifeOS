@@ -1,6 +1,8 @@
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { render, screen, userEvent, waitFor, within } from '@testing-library/react-native';
+import Constants from 'expo-constants';
 import { useEffect, type PropsWithChildren, type ReactElement } from 'react';
+import { Platform } from 'react-native';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 
 import { AccountScreen } from '@/features/settings/account-screen';
@@ -16,6 +18,16 @@ import { WeekStartScreen } from '@/features/settings/week-start-screen';
 import * as taskApi from '@/features/tasks/task.api';
 import { DemoTaskProvider } from '@/features/tasks/demo-task-provider';
 import { TaskQueryScopeProvider } from '@/features/tasks/task-query-scope';
+
+jest.mock('expo-constants', () => ({
+  ...jest.requireActual('expo-constants'),
+  __esModule: true,
+  default: {
+    ...jest.requireActual('expo-constants').default,
+    expoConfig: null,
+    platform: undefined,
+  },
+}));
 
 jest.mock('@/features/settings/settings.api', () => ({
   getSettings: jest.fn(),
@@ -88,7 +100,32 @@ beforeEach(() => {
   mockSignOut.mockResolvedValue(undefined);
 });
 
+afterEach(() => jest.restoreAllMocks());
+
 describe('More and Settings screens', () => {
+  it.each([
+    { version: '7.8.9', build: '12' },
+    { version: '8.0.1', build: '13' },
+  ])('shows metadata version $version and native build $build in More', async ({ version, build }) => {
+    jest.replaceProperty(Platform, 'OS', 'ios');
+    jest.replaceProperty(Constants, 'expoConfig', {
+      name: 'LifeOS', slug: 'lifeos', version, ios: { buildNumber: '99' },
+    });
+    jest.replaceProperty(Constants, 'platform', { ios: { buildNumber: build } } as typeof Constants.platform);
+    await renderSettings(
+      <MoreScreen
+        onNavigateAccount={jest.fn()}
+        onNavigateInbox={jest.fn()}
+        onNavigateSettings={jest.fn()}
+        onNavigateToday={jest.fn()}
+        onNavigateWeek={jest.fn()}
+      />,
+    );
+    expect(screen.getByText('LifeOS')).toBeTruthy();
+    expect(screen.getByText(`גרסת פיתוח ${version} · בנייה ${build}`)).toBeTruthy();
+    expect(screen.queryByText('LifeOS · גרסה 0.1')).toBeNull();
+  });
+
   it('makes More navigation functional and reuses Quick Capture', async () => {
     const onSettings = jest.fn();
     const onAccount = jest.fn();
