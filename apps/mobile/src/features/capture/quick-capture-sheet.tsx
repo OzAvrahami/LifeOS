@@ -23,23 +23,25 @@ const destinations: { id: CaptureDestination; label: string; ltr?: boolean }[] =
 ];
 
 export function QuickCaptureSheet({
+  initialDestination = 'inbox',
   onClose,
   onSave,
   visible,
 }: {
+  initialDestination?: CaptureDestination;
   onClose: () => void;
   onSave?: (title: string, destination: CaptureDestination) => Promise<void> | void;
   visible: boolean;
 }) {
   const insets = useSafeAreaInsets();
   const [title, setTitle] = useState('');
-  const [destination, setDestination] = useState<CaptureDestination>('inbox');
+  const [destination, setDestination] = useState<CaptureDestination>(initialDestination);
   const [error, setError] = useState(false);
   const [saving, setSaving] = useState(false);
 
   const close = () => {
     setTitle('');
-    setDestination('inbox');
+    setDestination(initialDestination);
     setError(false);
     setSaving(false);
     onClose();

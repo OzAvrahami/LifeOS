@@ -12,6 +12,8 @@ LifeOS follows Semantic Versioning for development and release tags.
 
 ### Changed
 
+- Connected Today’s inline “Add Task” action to Quick Capture with Today preselected while preserving the global Inbox default.
+- Made Week’s “More Tasks” action expand and collapse all remaining week-planned Tasks with the same scheduling controls.
 - Replaced Today’s arbitrary capacity denominator and capacity-derived status with an honest planned Task-time summary; Commitments remain visibly separate and Tasks without estimates are disclosed.
 - Retired daily capacity as the primary Settings concept while preserving its stored values and older-client compatibility. This intentionally supersedes Issue #6’s Today capacity notice, not its persistence semantics.
 

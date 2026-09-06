@@ -3,7 +3,7 @@ import { useState } from 'react';
 import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 
 import { MobileShell } from '@/components/mobile-shell';
-import { QuickCaptureSheet } from '@/features/capture/quick-capture-sheet';
+import { QuickCaptureSheet, type CaptureDestination } from '@/features/capture/quick-capture-sheet';
 import { CommitmentEditor } from '@/features/commitments/commitment-editor';
 import {
   useCommitments,
@@ -58,6 +58,7 @@ export function TodayScreen({
 }) {
   const [todayState, setTodayState] = useState<TodayDemoState>(initialState);
   const [captureOpen, setCaptureOpen] = useState(false);
+  const [captureInitialDestination, setCaptureInitialDestination] = useState<CaptureDestination>('inbox');
   const [commitmentEditorOpen, setCommitmentEditorOpen] = useState(false);
   const [editingCommitment, setEditingCommitment] = useState<ServerCommitment | null>(null);
   const demo = useDemoTasks();
@@ -95,6 +96,11 @@ export function TodayScreen({
   const serverTaskTime = serverTasks
     ? summarizePlannedTaskTime(todayQuery.data ?? [])
     : null;
+
+  const openCapture = (destination: CaptureDestination) => {
+    setCaptureInitialDestination(destination);
+    setCaptureOpen(true);
+  };
 
   const openNewCommitment = () => {
     setEditingCommitment(null);
@@ -200,6 +206,7 @@ export function TodayScreen({
           onToggleFocus={serverTasks ? (taskId) => void selectDailyFocus(taskId) : undefined}
           commitments={serverTasks ? presentedCommitments : undefined}
           onAddCommitment={serverTasks ? openNewCommitment : undefined}
+          onAddTask={() => openCapture('today')}
           onEditCommitment={serverTasks ? openExistingCommitment : undefined}
           serverCommitmentCount={serverTasks ? serverCommitments.length : undefined}
           serverTaskCount={serverTasks ? sourceTasks.length : undefined}
@@ -233,6 +240,7 @@ export function TodayScreen({
         content = (
           <NormalTodayContent
             focusTask={normalTodayFixture.focus}
+            onAddTask={() => openCapture('today')}
             onStartFocus={() => setTodayState('active')}
             suggestion={normalTodayFixture.suggestion}
             tasks={normalTodayFixture.tasks}
@@ -247,7 +255,7 @@ export function TodayScreen({
         onNavigateInbox={onNavigateInbox}
         onNavigateMore={onNavigateMore}
         onNavigateWeek={onNavigateWeek}
-        onQuickCapture={() => setCaptureOpen(true)}
+        onQuickCapture={() => openCapture('inbox')}
       >
         <TaskQueryNotice
           error={serverTasks && (todayQuery.isError || commitmentQuery.isError || dailyPlanQuery.isError || settingsQuery.isError || operationError)}
@@ -257,6 +265,8 @@ export function TodayScreen({
         {isHydrating ? null : content}
       </MobileShell>
       <QuickCaptureSheet
+        initialDestination={captureInitialDestination}
+        key={captureInitialDestination}
         onClose={() => setCaptureOpen(false)}
         onSave={captureTask}
         visible={captureOpen}
@@ -282,6 +292,7 @@ function NormalTodayContent({
   focusedTaskId,
   movedTaskId,
   onAddCommitment,
+  onAddTask,
   onEditCommitment,
   onStartFocus,
   onStartTask,
@@ -299,6 +310,7 @@ function NormalTodayContent({
   focusedTaskId?: string;
   movedTaskId?: string;
   onAddCommitment?: () => void;
+  onAddTask: () => void;
   onEditCommitment?: (id: string) => void;
   onStartFocus: () => void;
   onStartTask?: (taskId: string) => void;
@@ -351,7 +363,12 @@ function NormalTodayContent({
           onToggleFocus={onToggleFocus}
           tasks={tasks}
         />
-        <Pressable accessibilityRole="button" style={styles.addTaskButton}>
+        <Pressable
+          accessibilityLabel="הוסף משימה להיום"
+          accessibilityRole="button"
+          onPress={onAddTask}
+          style={styles.addTaskButton}
+        >
           <Text style={styles.addTaskText}>+ הוסף משימה</Text>
         </Pressable>
 

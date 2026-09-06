@@ -1,6 +1,7 @@
 import { render, screen, userEvent, within } from '@testing-library/react-native';
 
 import { TodayScreen } from '@/features/today/today-screen';
+import { UnscheduledWeekTasks } from '@/features/week/week.components';
 import { WeekScreen } from '@/features/week/week-screen';
 
 import { TestProviders } from '../test-utils/test-providers';
@@ -40,12 +41,38 @@ describe('<WeekScreen />', () => {
   });
 
   it('renders weekly focuses and compact unscheduled tasks', async () => {
+    const user = userEvent.setup();
     await renderWeek();
 
     expect(screen.getByLabelText('המיקוד השבועי')).toBeTruthy();
     expect(screen.getByText('לסיים את אפיון LifeOS')).toBeTruthy();
     expect(screen.getByLabelText('לתכנן השבוע')).toBeTruthy();
     expect(screen.getByText('עוד משימה אחת · לסדר מחסן ←')).toBeTruthy();
+    expect(screen.queryByText('לסדר מחסן')).toBeNull();
+
+    await user.press(screen.getByLabelText('הצג משימה נוספת'));
+    expect(screen.getByText('לסדר מחסן')).toBeTruthy();
+    expect(screen.getByLabelText('הצג פחות משימות').props.accessibilityState).toEqual({ expanded: true });
+
+    await user.press(screen.getByLabelText('הצג פחות משימות'));
+    expect(screen.queryByText('לסדר מחסן')).toBeNull();
+    expect(screen.getByLabelText('הצג משימה נוספת').props.accessibilityState).toEqual({ expanded: false });
+  });
+
+  it.each([0, 1, 2])('keeps the compact list correct with %i week-planned Tasks', async (taskCount) => {
+    const tasks = Array.from({ length: taskCount }, (_, index) => ({
+      durationMinutes: 15,
+      id: `compact-${index}`,
+      title: `משימה ${index + 1}`,
+    }));
+    await render(
+      <TestProviders>
+        <UnscheduledWeekTasks tasks={tasks} />
+      </TestProviders>,
+    );
+
+    expect(screen.queryAllByLabelText(/^בחר יום עבור /)).toHaveLength(taskCount);
+    expect(screen.queryByLabelText(/^הצג .*נוספ/)).toBeNull();
   });
 
   it('renders the supportive overloaded-day warning and context', async () => {

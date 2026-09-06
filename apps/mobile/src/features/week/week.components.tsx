@@ -117,8 +117,10 @@ export function UnscheduledWeekTasks({
   tasks: UnscheduledWeekTask[];
 }) {
   const [choosingTaskId, setChoosingTaskId] = useState<string | null>(null);
-  const visibleTasks = tasks.slice(0, 2);
-  const hiddenTaskCount = tasks.length - visibleTasks.length;
+  const [expanded, setExpanded] = useState(false);
+  const hiddenTaskCount = Math.max(0, tasks.length - 2);
+  const visibleTasks = expanded ? tasks : tasks.slice(0, 2);
+  const firstHiddenTask = tasks[2];
   return (
     <View accessibilityLabel="לתכנן השבוע" style={styles.unscheduledCard}>
       {visibleTasks.map((task) => (
@@ -157,9 +159,17 @@ export function UnscheduledWeekTasks({
         </View>
       ))}
       {hiddenTaskCount > 0 ? (
-        <Pressable accessibilityRole="button" style={styles.moreTask}>
+        <Pressable
+          accessibilityLabel={expanded ? 'הצג פחות משימות' : `הצג ${hiddenTaskCount === 1 ? 'משימה נוספת' : `${hiddenTaskCount} משימות נוספות`}`}
+          accessibilityRole="button"
+          accessibilityState={{ expanded }}
+          onPress={() => setExpanded((value) => !value)}
+          style={styles.moreTask}
+        >
           <Text style={styles.moreTaskText}>
-            עוד {hiddenTaskCount === 1 ? 'משימה אחת' : `${hiddenTaskCount} משימות`} · {tasks[2].title} ←
+            {expanded
+              ? 'פחות משימות ↑'
+              : `עוד ${hiddenTaskCount === 1 ? 'משימה אחת' : `${hiddenTaskCount} משימות`} · ${firstHiddenTask!.title} ←`}
           </Text>
         </Pressable>
       ) : null}
