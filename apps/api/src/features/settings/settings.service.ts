@@ -12,6 +12,8 @@ import { SettingsApiError } from './settings.validation.js';
 
 function defaults(): UserSettings {
   return {
+    dayEndTime: null,
+    dayStartTime: null,
     defaultDailyCapacityMinutes: DEFAULT_DAILY_CAPACITY_MINUTES,
     persisted: false,
     timezone: null,
@@ -21,11 +23,17 @@ function defaults(): UserSettings {
 
 function mapSettings(row: UserSettingsRow): UserSettings {
   return {
+    dayEndTime: clockTime(row.day_end_time),
+    dayStartTime: clockTime(row.day_start_time),
     defaultDailyCapacityMinutes: row.default_daily_capacity_minutes,
     persisted: true,
     timezone: row.timezone,
     weekStartDay: row.week_start_day,
   };
+}
+
+function clockTime(value: string | null | undefined) {
+  return value?.slice(0, 5) ?? null;
 }
 
 function dataError(error: PostgrestError): never {
@@ -52,9 +60,16 @@ export class SupabaseSettingsService implements SettingsServiceContract {
   }
 
   async put(input: PutUserSettingsInput) {
+    const dayWindow = input.dayStartTime !== undefined || input.dayEndTime !== undefined
+      ? {
+          day_end_time: input.dayEndTime,
+          day_start_time: input.dayStartTime,
+        }
+      : {};
     const { data, error } = await this.client
       .from('user_settings')
       .upsert({
+        ...dayWindow,
         default_daily_capacity_minutes: input.defaultDailyCapacityMinutes,
         timezone: input.timezone,
         user_id: this.userId,

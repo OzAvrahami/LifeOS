@@ -1,5 +1,5 @@
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { render, screen, waitFor } from '@testing-library/react-native';
+import { notifyManager, QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { act, render, screen, userEvent, waitFor, within } from '@testing-library/react-native';
 import { useEffect, type PropsWithChildren } from 'react';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 
@@ -41,6 +41,14 @@ const sundaySettings: UserSettings = {
   timezone: 'Asia/Jerusalem',
   weekStartDay: 0,
 };
+
+beforeAll(() => {
+  notifyManager.setScheduler((callback) => callback());
+});
+
+afterAll(() => {
+  notifyManager.setScheduler((callback) => setTimeout(callback, 0));
+});
 
 function Providers({ children, client }: PropsWithChildren<{ client: QueryClient }>) {
   useEffect(() => () => client.clear(), [client]);
@@ -92,35 +100,154 @@ beforeEach(() => {
   jest.mocked(planningApi.getDailyPlan).mockResolvedValue(null);
 });
 
-it('recalculates Today immediately from the cached global capacity while preserving a DailyPlan override', async () => {
+it('keeps the honest Task-time summary independent of legacy defaults and DailyPlan overrides', async () => {
   const client = makeClient();
   const today = localDateKey(undefined, sundaySettings.timezone ?? undefined);
   jest.mocked(taskApi.listTasks).mockImplementation(async (filters) => filters?.plannedDate ? [taskFor(today)] : []);
   const view = await render(
     <Providers client={client}><TodayScreen taskSource="server" /></Providers>,
   );
-  expect(await screen.findByText('5:00 / 6:00')).toBeTruthy();
-  expect(screen.getByText('עמוס')).toBeTruthy();
+  expect(await screen.findByText('זמן משימות מתוכנן: 5 שעות')).toBeTruthy();
+  expect(screen.queryByText(/6:00|עמוס|מאוזן/)).toBeNull();
 
-  client.setQueryData(settingsKeys.user(userId), {
-    ...sundaySettings,
-    defaultDailyCapacityMinutes: 480,
+  await act(async () => {
+    client.setQueryData(settingsKeys.user(userId), {
+      ...sundaySettings,
+      defaultDailyCapacityMinutes: 480,
+    });
   });
-  expect(await screen.findByText('5:00 / 8:00')).toBeTruthy();
-  expect(screen.getByText('מאוזן')).toBeTruthy();
+  expect(screen.getByText('זמן משימות מתוכנן: 5 שעות')).toBeTruthy();
+  expect(screen.queryByText(/8:00|עמוס|מאוזן/)).toBeNull();
 
-  client.setQueryData(planningKeys.dailyPlan(userId, today), {
-    availableMinutes: 180,
+  await act(async () => {
+    client.setQueryData(planningKeys.dailyPlan(userId, today), {
+      availableMinutes: 431,
+      createdAt: '2026-08-15T08:00:00.000Z',
+      date: today,
+      focusTaskId: null,
+      id: 'daily-override',
+      updatedAt: '2026-08-15T08:00:00.000Z',
+    });
+  });
+  expect(screen.getByText('זמן משימות מתוכנן: 5 שעות')).toBeTruthy();
+  expect(screen.queryByText(/7:11|זמן זמין מיוחד/)).toBeNull();
+  await act(async () => {
+    client.setQueryData(settingsKeys.user(userId), sundaySettings);
+  });
+  expect(screen.getByText('זמן משימות מתוכנן: 5 שעות')).toBeTruthy();
+  expect(screen.queryByText(/7:11|6:00|זמן זמין מיוחד/)).toBeNull();
+  view.unmount();
+});
+
+it('does not rewrite a legacy override, Daily Focus, or another date while rendering Today', async () => {
+  const settings = { ...sundaySettings, defaultDailyCapacityMinutes: 480 };
+  const client = makeClient(settings);
+  const today = localDateKey(undefined, settings.timezone ?? undefined);
+  const otherDate = '2099-01-01';
+  const dailyPlan = {
+    availableMinutes: 431,
     createdAt: '2026-08-15T08:00:00.000Z',
     date: today,
-    focusTaskId: null,
+    focusTaskId: 'load-task',
     id: 'daily-override',
     updatedAt: '2026-08-15T08:00:00.000Z',
+  };
+  const otherPlan = { ...dailyPlan, date: otherDate, id: 'other-date-plan' };
+  client.setQueryData(planningKeys.dailyPlan(userId, today), dailyPlan);
+  client.setQueryData(planningKeys.dailyPlan(userId, otherDate), otherPlan);
+  jest.mocked(taskApi.listTasks).mockImplementation(async (filters) => (
+    filters?.plannedDate === today ? [taskFor(today)] : []
+  ));
+
+  await render(<Providers client={client}><TodayScreen taskSource="server" /></Providers>);
+
+  expect(await screen.findByText('זמן משימות מתוכנן: 5 שעות')).toBeTruthy();
+  expect(within(screen.getByLabelText('עכשיו')).getByText('משימת עומס')).toBeTruthy();
+  expect(screen.queryByText(/7:11|8:00|זמן זמין מיוחד/)).toBeNull();
+  expect(planningApi.putDailyPlan).not.toHaveBeenCalled();
+  expect(client.getQueryData(planningKeys.dailyPlan(userId, today))).toBe(dailyPlan);
+  expect(client.getQueryData(planningKeys.dailyPlan(userId, otherDate))).toBe(otherPlan);
+});
+
+it('does not create a capacity override during Daily Focus edits and preserves an existing override', async () => {
+  const client = makeClient({ ...sundaySettings, defaultDailyCapacityMinutes: 480 });
+  const today = localDateKey(undefined, sundaySettings.timezone ?? undefined);
+  const inheritedFocusPlan = {
+    availableMinutes: null,
+    createdAt: '2026-08-15T08:00:00.000Z',
+    date: today,
+    focusTaskId: 'load-task',
+    id: 'daily-focus',
+    updatedAt: '2026-08-15T08:00:00.000Z',
+  };
+  const overriddenFocusPlan = { ...inheritedFocusPlan, availableMinutes: 431 };
+  const overriddenNoFocusPlan = { ...overriddenFocusPlan, focusTaskId: null };
+  client.setQueryData(planningKeys.dailyPlan(userId, today), null);
+  jest.mocked(taskApi.listTasks).mockImplementation(async (filters) => (
+    filters?.plannedDate === today ? [taskFor(today)] : []
+  ));
+  jest.mocked(planningApi.putDailyPlan)
+    .mockResolvedValueOnce(inheritedFocusPlan)
+    .mockResolvedValueOnce(overriddenNoFocusPlan);
+
+  await render(<Providers client={client}><TodayScreen taskSource="server" /></Providers>);
+  const taskRow = await screen.findByLabelText('התחל משימה: משימת עומס');
+  const user = userEvent.setup();
+  await user.longPress(taskRow);
+  await waitFor(() => expect(jest.mocked(planningApi.putDailyPlan).mock.calls[0]?.[0]).toEqual({
+    date: today,
+    input: { availableMinutes: null, focusTaskId: 'load-task' },
+  }));
+
+  await act(async () => {
+    client.setQueryData(planningKeys.dailyPlan(userId, today), overriddenFocusPlan);
   });
-  expect(await screen.findByText('5:00 / 3:00')).toBeTruthy();
-  client.setQueryData(settingsKeys.user(userId), sundaySettings);
-  expect(screen.getByText('5:00 / 3:00')).toBeTruthy();
-  view.unmount();
+  expect(await screen.findByText('זמן משימות מתוכנן: 5 שעות')).toBeTruthy();
+  await user.longPress(taskRow);
+  await waitFor(() => expect(jest.mocked(planningApi.putDailyPlan).mock.calls[1]?.[0]).toEqual({
+    date: today,
+    input: { availableMinutes: 431, focusTaskId: null },
+  }));
+});
+
+it('does not move Tasks or DailyPlans or change Task time when the Day Window changes', async () => {
+  const client = makeClient({
+    ...sundaySettings,
+    dayEndTime: null,
+    dayStartTime: null,
+    dayWindowSupported: true,
+  });
+  const today = localDateKey(undefined, sundaySettings.timezone ?? undefined);
+  const task = taskFor(today);
+  const plan = {
+    availableMinutes: null,
+    createdAt: '2026-08-15T08:00:00.000Z',
+    date: today,
+    focusTaskId: task.id,
+    id: 'same-calendar-day-plan',
+    updatedAt: '2026-08-15T08:00:00.000Z',
+  };
+  client.setQueryData(planningKeys.dailyPlan(userId, today), plan);
+  jest.mocked(taskApi.listTasks).mockImplementation(async (filters) => filters?.plannedDate === today ? [task] : []);
+
+  await render(<Providers client={client}><TodayScreen taskSource="server" /></Providers>);
+  expect(await screen.findByText('זמן משימות מתוכנן: 5 שעות')).toBeTruthy();
+
+  await act(async () => {
+    client.setQueryData(settingsKeys.user(userId), {
+      ...sundaySettings,
+      dayEndTime: '01:00',
+      dayStartTime: '07:00',
+      dayWindowSupported: true,
+    });
+  });
+
+  expect(screen.getByText('זמן משימות מתוכנן: 5 שעות')).toBeTruthy();
+  expect(taskApi.listTasks).toHaveBeenCalledWith({ plannedDate: today });
+  expect(client.getQueryData(planningKeys.dailyPlan(userId, today))).toBe(plan);
+  expect(task).toEqual(expect.objectContaining({ estimatedMinutes: 300, plannedDate: today, status: 'open' }));
+  expect(planningApi.putDailyPlan).not.toHaveBeenCalled();
+  expect(taskApi.updateTask).not.toHaveBeenCalled();
 });
 
 it('changes every normal Week query boundary and seven-day order without rewriting the prior WeekPlan cache', async () => {
@@ -140,7 +267,9 @@ it('changes every normal Week query boundary and seven-day order without rewriti
   await waitFor(() => expect(commitmentApi.listCommitments).toHaveBeenCalledWith({ dateFrom: sundayStart, dateTo: sundayEnd }));
   expect(taskApi.listTasks).toHaveBeenCalledWith({ weekStart: sundayStart });
 
-  client.setQueryData(settingsKeys.user(userId), mondaySettings);
+  await act(async () => {
+    client.setQueryData(settingsKeys.user(userId), mondaySettings);
+  });
   await waitFor(() => expect(commitmentApi.listCommitments).toHaveBeenCalledWith({ dateFrom: mondayStart, dateTo: mondayEnd }));
   expect(taskApi.listTasks).toHaveBeenCalledWith({ weekStart: mondayStart });
   expect(planningApi.getWeeklyFocuses).toHaveBeenCalledWith(mondayStart);

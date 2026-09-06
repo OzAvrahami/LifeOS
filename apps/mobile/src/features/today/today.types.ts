@@ -24,7 +24,7 @@ export function isTodayDemoState(value: string | undefined): value is TodayDemoS
 export type TodayTask = {
   id: string;
   title: string;
-  durationMinutes: number;
+  durationMinutes: number | null;
   lifeArea: LifeArea;
 };
 
@@ -41,8 +41,8 @@ export type TodayFixture = {
   summary: {
     taskCount: number;
     commitmentCount: number;
-    plannedTime: string;
-    workload: 'מאוזן';
+    plannedTaskTime: string;
+    unknownEstimateCount: number;
   };
   focus: TodayTask;
   commitments: Commitment[];

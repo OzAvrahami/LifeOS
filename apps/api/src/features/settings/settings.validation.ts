@@ -25,10 +25,32 @@ export function isIanaTimezone(value: string) {
 export function parsePutSettings(value: unknown): PutUserSettingsInput {
   if (!value || typeof value !== 'object' || Array.isArray(value)) invalid();
   const body = value as Record<string, unknown>;
-  const allowed = new Set(['defaultDailyCapacityMinutes', 'weekStartDay', 'timezone']);
+  const required = new Set(['defaultDailyCapacityMinutes', 'weekStartDay', 'timezone']);
+  const allowed = new Set([...required, 'dayStartTime', 'dayEndTime']);
   if (Object.keys(body).some((key) => !allowed.has(key))) invalid();
-  if (Object.keys(body).length !== allowed.size || [...allowed].some((key) => !(key in body))) {
+  if ([...required].some((key) => !(key in body))) {
     invalid('All Settings fields are required');
+  }
+
+  const hasDayStart = 'dayStartTime' in body;
+  const hasDayEnd = 'dayEndTime' in body;
+  if (hasDayStart !== hasDayEnd) invalid('Both Day Window fields are required together');
+
+  let dayWindow: Pick<PutUserSettingsInput, 'dayStartTime' | 'dayEndTime'> = {};
+  if (hasDayStart && hasDayEnd) {
+    const start = body.dayStartTime;
+    const end = body.dayEndTime;
+    if (start === null && end === null) {
+      dayWindow = { dayEndTime: null, dayStartTime: null };
+    } else {
+      if (typeof start !== 'string' || typeof end !== 'string') {
+        invalid('Invalid Day Window');
+      }
+      if (!isClockTime(start) || !isClockTime(end) || start === end) {
+        invalid('Invalid Day Window');
+      }
+      dayWindow = { dayEndTime: end, dayStartTime: start };
+    }
   }
 
   if (
@@ -46,8 +68,13 @@ export function parsePutSettings(value: unknown): PutUserSettingsInput {
   if (!timezone || timezone.length > 100 || !isIanaTimezone(timezone)) invalid('Invalid timezone');
 
   return {
+    ...dayWindow,
     defaultDailyCapacityMinutes: body.defaultDailyCapacityMinutes as number,
     timezone,
     weekStartDay: body.weekStartDay as number,
   };
+}
+
+export function isClockTime(value: string) {
+  return /^(?:[01]\d|2[0-3]):[0-5]\d$/.test(value);
 }

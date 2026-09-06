@@ -5,17 +5,17 @@ import { colors, spacing, typography } from '@/theme/tokens';
 
 import { SettingsCard, SettingsPage, SettingsRow, SettingsSectionLabel } from './settings.components';
 import { useEffectiveSettings } from './settings.queries';
-import { hoursLabel, timezoneOffsetLabel } from './settings-time';
+import { dayWindowValue, timezoneOffsetLabel } from './settings-time';
 import { timezoneOptions, weekdayLabels } from './settings.types';
 
 export function SettingsScreen({
   onBack,
-  onDailyCapacity,
+  onDayWindow,
   onTimezone,
   onWeekStart,
 }: {
   onBack: () => void;
-  onDailyCapacity: () => void;
+  onDayWindow: () => void;
   onTimezone: () => void;
   onWeekStart: () => void;
 }) {
@@ -25,11 +25,29 @@ export function SettingsScreen({
   return (
     <SettingsPage onBack={onBack} title="הגדרות">
       <TaskQueryNotice error={query.isError} loading={query.isPending} onRetry={() => void query.refetch()} />
-      <SettingsSectionLabel>תכנון יומי</SettingsSectionLabel>
+      <SettingsSectionLabel>היום שלי</SettingsSectionLabel>
       <SettingsCard>
-        <SettingsRow label="זמן זמין ביום" onPress={onDailyCapacity} value={hoursLabel(effective.defaultDailyCapacityMinutes)} />
+        <SettingsRow
+          divider
+          label="תחילת היום"
+          onPress={onDayWindow}
+          value={query.isPending ? 'טוען…' : effective.dayWindowSupported ? effective.dayStartTime ?? 'לא הוגדר' : 'דורש עדכון שרת'}
+        />
+        <SettingsRow
+          label="סיום היום"
+          onPress={onDayWindow}
+          value={query.isPending ? 'טוען…' : effective.dayWindowSupported ? effective.dayEndTime ?? 'לא הוגדר' : 'דורש עדכון שרת'}
+        />
       </SettingsCard>
-      <Text style={styles.hint}>כמה זמן ביום בדרך כלל תרצה להקדיש לדברים מתוכננים.</Text>
+      <Text style={styles.hint}>
+        {query.isPending
+          ? 'טוען את טווח היום מהחשבון…'
+          : query.isError
+            ? 'לא ניתן לקבוע אם טווח היום זמין עד שההגדרות ייטענו.'
+            : effective.dayWindowSupported
+              ? `טווח היום הפעיל שלך (${dayWindowValue(effective.dayStartTime, effective.dayEndTime)}). הוא אינו זמן פנוי למשימות.`
+              : 'שמירת טווח היום בחשבון תהיה זמינה לאחר עדכון השרת.'}
+      </Text>
       <SettingsSectionLabel>תכנון שבועי</SettingsSectionLabel>
       <SettingsCard>
         <SettingsRow label="תחילת שבוע" onPress={onWeekStart} value={weekdayLabels[effective.weekStartDay] ?? weekdayLabels[0]} />

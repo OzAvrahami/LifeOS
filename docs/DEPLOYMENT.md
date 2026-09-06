@@ -64,3 +64,15 @@ The verified standalone test used the installed Release build with Metro stopped
 The current build is signed through the existing Apple Personal Team/development setup and is intended for internal use on registered devices. “Standalone” means the installed application can operate without development infrastructure; it does not mean the application has been released through TestFlight or the App Store.
 
 Later TestFlight or App Store distribution will require an appropriate paid Apple Developer Program membership, App Store Connect application and signing/provisioning configuration, production release metadata and privacy declarations, archive/upload validation, and the applicable TestFlight review or App Review process. Those distribution steps are not complete in Phase 8.
+
+## Day Window rollout prerequisite
+
+Issue #7 adds nullable `day_start_time` and `day_end_time` columns and compatible Settings API fields. Roll out this additive change in this order:
+
+1. Apply `20260906120000_add_user_settings_day_window.sql` to the target database.
+2. Deploy the compatible API. It returns both fields (including `null`), preserves them when an older client omits both, and accepts explicit clearing only when both are `null`.
+3. Publish or install the updated client.
+
+Do not reverse steps 1 and 2. A local Expo Web refresh only loads local frontend code; it does not deploy the local API to Railway or apply the Supabase migration. Until the Railway API response includes both Day Window fields, the updated client shows a non-destructive “server update required” state and does not claim an account save.
+
+No new native dependency or native configuration is introduced by this feature. An iOS native rebuild is not required solely for these source changes; use the existing client delivery method after the database and API prerequisites are live.

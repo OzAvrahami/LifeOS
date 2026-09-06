@@ -5,7 +5,6 @@ import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { MobileShell } from '@/components/mobile-shell';
 import { QuickCaptureSheet } from '@/features/capture/quick-capture-sheet';
 import { CommitmentEditor } from '@/features/commitments/commitment-editor';
-import { formatMinutes, plannedMinutes, workloadState } from '@/features/commitments/commitment.metrics';
 import {
   useCommitments,
   useCreateCommitment,
@@ -37,6 +36,7 @@ import {
 } from './today.components';
 import { normalTodayFixture } from './today.fixture';
 import { TodayDemoState, TodayTask } from './today.types';
+import { formatTaskMinutesHebrew, summarizePlannedTaskTime } from './today-task-summary';
 import { UnplannedState } from './unplanned-state';
 
 export function TodayScreen({
@@ -92,10 +92,9 @@ export function TodayScreen({
     time: commitment.startTime,
     title: commitment.title,
   }));
-  const availableMinutes = dailyPlanQuery.data?.availableMinutes
-    ?? settings.defaultDailyCapacityMinutes;
-  const combinedPlannedMinutes = plannedMinutes(sourceTasks, serverCommitments);
-  const serverWorkload = workloadState(combinedPlannedMinutes, availableMinutes);
+  const serverTaskTime = serverTasks
+    ? summarizePlannedTaskTime(todayQuery.data ?? [])
+    : null;
 
   const openNewCommitment = () => {
     setEditingCommitment(null);
@@ -164,7 +163,9 @@ export function TodayScreen({
           onFinish={() => void updateStatus(activeTodayTask.id, 'completed')}
           onStartTask={(taskId) => void updateStatus(taskId, 'in_progress')}
           onStop={() => void updateStatus(activeTodayTask.id, 'open')}
+          plannedTaskTime={serverTaskTime ? formatTaskMinutesHebrew(serverTaskTime.knownMinutes) : undefined}
           task={activeTodayTask}
+          unknownEstimateCount={serverTaskTime?.unknownEstimateCount}
         />
       );
     } else if (completedTasks.length > 0) {
@@ -176,6 +177,8 @@ export function TodayScreen({
           nextTask={nextTask}
           openTasks={openTasks}
           onStart={() => nextTask && void updateStatus(nextTask.id, 'in_progress')}
+          plannedTaskTime={serverTaskTime ? formatTaskMinutesHebrew(serverTaskTime.knownMinutes) : undefined}
+          unknownEstimateCount={serverTaskTime?.unknownEstimateCount}
         />
       );
     } else {
@@ -198,11 +201,10 @@ export function TodayScreen({
           commitments={serverTasks ? presentedCommitments : undefined}
           onAddCommitment={serverTasks ? openNewCommitment : undefined}
           onEditCommitment={serverTasks ? openExistingCommitment : undefined}
-          serverAvailableTime={serverTasks ? formatMinutes(availableMinutes) : undefined}
           serverCommitmentCount={serverTasks ? serverCommitments.length : undefined}
           serverTaskCount={serverTasks ? sourceTasks.length : undefined}
-          serverPlannedTime={serverTasks ? formatMinutes(combinedPlannedMinutes) : undefined}
-          serverWorkload={serverTasks ? serverWorkload : undefined}
+          serverPlannedTaskTime={serverTaskTime ? formatTaskMinutesHebrew(serverTaskTime.knownMinutes) : undefined}
+          serverUnknownEstimateCount={serverTaskTime?.unknownEstimateCount}
           tasks={tasks}
         />
       );
@@ -282,11 +284,10 @@ function NormalTodayContent({
   onStartFocus,
   onStartTask,
   onToggleFocus,
-  serverAvailableTime,
   serverCommitmentCount,
-  serverPlannedTime,
+  serverPlannedTaskTime,
   serverTaskCount,
-  serverWorkload,
+  serverUnknownEstimateCount,
   tasks,
 }: {
   commitments?: typeof normalTodayFixture.commitments;
@@ -299,11 +300,10 @@ function NormalTodayContent({
   onStartFocus: () => void;
   onStartTask?: (taskId: string) => void;
   onToggleFocus?: (taskId: string) => void;
-  serverAvailableTime?: string;
   serverCommitmentCount?: number;
-  serverPlannedTime?: string;
+  serverPlannedTaskTime?: string;
   serverTaskCount?: number;
-  serverWorkload?: string;
+  serverUnknownEstimateCount?: number;
   tasks: TodayTask[];
 }) {
   const today = normalTodayFixture;
@@ -327,13 +327,12 @@ function NormalTodayContent({
         showsVerticalScrollIndicator={false}
       >
         <TodayHeader
-          availableTime={serverAvailableTime}
           commitmentCount={serverCommitmentCount ?? today.summary.commitmentCount}
           dateLabel={dateLabel ?? today.dateLabel}
           greeting={today.greeting}
-          plannedTime={serverPlannedTime ?? today.summary.plannedTime}
+          plannedTaskTime={serverPlannedTaskTime ?? today.summary.plannedTaskTime}
           taskCount={taskCount}
-          workload={serverWorkload ?? today.summary.workload}
+          unknownEstimateCount={serverUnknownEstimateCount ?? today.summary.unknownEstimateCount}
         />
         {focusTask ? <FocusCard onStart={onStartFocus} task={focusTask} /> : null}
 
@@ -414,7 +413,7 @@ function toPresentedTodayTask(task: {
   title: string;
 }): TodayTask {
   return {
-    durationMinutes: task.estimatedMinutes ?? 0,
+    durationMinutes: task.estimatedMinutes ?? null,
     id: task.id,
     lifeArea: task.lifeArea ?? 'work',
     title: task.title,

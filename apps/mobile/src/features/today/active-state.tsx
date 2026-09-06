@@ -3,6 +3,7 @@ import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { colors, radius, spacing, typography } from '@/theme/tokens';
 
 import { activeTodayFixture } from './today.fixture';
+import { TaskTimeSummary } from './today.components';
 import { TodayTask } from './today.types';
 
 export function ActiveState({
@@ -12,7 +13,9 @@ export function ActiveState({
   onFinish,
   onStartTask,
   onStop,
+  plannedTaskTime,
   task,
+  unknownEstimateCount,
 }: {
   commitment?: { time: string; title: string } | null;
   dateLabel?: string;
@@ -20,7 +23,9 @@ export function ActiveState({
   onFinish: () => void;
   onStartTask?: (taskId: string) => void;
   onStop: () => void;
+  plannedTaskTime?: string;
   task?: TodayTask;
+  unknownEstimateCount?: number;
 }) {
   const today = activeTodayFixture;
   const activeTask = task ?? today.task;
@@ -30,6 +35,10 @@ export function ActiveState({
     <ScrollView contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
       <Text style={styles.date}>{dateLabel ?? today.dateLabel}</Text>
       <Text style={styles.summary}>משימה אחת פעילה עכשיו</Text>
+      <TaskTimeSummary
+        plannedTaskTime={plannedTaskTime ?? 'שעה ו־45 דקות'}
+        unknownEstimateCount={unknownEstimateCount}
+      />
 
       <View accessibilityLabel="פעיל עכשיו" style={styles.activeCard}>
         <View style={styles.activeLabelRow}>
@@ -37,7 +46,9 @@ export function ActiveState({
           <Text style={styles.activeLabel}>פעיל עכשיו</Text>
         </View>
         <Text style={styles.title}>{activeTask.title}</Text>
-        <Text style={styles.meta}>הערכה: כ־{activeTask.durationMinutes} דקות · עבודה</Text>
+        <Text style={styles.meta}>
+          {activeTask.durationMinutes === null ? 'ללא הערכת זמן' : `הערכה: כ־${activeTask.durationMinutes} דקות`} · עבודה
+        </Text>
         <View style={styles.actions}>
           <Pressable accessibilityRole="button" onPress={onFinish} style={styles.finishButton}>
             <Text style={styles.finishText}>סיום</Text>
@@ -60,7 +71,7 @@ export function ActiveState({
           >
             <View style={styles.checkbox} />
             <Text style={styles.taskTitle}>{laterTask.title}</Text>
-            <Text style={styles.duration}>{laterTask.durationMinutes} דק׳</Text>
+            <Text style={styles.duration}>{laterTask.durationMinutes === null ? 'ללא הערכה' : `${laterTask.durationMinutes} דק׳`}</Text>
           </Pressable>
         ))}
       </View>

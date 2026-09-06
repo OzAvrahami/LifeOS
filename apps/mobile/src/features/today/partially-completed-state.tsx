@@ -4,6 +4,7 @@ import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { colors, radius, spacing, typography } from '@/theme/tokens';
 
 import { partiallyCompletedTodayFixture } from './today.fixture';
+import { TaskTimeSummary } from './today.components';
 import { TodayTask } from './today.types';
 
 export function PartiallyCompletedState({
@@ -12,12 +13,16 @@ export function PartiallyCompletedState({
   nextTask,
   openTasks,
   onStart,
+  plannedTaskTime,
+  unknownEstimateCount,
 }: {
   completedTasks?: TodayTask[];
   dateLabel?: string;
   nextTask?: TodayTask | null;
   openTasks?: TodayTask[];
   onStart: () => void;
+  plannedTaskTime?: string;
+  unknownEstimateCount?: number;
 }) {
   const today = partiallyCompletedTodayFixture;
   const visibleCompletedTasks = completedTasks ?? today.completedTasks;
@@ -48,12 +53,16 @@ export function PartiallyCompletedState({
             ? 'נשארה משימה אחת מתוכננת להיום.'
             : `נשארו ${remainingCount} משימות מתוכננות להיום.`}
       </Text>
+      <TaskTimeSummary
+        plannedTaskTime={plannedTaskTime ?? 'שעה ו־45 דקות'}
+        unknownEstimateCount={unknownEstimateCount}
+      />
 
       {visibleNextTask ? (
         <View accessibilityLabel="הבא בתור" style={styles.nextCard}>
           <Text style={styles.nextLabel}>הבא בתור</Text>
           <Text style={styles.nextTitle}>{visibleNextTask.title}</Text>
-          <Text style={styles.nextMeta}>כ־{visibleNextTask.durationMinutes} דקות · בית</Text>
+          <Text style={styles.nextMeta}>{visibleNextTask.durationMinutes === null ? 'ללא הערכת זמן' : `כ־${visibleNextTask.durationMinutes} דקות`} · בית</Text>
           <Pressable accessibilityRole="button" onPress={onStart} style={styles.startButton}>
             <Text style={styles.startText}>התחלה</Text>
           </Pressable>
@@ -68,7 +77,7 @@ export function PartiallyCompletedState({
               <View key={task.id} style={[styles.taskRow, index > 0 && styles.divider]}>
                 <View style={styles.checkbox} />
                 <Text style={styles.taskTitle}>{task.title}</Text>
-                <Text style={styles.duration}>{task.durationMinutes} דק׳</Text>
+                <Text style={styles.duration}>{task.durationMinutes === null ? 'ללא הערכה' : `${task.durationMinutes} דק׳`}</Text>
               </View>
             ))}
           </View>
@@ -86,7 +95,7 @@ export function PartiallyCompletedState({
               <Ionicons color={colors.white} name="checkmark" size={14} />
             </View>
             <Text style={styles.completedTitle}>{task.title}</Text>
-            <Text style={styles.completedDuration}>{task.durationMinutes} דק׳</Text>
+            <Text style={styles.completedDuration}>{task.durationMinutes === null ? 'ללא הערכה' : `${task.durationMinutes} דק׳`}</Text>
           </View>
         ))}
       </View>

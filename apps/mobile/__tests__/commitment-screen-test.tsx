@@ -87,7 +87,7 @@ beforeEach(() => {
   jest.mocked(planningApi.getWeeklyFocuses).mockResolvedValue([]);
 });
 
-it('renders real Today Commitments, workload, and supports create → edit → physical delete without refetches', async () => {
+it('keeps real Today Commitments separate from Task time and supports create → edit → physical delete without refetches', async () => {
   let commitments = [item(), item({ endTime: null, id: 'point', startTime: '13:30', title: 'איסוף הילדים' })];
   listCommitmentsMock.mockImplementation(async (filters) => commitments.filter((commitment) => !filters?.date || commitment.date === filters.date));
   createCommitmentMock.mockImplementation(async (input) => {
@@ -110,8 +110,8 @@ it('renders real Today Commitments, workload, and supports create → edit → p
   await render(<TestProviders><TodayScreen taskSource="server" /></TestProviders>);
   expect(await screen.findByText('תור לרופא')).toBeTruthy();
   expect(screen.getByText('2 התחייבויות')).toBeTruthy();
-  expect(screen.getByText('2:30 / 6:00')).toBeTruthy();
-  expect(screen.getByText('פנוי')).toBeTruthy();
+  expect(screen.getByText('זמן משימות מתוכנן: שעה')).toBeTruthy();
+  expect(screen.queryByText(/2:30|6:00|פנוי|מאוזן|עמוס/)).toBeNull();
 
   const user = userEvent.setup();
   await user.press(screen.getByLabelText('הוספת התחייבות'));

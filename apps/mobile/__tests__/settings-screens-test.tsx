@@ -5,6 +5,7 @@ import { SafeAreaProvider } from 'react-native-safe-area-context';
 
 import { AccountScreen } from '@/features/settings/account-screen';
 import { DailyCapacityScreen } from '@/features/settings/daily-capacity-screen';
+import { DayWindowScreen } from '@/features/settings/day-window-screen';
 import { MoreScreen } from '@/features/settings/more-screen';
 import * as settingsApi from '@/features/settings/settings.api';
 import { settingsKeys } from '@/features/settings/settings.queries';
@@ -40,6 +41,9 @@ const initialMetrics = {
   insets: { bottom: 34, left: 0, right: 0, top: 47 },
 };
 const initialSettings: UserSettings = {
+  dayEndTime: null,
+  dayStartTime: null,
+  dayWindowSupported: true,
   defaultDailyCapacityMinutes: 360,
   persisted: true,
   timezone: 'Asia/Jerusalem',
@@ -117,17 +121,17 @@ describe('More and Settings screens', () => {
   });
 
   it('navigates from Settings and displays persisted values with a dynamic offset', async () => {
-    const daily = jest.fn();
+    const dayWindow = jest.fn();
     const week = jest.fn();
     const timezone = jest.fn();
-    await renderSettings(<SettingsScreen onBack={jest.fn()} onDailyCapacity={daily} onTimezone={timezone} onWeekStart={week} />);
+    await renderSettings(<SettingsScreen onBack={jest.fn()} onDayWindow={dayWindow} onTimezone={timezone} onWeekStart={week} />);
     const user = userEvent.setup();
-    expect(screen.getByText('6 שעות')).toBeTruthy();
+    expect(screen.getAllByText('לא הוגדר')).toHaveLength(2);
     expect(screen.getByText('ראשון')).toBeTruthy();
     expect(screen.getByText(/ישראל · GMT\+/)).toBeTruthy();
-    await user.press(screen.getByLabelText('זמן זמין ביום: 6 שעות'));
+    await user.press(screen.getByLabelText('תחילת היום: לא הוגדר'));
     await user.press(screen.getByLabelText('תחילת שבוע: ראשון'));
-    expect(daily).toHaveBeenCalledTimes(1);
+    expect(dayWindow).toHaveBeenCalledTimes(1);
     expect(week).toHaveBeenCalledTimes(1);
   });
 
@@ -146,6 +150,73 @@ describe('More and Settings screens', () => {
       weekStartDay: 0,
     });
     expect(capacityRender.queryClient.getQueryData(settingsKeys.user(userId))).toEqual(capacitySaved);
+  });
+
+  it('saves and reloads an overnight Day Window through the caller cache', async () => {
+    const configured = { ...initialSettings, dayEndTime: '01:00', dayStartTime: '07:00' };
+    jest.mocked(settingsApi.putSettings).mockResolvedValueOnce(configured);
+    const onBack = jest.fn();
+    const rendered = await renderSettings(<DayWindowScreen onBack={onBack} />, configured);
+    expect(screen.getByLabelText('סיום ביום הבא')).toBeTruthy();
+    expect(screen.getByText('07:00')).toBeTruthy();
+    expect(screen.getByText('01:00')).toBeTruthy();
+
+    await userEvent.setup().press(screen.getByLabelText('שמירת היום שלי'));
+    await waitFor(() => expect(onBack).toHaveBeenCalledTimes(1));
+    expect(jest.mocked(settingsApi.putSettings).mock.calls[0]?.[0]).toEqual({
+      dayEndTime: '01:00',
+      dayStartTime: '07:00',
+      defaultDailyCapacityMinutes: 360,
+      timezone: 'Asia/Jerusalem',
+      weekStartDay: 0,
+    });
+    expect(rendered.queryClient.getQueryData(settingsKeys.user(userId))).toEqual(configured);
+    expect(settingsApi.getSettings).not.toHaveBeenCalled();
+  });
+
+  it('clears both Day Window values explicitly without changing other settings', async () => {
+    const configured = { ...initialSettings, dayEndTime: '23:30', dayStartTime: '08:00' };
+    const cleared = { ...configured, dayEndTime: null, dayStartTime: null };
+    jest.mocked(settingsApi.putSettings).mockResolvedValueOnce(cleared);
+    const onBack = jest.fn();
+    await renderSettings(<DayWindowScreen onBack={onBack} />, configured);
+    const user = userEvent.setup();
+    await user.press(screen.getByLabelText('ניקוי חלון היום'));
+    await user.press(screen.getByLabelText('שמירת היום שלי'));
+    await waitFor(() => expect(onBack).toHaveBeenCalledTimes(1));
+    expect(jest.mocked(settingsApi.putSettings).mock.calls[0]?.[0]).toEqual(expect.objectContaining({
+      dayEndTime: null,
+      dayStartTime: null,
+      timezone: 'Asia/Jerusalem',
+      weekStartDay: 0,
+    }));
+  });
+
+  it('keeps edited Day Window values visible and the cache unchanged when saving fails', async () => {
+    const configured = { ...initialSettings, dayEndTime: '00:00', dayStartTime: '06:30' };
+    jest.mocked(settingsApi.putSettings).mockRejectedValueOnce(new Error('offline'));
+    const onBack = jest.fn();
+    const rendered = await renderSettings(<DayWindowScreen onBack={onBack} />, configured);
+    await userEvent.setup().press(screen.getByLabelText('שמירת היום שלי'));
+    expect(await screen.findByText('לא הצלחנו לשמור. השעות שבחרת נשארו כאן ואפשר לנסות שוב.')).toBeTruthy();
+    expect(screen.getByText('06:30')).toBeTruthy();
+    expect(screen.getByText('00:00')).toBeTruthy();
+    expect(onBack).not.toHaveBeenCalled();
+    expect(rendered.queryClient.getQueryData(settingsKeys.user(userId))).toEqual(configured);
+  });
+
+  it('shows a non-destructive update-required state against a pre-upgrade API response', async () => {
+    const oldResponse: UserSettings = {
+      defaultDailyCapacityMinutes: 360,
+      persisted: true,
+      timezone: 'Asia/Jerusalem',
+      weekStartDay: 0,
+    };
+    await renderSettings(<DayWindowScreen onBack={jest.fn()} />, oldResponse);
+    expect(screen.getByLabelText('חלון היום אינו זמין')).toBeTruthy();
+    expect(screen.getByText('נדרש עדכון שרת')).toBeTruthy();
+    expect(screen.queryByLabelText('שמירת היום שלי')).toBeNull();
+    expect(settingsApi.putSettings).not.toHaveBeenCalled();
   });
 
   it('saves Week Start as complete settings without refetching', async () => {

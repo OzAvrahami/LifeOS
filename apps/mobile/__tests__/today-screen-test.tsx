@@ -18,6 +18,8 @@ describe('<TodayScreen />', () => {
     expect(screen.getByLabelText('התחייבויות')).toBeTruthy();
     expect(screen.getByLabelText('המשימות שלי')).toBeTruthy();
     expect(screen.getByLabelText('אפשר להוסיף להיום')).toBeTruthy();
+    expect(screen.getByText('זמן משימות מתוכנן: שעה ו־45 דקות')).toBeTruthy();
+    expect(screen.queryByText(/\d+:\d+ \/ \d+:\d+|פנוי|מאוזן|עמוס מדי/)).toBeNull();
   });
 
   it('renders the approved navigation with Today selected', async () => {
@@ -58,7 +60,7 @@ describe('<TodayScreen />', () => {
 
     expect(screen.getAllByText('לקבוע טיפול לרכב')).toHaveLength(1);
     expect(screen.getByText('נוסף להיום מה־Inbox · אותה משימה')).toBeTruthy();
-    expect(screen.getByText('5 משימות')).toBeTruthy();
+    expect(screen.getByText('4 משימות')).toBeTruthy();
   });
 
   it('renders an open but shaped unplanned day', async () => {
@@ -71,6 +73,7 @@ describe('<TodayScreen />', () => {
     expect(screen.getByText('היום שלך עדיין פתוח')).toBeTruthy();
     expect(screen.getByText('אין משימות מתוכננות · 2 התחייבויות היום')).toBeTruthy();
     expect(screen.getByLabelText('כבר ביומן')).toBeTruthy();
+    expect(screen.getByText('זמן משימות מתוכנן: 0 דקות')).toBeTruthy();
   });
 
   it('renders an active task with finish and stop controls but no timer', async () => {
@@ -86,19 +89,19 @@ describe('<TodayScreen />', () => {
     expect(screen.getByText('עצירה')).toBeTruthy();
     expect(screen.queryByText('00:00')).toBeNull();
     expect(screen.queryByText(/טיימר|זמן שחלף/)).toBeNull();
+    expect(screen.getByText('זמן משימות מתוכנן: שעה ו־45 דקות')).toBeTruthy();
   });
 
-  it('renders the warm overloaded-day guidance', async () => {
+  it('retires the capacity-derived overloaded preview in favor of an honest Task summary', async () => {
     await render(
       <TestProviders>
         <TodayScreen initialState="overloaded" />
       </TestProviders>,
     );
 
-    expect(screen.getByText('עמוס מדי')).toBeTruthy();
-    expect(screen.getByLabelText('אזהרת עומס')).toBeTruthy();
-    expect(screen.getByText('נראה שתכננת יותר ממה שניתן להספיק היום.')).toBeTruthy();
-    expect(screen.getByText('לשקול מחדש את היום')).toBeTruthy();
+    expect(screen.getByText('זמן משימות מתוכנן: 3 שעות ו־15 דקות')).toBeTruthy();
+    expect(screen.getByText(/אינו מסיק כמה זמן פנוי נשאר/)).toBeTruthy();
+    expect(screen.queryByText(/עמוס מדי|אזהרת עומס|מתוך 6:00|לשקול מחדש/)).toBeNull();
   });
 
   it('renders human-readable partial progress without a productivity percentage', async () => {
@@ -111,6 +114,7 @@ describe('<TodayScreen />', () => {
     expect(screen.getByText('2 הושלמו · 1 נשארה')).toBeTruthy();
     expect(screen.getByLabelText('משימות שהושלמו')).toBeTruthy();
     expect(screen.queryByText(/%|אחוז|ציון/)).toBeNull();
+    expect(screen.getByText('זמן משימות מתוכנן: שעה ו־45 דקות')).toBeTruthy();
   });
 
   it('opens Quick Capture with a required title and Inbox selected by default', async () => {

@@ -4,13 +4,13 @@ export const normalTodayFixture: TodayFixture = {
   greeting: 'בוקר טוב, עוז',
   dateLabel: 'שבת, 8 באוגוסט',
   summary: {
-    taskCount: 4,
+    taskCount: 3,
     commitmentCount: 2,
-    plannedTime: '3:20',
-    workload: 'מאוזן',
+    plannedTaskTime: 'שעה ו־45 דקות',
+    unknownEstimateCount: 0,
   },
   focus: {
-    id: 'focus-lifeos',
+    id: 'lifeos',
     title: 'לעבוד על LifeOS',
     durationMinutes: 60,
     lifeArea: 'work',
@@ -43,9 +43,8 @@ export const activeTodayFixture = {
 export const overloadedTodayFixture = {
   greeting: 'בוקר טוב, עוז',
   dateLabel: 'שבת, 8 באוגוסט',
-  plannedTime: '8:10',
-  availableTime: '6:00',
-  taskCount: 7,
+  plannedTaskTime: '3 שעות ו־15 דקות',
+  taskCount: 3,
   commitmentCount: 2,
   tasks: [
     { ...normalTodayFixture.tasks[0], durationMinutes: 90, important: true },

@@ -170,6 +170,35 @@ describe('Planning API', () => {
     assert.equal(data.plans.size, 0);
   });
 
+  it('preserves capacity semantics when Daily Focus changes and supports explicit zero and inheritance', async () => {
+    const data = database();
+    const app = createPlanningTestApp(data);
+    const path = `/daily-plans/${today}`;
+    const taskId = data.tasks[0]!.id;
+    await authenticated(app).put(path).send({
+      availableMinutes: 431,
+      focusTaskId: taskId,
+    }).expect(200);
+    const clearedFocus = await authenticated(app).put(path).send({
+      availableMinutes: 431,
+      focusTaskId: null,
+    }).expect(200);
+    assert.equal(clearedFocus.body.dailyPlan.availableMinutes, 431);
+
+    const zero = await authenticated(app).put(path).send({
+      availableMinutes: 0,
+      focusTaskId: taskId,
+    }).expect(200);
+    assert.equal(zero.body.dailyPlan.availableMinutes, 0);
+
+    const inherited = await authenticated(app).put(path).send({
+      availableMinutes: null,
+      focusTaskId: taskId,
+    }).expect(200);
+    assert.equal(inherited.body.dailyPlan.availableMinutes, null);
+    assert.equal(inherited.body.dailyPlan.focusTaskId, taskId);
+  });
+
   it('persists ordered WeeklyFocus rows, replaces atomically, and caps the list at three', async () => {
     const data = database();
     const app = createPlanningTestApp(data);

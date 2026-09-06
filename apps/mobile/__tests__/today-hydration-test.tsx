@@ -122,4 +122,62 @@ describe('Today server hydration', () => {
     expect(screen.getByText('1 משימות')).toBeTruthy();
     expect(screen.getByLabelText(`התחל משימה: ${openTask.title}`)).toBeTruthy();
   });
+
+  it('summarizes only identifiable Task estimates and discloses unknown estimates', async () => {
+    jest.mocked(taskApi.listTasks).mockResolvedValue([
+      { ...openTask, estimatedMinutes: 165 },
+      { ...openTask, estimatedMinutes: null, id: 'unknown-task', position: 1, title: 'משימה ללא הערכה' },
+    ]);
+    jest.mocked(commitmentApi.listCommitments).mockResolvedValue([{
+      createdAt: '2026-08-20T08:00:00.000Z',
+      date: localDateKey(),
+      description: null,
+      endTime: '13:00',
+      id: 'long-commitment',
+      lifeArea: 'work',
+      startTime: '08:00',
+      title: 'התחייבות של חמש שעות',
+      updatedAt: '2026-08-20T08:00:00.000Z',
+    }]);
+
+    await renderServerToday();
+
+    expect(await screen.findByText('זמן משימות מתוכנן: שעתיים ו־45 דקות')).toBeTruthy();
+    expect(screen.getByText('למשימה אחת אין הערכת זמן')).toBeTruthy();
+    expect(screen.getByText('1 התחייבויות')).toBeTruthy();
+    expect(screen.queryByText(/7:45|5 שעות|זמן פנוי|מתוך/)).toBeNull();
+  });
+
+  it('waits for Settings and Daily Plan hydration before rendering the Task-time summary', async () => {
+    let resolveSettings: ((settings: Awaited<ReturnType<typeof settingsApi.getSettings>>) => void) | undefined;
+    let resolveDailyPlan: ((plan: Awaited<ReturnType<typeof planningApi.getDailyPlan>>) => void) | undefined;
+    jest.mocked(taskApi.listTasks).mockResolvedValue([]);
+    jest.mocked(settingsApi.getSettings).mockReturnValue(new Promise((resolve) => {
+      resolveSettings = resolve;
+    }));
+    jest.mocked(planningApi.getDailyPlan).mockReturnValue(new Promise((resolve) => {
+      resolveDailyPlan = resolve;
+    }));
+
+    await renderServerToday();
+    expect(screen.getByLabelText('טוען משימות')).toBeTruthy();
+    expect(screen.queryByText('זמן משימות מתוכנן: 0 דקות')).toBeNull();
+
+    await act(async () => {
+      resolveSettings?.({
+        defaultDailyCapacityMinutes: 480,
+        persisted: true,
+        timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
+        weekStartDay: 0,
+      });
+    });
+    expect(screen.getByLabelText('טוען משימות')).toBeTruthy();
+    expect(screen.queryByText('זמן משימות מתוכנן: 0 דקות')).toBeNull();
+
+    await act(async () => {
+      resolveDailyPlan?.(null);
+    });
+    expect(await screen.findByText('זמן משימות מתוכנן: 0 דקות')).toBeTruthy();
+    expect(screen.queryByText(/8:00|6:00|פנוי|מאוזן|עמוס/)).toBeNull();
+  });
 });

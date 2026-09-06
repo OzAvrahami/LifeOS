@@ -2,6 +2,7 @@ import assert from 'node:assert/strict';
 import { execFileSync, spawn, spawnSync } from 'node:child_process';
 import console from 'node:console';
 import { randomBytes } from 'node:crypto';
+import { resolve } from 'node:path';
 import process from 'node:process';
 import { setTimeout as sleep } from 'node:timers/promises';
 import { fileURLToPath, URL } from 'node:url';
@@ -9,6 +10,10 @@ import { fileURLToPath, URL } from 'node:url';
 import { createClient } from '@supabase/supabase-js';
 
 const repositoryRoot = fileURLToPath(new URL('../../..', import.meta.url));
+const supabaseWorkdir = process.env.LIFEOS_INTEGRATION_SUPABASE_WORKDIR
+  ? resolve(process.env.LIFEOS_INTEGRATION_SUPABASE_WORKDIR)
+  : repositoryRoot;
+const supabaseProjectId = process.env.LIFEOS_INTEGRATION_SUPABASE_PROJECT_ID ?? 'LifeOS';
 const apiPort = 3199;
 const apiBaseUrl = `http://127.0.0.1:${apiPort}`;
 const uuidPattern = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
@@ -22,7 +27,7 @@ function parseLocalStatus() {
   const raw = execFileSync(
     executable,
     args,
-    { cwd: repositoryRoot, encoding: 'utf8' },
+    { cwd: supabaseWorkdir, encoding: 'utf8' },
   );
   const firstBrace = raw.indexOf('{');
   const lastBrace = raw.lastIndexOf('}');
@@ -87,9 +92,7 @@ function discoverLocalDatabaseContainer() {
   const docker = process.platform === 'win32' ? 'docker.exe' : 'docker';
   const output = execFileSync(docker, ['ps', '--format', '{{.Names}}'], { encoding: 'utf8' });
   const containers = output.split(/\r?\n/).filter(Boolean);
-  const databaseContainers = containers.filter((name) => name.startsWith('supabase_db_'));
-  const databaseContainer = databaseContainers.find((name) => name === 'supabase_db_LifeOS')
-    ?? (databaseContainers.length === 1 ? databaseContainers[0] : undefined);
+  const databaseContainer = containers.find((name) => name === `supabase_db_${supabaseProjectId}`);
   if (!databaseContainer) throw new Error('Local Supabase database container was not found');
   return { databaseContainer, docker };
 }
@@ -118,11 +121,14 @@ async function signIn(url, publishableKey, email, password) {
 async function main() {
   const status = parseLocalStatus();
   const supabaseUrl = requireLocalUrl(status.API_URL);
+  requireLocalUrl(status.DB_URL);
   const publishableKey = status.PUBLISHABLE_KEY || status.ANON_KEY;
   const adminKey = status.SECRET_KEY || status.SERVICE_ROLE_KEY;
   if (!publishableKey || !adminKey) throw new Error('Local Supabase credentials were not available');
 
   const { databaseContainer, docker } = discoverLocalDatabaseContainer();
+  console.log(`TARGET local API ${supabaseUrl}`);
+  console.log(`TARGET local database ${new URL(status.DB_URL).hostname}:${new URL(status.DB_URL).port} in ${databaseContainer}`);
   const admin = quietClient(supabaseUrl, adminKey);
   const suffix = `${Date.now()}-${randomBytes(4).toString('hex')}`;
   const password = `Local-${randomBytes(18).toString('base64url')}!9`;
@@ -210,6 +216,8 @@ async function main() {
     const defaultSettingsA = (await apiRequest('GET', '/settings', tokenA)).settings;
     const defaultSettingsB = (await apiRequest('GET', '/settings', tokenB)).settings;
     assert.deepEqual(defaultSettingsA, {
+      dayEndTime: null,
+      dayStartTime: null,
       defaultDailyCapacityMinutes: 360,
       persisted: false,
       timezone: null,
@@ -218,12 +226,49 @@ async function main() {
     assert.deepEqual(defaultSettingsB, defaultSettingsA);
     assert.equal(localSql(docker, databaseContainer, 'select count(*) from public.user_settings;'), '0');
 
+    const sameDaySettingsA = (await apiRequest('PUT', '/settings', tokenA, {
+      dayEndTime: '23:30',
+      dayStartTime: '08:00',
+      defaultDailyCapacityMinutes: 480,
+      timezone: 'Asia/Jerusalem',
+      weekStartDay: 1,
+    })).settings;
+    assert.equal(sameDaySettingsA.dayStartTime, '08:00');
+    assert.equal(sameDaySettingsA.dayEndTime, '23:30');
+    assert.deepEqual((await apiRequest('GET', '/settings', tokenA)).settings, sameDaySettingsA);
+
+    const sameDayPostgrest = await callerA
+      .from('user_settings')
+      .select('day_start_time,day_end_time')
+      .eq('user_id', users[0].id)
+      .single();
+    assert.ifError(sameDayPostgrest.error);
+    assert.deepEqual(sameDayPostgrest.data, {
+      day_end_time: '23:30:00',
+      day_start_time: '08:00:00',
+    });
+
+    const midnightSettingsA = (await apiRequest('PUT', '/settings', tokenA, {
+      dayEndTime: '00:00',
+      dayStartTime: '06:30',
+      defaultDailyCapacityMinutes: 480,
+      timezone: 'Asia/Jerusalem',
+      weekStartDay: 1,
+    })).settings;
+    assert.equal(midnightSettingsA.dayStartTime, '06:30');
+    assert.equal(midnightSettingsA.dayEndTime, '00:00');
+    assert.deepEqual((await apiRequest('GET', '/settings', tokenA)).settings, midnightSettingsA);
+
     const savedSettingsA = (await apiRequest('PUT', '/settings', tokenA, {
+      dayEndTime: '01:00',
+      dayStartTime: '07:00',
       defaultDailyCapacityMinutes: 480,
       timezone: 'Asia/Jerusalem',
       weekStartDay: 1,
     })).settings;
     assert.deepEqual(savedSettingsA, {
+      dayEndTime: '01:00',
+      dayStartTime: '07:00',
       defaultDailyCapacityMinutes: 480,
       persisted: true,
       timezone: 'Asia/Jerusalem',
@@ -233,11 +278,32 @@ async function main() {
     assert.deepEqual((await apiRequest('GET', '/settings', tokenB)).settings, defaultSettingsB);
     assert.equal(localSql(docker, databaseContainer, `select count(*) from public.user_settings where user_id = '${users[0].id}'::uuid;`), '1');
 
-    const directSettingsA = await callerA.from('user_settings').select('user_id,default_daily_capacity_minutes,week_start_day,timezone');
-    const directSettingsB = await callerB.from('user_settings').select('user_id,default_daily_capacity_minutes,week_start_day,timezone');
+    const oldClientSettingsA = (await apiRequest('PUT', '/settings', tokenA, {
+      defaultDailyCapacityMinutes: 600,
+      timezone: 'Europe/London',
+      weekStartDay: 6,
+    })).settings;
+    assert.deepEqual(oldClientSettingsA, {
+      dayEndTime: '01:00',
+      dayStartTime: '07:00',
+      defaultDailyCapacityMinutes: 600,
+      persisted: true,
+      timezone: 'Europe/London',
+      weekStartDay: 6,
+    });
+
+    const directSettingsA = await callerA.from('user_settings').select('user_id,day_start_time,day_end_time,default_daily_capacity_minutes,week_start_day,timezone');
+    const directSettingsB = await callerB.from('user_settings').select('user_id,day_start_time,day_end_time,default_daily_capacity_minutes,week_start_day,timezone');
     assert.ifError(directSettingsA.error);
     assert.ifError(directSettingsB.error);
-    assert.deepEqual(directSettingsA.data.map((row) => row.user_id), [users[0].id]);
+    assert.deepEqual(directSettingsA.data, [{
+      day_end_time: '01:00:00',
+      day_start_time: '07:00:00',
+      default_daily_capacity_minutes: 600,
+      timezone: 'Europe/London',
+      user_id: users[0].id,
+      week_start_day: 6,
+    }]);
     assert.deepEqual(directSettingsB.data, []);
     const crossSettingsUpdate = await callerB
       .from('user_settings')
@@ -265,6 +331,39 @@ async function main() {
       timezone: 'Asia/Jerusalem',
       weekStartDay: 1,
     }, 400);
+    const invalidDayWindowRequests = [
+      {
+        dayStartTime: '08:00',
+        defaultDailyCapacityMinutes: 360,
+        timezone: 'Asia/Jerusalem',
+        weekStartDay: 0,
+      },
+      {
+        dayEndTime: '08:00',
+        dayStartTime: null,
+        defaultDailyCapacityMinutes: 360,
+        timezone: 'Asia/Jerusalem',
+        weekStartDay: 0,
+      },
+      {
+        dayEndTime: '08:00',
+        dayStartTime: '08:00',
+        defaultDailyCapacityMinutes: 360,
+        timezone: 'Asia/Jerusalem',
+        weekStartDay: 0,
+      },
+      {
+        dayEndTime: '23:30',
+        dayStartTime: '25:00',
+        defaultDailyCapacityMinutes: 360,
+        timezone: 'Asia/Jerusalem',
+        weekStartDay: 0,
+      },
+    ];
+    for (const invalidSettings of invalidDayWindowRequests) {
+      await apiRequest('PUT', '/settings', tokenA, invalidSettings, 400);
+      assert.deepEqual((await apiRequest('GET', '/settings', tokenA)).settings, oldClientSettingsA);
+    }
     await apiRequest('PUT', '/settings', tokenA, {
       defaultDailyCapacityMinutes: 360,
       timezone: 'Asia/Jerusalem',
@@ -281,9 +380,48 @@ async function main() {
     const invalidWeekday = await callerB.from('user_settings')
       .update({ week_start_day: 7 })
       .eq('user_id', users[1].id);
+    const invalidDayWindow = await callerB.from('user_settings')
+      .update({ day_end_time: '08:00', day_start_time: '08:00' })
+      .eq('user_id', users[1].id);
+    const partialDayWindow = await callerB.from('user_settings')
+      .update({ day_end_time: null, day_start_time: '08:00' })
+      .eq('user_id', users[1].id);
     assert.ok(invalidCapacity.error, 'PostgreSQL unexpectedly accepted invalid Settings capacity');
     assert.ok(invalidWeekday.error, 'PostgreSQL unexpectedly accepted invalid Settings weekday');
-    assert.deepEqual((await apiRequest('GET', '/settings', tokenA)).settings, savedSettingsA);
+    assert.ok(invalidDayWindow.error, 'PostgreSQL unexpectedly accepted an equal Day Window');
+    assert.ok(partialDayWindow.error, 'PostgreSQL unexpectedly accepted a partial Day Window');
+    assert.deepEqual((await apiRequest('GET', '/settings', tokenA)).settings, oldClientSettingsA);
+    assert.deepEqual((await apiRequest('GET', '/settings', tokenB)).settings, {
+      dayEndTime: null,
+      dayStartTime: null,
+      defaultDailyCapacityMinutes: 300,
+      persisted: true,
+      timezone: 'America/New_York',
+      weekStartDay: 6,
+    });
+
+    const clearedDayWindow = (await apiRequest('PUT', '/settings', tokenA, {
+      dayEndTime: null,
+      dayStartTime: null,
+      defaultDailyCapacityMinutes: 600,
+      timezone: 'Europe/London',
+      weekStartDay: 6,
+    })).settings;
+    assert.deepEqual(clearedDayWindow, {
+      dayEndTime: null,
+      dayStartTime: null,
+      defaultDailyCapacityMinutes: 600,
+      persisted: true,
+      timezone: 'Europe/London',
+      weekStartDay: 6,
+    });
+    await apiRequest('PUT', '/settings', tokenA, {
+      dayEndTime: '01:00',
+      dayStartTime: '07:00',
+      defaultDailyCapacityMinutes: 480,
+      timezone: 'Asia/Jerusalem',
+      weekStartDay: 1,
+    });
 
     const createdA = (await apiRequest('POST', '/tasks', tokenA, {
       title: 'User A integration task',
@@ -629,7 +767,7 @@ async function main() {
     console.log('PASS DailyPlan ownership, focus ownership, upsert, capacity, and clearing');
     console.log('PASS ordered WeeklyFocus replacement, maximum, and WeekPlan-derived RLS');
     console.log('PASS one-time Commitment CRUD, ordering, physical delete, constraints, and caller RLS');
-    console.log('PASS UserSettings defaults, persistence, validation, one-row ownership, and caller RLS');
+    console.log('PASS UserSettings defaults, Day Window persistence/clearing, old-client preservation, validation, one-row ownership, and caller RLS');
   } finally {
     if (apiProcess && apiProcess.exitCode === null) {
       apiProcess.kill();

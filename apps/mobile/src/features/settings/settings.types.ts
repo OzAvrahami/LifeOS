@@ -2,6 +2,9 @@ export const DEFAULT_DAILY_CAPACITY_MINUTES = 360;
 export const DEFAULT_WEEK_START_DAY = 0;
 
 export type UserSettings = {
+  dayEndTime?: string | null;
+  dayStartTime?: string | null;
+  dayWindowSupported?: boolean;
   defaultDailyCapacityMinutes: number;
   persisted: boolean;
   timezone: string | null;
@@ -9,6 +12,9 @@ export type UserSettings = {
 };
 
 export type EffectiveUserSettings = {
+  dayEndTime: string | null;
+  dayStartTime: string | null;
+  dayWindowSupported: boolean;
   defaultDailyCapacityMinutes: number;
   persisted: boolean;
   timezone: string;
@@ -16,6 +22,8 @@ export type EffectiveUserSettings = {
 };
 
 export type PutUserSettingsInput = {
+  dayEndTime?: string | null;
+  dayStartTime?: string | null;
   defaultDailyCapacityMinutes: number;
   timezone: string;
   weekStartDay: number;

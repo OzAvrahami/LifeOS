@@ -15,12 +15,20 @@ export function deviceTimezone() {
 
 export function effectiveUserSettings(settings?: UserSettings): EffectiveUserSettings {
   return {
+    dayEndTime: settings?.dayEndTime ?? null,
+    dayStartTime: settings?.dayStartTime ?? null,
+    dayWindowSupported: settings?.dayWindowSupported ?? false,
     defaultDailyCapacityMinutes:
       settings?.defaultDailyCapacityMinutes ?? DEFAULT_DAILY_CAPACITY_MINUTES,
     persisted: settings?.persisted ?? false,
     timezone: settings?.timezone ?? deviceTimezone(),
     weekStartDay: settings?.weekStartDay ?? DEFAULT_WEEK_START_DAY,
   };
+}
+
+export function dayWindowValue(start: string | null, end: string | null) {
+  if (!start || !end) return 'לא הוגדר';
+  return `${start} → ${end}`;
 }
 
 export function timezoneOffsetLabel(timezone: string, date = new Date()) {

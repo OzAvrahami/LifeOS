@@ -5,25 +5,24 @@ import { Pressable, StyleSheet, Text, View } from 'react-native';
 import { colors, radius, spacing, typography } from '@/theme/tokens';
 
 import { Commitment, TodayTask } from './today.types';
+import { unknownEstimateLabel } from './today-task-summary';
 
 const lifeAreaColor: Record<Commitment['lifeArea'], string> = colors.lifeArea;
 
 export function TodayHeader({
-  availableTime,
   commitmentCount,
   dateLabel,
   greeting,
-  plannedTime,
+  plannedTaskTime,
   taskCount,
-  workload,
+  unknownEstimateCount,
 }: {
-  availableTime?: string;
   commitmentCount: number;
   dateLabel: string;
   greeting: string;
-  plannedTime: string;
+  plannedTaskTime: string;
   taskCount: number;
-  workload: string;
+  unknownEstimateCount: number;
 }) {
   return (
     <View accessibilityLabel="סיכום היום" style={styles.header}>
@@ -34,21 +33,25 @@ export function TodayHeader({
           <Text style={styles.summaryText}>{taskCount} משימות</Text>
           <Text style={styles.summaryDivider}>·</Text>
           <Text style={styles.summaryText}>{commitmentCount} התחייבויות</Text>
-          <Text style={styles.summaryDivider}>·</Text>
-          <Text style={styles.summaryText}>
-            <Text style={styles.ltr}>{plannedTime}{availableTime ? ` / ${availableTime}` : ''}</Text> שעות
-          </Text>
         </View>
-        <WorkloadBadge label={workload} />
       </View>
+      <TaskTimeSummary plannedTaskTime={plannedTaskTime} unknownEstimateCount={unknownEstimateCount} />
     </View>
   );
 }
 
-export function WorkloadBadge({ label }: { label: string }) {
+export function TaskTimeSummary({
+  plannedTaskTime,
+  unknownEstimateCount = 0,
+}: {
+  plannedTaskTime: string;
+  unknownEstimateCount?: number;
+}) {
+  const unknown = unknownEstimateLabel(unknownEstimateCount);
   return (
-    <View accessibilityLabel={`עומס היום: ${label}`} style={styles.workloadBadge}>
-      <Text style={styles.workloadText}>{label}</Text>
+    <View accessibilityLabel="זמן משימות מתוכנן" style={styles.taskTimeSummary}>
+      <Text style={styles.taskTimeText}>זמן משימות מתוכנן: {plannedTaskTime}</Text>
+      {unknown ? <Text style={styles.taskTimeUnknown}>{unknown}</Text> : null}
     </View>
   );
 }
@@ -61,7 +64,7 @@ export function FocusCard({ task, onStart }: { task: TodayTask; onStart?: () => 
         <Text style={styles.focusLabel}>עכשיו</Text>
       </View>
       <Text style={styles.focusTitle}>{task.title}</Text>
-      <Text style={styles.focusMeta}>כ־{task.durationMinutes} דקות · עבודה</Text>
+      <Text style={styles.focusMeta}>{task.durationMinutes === null ? 'ללא הערכת זמן' : `כ־${task.durationMinutes} דקות`} · עבודה</Text>
       <Pressable accessibilityRole="button" onPress={onStart} style={styles.startButton}>
         <Text style={styles.startButtonText}>התחלה</Text>
       </Pressable>
@@ -154,7 +157,7 @@ export function TaskList({
           ) : (
             <>
               <View style={[styles.lifeAreaDot, { backgroundColor: lifeAreaColor[task.lifeArea] }]} />
-              <Text style={styles.taskDuration}>{task.durationMinutes} דק׳</Text>
+              <Text style={styles.taskDuration}>{task.durationMinutes === null ? 'ללא הערכה' : `${task.durationMinutes} דק׳`}</Text>
             </>
           )}
         </Pressable>
@@ -195,7 +198,6 @@ const styles = StyleSheet.create({
   summaryRow: {
     alignItems: 'center',
     flexDirection: 'row-reverse',
-    justifyContent: 'space-between',
     marginTop: 14,
   },
   summaryItems: { alignItems: 'center', flexDirection: 'row-reverse', gap: spacing.xs },
@@ -206,18 +208,9 @@ const styles = StyleSheet.create({
     writingDirection: 'rtl',
   },
   summaryDivider: { color: '#CFC8BA', fontSize: typography.size.label },
-  ltr: { writingDirection: 'ltr' },
-  workloadBadge: {
-    backgroundColor: colors.accentWeak,
-    borderRadius: radius.round,
-    paddingHorizontal: spacing.sm,
-    paddingVertical: 5,
-  },
-  workloadText: {
-    color: colors.accentText,
-    fontFamily: typography.family.bold,
-    fontSize: typography.size.label,
-  },
+  taskTimeSummary: { marginTop: spacing.xs },
+  taskTimeText: { color: colors.textSoft, fontFamily: typography.family.bold, fontSize: typography.size.body, textAlign: 'right', writingDirection: 'rtl' },
+  taskTimeUnknown: { color: colors.textFaint, fontFamily: typography.family.regular, fontSize: typography.size.label, marginTop: 2, textAlign: 'right', writingDirection: 'rtl' },
   focusCard: {
     backgroundColor: colors.accentWeak,
     borderRadius: radius.xl,

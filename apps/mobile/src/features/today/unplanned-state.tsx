@@ -4,6 +4,7 @@ import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { colors, radius, spacing, typography } from '@/theme/tokens';
 
 import { unplannedTodayFixture } from './today.fixture';
+import { TaskTimeSummary } from './today.components';
 
 export function UnplannedState() {
   const today = unplannedTodayFixture;
@@ -13,6 +14,7 @@ export function UnplannedState() {
       <Text style={styles.greeting}>{today.greeting}</Text>
       <Text style={styles.date}>{today.dateLabel}</Text>
       <Text style={styles.summary}>אין משימות מתוכננות · 2 התחייבויות היום</Text>
+      <TaskTimeSummary plannedTaskTime="0 דקות" />
 
       <View accessibilityLabel="יום לא מתוכנן" style={styles.openDay}>
         <View style={styles.openIcon}>

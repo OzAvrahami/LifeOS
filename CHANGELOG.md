@@ -6,6 +6,19 @@ LifeOS follows Semantic Versioning for development and release tags.
 
 ## [Unreleased]
 
+### Added
+
+- Added an account-persisted, optional “My day” window with recurring local start/end clock times and explicit overnight behavior.
+
+### Changed
+
+- Replaced Today’s arbitrary capacity denominator and capacity-derived status with an honest planned Task-time summary; Commitments remain visibly separate and Tasks without estimates are disclosed.
+- Retired daily capacity as the primary Settings concept while preserving its stored values and older-client compatibility. This intentionally supersedes Issue #6’s Today capacity notice, not its persistence semantics.
+
+### Fixed
+
+- Preserved inherited/null/zero daily-capacity semantics and ensured Daily Focus edits do not create or erase legacy capacity overrides.
+
 ## [0.1.1] - 2026-08-20
 
 ### Added

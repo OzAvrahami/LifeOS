@@ -1,6 +1,8 @@
 # LifeOS Implementation Status
 
-- **Last updated:** 2026-08-20
+- **Last updated:** 2026-09-06
+- **Current work item:** Issue #7 is implemented locally and ready for review; additive schema/API rollout and browser/iPhone acceptance are still pending.
+- **Suggested next project status:** In Progress while schema/API rollout is pending; move to Verify only after the compatible backend is available for browser/iPhone acceptance. No project field was changed automatically.
 - **Current release being cut:** v0.1.1 — standalone internal deployment milestone; ready for release commit and tag
 - **Current phase:** Phase 8 complete — standalone internal MVP deployment verified
 - **Phase 8 status:** PASSED — Railway HTTPS API and standalone real-iPhone Release build verified over cellular networking
@@ -17,12 +19,12 @@ This document is the current source of truth for implementation status. “Verif
 | Tasks | ✅ Verified remotely and on device | Remote migration and authenticated API persistence verified | API, Mobile, local real-JWT/RLS harness, remote Phase 7C E2E | Stable UUIDs survived the remote Core Flow; single-active handoff, two-user isolation, and real-device Core Flow passed. |
 | Quick Capture | ✅ Verified remotely and on device | Remote API capture persistence verified | Mobile API/cache/flow tests; remote Phase 7C E2E | Capture persisted through fresh reads, API restart, logout/login, app restart, and the final real-iPhone smoke. `Choose day` remains intentionally limited to the approved lightweight behavior. |
 | Inbox | ✅ Verified remotely and on device | Remote API persistence verified | UI, processing, routing, Task flow tests; remote Phase 7C E2E | The same Task persisted through Inbox → Week/Today without duplication; the real-iPhone Core Flow passed. |
-| Today | ✅ Verified remotely and on device | Tasks, DailyPlan, Commitments, Settings verified remotely | Today, hydration, task-flow, planning, commitment, settings tests; remote Phase 7C E2E | Active/completed persistence and correct initial hydration passed on a real iPhone. End-of-day rescheduling remains outside the narrow release gate. |
+| Today | 🟡 Issue #7 local verification pending | Tasks, DailyPlan, Commitments, Settings previously verified remotely | Today, hydration, task-flow, planning, commitment, settings tests | Local source now shows planned Task time without a capacity denominator and discloses missing estimates. Browser/iPhone acceptance of this change is pending. |
 | Week | ✅ Verified remotely and on device | Tasks, WeekPlan, WeeklyFocus, Commitments verified remotely | Week, planning, commitments, settings-boundary tests; remote Phase 7C E2E | Inbox → Week → Today and ordered WeeklyFocus persistence passed remotely and in the device Core Flow. |
 | Daily/Weekly planning | ✅ Verified | DailyPlan/WeeklyFocus migrations + APIs verified remotely | API, cache, UI, local and remote RLS checks | DailyPlan and ordered WeeklyFocus persistence survived restart and logout/login. Full planning ritual state is intentionally not persisted. |
 | Commitments | ✅ Verified remotely | Commitment migration + API verified remotely | API, UI/cache/workload, local and remote RLS checks | One-time remote persistence and two-user isolation passed. Recurrence and calendar sync are deferred. |
-| Workload/availability | ✅ Verified | DailyPlan override + UserSettings default | Metrics and screen integration tests | Task estimates plus timed Commitments drive Today status; missing durations contribute zero. Real-use calibration remains product validation. |
-| More / Settings | ✅ Verified remotely and on device | UserSettings remote persistence verified | API, UI/cache/date, local RLS tests; remote Phase 7C E2E | Settings survived fresh fetch, logout/login, app restart, and the final real-iPhone smoke; two-user isolation passed. |
+| Workload/availability | 🟡 Retired from Today | Legacy DailyPlan override + UserSettings default retained | Legacy metrics/data-integrity tests | Today no longer claims availability or capacity-derived status. Commitments remain separate; missing Task estimates are disclosed rather than treated as known time. |
+| More / Settings | 🟡 Issue #7 rollout pending | Legacy UserSettings verified remotely; Day Window additive migration is local only | API, UI/cache/date, local RLS tests | “היום שלי” stores nullable recurring local clock times after schema/API rollout. Pre-upgrade servers are detected and no device-only save is claimed. |
 | API | ✅ Deployed and verified | Stateless Railway HTTPS service over caller-scoped Supabase | API unit/integration suite; Railway health and authenticated identity checks | `lifeos-api` runs compiled JavaScript on Railway; public health and authenticated `/auth/me` checks passed. |
 | Authentication | ✅ Verified remotely and on device | Remote Supabase Auth session flow verified | Auth provider/UI/callback/API and bootstrap-race tests; remote Phase 7C E2E | Remote and real-iPhone login, logout/login restoration, and restart persistence passed; the stale-bootstrap session race is fixed. |
 | Supabase/database | ✅ Verified | Five versioned migrations deployed remotely | Local reset/lint, remote history/dry-run/lint, opt-in local integration harness | Remote history matches all five migrations, linked dry-run is up to date, and remote public-schema lint passes. |
@@ -60,6 +62,8 @@ This document is the current source of truth for implementation status. “Verif
 - One-time Commitments are separate from Tasks and are physically deleted.
 - Daily capacity, week start, and IANA timezone are persisted in one UserSettings row per user.
 - DailyPlan capacity overrides the global setting; changing week start does not rewrite historical WeekPlans.
+- The optional Day Window is stored as a nullable start/end local clock-time pair; omission preserves it, both-null clears it, and an earlier end is overnight.
+- Day Window is not availability and does not change Task or DailyPlan calendar-date ownership.
 
 ### API, Auth, database, and security
 
@@ -75,7 +79,7 @@ This document is the current source of truth for implementation status. “Verif
 3. The Product Spec mentions an “All Tasks” screen and Life Areas, but neither is part of the narrow v0.1 release gate; Life Areas are explicitly disabled/deferred.
 4. Expo Web is a secondary review/development target, not the v0.1 release platform.
 5. The standalone iPhone build uses the current Apple Personal Team/development-distribution setup. TestFlight and App Store distribution are not complete.
-6. No known release-blocking product bug remains.
+6. Issue #7 still requires additive database/API rollout and browser/iPhone acceptance before it can be considered complete or released.
 
 ## Current Critical Path
 

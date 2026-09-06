@@ -8,6 +8,7 @@ import request from 'supertest';
 
 import { createApp } from '../src/app.js';
 import { createSettingsRouter } from '../src/features/settings/settings.routes.js';
+import { SupabaseSettingsService } from '../src/features/settings/settings.service.js';
 import {
   DEFAULT_DAILY_CAPACITY_MINUTES,
   DEFAULT_WEEK_START_DAY,
@@ -28,6 +29,8 @@ class MemorySettingsService implements SettingsServiceContract {
 
   async get() {
     return this.rows.get(this.userId) ?? {
+      dayEndTime: null,
+      dayStartTime: null,
       defaultDailyCapacityMinutes: DEFAULT_DAILY_CAPACITY_MINUTES,
       persisted: false,
       timezone: null,
@@ -36,7 +39,14 @@ class MemorySettingsService implements SettingsServiceContract {
   }
 
   async put(input: PutUserSettingsInput) {
-    const settings = { ...input, persisted: true } satisfies UserSettings;
+    const current = await this.get();
+    const settings = {
+      ...current,
+      ...input,
+      dayEndTime: input.dayEndTime !== undefined ? input.dayEndTime : current.dayEndTime,
+      dayStartTime: input.dayStartTime !== undefined ? input.dayStartTime : current.dayStartTime,
+      persisted: true,
+    } satisfies UserSettings;
     this.rows.set(this.userId, settings);
     return settings;
   }
@@ -84,6 +94,8 @@ describe('Settings API', () => {
     const { app, rows } = createSettingsTestApp();
     const response = await auth(app).get().expect(200);
     assert.deepEqual(response.body.settings, {
+      dayEndTime: null,
+      dayStartTime: null,
       defaultDailyCapacityMinutes: 360,
       persisted: false,
       timezone: null,
@@ -100,6 +112,8 @@ describe('Settings API', () => {
     const response = await auth(app).get().expect(200);
     assert.deepEqual(response.body.settings, {
       ...savedSettings,
+      dayEndTime: null,
+      dayStartTime: null,
       defaultDailyCapacityMinutes: 420,
       persisted: true,
     });
@@ -108,12 +122,110 @@ describe('Settings API', () => {
 
   it('keeps user settings isolated by the verified identity', async () => {
     const { app } = createSettingsTestApp();
-    await auth(app, 'token-a').put(savedSettings).expect(200);
+    await auth(app, 'token-a').put({
+      ...savedSettings,
+      dayEndTime: '01:00',
+      dayStartTime: '07:00',
+    }).expect(200);
     const userBResponse = await auth(app, 'token-b').get().expect(200);
     assert.equal(userBResponse.body.settings.persisted, false);
+    assert.equal(userBResponse.body.settings.dayStartTime, null);
     await auth(app, 'token-b').put({ ...savedSettings, timezone: 'America/New_York' }).expect(200);
     const userAResponse = await auth(app, 'token-a').get().expect(200);
     assert.equal(userAResponse.body.settings.timezone, 'Europe/London');
+    assert.equal(userAResponse.body.settings.dayStartTime, '07:00');
+    assert.equal(userAResponse.body.settings.dayEndTime, '01:00');
+  });
+
+  it('persists same-day, midnight, and overnight Day Windows and supports explicit clearing', async () => {
+    const { app } = createSettingsTestApp();
+    for (const dayWindow of [
+      { dayStartTime: '08:00', dayEndTime: '23:30' },
+      { dayStartTime: '06:30', dayEndTime: '00:00' },
+      { dayStartTime: '07:00', dayEndTime: '01:00' },
+    ]) {
+      const saved = await auth(app).put({ ...savedSettings, ...dayWindow }).expect(200);
+      assert.deepEqual(saved.body.settings, { ...savedSettings, ...dayWindow, persisted: true });
+      const reloaded = await auth(app).get().expect(200);
+      assert.deepEqual(reloaded.body.settings, saved.body.settings);
+    }
+
+    const cleared = await auth(app).put({
+      ...savedSettings,
+      dayEndTime: null,
+      dayStartTime: null,
+    }).expect(200);
+    assert.equal(cleared.body.settings.dayStartTime, null);
+    assert.equal(cleared.body.settings.dayEndTime, null);
+  });
+
+  it('preserves a saved Day Window when an old client omits both new fields', async () => {
+    const { app } = createSettingsTestApp();
+    await auth(app).put({
+      ...savedSettings,
+      dayEndTime: '01:00',
+      dayStartTime: '07:00',
+    }).expect(200);
+
+    const oldClientSave = await auth(app).put({
+      ...savedSettings,
+      timezone: 'Asia/Jerusalem',
+    }).expect(200);
+    assert.equal(oldClientSave.body.settings.dayStartTime, '07:00');
+    assert.equal(oldClientSave.body.settings.dayEndTime, '01:00');
+    assert.equal(oldClientSave.body.settings.timezone, 'Asia/Jerusalem');
+  });
+
+  it('does not add null Day Window columns to the Supabase upsert for an old-client request', async () => {
+    let payload: Record<string, unknown> | undefined;
+    const existingRow = {
+      created_at: '2026-09-06T08:00:00.000Z',
+      day_end_time: '01:00:00',
+      day_start_time: '07:00:00',
+      default_daily_capacity_minutes: 480,
+      timezone: 'Europe/London',
+      updated_at: '2026-09-06T08:00:00.000Z',
+      user_id: userA.id,
+      week_start_day: 1,
+    };
+    const client = {
+      from: () => ({
+        upsert: (values: Record<string, unknown>) => {
+          payload = values;
+          return {
+            select: () => ({
+              single: async () => ({ data: { ...existingRow, ...values }, error: null }),
+            }),
+          };
+        },
+      }),
+    } as unknown as SupabaseClient;
+
+    const result = await new SupabaseSettingsService(client, userA.id).put(savedSettings);
+    assert.equal(Object.hasOwn(payload ?? {}, 'day_start_time'), false);
+    assert.equal(Object.hasOwn(payload ?? {}, 'day_end_time'), false);
+    assert.equal(result.dayStartTime, '07:00');
+    assert.equal(result.dayEndTime, '01:00');
+  });
+
+  it('rejects incomplete, equal, mixed-null, and malformed Day Windows atomically', async () => {
+    const { app } = createSettingsTestApp();
+    await auth(app).put({
+      ...savedSettings,
+      dayEndTime: '23:30',
+      dayStartTime: '08:00',
+    }).expect(200);
+
+    await auth(app).put({ ...savedSettings, dayStartTime: '08:00' }).expect(400);
+    await auth(app).put({ ...savedSettings, dayEndTime: '08:00' }).expect(400);
+    await auth(app).put({ ...savedSettings, dayStartTime: '08:00', dayEndTime: null }).expect(400);
+    await auth(app).put({ ...savedSettings, dayStartTime: '08:00', dayEndTime: '08:00' }).expect(400);
+    await auth(app).put({ ...savedSettings, dayStartTime: '8:00', dayEndTime: '23:30' }).expect(400);
+    await auth(app).put({ ...savedSettings, dayStartTime: '24:00', dayEndTime: '01:00' }).expect(400);
+
+    const unchanged = await auth(app).get().expect(200);
+    assert.equal(unchanged.body.settings.dayStartTime, '08:00');
+    assert.equal(unchanged.body.settings.dayEndTime, '23:30');
   });
 
   it('rejects invalid capacity, weekday, timezone, missing fields, and ownership input', async () => {
@@ -137,5 +249,14 @@ describe('Settings API', () => {
     assert.equal((migration.match(/\(select auth\.uid\(\)\) = user_id/g) ?? []).length, 5);
     assert.match(migration, /user_settings_set_updated_at/);
     assert.match(migration, /revoke all on table public\.user_settings from anon/);
+
+    const dayWindowMigration = readFileSync(
+      new URL('../../../supabase/migrations/20260906120000_add_user_settings_day_window.sql', import.meta.url),
+      'utf8',
+    );
+    assert.match(dayWindowMigration, /add column day_start_time time without time zone/);
+    assert.match(dayWindowMigration, /add column day_end_time time without time zone/);
+    assert.match(dayWindowMigration, /day_start_time is null and day_end_time is null/);
+    assert.match(dayWindowMigration, /day_start_time <> day_end_time/);
   });
 });
