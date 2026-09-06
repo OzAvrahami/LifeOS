@@ -28,21 +28,41 @@ export function WeekHeader({ dateRange = weekDateRange, showLabel = true }: { da
   );
 }
 
-export function WeeklyFocusCard({ focuses, onEdit }: { focuses: WeeklyFocus[]; onEdit?: () => void }) {
+export function WeeklyFocusCard({
+  focuses,
+  onEdit,
+  state = 'ready',
+}: {
+  focuses: WeeklyFocus[];
+  onEdit?: () => void;
+  state?: 'error' | 'loading' | 'ready';
+}) {
+  const actionLabel = focuses.length === 0 ? 'הוסף מיקודים' : 'עריכת מיקודים';
   return (
-    <View accessibilityLabel="המיקוד השבועי" style={styles.focusCard}>
+    <View accessibilityLabel="מיקודים לשבוע" style={styles.focusCard}>
       <View style={styles.focusHeading}>
-        <Text style={styles.focusLabel}>המיקוד השבועי</Text>
-        <Pressable accessibilityRole="button" onPress={onEdit}><Text style={styles.edit}>עריכה</Text></Pressable>
+        <Text style={styles.focusLabel}>מיקודים לשבוע</Text>
+        {state === 'ready' && onEdit ? (
+          <Pressable accessibilityRole="button" onPress={onEdit}>
+            <Text style={styles.edit}>{actionLabel}</Text>
+          </Pressable>
+        ) : null}
       </View>
-      <View style={styles.focusList}>
-        {focuses.map((focus, index) => (
-          <View key={focus.id} style={styles.focusRow}>
-            <View style={styles.focusNumber}><Text style={styles.focusNumberText}>{index + 1}</Text></View>
-            <Text style={styles.focusTitle}>{focus.title}</Text>
-          </View>
-        ))}
-      </View>
+      {state === 'loading' ? <Text style={styles.focusState}>טוען מיקודים…</Text> : null}
+      {state === 'error' ? <Text style={styles.focusState}>לא הצלחנו לטעון את המיקודים.</Text> : null}
+      {state === 'ready' && focuses.length === 0 ? (
+        <Text style={styles.focusState}>עוד לא נשמרו מיקודים לשבוע הזה.</Text>
+      ) : null}
+      {state === 'ready' && focuses.length > 0 ? (
+        <View style={styles.focusList}>
+          {focuses.map((focus, index) => (
+            <View key={focus.id} style={styles.focusRow}>
+              <View style={styles.focusNumber}><Text style={styles.focusNumberText}>{index + 1}</Text></View>
+              <Text style={styles.focusTitle}>{focus.title}</Text>
+            </View>
+          ))}
+        </View>
+      ) : null}
     </View>
   );
 }
@@ -199,6 +219,7 @@ const styles = StyleSheet.create({
   focusHeading: { alignItems: 'center', flexDirection: 'row-reverse', justifyContent: 'space-between', marginBottom: 7 },
   focusLabel: { color: colors.accent, fontFamily: typography.family.extraBold, fontSize: typography.size.label, letterSpacing: 0.5, writingDirection: 'rtl' },
   edit: { color: colors.accent, fontFamily: typography.family.bold, fontSize: typography.size.label, writingDirection: 'rtl' },
+  focusState: { color: colors.textMuted, fontFamily: typography.family.regular, fontSize: typography.size.meta, textAlign: 'right', writingDirection: 'rtl' },
   focusList: { gap: 7 },
   focusRow: { alignItems: 'center', flexDirection: 'row-reverse', gap: 11 },
   focusNumber: { alignItems: 'center', backgroundColor: colors.accent, borderRadius: 7, height: 24, justifyContent: 'center', width: 24 },

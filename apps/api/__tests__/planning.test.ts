@@ -201,8 +201,10 @@ describe('Planning API', () => {
 
   it('persists ordered WeeklyFocus rows, replaces atomically, and caps the list at three', async () => {
     const data = database();
+    const originalTasks = structuredClone(data.tasks);
     const app = createPlanningTestApp(data);
     const path = '/week-plans/2026-08-09/focuses';
+    const otherWeekPath = '/week-plans/2026-08-16/focuses';
     const titles = ['Focus one', 'Focus two', 'Focus three'];
     const saved = await authenticated(app).put(path).send({ titles }).expect(200);
     assert.deepEqual(saved.body.focuses.map((focus: WeeklyFocus) => focus.position), [0, 1, 2]);
@@ -212,6 +214,14 @@ describe('Planning API', () => {
     );
     await authenticated(app).put(path).send({ titles: [...titles, 'Focus four'] }).expect(400);
     assert.deepEqual(data.focuses.get(planKey(userA.id, '2026-08-09'))?.map((focus) => focus.title), titles);
+    await authenticated(app).put(otherWeekPath).send({ titles: ['Other week'] }).expect(200);
+    await authenticated(app).put(path).send({ titles: [] }).expect(200);
+    assert.deepEqual((await authenticated(app).get(path).expect(200)).body.focuses, []);
+    assert.deepEqual(
+      (await authenticated(app).get(otherWeekPath).expect(200)).body.focuses.map((focus: WeeklyFocus) => focus.title),
+      ['Other week'],
+    );
+    assert.deepEqual(data.tasks, originalTasks);
   });
 
   it('keeps WeeklyFocus collections isolated by authenticated owner', async () => {

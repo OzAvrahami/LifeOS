@@ -44,7 +44,7 @@ describe('<WeekScreen />', () => {
     const user = userEvent.setup();
     await renderWeek();
 
-    expect(screen.getByLabelText('המיקוד השבועי')).toBeTruthy();
+    expect(screen.getByLabelText('מיקודים לשבוע')).toBeTruthy();
     expect(screen.getByText('לסיים את אפיון LifeOS')).toBeTruthy();
     expect(screen.getByLabelText('לתכנן השבוע')).toBeTruthy();
     expect(screen.getByText('עוד משימה אחת · לסדר מחסן ←')).toBeTruthy();
@@ -99,9 +99,11 @@ describe('<WeekScreen />', () => {
 
     await user.press(screen.getByText('תכנן את השבוע'));
 
-    expect(screen.getByLabelText('תכנון השבוע')).toBeTruthy();
+    expect(screen.getByLabelText('תצוגת פיתוח: תכנון השבוע')).toBeTruthy();
+    expect(screen.getByText('תצוגת פיתוח · תכנון השבוע')).toBeTruthy();
     expect(screen.getByText('שלב 1 מתוך 4')).toBeTruthy();
     expect(screen.getByText('מה נשאר מהשבוע הקודם?')).toBeTruthy();
+    expect(screen.getByText('להכין הצעת מחיר')).toBeTruthy();
   });
 
   it('marks Week selected and invokes Today navigation', async () => {

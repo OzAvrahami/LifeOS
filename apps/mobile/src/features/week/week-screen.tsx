@@ -11,6 +11,7 @@ import {
   useReplaceWeeklyFocuses,
   useWeeklyFocuses,
 } from '@/features/planning/planning.queries';
+import type { WeeklyFocus } from '@/features/planning/planning.types';
 import { useEffectiveSettings } from '@/features/settings/settings.queries';
 import { weekdayLabels } from '@/features/settings/settings.types';
 import { useDemoTasks } from '@/features/tasks/demo-task-provider';
@@ -47,6 +48,7 @@ import {
 import { WeekPlanningFlow } from './week-planning-flow';
 import { tasksByPlannedDate } from './week-aggregation';
 import { WeekDemoState } from './week.types';
+import { WeeklyFocusEditor } from './weekly-focus-editor';
 
 export function WeekScreen({
   initialState = 'normal',
@@ -61,12 +63,13 @@ export function WeekScreen({
   onNavigateToday?: () => void;
   taskSource?: TaskSource;
 }) {
-  const [weekState, setWeekState] = useState<WeekDemoState>(initialState);
+  const serverTasks = taskSource === 'server';
+  const [weekState, setWeekState] = useState<WeekDemoState>(serverTasks ? 'normal' : initialState);
   const [planningInitialStep, setPlanningInitialStep] = useState(initialState === 'planning' ? 2 : 0);
+  const [focusEditorFocuses, setFocusEditorFocuses] = useState<WeeklyFocus[] | null>(null);
   const [captureOpen, setCaptureOpen] = useState(false);
   const [commitmentEditorDate, setCommitmentEditorDate] = useState<string | null>(null);
   const demo = useDemoTasks();
-  const serverTasks = taskSource === 'server';
   const { effective: settings, query: settingsQuery } = useEffectiveSettings(serverTasks);
   const weekStart = currentWeekStart(undefined, settings);
   const currentDateKeys = currentWeekDateKeys(undefined, settings);
@@ -110,15 +113,22 @@ export function WeekScreen({
       }))
     : normalWeekDays;
 
-  if (weekState === 'planning') {
+  if (serverTasks && focusEditorFocuses) {
+    return (
+      <WeeklyFocusEditor
+        focuses={focusEditorFocuses}
+        onCancel={() => setFocusEditorFocuses(null)}
+        onSave={(titles) => replaceWeeklyFocusMutation.mutateAsync({ titles, weekStart })}
+        onSaved={() => setFocusEditorFocuses(null)}
+      />
+    );
+  }
+
+  if (!serverTasks && weekState === 'planning') {
     return (
       <WeekPlanningFlow
-        focuses={serverTasks ? weeklyFocusQuery.data ?? [] : undefined}
         initialStep={planningInitialStep}
         onDone={() => setWeekState('normal')}
-        onSaveFocuses={serverTasks ? async (titles) => {
-          return replaceWeeklyFocusMutation.mutateAsync({ titles, weekStart });
-        } : undefined}
       />
     );
   }
@@ -148,7 +158,18 @@ export function WeekScreen({
               />
             }
             focuses={serverTasks ? weeklyFocusQuery.data ?? [] : weeklyFocuses}
-            onEditFocuses={() => { setPlanningInitialStep(2); setWeekState('planning'); }}
+            focusState={serverTasks
+              ? weeklyFocusQuery.isPending
+                ? 'loading'
+                : weeklyFocusQuery.isError
+                  ? 'error'
+                  : 'ready'
+              : 'ready'}
+            onEditFocuses={serverTasks
+              ? weeklyFocusQuery.isSuccess
+                ? () => setFocusEditorFocuses(weeklyFocusQuery.data.map((focus) => ({ ...focus })))
+                : undefined
+              : () => { setPlanningInitialStep(2); setWeekState('planning'); }}
             onAddCommitment={serverTasks ? setCommitmentEditorDate : undefined}
             onMoveToToday={async (taskId) => {
               if (serverTasks) {
@@ -191,6 +212,7 @@ export function WeekScreen({
 function NormalWeek({
   dateRange,
   days,
+  focusState,
   focuses,
   notice,
   onEditFocuses,
@@ -200,9 +222,10 @@ function NormalWeek({
 }: {
   dateRange?: string;
   days: typeof normalWeekDays;
+  focusState?: 'error' | 'loading' | 'ready';
   focuses: typeof weeklyFocuses;
   notice?: ReactNode;
-  onEditFocuses: () => void;
+  onEditFocuses?: () => void;
   onAddCommitment?: (date: string) => void;
   onMoveToToday: (taskId: string) => Promise<void> | void;
   tasks: typeof unscheduledWeekTasks;
@@ -211,7 +234,7 @@ function NormalWeek({
     <ScrollView contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
       <WeekHeader dateRange={dateRange} />
       {notice}
-      <WeeklyFocusCard focuses={focuses} onEdit={onEditFocuses} />
+      <WeeklyFocusCard focuses={focuses} onEdit={onEditFocuses} state={focusState} />
       <WeekSectionLabel>השבוע שלך</WeekSectionLabel>
       <View accessibilityLabel="סקירת שבעת ימי השבוע" style={styles.days}>
         {days.map((day) => <WeekDayRow day={day} key={day.id} onAddCommitment={onAddCommitment} />)}

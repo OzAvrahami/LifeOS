@@ -12,6 +12,7 @@ LifeOS follows Semantic Versioning for development and release tags.
 
 ### Changed
 
+- Replaced the normal authenticated fixture-backed Weekly Planning wizard with an honest, account/week-scoped Weekly Focus editor; the canonical four-step wizard remains development-preview-only.
 - Connected Today’s inline “Add Task” action to Quick Capture with Today preselected while preserving the global Inbox default.
 - Made Week’s “More Tasks” action expand and collapse all remaining week-planned Tasks with the same scheduling controls.
 - Replaced Today’s arbitrary capacity denominator and capacity-derived status with an honest planned Task-time summary; Commitments remain visibly separate and Tasks without estimates are disclosed.

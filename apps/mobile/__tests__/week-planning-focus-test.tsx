@@ -1,7 +1,7 @@
 import { act, render, screen, userEvent, waitFor } from '@testing-library/react-native';
 
 import type { WeeklyFocus } from '@/features/planning/planning.types';
-import { WeekPlanningFlow } from '@/features/week/week-planning-flow';
+import { WeeklyFocusEditor } from '@/features/week/weekly-focus-editor';
 
 import { TestProviders } from '../test-utils/test-providers';
 
@@ -26,11 +26,11 @@ async function renderFocusStep(
 ) {
   const result = await render(
     <TestProviders>
-      <WeekPlanningFlow
+      <WeeklyFocusEditor
         focuses={focuses}
-        initialStep={2}
-        onDone={jest.fn()}
-        onSaveFocuses={onSaveFocuses}
+        onCancel={jest.fn()}
+        onSave={onSaveFocuses}
+        onSaved={jest.fn()}
       />
     </TestProviders>,
   );
@@ -43,7 +43,7 @@ function selectedFocusCount() {
   ).length;
 }
 
-describe('Weekly Planning custom focus selection', () => {
+describe('Weekly Focus editor selection', () => {
   it('does not add typed text until the explicit add action confirms it', async () => {
     const user = userEvent.setup();
     const { onSaveFocuses } = await renderFocusStep([focus('one', 'מיקוד קיים', 0)]);
@@ -77,7 +77,7 @@ describe('Weekly Planning custom focus selection', () => {
     await user.press(screen.getByLabelText('הוסף מיקוד'));
     expect(screen.getByLabelText('מועמד לא מסומן').props.accessibilityState.checked).toBe(false);
     await user.type(screen.getByLabelText('מיקוד חדש'), 'לא נשמר בסתר');
-    await user.press(screen.getByText('המשך'));
+    await user.press(screen.getByText('שמירת מיקודים'));
 
     await waitFor(() => expect(onSaveFocuses).toHaveBeenCalledWith(['מיקוד קיים']));
     expect(onSaveFocuses).not.toHaveBeenCalledWith(expect.arrayContaining(['מועמד לא מסומן']));

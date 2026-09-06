@@ -1,8 +1,8 @@
 # LifeOS Implementation Status
 
 - **Last updated:** 2026-09-06
-- **Current work item:** Issue #7 is implemented locally and ready for review; additive schema/API rollout and browser/iPhone acceptance are still pending.
-- **Suggested next project status:** In Progress while schema/API rollout is pending; move to Verify only after the compatible backend is available for browser/iPhone acceptance. No project field was changed automatically.
+- **Current work item:** A limited Issue #3 Weekly Focus stabilization is implemented locally; the full Weekly Planning lifecycle remains incomplete. Issue #7 schema/API rollout and browser/iPhone acceptance are also still pending.
+- **Suggested next project status:** Issue #3 remains In Progress because this stabilization does not complete its broader lifecycle scope. Issue #8 remains in Verify pending real-iPhone acceptance.
 - **Current release being cut:** v0.1.1 — standalone internal deployment milestone; ready for release commit and tag
 - **Current phase:** Phase 8 complete — standalone internal MVP deployment verified
 - **Phase 8 status:** PASSED — Railway HTTPS API and standalone real-iPhone Release build verified over cellular networking
@@ -20,8 +20,8 @@ This document is the current source of truth for implementation status. “Verif
 | Quick Capture | ✅ Verified remotely and on device | Remote API capture persistence verified | Mobile API/cache/flow tests; remote Phase 7C E2E | Capture persisted through fresh reads, API restart, logout/login, app restart, and the final real-iPhone smoke. `Choose day` remains intentionally limited to the approved lightweight behavior. |
 | Inbox | ✅ Verified remotely and on device | Remote API persistence verified | UI, processing, routing, Task flow tests; remote Phase 7C E2E | The same Task persisted through Inbox → Week/Today without duplication; the real-iPhone Core Flow passed. |
 | Today | 🟡 Issue #7 local verification pending | Tasks, DailyPlan, Commitments, Settings previously verified remotely | Today, hydration, task-flow, planning, commitment, settings tests | Local source now shows planned Task time without a capacity denominator and discloses missing estimates. Browser/iPhone acceptance of this change is pending. |
-| Week | ✅ Verified remotely and on device | Tasks, WeekPlan, WeeklyFocus, Commitments verified remotely | Week, planning, commitments, settings-boundary tests; remote Phase 7C E2E | Inbox → Week → Today and ordered WeeklyFocus persistence passed remotely and in the device Core Flow. |
-| Daily/Weekly planning | ✅ Verified | DailyPlan/WeeklyFocus migrations + APIs verified remotely | API, cache, UI, local and remote RLS checks | DailyPlan and ordered WeeklyFocus persistence survived restart and logout/login. Full planning ritual state is intentionally not persisted. |
+| Week | 🟡 Weekly Focus cleanup pending acceptance | Tasks, WeekPlan, WeeklyFocus, Commitments verified remotely | Week, planning, commitments, settings-boundary tests; remote Phase 7C E2E | Normal authenticated use now exposes an account/week-scoped Weekly Focus editor; fixture planning content is development-preview-only. Browser/iPhone acceptance of this local UI change is pending. |
+| Daily/Weekly planning | 🟡 Partial | DailyPlan/WeeklyFocus migrations + APIs verified remotely | API, cache, UI, local and remote RLS checks | DailyPlan and ordered WeeklyFocus persistence survived restart and logout/login. The focused Weekly Focus editor is implemented; Issue #3's full not-started/in-progress/completed lifecycle and resume behavior remain incomplete. |
 | Commitments | ✅ Verified remotely | Commitment migration + API verified remotely | API, UI/cache/workload, local and remote RLS checks | One-time remote persistence and two-user isolation passed. Recurrence and calendar sync are deferred. |
 | Workload/availability | 🟡 Retired from Today | Legacy DailyPlan override + UserSettings default retained | Legacy metrics/data-integrity tests | Today no longer claims availability or capacity-derived status. Commitments remain separate; missing Task estimates are disclosed rather than treated as known time. |
 | More / Settings | 🟡 Issue #7 rollout pending | Legacy UserSettings verified remotely; Day Window additive migration is local only | API, UI/cache/date, local RLS tests | “היום שלי” stores nullable recurring local clock times after schema/API rollout. Pre-upgrade servers are detected and no device-only save is claimed. |
@@ -30,7 +30,7 @@ This document is the current source of truth for implementation status. “Verif
 | Supabase/database | ✅ Verified | Five versioned migrations deployed remotely | Local reset/lint, remote history/dry-run/lint, opt-in local integration harness | Remote history matches all five migrations, linked dry-run is up to date, and remote public-schema lint passes. |
 | RLS/security | ✅ Verified locally and remotely | Caller-JWT RLS policies on all user data | Two-user local harness; anonymous and authenticated remote checks | Bidirectional remote read/write isolation passed for Tasks, WeekPlans, DailyPlans, WeeklyFocuses, Commitments, and UserSettings; anonymous table/RPC denial remains verified with `42501`. |
 | Cross-screen synchronization | ✅ Verified in automation, remotely, and on device | TanStack Query user-scoped caches | Cache membership/request-audit tests | Targeted cache updates prevent copies and request multipliers; remote and real-device Core Flow remained consistent. |
-| Automated tests | ✅ Verified | N/A | 113 Mobile across 26 suites + 37 API tests; local harness opt-in | Standard tests mock external cloud boundaries; local harness exercises actual Docker PostgreSQL/Auth/RLS. |
+| Automated tests | ✅ Verified | N/A | 166 Mobile across 30 suites + 44 API tests; local harness opt-in | Standard tests mock external cloud boundaries; local harness exercises actual Docker PostgreSQL/Auth/RLS. |
 | Real-device verification | ✅ Standalone internal use verified | Remote authenticated persistence observed on device | Real-iPhone development and Release-build smokes | The installed Release build operated over cellular with Metro, the local API, and the Mac unavailable. It remains development-signed and is not a TestFlight or App Store release. |
 | Life Areas and broader product modules | ⏸️ Deferred | None | None | Life Areas UI remains disabled; recurring schedules, external calendars, notifications, AI, projects, habits, and billing are outside the current gate. |
 
@@ -59,6 +59,8 @@ This document is the current source of truth for implementation status. “Verif
 
 - Daily Focus points to an existing same-owner Today Task.
 - WeeklyFocus belongs to a WeekPlan, is ordered, and is capped at three selected rows.
+- Normal authenticated Week loads WeeklyFocus data before enabling its focused editor; empty, cancel, clear, failed-save/retry, and cache-backed reopen behavior do not fall back to fixtures or create Tasks.
+- The fixture-backed four-step Weekly Planning wizard is restricted to explicit development previews and cannot persist account data.
 - One-time Commitments are separate from Tasks and are physically deleted.
 - Daily capacity, week start, and IANA timezone are persisted in one UserSettings row per user.
 - DailyPlan capacity overrides the global setting; changing week start does not rewrite historical WeekPlans.
@@ -80,6 +82,7 @@ This document is the current source of truth for implementation status. “Verif
 4. Expo Web is a secondary review/development target, not the v0.1 release platform.
 5. The standalone iPhone build uses the current Apple Personal Team/development-distribution setup. TestFlight and App Store distribution are not complete.
 6. Issue #7 still requires additive database/API rollout and browser/iPhone acceptance before it can be considered complete or released.
+7. Issue #3 still requires an explicit Weekly Planning lifecycle, persisted progress, and resume/review behavior; the focused Weekly Focus editor is only a stabilization slice.
 
 ## Current Critical Path
 

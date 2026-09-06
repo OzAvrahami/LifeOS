@@ -3,7 +3,6 @@ import { useRef, useState } from 'react';
 import { Pressable, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
-import type { WeeklyFocus } from '@/features/planning/planning.types';
 import { colors, radius, spacing, typography } from '@/theme/tokens';
 
 import { planningCarryover, unplannedWeekCommitments, weeklyFocuses } from './week.fixture';
@@ -22,32 +21,22 @@ function normalizedFocusTitle(title: string) {
   return title.trim().replace(/\s+/g, ' ').toLocaleLowerCase('he-IL');
 }
 
+/** Canonical fixture-only preview. Normal authenticated editing uses WeeklyFocusEditor. */
 export function WeekPlanningFlow({
-  focuses,
   initialStep = 0,
   onDone,
-  onSaveFocuses,
 }: {
-  focuses?: WeeklyFocus[];
   initialStep?: number;
   onDone: () => void;
-  onSaveFocuses?: (titles: string[]) => Promise<WeeklyFocus[]>;
 }) {
-  const baseFocusCandidates = onSaveFocuses
-    ? focuses?.length ? focuses : weeklyFocuses.slice(0, 2)
-    : weeklyFocuses.slice(0, 2);
+  const baseFocusCandidates = weeklyFocuses.slice(0, 2);
   const [step, setStep] = useState(initialStep);
   const [selectedFocuses, setSelectedFocuses] = useState<string[]>(
-    (onSaveFocuses && focuses?.length ? focuses : weeklyFocuses.slice(0, 2)).map((focus) => focus.id),
+    weeklyFocuses.slice(0, 2).map((focus) => focus.id),
   );
   const [newFocus, setNewFocus] = useState('');
   const [customFocuses, setCustomFocuses] = useState<{ id: string; title: string }[]>([]);
-  const [focusError, setFocusError] = useState(false);
   const [focusSelectionMessage, setFocusSelectionMessage] = useState<string | null>(null);
-  const [savedFocusTitles, setSavedFocusTitles] = useState<string[]>(
-    focuses?.map((focus) => focus.title) ?? weeklyFocuses.slice(0, 3).map((focus) => focus.title),
-  );
-  const [saving, setSaving] = useState(false);
   const nextCustomFocusId = useRef(1);
   const baseFocusTitles = new Set(baseFocusCandidates.map((focus) => normalizedFocusTitle(focus.title)));
   const focusCandidates = [
@@ -85,36 +74,19 @@ export function WeekPlanningFlow({
     setFocusSelectionMessage(null);
   };
 
-  const next = async () => {
-    if (step === 2 && onSaveFocuses) {
-      const titles = focusCandidates
-        .filter((focus) => selectedFocuses.includes(focus.id))
-        .map((focus) => focus.title);
-      setFocusError(false);
-      setSaving(true);
-      try {
-        const savedFocuses = await onSaveFocuses(titles);
-        setSelectedFocuses(savedFocuses.map((focus) => focus.id));
-        setSavedFocusTitles(titles);
-      } catch {
-        setFocusError(true);
-        return;
-      } finally {
-        setSaving(false);
-      }
-    }
+  const next = () => {
     if (step === steps.length - 1) onDone();
     else setStep((current) => current + 1);
   };
 
   return (
     <SafeAreaView edges={['top', 'bottom']} style={styles.safeArea}>
-      <View accessibilityLabel="תכנון השבוע" style={styles.container}>
+      <View accessibilityLabel="תצוגת פיתוח: תכנון השבוע" style={styles.container}>
         <View style={styles.topRow}>
           <Pressable accessibilityLabel="חזרה לשבוע" accessibilityRole="button" onPress={onDone} style={styles.close}>
             <Ionicons color={colors.textSoft} name="close" size={22} />
           </Pressable>
-          <Text style={styles.flowTitle}>תכנון השבוע</Text>
+          <Text style={styles.flowTitle}>תצוגת פיתוח · תכנון השבוע</Text>
           <Text style={styles.stepLabel}>שלב {step + 1} מתוך 4</Text>
         </View>
         <View accessibilityLabel={`התקדמות תכנון: שלב ${step + 1} מתוך 4`} style={styles.progress}>
@@ -140,12 +112,11 @@ export function WeekPlanningFlow({
               selected={selectedFocuses}
             />
           ) : null}
-          {step === 3 ? <ScheduleStep titles={onSaveFocuses ? savedFocusTitles : undefined} /> : null}
-          {focusError ? <Text style={styles.errorText}>לא הצלחנו לשמור. אפשר לנסות שוב.</Text> : null}
+          {step === 3 ? <ScheduleStep /> : null}
         </ScrollView>
 
         <View style={styles.footer}>
-          <Pressable accessibilityRole="button" disabled={saving} onPress={() => void next()} style={styles.continueButton}>
+          <Pressable accessibilityRole="button" onPress={next} style={styles.continueButton}>
             <Text style={styles.continueText}>{step === 3 ? 'סיום התכנון' : 'המשך'}</Text>
           </Pressable>
           {step > 0 ? (
@@ -153,7 +124,7 @@ export function WeekPlanningFlow({
               <Text style={styles.secondaryText}>חזרה</Text>
             </Pressable>
           ) : (
-            <Pressable accessibilityRole="button" disabled={saving} onPress={() => void next()} style={styles.secondaryButton}>
+            <Pressable accessibilityRole="button" onPress={next} style={styles.secondaryButton}>
               <Text style={styles.secondaryText}>דלג לשלב הבא</Text>
             </Pressable>
           )}
@@ -201,9 +172,8 @@ function FocusStep({ focuses, message, newFocus, onAddFocus, onChangeNewFocus, o
   );
 }
 
-function ScheduleStep({ titles }: { titles?: string[] }) {
-  const scheduledFocuses = titles?.map((title, index) => ({ id: `saved-${index}`, title }))
-    ?? weeklyFocuses.slice(0, 3);
+function ScheduleStep() {
+  const scheduledFocuses = weeklyFocuses.slice(0, 3);
   return (
     <View style={styles.options}>
       {scheduledFocuses.map((focus, index) => (
@@ -262,5 +232,4 @@ const styles = StyleSheet.create({
   continueText: { color: colors.white, fontFamily: typography.family.bold, fontSize: typography.size.button, writingDirection: 'rtl' },
   secondaryButton: { alignItems: 'center', minHeight: 32, justifyContent: 'center' },
   secondaryText: { color: colors.textSubtle, fontFamily: typography.family.semibold, fontSize: typography.size.body, writingDirection: 'rtl' },
-  errorText: { color: colors.warningText, fontFamily: typography.family.regular, fontSize: typography.size.meta, marginTop: spacing.xs, textAlign: 'right', writingDirection: 'rtl' },
 });
