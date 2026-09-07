@@ -1,6 +1,13 @@
-import type { ChangeEvent, CSSProperties } from 'react';
+import type { ChangeEvent, CSSProperties, ReactNode } from 'react';
 
 import { colors, radius, typography } from '@/theme/tokens';
+
+// Web retains its native HTML fields; no separate selection surface is needed.
+export function CommitmentTimePickerProvider({ children }: { children: ReactNode }) {
+  return <>{children}</>;
+}
+
+export function CommitmentTimePicker() { return null; }
 
 export function CommitmentDateField({ value, onChange }: { value: string; onChange: (value: string) => void }) {
   return (

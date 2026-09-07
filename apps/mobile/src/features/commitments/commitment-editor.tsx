@@ -15,7 +15,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { colors, radius, spacing, typography } from '@/theme/tokens';
 
-import { CommitmentDateField, CommitmentTimeField } from './commitment-date-time-fields';
+import { CommitmentDateField, CommitmentTimeField, CommitmentTimePicker, CommitmentTimePickerProvider } from './commitment-date-time-fields';
 import {
   commitmentLifeAreaLabels,
   commitmentLifeAreas,
@@ -26,21 +26,32 @@ import {
 
 type FieldErrors = { date?: string; general?: string; time?: string; title?: string };
 
-export function CommitmentEditor({
-  commitment,
-  initialDate,
-  onClose,
-  onDelete,
-  onSave,
-  visible,
-}: {
+type CommitmentEditorProps = {
   commitment?: Commitment | null;
   initialDate: string;
   onClose: () => void;
   onDelete?: (id: string) => Promise<void>;
   onSave: (input: CreateCommitmentInput) => Promise<void>;
   visible: boolean;
-}) {
+};
+
+export function CommitmentEditor(props: CommitmentEditorProps) {
+  if (!props.visible) return null;
+  return (
+    <CommitmentTimePickerProvider key={props.commitment?.id ?? `new-${props.initialDate}`}>
+      <CommitmentEditorSession {...props} />
+    </CommitmentTimePickerProvider>
+  );
+}
+
+function CommitmentEditorSession({
+  commitment,
+  initialDate,
+  onClose,
+  onDelete,
+  onSave,
+  visible,
+}: CommitmentEditorProps) {
   const insets = useSafeAreaInsets();
   const [title, setTitle] = useState(commitment?.title ?? '');
   const [description, setDescription] = useState(commitment?.description ?? '');
@@ -152,6 +163,7 @@ export function CommitmentEditor({
                 <Text style={styles.until}>עד</Text>
                 <CommitmentTimeField accessibilityLabel="שעת סיום" onChange={(value) => { setEndTime(value); setErrors((current) => ({ ...current, time: undefined })); }} optional placeholder="שעת סיום" value={endTime} />
               </View>
+              <CommitmentTimePicker />
               <Text style={styles.hint}>שעת הסיום היא רשות — אפשר להשאיר אירוע נקודתי.</Text>
               {errors.time ? <Text accessibilityRole="alert" style={styles.error}>{errors.time}</Text> : null}
 

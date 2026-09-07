@@ -8,6 +8,7 @@ import request from 'supertest';
 
 import { createApp } from '../src/app.js';
 import { createCommitmentRouter } from '../src/features/commitments/commitment.routes.js';
+import { SupabaseCommitmentService } from '../src/features/commitments/commitment.service.js';
 import type {
   Commitment,
   CommitmentListFilters,
@@ -115,6 +116,60 @@ function database(): MemoryDatabase {
 }
 
 describe('Commitment API', () => {
+  it('preserves arbitrary minutes through create, edit and fresh reads without changing the date/details', async () => {
+    const app = createCommitmentTestApp(database());
+    const input = { date: '2026-09-08', title: 'Precision', description: 'Keep these details', lifeArea: 'work', startTime: '09:10', endTime: '10:17' };
+    const created = (await authenticated(app).post('/commitments').send(input).expect(201)).body.commitment;
+    for (const startTime of ['09:10', '09:25', '09:17']) {
+      await authenticated(app).patch(`/commitments/${created.id}`).send({ startTime }).expect(200);
+      const read = (await authenticated(app).get('/commitments?date=2026-09-08').expect(200)).body.commitments;
+      assert.equal(read.length, 1);
+      assert.deepEqual(read[0], { ...created, startTime, updatedAt: read[0].updatedAt });
+    }
+    await authenticated(app).patch(`/commitments/${created.id}`).send({ endTime: '09:17' }).expect(400);
+    await authenticated(app).patch(`/commitments/${created.id}`).send({ endTime: '09:10' }).expect(400);
+    await authenticated(app).patch(`/commitments/${created.id}`).send({ endTime: null }).expect(200);
+    const cleared = (await authenticated(app).get('/commitments').expect(200)).body.commitments[0];
+    assert.equal(cleared.endTime, null);
+    assert.equal(cleared.startTime, '09:17');
+    assert.equal(cleared.date, input.date);
+  });
+
+  it('maps exact HH:mm writes and database HH:mm:ss reads in the real persistence service', async () => {
+    let row: Record<string, unknown> = {};
+    const query = {
+      insert(values: Record<string, unknown>) {
+        row = { ...values, id: uuid(1), created_at: '2026-09-01T00:00:00Z', updated_at: '2026-09-01T00:00:00Z' };
+        return query;
+      },
+      update(values: Record<string, unknown>) { row = { ...row, ...values }; return query; },
+      select() { return query; },
+      eq() { return query; },
+      single() { return Promise.resolve({ data: row, error: null }); },
+      maybeSingle() { return Promise.resolve({ data: row, error: null }); },
+    };
+    const client = { from: () => query } as unknown as SupabaseClient;
+    const service = new SupabaseCommitmentService(client, userA.id);
+    for (const startTime of ['09:10', '09:25', '09:17']) {
+      const input = { date: '2026-09-08', title: 'Exact', description: 'Details', lifeArea: null, startTime, endTime: '10:17' };
+      const created = await service.create(input);
+      assert.equal(row.start_time, startTime);
+      assert.equal(row.end_time, '10:17');
+      assert.equal(created.startTime, startTime);
+      // PostgreSQL time columns return seconds; normalize without rounding minutes.
+      row.start_time = `${startTime}:00`;
+      row.end_time = '10:17:00';
+      const updated = await service.update(created.id, { title: 'Edited' });
+      assert.equal(updated.startTime, startTime);
+      assert.equal(updated.endTime, '10:17');
+      assert.equal(updated.date, input.date);
+      assert.equal(updated.description, input.description);
+      const cleared = await service.update(created.id, { endTime: null });
+      assert.equal(cleared.endTime, null);
+      assert.equal(cleared.startTime, startTime);
+    }
+  });
+
   it('requires authentication for every route', async () => {
     const app = createCommitmentTestApp(database());
     await request(app).get('/commitments').expect(401);

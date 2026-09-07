@@ -1,6 +1,6 @@
 # LifeOS Implementation Status
 
-- **Last updated:** 2026-09-06
+- **Last updated:** 2026-09-07
 - **Current work item:** Prepare v0.2.0 for a new standalone internal iPhone build from `main` at `5a18f28`. Day Window, Today fixes, capture/Week expansion, and Weekly Focus stabilization are committed. The user reported the Day Window migration applied and browser checks passed; physical-iPhone acceptance of the new build remains pending.
 - **Required project status:** Keep #8 open in Verify pending physical-iPhone acceptance; keep #3 and #4 open in In Progress because their broader scope remains incomplete. All three issue open states were read back during preparation. Project Status could not be independently read: the local GitHub CLI token lacks `read:project`. No issue or project states were changed.
 - **Latest published release:** [v0.1.1](https://github.com/OzAvrahami/LifeOS/releases/tag/v0.1.1), published 2026-08-27 (verified through GitHub Releases).
@@ -10,6 +10,10 @@
 - **Next engineering action:** Manually build/install v0.2.0 and record the physical-iPhone checklist in `DEPLOYMENT.md`.
 
 This document is the current source of truth for implementation status. “Verified” means supported by tracked code plus a repeatable repository check; it does not imply remote or real-device verification unless stated.
+
+## Issue #11 owner review — 2026-09-07
+
+The local commitment time-picker fix adds exact-minute draft/confirm/cancel behavior and a full-width iOS selection surface within the existing editor. Focused iOS/Android, Web/date-field, and API precision tests pass, as do mobile/API typecheck and lint. The authorized test-only follow-up replaces the pre-existing date-dependent Monday-label assertion with controlled Monday/Thursday cases covering query boundaries, all seven rows, Today treatment, and cache preservation. The full mobile suite now passes: 33 suites, 185 tests passed, one existing Android-only exclusion covered by the separate Android run. #11 was moved to Verify and read back as open with P1 — High; physical-iPhone acceptance is still pending. No release/version, Git state, or other issue status changes were made. See [the verification record and owner checklist](issue-11-verification.md). The release-preparation context above is historical and is not acceptance of this uncommitted fix.
 
 ## Implementation matrix
 

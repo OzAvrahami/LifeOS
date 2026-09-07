@@ -10,7 +10,7 @@ import * as settingsApi from '@/features/settings/settings.api';
 import { settingsKeys } from '@/features/settings/settings.queries';
 import type { UserSettings } from '@/features/settings/settings.types';
 import * as taskApi from '@/features/tasks/task.api';
-import { currentWeekDateKeys, currentWeekStart, localDateKey } from '@/features/tasks/task-dates';
+import { localDateKey } from '@/features/tasks/task-dates';
 import { DemoTaskProvider } from '@/features/tasks/demo-task-provider';
 import { TaskQueryScopeProvider } from '@/features/tasks/task-query-scope';
 import type { Task } from '@/features/tasks/task.types';
@@ -250,33 +250,88 @@ it('does not move Tasks or DailyPlans or change Task time when the Day Window ch
   expect(taskApi.updateTask).not.toHaveBeenCalled();
 });
 
-it('changes every normal Week query boundary and seven-day order without rewriting the prior WeekPlan cache', async () => {
-  const client = makeClient();
-  jest.mocked(taskApi.listTasks).mockResolvedValue([]);
-  const sundayStart = currentWeekStart(undefined, sundaySettings);
-  const mondaySettings = { ...sundaySettings, weekStartDay: 1 };
-  const mondayStart = currentWeekStart(undefined, mondaySettings);
-  const sundayEnd = currentWeekDateKeys(undefined, sundaySettings)[6]!;
-  const mondayEnd = currentWeekDateKeys(undefined, mondaySettings)[6]!;
-  client.setQueryData(planningKeys.weeklyFocuses(userId, sundayStart), [{
-    createdAt: '2026-08-15T08:00:00.000Z', id: 'historical-focus', position: 0,
-    title: 'מיקוד בגבול הקודם', updatedAt: '2026-08-15T08:00:00.000Z', weekPlanId: 'old-week-plan',
-  }]);
+describe('configured Week start with a controlled calendar date', () => {
+  afterEach(() => jest.useRealTimers());
 
-  await render(<Providers client={client}><WeekScreen taskSource="server" /></Providers>);
-  await waitFor(() => expect(commitmentApi.listCommitments).toHaveBeenCalledWith({ dateFrom: sundayStart, dateTo: sundayEnd }));
-  expect(taskApi.listTasks).toHaveBeenCalledWith({ weekStart: sundayStart });
+  it.each([
+    { scenario: 'Monday is Today', now: '2026-09-07T09:00:00Z', todayLabel: 'שני' },
+    { scenario: 'Thursday is Today', now: '2026-09-10T09:00:00Z', todayLabel: 'חמישי' },
+  ])('switches Sunday to Monday with correct boundaries, ordering and preserved cache: $scenario', async ({ now, todayLabel }) => {
+    // Freeze Date only. Query notifications and testing-library waits keep their
+    // real scheduling; no timer advancement or application timezone changes.
+    jest.useFakeTimers({
+      now: new Date(now),
+      doNotFake: [
+        'hrtime', 'nextTick', 'performance', 'queueMicrotask',
+        'requestAnimationFrame', 'cancelAnimationFrame', 'requestIdleCallback', 'cancelIdleCallback',
+        'setImmediate', 'clearImmediate', 'setInterval', 'clearInterval', 'setTimeout', 'clearTimeout',
+      ],
+    });
+    const client = makeClient();
+    jest.mocked(taskApi.listTasks).mockResolvedValue([]);
+    const sundayFocuses = [{
+      createdAt: '2026-08-15T08:00:00.000Z', id: 'sunday-focus', position: 0,
+      title: 'מיקוד בגבול הקודם', updatedAt: '2026-08-15T08:00:00.000Z', weekPlanId: 'sunday-week-plan',
+    }];
+    const priorWeekFocuses = [{ ...sundayFocuses[0]!, id: 'historical-focus', weekPlanId: 'prior-week-plan' }];
+    client.setQueryData(planningKeys.weeklyFocuses(userId, '2026-08-30'), priorWeekFocuses);
+    jest.mocked(planningApi.getWeeklyFocuses).mockImplementation(async (weekStart) => (
+      weekStart === '2026-09-06' ? sundayFocuses : []
+    ));
 
-  await act(async () => {
-    client.setQueryData(settingsKeys.user(userId), mondaySettings);
+    // Independent calendar expectations, not outputs from the production helpers.
+    const assertRows = (expected: [string, number][]) => {
+      const overview = within(screen.getByLabelText('סקירת שבעת ימי השבוע'));
+      const rows = overview.getAllByRole('button');
+      expect(rows.map((row) => row.props.accessibilityLabel)).toEqual(
+        expected.map(([weekday]) => `הוסף התחייבות ליום ${weekday}`),
+      );
+      expect(overview.getAllByText('היום')).toHaveLength(1);
+      expected.forEach(([weekday, dayOfMonth], index) => {
+        const row = rows[index]!;
+        const today = weekday === todayLabel;
+        expect(within(row).getByText(today ? 'היום' : weekday)).toBeTruthy();
+        expect(within(row).getByText(String(dayOfMonth))).toBeTruthy();
+        expect(row.props.accessibilityState.selected).toBe(today);
+        if (today) expect(within(row).queryByText(weekday)).toBeNull();
+      });
+    };
+
+    const view = await render(<Providers client={client}><WeekScreen taskSource="server" /></Providers>);
+    try {
+      await waitFor(() => {
+        expect(taskApi.listTasks).toHaveBeenCalledWith({ plannedDateFrom: '2026-09-06', plannedDateTo: '2026-09-12' });
+        expect(taskApi.listTasks).toHaveBeenCalledWith({ weekStart: '2026-09-06' });
+        expect(commitmentApi.listCommitments).toHaveBeenCalledWith({ dateFrom: '2026-09-06', dateTo: '2026-09-12' });
+        expect(planningApi.getWeeklyFocuses).toHaveBeenCalledWith('2026-09-06');
+        expect(client.getQueryData(planningKeys.weeklyFocuses(userId, '2026-09-06'))).toEqual(sundayFocuses);
+      });
+      assertRows([['ראשון', 6], ['שני', 7], ['שלישי', 8], ['רביעי', 9], ['חמישי', 10], ['שישי', 11], ['שבת', 12]]);
+      const cachedSundayFocuses = client.getQueryData(planningKeys.weeklyFocuses(userId, '2026-09-06'));
+
+      await act(async () => {
+        client.setQueryData(settingsKeys.user(userId), { ...sundaySettings, weekStartDay: 1 });
+      });
+      await waitFor(() => {
+        expect(taskApi.listTasks).toHaveBeenCalledWith({ plannedDateFrom: '2026-09-07', plannedDateTo: '2026-09-13' });
+        expect(taskApi.listTasks).toHaveBeenCalledWith({ weekStart: '2026-09-07' });
+        expect(commitmentApi.listCommitments).toHaveBeenCalledWith({ dateFrom: '2026-09-07', dateTo: '2026-09-13' });
+        expect(planningApi.getWeeklyFocuses).toHaveBeenCalledWith('2026-09-07');
+        expect(client.getQueryData(planningKeys.weeklyFocuses(userId, '2026-09-07'))).toEqual([]);
+      });
+      assertRows([['שני', 7], ['שלישי', 8], ['רביעי', 9], ['חמישי', 10], ['שישי', 11], ['שבת', 12], ['ראשון', 13]]);
+      expect(taskApi.listTasks).toHaveBeenCalledTimes(4);
+      expect(commitmentApi.listCommitments).toHaveBeenCalledTimes(2);
+      expect(planningApi.getWeeklyFocuses).toHaveBeenCalledTimes(2);
+      expect(client.getQueryData(planningKeys.weeklyFocuses(userId, '2026-09-06'))).toBe(cachedSundayFocuses);
+      expect(client.getQueryData(planningKeys.weeklyFocuses(userId, '2026-08-30'))).toBe(priorWeekFocuses);
+      expect(planningApi.replaceWeeklyFocuses).not.toHaveBeenCalled();
+      expect(taskApi.updateTask).not.toHaveBeenCalled();
+      expect(commitmentApi.updateCommitment).not.toHaveBeenCalled();
+    } finally {
+      await view.unmount();
+    }
   });
-  await waitFor(() => expect(commitmentApi.listCommitments).toHaveBeenCalledWith({ dateFrom: mondayStart, dateTo: mondayEnd }));
-  expect(taskApi.listTasks).toHaveBeenCalledWith({ weekStart: mondayStart });
-  expect(planningApi.getWeeklyFocuses).toHaveBeenCalledWith(mondayStart);
-  expect(screen.getAllByText('שני').length).toBeGreaterThan(0);
-  expect(client.getQueryData(planningKeys.weeklyFocuses(userId, sundayStart))).toEqual([
-    expect.objectContaining({ id: 'historical-focus' }),
-  ]);
 });
 
 it('keeps canonical previews independent of persisted Settings', async () => {

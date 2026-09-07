@@ -118,6 +118,7 @@ it('keeps real Today Commitments separate from Task time and supports create →
   await user.type(screen.getByLabelText('כותרת התחייבות'), 'פגישה חדשה');
   await user.press(screen.getByLabelText('שעת התחלה'));
   await user.press(screen.getByLabelText('בחר שעה'));
+  await user.press(screen.getByLabelText('אישור שעה'));
   await user.press(screen.getByLabelText('שמירת התחייבות'));
   expect(await screen.findByText('3 התחייבויות')).toBeTruthy();
   expect(createCommitmentMock.mock.calls[0]?.[0]).toEqual(expect.objectContaining({ date: today, startTime: '09:30', title: 'פגישה חדשה' }));
@@ -146,8 +147,10 @@ it('shows validation before sending an invalid time range', async () => {
   await user.type(screen.getByLabelText('כותרת התחייבות'), 'טווח לא תקין');
   await user.press(screen.getByLabelText('שעת התחלה'));
   await user.press(screen.getByLabelText('בחר שעה'));
+  await user.press(screen.getByLabelText('אישור שעה'));
   await user.press(screen.getByLabelText('שעת סיום'));
   await user.press(screen.getByLabelText('בחר שעה'));
+  await user.press(screen.getByLabelText('אישור שעה'));
   await user.press(screen.getByLabelText('שמירת התחייבות'));
   expect(screen.getByText('שעת הסיום צריכה להיות אחרי שעת ההתחלה.')).toBeTruthy();
   expect(createCommitmentMock).not.toHaveBeenCalled();
@@ -170,6 +173,7 @@ it('uses the earliest real Week hint and prefills the selected Week day', async 
   await user.type(screen.getByLabelText('כותרת התחייבות'), 'מהשבוע');
   await user.press(screen.getByLabelText('שעת התחלה'));
   await user.press(screen.getByLabelText('בחר שעה'));
+  await user.press(screen.getByLabelText('אישור שעה'));
   await user.press(screen.getByLabelText('שמירת התחייבות'));
   await waitFor(() => expect(createCommitmentMock.mock.calls[0]?.[0]).toEqual(expect.objectContaining({ date: monday, title: 'מהשבוע' })));
 });
