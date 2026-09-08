@@ -61,3 +61,9 @@ LifeOS versions use Semantic Versioning with a leading `v`:
 - `vMAJOR.MINOR.PATCH-beta.N`
 
 A GitHub Release represents a meaningful published version and is authoritative for the released version. A Git tag by itself is not a published release. Generated release notes group changes by canonical type labels and exclude `duplicate`, `invalid`, and `wontfix` items.
+
+### Owner-controlled publication
+
+Codex prepares and verifies release documentation only. It must not create or publish GitHub Releases, including drafts, or edit an existing Release. The owner creates Git tags manually only after all documentation, including `CHANGELOG.md`, is complete, approved, and committed. The release tag must target the final approved documentation commit, including any final release-note corrections; Codex must not create or guess a future commit SHA.
+
+The owner performs Git state-changing operations and GitHub publication. Release readiness and internal-device acceptance do not imply GitHub publication. For v0.2.1, use a normal non-prerelease Release marked Latest at publication, as specified in [the publication handoff](release-0.2.1-verification.md#owner-publication-settings-and-stop-point).

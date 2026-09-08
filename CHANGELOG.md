@@ -6,34 +6,37 @@ LifeOS follows Semantic Versioning for development and release tags.
 
 ## [Unreleased]
 
-### Fixed
+No unreleased changes recorded.
 
-- Replaced More’s stale hardcoded version label with the shared metadata-derived version/build footer, preserving LifeOS branding, Hebrew/RTL styling, and development/web fallbacks.
+## [0.2.1] — Ready for owner publication
 
-## [0.2.1] — Internal iPhone owner acceptance — 2026-09-08
-
-**Installed and owner-accepted internally as 0.2.1/build 3; not published as a GitHub Release, TestFlight, or App Store release.** After manually committing/pushing preparation `2aa6bc4a246a06efc31a6c7753b1ad9f51b8a102`, the owner built/installed the standalone Release, confirmed its displayed version/build, and replied "מאשר הכל" — "I approve everything." Owner-reported acceptance covers standalone cellular opening/data loading without the Mac/Metro, #11 precise picker interactions, #12 keyboard/text interactions, #13 date placement/cancellation/disposable-task movement, and retention of the tested commitment/task times/dates after saving and reopening the app.
-
-Historical preparation on 2026-09-08 used `544cde042a83684bc389d903ef17f51adee8af2f` and did not build, install, or publish in that preparation step. Earlier #11/#12 desktop and #13 preview/demo approvals and automated results remain separate evidence from the later owner device acceptance.
+Internal iPhone **0.2.1 / build 3**, installed and owner-accepted on 2026-09-08. GitHub publication is pending the owner's final documentation approval, commit, and manual tag/release steps. This is not an App Store or TestFlight release.
 
 ### Fixed
 
-- #11: precise commitment time selection, including 09:17, with visible full-width iOS hour/minute selection, explicit confirmation/cancellation, reopening, and optional-end set/clear semantics, now owner-accepted on the installed iPhone build.
-- #12: blank-space keyboard dismissal and preserved one-tap date/time/actions, natural text focus, multiline description, and reachable Save.
-- #13: confirmed calendar-date capture/rescheduling across months/years through Capture, Inbox, and Week; planning-only moves preserve task identity, unrelated fields, deadlines, status, and execution history. Prior isolated automated coverage supports these internal invariants; owner-reported device saving/reopening confirms the tested visible persistence flow without internal-ID/history inspection.
-- Retained deterministic Week/settings regression stabilization, calendar/cache coverage, and complementary iOS/Android and Web picker/keyboard coverage without new skips.
+- **Precise commitment times (#11):** select exact minutes such as 09:17, confirm or cancel without premature dismissal, reopen the selected time, and set or clear the optional end time.
+- **Commitment keyboard interactions (#12):** dismiss the keyboard from blank form space without losing text or closing the form; date/time controls activate in one tap, with natural text and description editing.
+- **Calendar task planning (#13):** capture and reschedule tasks on a chosen calendar date, including another month/year, with clear confirmation and cancellation. Planning-only moves preserve unrelated task fields, deadlines, and execution history.
+- **Settings/More version display:** both screens use the shared version/build footer, replacing More's stale hardcoded version while preserving LifeOS branding and platform-appropriate labels.
 
-### Changed
+### Also included since v0.1.1
 
-- Followed the existing shared version convention: root, API, Mobile, Expo, and the four corresponding lockfile version fields now read `0.2.1`; iOS build is `3`. Dependency versions and lockfile resolutions are unchanged.
-- Synchronized only the ignored native Info.plist and Debug/Release version/build settings. During preparation, known native/cached Release evidence was `0.2.0 (2)`, cached Debug was `0.1.0 (1)`, no archives or build 3 were found, and the registered device was unavailable for installed-metadata inspection.
+The previous GitHub Release is v0.1.1. The following improvements were prepared under 0.2.0 and are included in 0.2.1; **0.2.0 was not published as a GitHub Release**.
 
-### Verification boundary
+- Optional “My day” start/end settings, including an overnight window.
+- Today summaries based on planned task time, with missing estimates disclosed and commitments kept separate; authenticated Today excludes fixture suggestions. Inline capture defaults to Today while global capture defaults to Inbox.
+- Week summaries derived from planned tasks, an expandable week-task list, and account/week-specific Weekly Focus editing.
+- LifeOS branding and the application icon.
 
-- Historical preparation checked GitHub deployment success for the exact #13 SHA and the expected HTTP 200 health contract. No new provider or service inspection was performed for acceptance finalization; active-deployment identity was not directly inspected.
-- [The 0.2.1 verification record](docs/release-0.2.1-verification.md) separates prior automation, owner-reported device acceptance, and unperformed specialized checks. #11/#12/#13 are closed as Completed, with their existing Project items read back as Done and priorities preserved. No new instrumented database/history/RLS test or full accessibility audit was run; unrelated older acceptance checks remain unchanged. Documentation finalization awaits the owner’s manual commit/push; no tag or GitHub Release was created.
+### Acceptance and remaining scope
 
-## [0.2.0] — Unreleased preparation
+The owner approved standalone cellular opening/data loading without the Mac/Metro, #11–#13 interactions, and retention of tested commitment/task times and dates after saving and reopening the app. Prior automated regression tests separately support internal field/history/cache/timezone invariants; no new instrumented database/history/RLS test or full accessibility audit is claimed.
+
+Older acceptance checks for inherited improvements retain their documented status. Full week/day navigation (#4), the broader planning lifecycle, and Google Calendar integration remain outside this completed scope. Detailed preparation, owner acceptance, and publication-baseline evidence are in [the 0.2.1 verification record](docs/release-0.2.1-verification.md).
+
+## [0.2.0] — Historical preparation; not publicly released
+
+The following is the historical preparation record; its scope is inherited by 0.2.1, and its outstanding acceptance items are not automatically approved by #11–#13 acceptance.
 
 Prepared for the next standalone internal iPhone build; not published and pending physical-iPhone acceptance. Scope reviewed against `v0.1.1..5a18f28`, plus this release preparation. The user reported that the Day Window migration was applied and browser checks passed; this is user-reported evidence, not a new remote verification or acceptance of this binary.
 

@@ -1,5 +1,31 @@
 # LifeOS 0.2.1/build 3 — preparation and owner acceptance
 
+## Current publication preparation — 2026-09-08
+
+Acceptance documentation was manually committed and pushed as `17123893b8d10f87278a71871f330d8141bce275` (`docs(release): record 0.2.1 iPhone acceptance`). Read-only checks found a clean worktree and local/remote `main` at that SHA before these final documentation edits. The acceptance-documentation checkpoint is complete; only this publication-preparation documentation awaits approval and a new manual commit/push.
+
+### Remote release and source baseline
+
+- The actual remote tag listing has no `v0.2.0` or `v0.2.1`. Authenticated GitHub release listing and `/releases/latest` return only published, non-draft, non-prerelease `v0.1.1`, published `2026-08-27T19:17:11Z`; no v0.2.1 draft or published Release exists.
+- The previous Release's annotated `v0.1.1` tag resolves to commit `b7bf0003b8bbb9398836ecd2e4bdf83a4e78d037`. Its changes through the owner-built baseline and the historical 0.2.0 preparation entry were reviewed for inherited release scope. No retrospective 0.2.0 tag/release is planned.
+- Current HEAD contains #11 `6bbccdc7ce655fda60cae2cd29a1c8212d36ca65`, #12 `3db8d52d90389a0da132cb1857a651b497e2ab44`, #13 `544cde042a83684bc389d903ef17f51adee8af2f`, release preparation `2aa6bc4a246a06efc31a6c7753b1ad9f51b8a102`, and acceptance documentation `17123893b8d10f87278a71871f330d8141bce275`; read-only ancestor checks passed.
+- More's shared version footer was introduced by `9db574e448f11dd48556ef10c4539239c21affc2`, an ancestor of both the owner-built baseline and current HEAD. The baseline's More screen imports/renders `AppVersionFooter`, also used by Settings. Its fix therefore belongs in the 0.2.1 scope rather than Unreleased.
+- `git diff --name-only 2aa6bc4..1712389` contains only `CHANGELOG.md` and seven `docs/*.md` files. No runtime, dependency, version, or tracked native change occurred after the owner-built baseline. This describes repository ancestry; the installed binary's exact SHA was not extracted.
+
+### Owner publication settings and stop point
+
+The canonical release summary is [CHANGELOG.md](../CHANGELOG.md), including fixes accepted in 0.2.1 and inherited improvements since v0.1.1. No standalone release-body file convention exists; `.github/release.yml` only configures generated-note categories, so no duplicate release-notes file was added. Copy-ready notes are supplied in the preparation handoff.
+
+- Proposed title: **LifeOS v0.2.1 — Planning fixes**.
+- After all documentation, including the changelog, is complete and approved, the owner manually commits/pushes these final edits and creates tag **v0.2.1** at that **final approved documentation commit**. Do not target `2aa6bc4` or `1712389`, which omit these edits; the future commit SHA is not yet known.
+- The owner then creates a normal **non-prerelease** GitHub Release using that tag and marks it **Latest at publication**. No GitHub publication has occurred in this preparation step.
+- Internal iPhone metadata remains **0.2.1 / build 3**; this does not publish to the App Store or TestFlight. No binary attachment is required. Do not upload an IPA, certificates, provisioning profiles, environment files, or signing materials.
+- Codex prepares and verifies only: it must not create tags or create/publish/edit GitHub Releases, including drafts. See [the release policy](github-development-standard.md#release-policy).
+
+No issue state/metadata, Project automation, runtime code, dependency, native configuration, or production setting is changed. No rebuild or test-suite rerun is needed for these documentation-only edits. Existing owner acceptance and specialized evidence limits below remain unchanged. Suggested final documentation commit: `docs(release): finalize v0.2.1 changelog and publication notes`.
+
+Publication-preparation checks passed: commit ancestry and documentation-only differences from the owner-built baseline; unchanged 0.2.1/build 3 metadata, runtime, dependencies, and existing ignored native/environment contents; local documentation/fragment links; diff review; and `git diff --check`. Remote main remained at `1712389`, and the final tag/Release read still found no v0.2.0/v0.2.1. No technical publication blocker was found in the inspected evidence; owner documentation approval, the final manual commit/push, and owner tag/publication remain outstanding. No test results below represent a new run in this step.
+
 ## Current owner acceptance — 2026-09-08
 
 On 2026-09-08, after manually committing/pushing release preparation `2aa6bc4a246a06efc31a6c7753b1ad9f51b8a102`, the owner built and installed the standalone internal iPhone Release, confirmed the app displays **0.2.1 / build 3**, and replied **"מאשר הכל" — "I approve everything."** This is **owner-reported acceptance**, not an independently observed device test. Standalone opening/data loading over cellular without the Mac/Metro and retention of the tested commitment/task times/dates after saving and reopening the app were approved.
@@ -11,7 +37,7 @@ On 2026-09-08, after manually committing/pushing release preparation `2aa6bc4a24
 
 Previous automated tests remain the evidence for internal IDs, unrelated-field/deadline/status/history preservation, cache membership, and timezone invariants. No new instrumented live-database/history/RLS test, full accessibility audit, exhaustive platform matrix, direct Railway active-deployment inspection, or extraction of the installed binary's exact source SHA was performed. The reported device persistence is accepted user-flow evidence, separate from the earlier preview/demo acceptance. Unrelated older release checks and backlog work are not approved by this record.
 
-Read-only Git checks for this finalization found clean tracked `main`, with local HEAD and remote `main` both at `2aa6bc4a246a06efc31a6c7753b1ad9f51b8a102`. Full implementation SHAs, all ancestors of that baseline:
+Read-only Git checks during the earlier acceptance finalization found clean tracked `main`, with local HEAD and remote `main` both at `2aa6bc4a246a06efc31a6c7753b1ad9f51b8a102`. Full implementation SHAs, all ancestors of that baseline:
 
 | Issue | Implementation SHA | Verified final GitHub state | Preserved priority |
 | --- | --- | --- | --- |
@@ -21,9 +47,9 @@ Read-only Git checks for this finalization found clean tracked `main`, with loca
 
 One acceptance comment per issue was posted with macOS `gh` and read back after checking for duplicates. Supported acceptance boxes were reconciled with their evidence; broad unperformed accessibility audits remain explicit. Existing Project automation moved each original item to Done after closure, with no duplicate item or manual Project-field mutation. Labels, assignees, milestones, titles, and priorities were preserved. No unrelated issue was changed.
 
-This update records an **installed, owner-accepted internal build**, not a GitHub Release, TestFlight, or App Store publication. No tag or GitHub Release was created. Documentation changes still require the owner's manual commit/push: `docs(release): record 0.2.1 iPhone acceptance`. No rebuild, test-suite rerun, or production action occurred in this finalization.
+This update records an **installed, owner-accepted internal build**, not a GitHub Release, TestFlight, or App Store publication. No tag or GitHub Release was created. The owner completed that acceptance-documentation commit/push as `17123893b8d10f87278a71871f330d8141bce275`. The separate publication-preparation edits described above still need approval and their own manual Git checkpoint. No rebuild, test-suite rerun, or production action occurred in this finalization.
 
-Finalization checks passed: documentation consistency, local file/fragment links, unchanged 0.2.1/build 3 metadata, preservation of all existing ignored native/environment file contents, and `git diff --check`. Only the eight intended documentation files changed; the Git index remains untouched. The test counts below are retained preparation results, not new runs.
+Historical acceptance-finalization checks passed: documentation consistency, local file/fragment links, unchanged 0.2.1/build 3 metadata, preservation of all existing ignored native/environment file contents, and `git diff --check`. Only the eight intended documentation files changed; the Git index remains untouched. The test counts below are retained preparation results, not new runs.
 
 ## Historical preparation stage — earlier on 2026-09-08
 

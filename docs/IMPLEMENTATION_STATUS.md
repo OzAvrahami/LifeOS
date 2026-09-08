@@ -1,15 +1,15 @@
 # LifeOS Implementation Status
 
 - **Last updated:** 2026-09-08
-- **Current work item:** Record owner-reported standalone iPhone acceptance of 0.2.1/build 3 and finalize #11/#12/#13. Documentation and GitHub workflow only; no rebuild or new test-suite run.
+- **Current work item:** Finalize the v0.2.1 product changelog and notes for owner publication. Acceptance documentation was committed/pushed in `17123893b8d10f87278a71871f330d8141bce275`; that checkpoint is complete. These separate final documentation edits require approval and their own manual commit/push. No runtime or issue-workflow changes.
 - **Project status:** #11/#12/#13 read back CLOSED / COMPLETED, with their existing Project items Done. Priorities preserved: #11 P1 — High, #12 P2 — Medium, #13 P1 — High; other metadata unchanged.
-- **Latest published release:** [v0.1.1](https://github.com/OzAvrahami/LifeOS/releases/tag/v0.1.1), as checked during preparation. No new GitHub Release or tag was created in this finalization.
-- **Installed internal version:** 0.2.1/build 3, confirmed by the owner on 2026-09-08 after building/installing from the owner-reported preparation checkpoint `2aa6bc4a246a06efc31a6c7753b1ad9f51b8a102`. Local HEAD and remote main match that SHA; no source SHA was extracted from the binary.
+- **Latest published release:** [v0.1.1](https://github.com/OzAvrahami/LifeOS/releases/tag/v0.1.1), rechecked through authenticated GitHub inspection on 2026-09-08. No remote v0.2.0/v0.2.1 tag or Release exists. Publication readiness does not mean publication is complete.
+- **Installed internal version:** 0.2.1/build 3, confirmed by the owner on 2026-09-08 after building/installing from the owner-reported preparation checkpoint `2aa6bc4a246a06efc31a6c7753b1ad9f51b8a102`. Current local HEAD and remote main match acceptance-documentation commit `17123893b8d10f87278a71871f330d8141bce275`; differences since the owner-built baseline are documentation only. No source SHA was extracted from the binary.
 - **Acceptance:** Owner replied "מאשר הכל" — "I approve everything." Standalone cellular opening/data loading without Mac/Metro, the requested #11/#12/#13 device interactions, and save/app-reopen retention of tested times/dates are owner-accepted. This is separate from prior desktop/demo acceptance and automated tests; no independent device observation or new instrumented database/history/RLS/accessibility audit is claimed.
 - **API evidence:** The prior preparation record contains GitHub deployment success and HTTP 200 health for #13's SHA. No direct Railway active-deployment inspection was performed then or in this documentation-only finalization.
 - **Current phase:** Phase 9 remains in progress; only #11/#12/#13 acceptance is finalized. Unrelated older acceptance and backlog work are unchanged.
 - **Phase 8 status:** Historical standalone verification remains recorded for 2026-08-20; current 0.2.1 owner evidence is separately dated 2026-09-08.
-- **Next action:** Owner manually reviews, commits, and pushes these documentation changes: `docs(release): record 0.2.1 iPhone acceptance`. See [the acceptance record](release-0.2.1-verification.md). No next issue or rebuild is started.
+- **Next action:** Owner approves and manually commits/pushes the final publication documentation, then manually tags that final commit as v0.2.1 and publishes a normal, non-prerelease GitHub Release marked Latest. Codex creates neither tags nor Releases, including drafts. See [publication settings and baseline evidence](release-0.2.1-verification.md#current-publication-preparation--2026-09-08). No next issue or rebuild is started.
 
 This document is the current source of truth for implementation status. “Verified” means supported by tracked code plus a repeatable repository check; it does not imply remote or real-device verification unless stated.
 
@@ -102,7 +102,7 @@ The owner previously accepted isolated preview/demo behavior and now reports acc
 
 ## Current Critical Path
 
-1. Owner reviews and manually commits/pushes the acceptance documentation.
+1. Acceptance documentation is already committed/pushed in `1712389`. Owner reviews and manually commits/pushes the final changelog/publication documentation, then manually tags that final approved commit and creates the Release.
 2. #11/#12/#13 are complete; no rebuild or next issue begins in this finalization. Broader #3/#4 scope, Google Calendar integration, and unrelated older acceptance/backlog work remain unchanged.
 
 ## Current release gate
@@ -131,7 +131,7 @@ The owner previously accepted isolated preview/demo behavior and now reports acc
 
 ## Next Action
 
-**Manual documentation Git checkpoint only:** `docs(release): record 0.2.1 iPhone acceptance`. No tag, GitHub Release, PR, deployment, or new implementation is part of this finalization.
+**Manual publication-documentation checkpoint:** `docs(release): finalize v0.2.1 changelog and publication notes`. The future v0.2.1 tag must target the resulting final approved documentation commit, not an earlier baseline. Only the owner creates the tag and normal Release marked Latest; Codex creates no draft or published Release, PR, deployment, or new implementation.
 
 ## v0.2.0 preparation validation — 2026-09-06
 
