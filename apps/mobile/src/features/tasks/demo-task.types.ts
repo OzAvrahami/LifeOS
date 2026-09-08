@@ -1,3 +1,5 @@
+import type { TaskCapturePlacement } from './task-capture.types';
+
 export type DemoTaskStatus = 'open' | 'in_progress' | 'completed' | 'cancelled';
 
 export type DemoTaskLifeArea = 'work' | 'family' | 'home';
@@ -16,7 +18,6 @@ export type DemoTask = {
   completedAt: string | null;
 };
 
-export type DemoCaptureDestination = 'inbox' | 'today' | 'week';
 
 export type DemoTaskState = {
   tasks: DemoTask[];
@@ -24,7 +25,7 @@ export type DemoTaskState = {
 };
 
 export type DemoTaskAction =
-  | { type: 'capture'; title: string; destination: DemoCaptureDestination }
+  | { type: 'capture'; title: string; placement: TaskCapturePlacement }
   | { type: 'move_to_inbox'; taskId: string }
   | { type: 'move_to_week'; taskId: string }
   | { type: 'move_to_today'; taskId: string }

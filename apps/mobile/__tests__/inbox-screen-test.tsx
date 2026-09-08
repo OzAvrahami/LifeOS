@@ -1,4 +1,4 @@
-import { render, screen, userEvent, within } from '@testing-library/react-native';
+import { fireEvent, render, screen, userEvent, within } from '@testing-library/react-native';
 
 import { InboxScreen } from '@/features/inbox/inbox-screen';
 
@@ -99,17 +99,18 @@ describe('<InboxScreen />', () => {
     expect(within(screen.getByLabelText('מה צריך לקרות עם זה')).getByText('השבוע').parent?.props.accessibilityState).toEqual({ selected: true });
   });
 
-  it('offers the lightweight approved day choice and moves the same item once', async () => {
+  it('confirms a calendar date and moves the same item once', async () => {
     const user = userEvent.setup();
     await renderInbox();
 
     await user.press(screen.getByLabelText('פתח פעולות עבור לקבוע תור לרופא'));
     const sheet = screen.getByLabelText('מה צריך לקרות עם זה');
     await user.press(within(sheet).getByText('לבחור יום'));
-    await user.press(within(sheet).getByText('ראשון · 9/8'));
+    await fireEvent(screen.getByLabelText('תאריך לתכנון'), 'valueChange', {}, new Date(2027, 0, 2, 12));
+    await user.press(screen.getByLabelText('אישור תאריך'));
 
     expect(screen.queryByText('לקבוע תור לרופא')).toBeNull();
-    expect(screen.getByText('נקבע לראשון · 9/8 · אותה משימה')).toBeTruthy();
+    expect(screen.getByText('נקבע ל2027-01-02 · אותה משימה')).toBeTruthy();
   });
 
   it('adds a title-only local item through the inline capture', async () => {

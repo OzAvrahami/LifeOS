@@ -1,25 +1,30 @@
-import { useState } from 'react';
-import { Pressable, StyleSheet, Text, View } from 'react-native';
+import { useRef, useState } from 'react';
+import { Keyboard, Platform, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { colors, radius, spacing, typography } from '@/theme/tokens';
 
-import { lightweightDayChoices, processingInboxItems } from './inbox.fixture';
-import { InboxDestination, InboxTask } from './inbox.types';
+import { TaskDateSelection } from '@/features/tasks/task-date-selection';
+
+import { processingInboxItems } from './inbox.fixture';
+import { InboxMove, InboxTask } from './inbox.types';
 
 const initialProcessingIndex = 2;
 
 export function InboxProcessingView({
+  defaultDate,
   initialIndex = initialProcessingIndex,
   items = processingInboxItems,
   onExit,
   onMove,
 }: {
+  defaultDate: string;
   initialIndex?: number;
   items?: InboxTask[];
   onExit: () => void;
-  onMove: (task: InboxTask, destination: InboxDestination, day?: string) => Promise<void> | void;
+  onMove: (task: InboxTask, placement: InboxMove) => Promise<void> | void;
 }) {
+  const busy = useRef(false);
   const [queue] = useState(items);
   const [index, setIndex] = useState(initialIndex);
   const [choosingDay, setChoosingDay] = useState(false);
@@ -27,12 +32,13 @@ export function InboxProcessingView({
   const [pending, setPending] = useState(false);
   const task = queue[index];
 
-  const advance = async (destination?: InboxDestination, day?: string) => {
-    if (pending) return;
+  const advance = async (placement?: InboxMove) => {
+    if (busy.current) return;
+    busy.current = true;
     setError(false);
     setPending(true);
     try {
-      if (destination) await onMove(task, destination, day);
+      if (placement) await onMove(task, placement);
       setChoosingDay(false);
       if (index >= queue.length - 1) {
         onExit();
@@ -41,7 +47,9 @@ export function InboxProcessingView({
       setIndex((current) => current + 1);
     } catch {
       setError(true);
+      if (placement?.destination === 'day') throw new Error('Task move failed');
     } finally {
+      busy.current = false;
       setPending(false);
     }
   };
@@ -50,10 +58,10 @@ export function InboxProcessingView({
 
   return (
     <SafeAreaView edges={['top', 'bottom']} style={styles.safeArea}>
-      <View accessibilityLabel="מיון מהיר" style={styles.container}>
+      <ScrollView accessibilityLabel="מיון מהיר" contentContainerStyle={styles.container} keyboardShouldPersistTaps="handled">
         <View style={styles.topRow}>
           <Text style={styles.title}>מיון מהיר</Text>
-          <Pressable accessibilityLabel="סגור מיון מהיר" accessibilityRole="button" onPress={onExit} style={styles.closeButton}>
+          <Pressable accessibilityLabel="סגור מיון מהיר" accessibilityRole="button" disabled={pending} onPress={onExit} style={styles.closeButton}>
             <Text style={styles.closeText}>✕</Text>
           </Pressable>
         </View>
@@ -77,36 +85,25 @@ export function InboxProcessingView({
 
         {choosingDay ? (
           <View accessibilityLabel="בחירת יום במיון מהיר" style={styles.actions}>
-            {lightweightDayChoices.map((day) => (
-              <Pressable
-                accessibilityRole="button"
-                key={day}
-                disabled={pending}
-                onPress={() => void advance('day', day)}
-                style={styles.secondaryAction}
-              >
-                <Text style={styles.secondaryActionText}>{day}</Text>
-              </Pressable>
-            ))}
-            <Pressable accessibilityRole="button" disabled={pending} onPress={() => setChoosingDay(false)} style={styles.inlineAction}>
-              <Text style={styles.skipText}>חזרה</Text>
-            </Pressable>
+            <TaskDateSelection key={task.id} defaultDate={defaultDate}
+              onCancel={() => setChoosingDay(false)}
+              onConfirm={(day) => advance({ destination: 'day', plannedDate: day })} />
           </View>
         ) : (
           <View style={styles.actions}>
             <View style={styles.destinationRow}>
-              <Pressable accessibilityRole="button" disabled={pending} onPress={() => void advance('today')} style={styles.primaryAction}>
+              <Pressable accessibilityRole="button" disabled={pending} onPress={() => void advance({ destination: 'today' })} style={styles.primaryAction}>
                 <Text style={styles.primaryActionText}>היום</Text>
               </Pressable>
-              <Pressable accessibilityRole="button" disabled={pending} onPress={() => void advance('week')} style={styles.secondaryActionHalf}>
+              <Pressable accessibilityRole="button" disabled={pending} onPress={() => void advance({ destination: 'week' })} style={styles.secondaryActionHalf}>
                 <Text style={styles.secondaryActionText}>השבוע</Text>
               </Pressable>
             </View>
-            <Pressable accessibilityRole="button" disabled={pending} onPress={() => setChoosingDay(true)} style={styles.secondaryAction}>
+            <Pressable accessibilityRole="button" disabled={pending} onPress={() => { if (Platform.OS !== 'web') Keyboard.dismiss(); setChoosingDay(true); }} style={styles.secondaryAction}>
               <Text style={styles.secondaryActionText}>לבחור יום</Text>
             </Pressable>
             <View style={styles.secondaryRow}>
-              <Pressable accessibilityRole="button" disabled={pending} onPress={() => void advance('deleted')} style={styles.inlineAction}>
+              <Pressable accessibilityRole="button" disabled={pending} onPress={() => void advance({ destination: 'deleted' })} style={styles.inlineAction}>
                 <Text style={styles.deleteText}>מחק</Text>
               </Pressable>
               <Pressable accessibilityRole="button" disabled={pending} onPress={() => void advance()} style={styles.inlineAction}>
@@ -116,14 +113,14 @@ export function InboxProcessingView({
           </View>
         )}
         {error ? <Text accessibilityRole="alert" style={styles.error}>לא הצלחנו לעדכן. אפשר לנסות שוב.</Text> : null}
-      </View>
+      </ScrollView>
     </SafeAreaView>
   );
 }
 
 const styles = StyleSheet.create({
   safeArea: { backgroundColor: '#EEEAE1', flex: 1 },
-  container: { flex: 1, paddingHorizontal: 22, paddingTop: spacing.xs },
+  container: { flexGrow: 1, paddingHorizontal: 22, paddingTop: spacing.xs },
   topRow: { alignItems: 'center', flexDirection: 'row-reverse', justifyContent: 'space-between' },
   title: {
     color: colors.text,

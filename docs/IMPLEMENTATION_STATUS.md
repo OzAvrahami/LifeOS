@@ -1,13 +1,13 @@
 # LifeOS Implementation Status
 
-- **Last updated:** 2026-09-07
-- **Current work item:** Prepare v0.2.0 for a new standalone internal iPhone build from `main` at `5a18f28`. Day Window, Today fixes, capture/Week expansion, and Weekly Focus stabilization are committed. The user reported the Day Window migration applied and browser checks passed; physical-iPhone acceptance of the new build remains pending.
-- **Required project status:** Keep #8 open in Verify pending physical-iPhone acceptance; keep #3 and #4 open in In Progress because their broader scope remains incomplete. All three issue open states were read back during preparation. Project Status could not be independently read: the local GitHub CLI token lacks `read:project`. No issue or project states were changed.
+- **Last updated:** 2026-09-08
+- **Current work item:** Issue #13 implemented locally on clean macOS `main` at `3db8d52`, following the owner's committed and desktop-approved #11/#12 fixes. Automated checks pass; #13 desktop review is next. Physical-iPhone acceptance of #11/#12/#13 remains pending.
+- **Required project status:** #13 is ready for Verify, remaining open with P1 — High. Project read/write is blocked because the current `gh` token lacks Project scope; no status/priority update or readback is claimed. #11/#12 were not changed. See [the #13 verification record](issue-13-verification.md).
 - **Latest published release:** [v0.1.1](https://github.com/OzAvrahami/LifeOS/releases/tag/v0.1.1), published 2026-08-27 (verified through GitHub Releases).
 - **Prepared version:** v0.2.0, iOS build 2 — unreleased; manual commit/push, build/install, and physical-iPhone acceptance pending.
 - **Current phase:** Phase 9 in progress — standalone usage fixes and v0.2.0 preparation; Phase 8 remains historically complete.
 - **Phase 8 status:** PASSED on 2026-08-20 — historical Railway HTTPS and standalone real-iPhone verification over cellular; not acceptance of v0.2.0.
-- **Next engineering action:** Manually build/install v0.2.0 and record the physical-iPhone checklist in `DEPLOYMENT.md`.
+- **Next engineering action:** Owner desktop review of #13, then manual staging/commit/push. In a separate follow-up, prepare the updated iPhone Release build and verify #11/#12/#13 together.
 
 This document is the current source of truth for implementation status. “Verified” means supported by tracked code plus a repeatable repository check; it does not imply remote or real-device verification unless stated.
 
@@ -19,6 +19,10 @@ The local commitment time-picker fix adds exact-minute draft/confirm/cancel beha
 
 Implemented against the owner's clean `main` at `6bbccdc` (#11). Commitment form background taps now request native keyboard dismissal without taking responder ownership; drags remain governed by platform scrolling behavior. Date, optional-end clearing, details, life-area selection, Save, and delete-request actions dismiss within their own handlers. Web text/date/time focus and #11's picker drafts, precise minutes, validation, and cancellation remain intact. All automated gates pass: 35 mobile suites, 196 tests passed, one existing Android-only exclusion; the separate Android run passes 11 tests, with nine complementary iOS exclusions. Mobile typecheck/lint and whitespace checks pass. #12 was read back as open, Verify, P2 — Medium. #11 remains open/Verify/P1, with its physical-iPhone acceptance pending. No connected browser or native device was available; DOM/native mocks are automated evidence only. See [the #12 verification record](issue-12-verification.md) for exact commands and desktop-first owner instructions. Manual review, device acceptance, and Git checkpoint remain with the owner.
 
+## Issue #13 owner review — 2026-09-08
+
+Quick Capture now confirms and carries an explicit calendar planning date through every caller to the existing mutation/API contract. Inbox actions, processing, and Week choose-day controls share the same Web/native calendar selection. Cancellation preserves committed values; pending/failed saves are guarded; preview remains local. Planning-only API moves preserve execution status/history and deadlines, and existing user-scoped caches update source/destination membership and aggregates. No API deployment was performed. Week date helpers now consume the actual configured timezone field. All automated checks pass: 38 mobile suites, 217 passed with one existing complementary platform exclusion; 48 API tests; focused native/Web regressions; mobile/API typecheck and lint. Desktop and physical-iPhone acceptance remain pending. Project access was restored on 2026-09-08: #13 was updated to Verify and read back as open with P1 — High preserved; no other issue or metadata was changed. Desktop review currently uses the in-memory preview at `http://localhost:8081/?preview=1`. The ordinary Web app resolves to the older remote production API; local API configuration uses cloud Supabase, and no isolated full-stack environment is available because Docker/Podman is missing. Initial preview loading was observed in isolated Chrome; owner interaction and full-stack acceptance remain pending. Exact commands, limitations, and the desktop-first checklist are in [issue-13-verification.md](issue-13-verification.md).
+
 ## Implementation matrix
 
 | Area | Status | Persistence | Tests | Notes |
@@ -26,7 +30,7 @@ Implemented against the owner's clean `main` at `6bbccdc` (#11). Commitment form
 | Product/UI foundation | ✅ Verified | N/A | Mobile visual-state/component coverage | Hebrew/RTL, mobile-first tokens, approved design export, and canonical previews are committed. Pixel-perfect device verification is separate. |
 | Mobile navigation | ✅ Verified | Session route state | Mobile navigation/Auth-gate tests | Expo Router routes exist for Auth, Today, Week, Inbox, More, Settings, and Account. |
 | Tasks | ✅ Verified remotely and on device | Remote migration and authenticated API persistence verified | API, Mobile, local real-JWT/RLS harness, remote Phase 7C E2E | Stable UUIDs survived the remote Core Flow; single-active handoff, two-user isolation, and real-device Core Flow passed. |
-| Quick Capture | ✅ Verified remotely and on device | Remote API capture persistence verified | Mobile API/cache/flow tests; remote Phase 7C E2E | Capture persisted through fresh reads, API restart, logout/login, app restart, and the final real-iPhone smoke. `Choose day` remains intentionally limited to the approved lightweight behavior. |
+| Quick Capture | ✅ Verified remotely and on device | Remote API capture persistence verified | Mobile API/cache/flow tests; remote Phase 7C E2E | Capture persisted through fresh reads, API restart, logout/login, app restart, and the final real-iPhone smoke. Issue #13 now implements arbitrary calendar dates in local source; its desktop/device acceptance remains pending. |
 | Inbox | ✅ Verified remotely and on device | Remote API persistence verified | UI, processing, routing, Task flow tests; remote Phase 7C E2E | The same Task persisted through Inbox → Week/Today without duplication; the real-iPhone Core Flow passed. |
 | Today | 🟡 New-build acceptance pending | Tasks, DailyPlan, Commitments, Settings previously verified remotely | Today, hydration, task-flow, planning, commitment, settings tests | Committed source shows planned Task time without a capacity denominator, discloses missing estimates, and excludes fixture suggestions. The user reported Day Window/browser checks passed; new-build iPhone acceptance remains pending. |
 | Week | 🟡 Weekly Focus cleanup pending acceptance | Tasks, WeekPlan, WeeklyFocus, Commitments verified remotely | Week, planning, commitments, settings-boundary tests; remote Phase 7C E2E | Normal authenticated use now exposes an account/week-scoped Weekly Focus editor; fixture planning content is development-preview-only. The stabilization is committed at `5a18f28`; new-build iPhone acceptance remains pending. Task expansion does not complete Issue #4 navigation/day-detail scope. |
@@ -86,7 +90,7 @@ Implemented against the owner's clean `main` at `6bbccdc` (#11). Commitment form
 ## Known gaps / risks
 
 1. Phase 7C and the real-iPhone smokes are dated release verifications, not always-on CI jobs; the dedicated E2E rows remain available as persistence evidence.
-2. End-of-day review/rescheduling and a full arbitrary-date picker are not complete v0.1 behaviors.
+2. Broader end-of-day review/replanning remains incomplete. Issue #13 implements exposed calendar-date capture/moves; distant-week navigation/day discovery remains owned by #4.
 3. The Product Spec mentions an “All Tasks” screen and Life Areas, but neither is part of the narrow v0.1 release gate; Life Areas are explicitly disabled/deferred.
 4. Expo Web is a secondary review/development target, not the v0.1 release platform.
 5. The standalone iPhone build uses the current Apple Personal Team/development-distribution setup. TestFlight and App Store distribution are not complete.
@@ -96,9 +100,9 @@ Implemented against the owner's clean `main` at `6bbccdc` (#11). Commitment form
 
 ## Current Critical Path
 
-1. Manually review, commit, and push the prepared v0.2.0 changes.
-2. Build/install a new standalone Release binary from `apps/mobile` using the existing signing setup.
-3. Record physical-iPhone acceptance; preserve #3/#4’s incomplete broader scope.
+1. Owner reviews #13 in the desktop browser.
+2. Owner manually stages, commits, and pushes.
+3. In a separate follow-up, prepare an updated iPhone Release build and record physical-device acceptance of #11/#12/#13. Preserve #3/#4's incomplete broader scope.
 
 ## Current release gate
 
@@ -126,7 +130,7 @@ Implemented against the owner's clean `main` at `6bbccdc` (#11). Commitment form
 
 ## Next Action
 
-**Manually commit/push, then build/install v0.2.0 and perform physical-iPhone acceptance.** A development refresh or git push does not update the installed standalone Release binary.
+**Review #13 on desktop, then manually stage/commit/push.** Updated iPhone Release preparation and combined #11/#12/#13 acceptance belong to a separate follow-up; refreshing Web does not update the installed standalone binary.
 
 ## v0.2.0 preparation validation — 2026-09-06
 

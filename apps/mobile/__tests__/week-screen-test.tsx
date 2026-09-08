@@ -67,7 +67,7 @@ describe('<WeekScreen />', () => {
     }));
     await render(
       <TestProviders>
-        <UnscheduledWeekTasks tasks={tasks} />
+        <UnscheduledWeekTasks defaultDate="2026-12-31" onSchedule={jest.fn()} tasks={tasks} />
       </TestProviders>,
     );
 

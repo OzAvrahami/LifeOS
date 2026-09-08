@@ -7,7 +7,7 @@ import { useEffectiveSettings } from '@/features/settings/settings.queries';
 import { useDemoTasks } from '@/features/tasks/demo-task-provider';
 import {
   currentWeekStart,
-  dateFromApprovedDayChoice,
+  isPlanningDate,
   localDateKey,
 } from '@/features/tasks/task-dates';
 import { toInboxTask } from '@/features/tasks/task-presenters';
@@ -28,7 +28,7 @@ import {
 import { busyInboxItems, normalInboxItems } from './inbox.fixture';
 import { InboxItemActionSheet } from './inbox-item-action-sheet';
 import { InboxProcessingView } from './inbox-processing';
-import { InboxDemoState, InboxDestination, InboxTask } from './inbox.types';
+import { InboxDemoState, InboxMove, InboxTask } from './inbox.types';
 
 export function InboxScreen({
   initialState = 'normal',
@@ -63,7 +63,7 @@ export function InboxScreen({
   const inboxQuery = useTasks({ placement: 'inbox' }, serverTasks);
   const updateMutation = useUpdateTask();
   const cancelMutation = useCancelTask();
-  const { captureTask } = useTaskCapture(taskSource);
+  const { captureTask, defaultDate } = useTaskCapture(taskSource);
   const [screenState, setScreenState] = useState<InboxDemoState>(initialState);
   const [fixtureItems, setFixtureItems] = useState<InboxTask[]>(() => {
     if (initialState === 'empty') return [];
@@ -133,13 +133,14 @@ export function InboxScreen({
   };
 
   const chooseDay = async (task: InboxTask, day: string) => {
+    if (!isPlanningDate(day)) throw new Error('Choose a valid planning date');
     if (serverTasks) {
       const moved = await runServerAction(() => updateMutation.mutateAsync({
         id: task.id,
-        input: { planning: { plannedDate: dateFromApprovedDayChoice(day, undefined, settings.timezone), type: 'day' } },
+        input: { planning: { plannedDate: day, type: 'day' } },
       }));
-      if (!moved) return;
-    } else if (demoIntegrated) scheduleTask(task.id, dayToPreviewDate(day));
+      if (!moved) throw new Error('Task move failed');
+    } else if (demoIntegrated) scheduleTask(task.id, day);
     else if (resolvedTaskId !== task.id) removeTask(task);
     setSelectedTask(null);
     setResolvedTaskId(null);
@@ -205,7 +206,7 @@ export function InboxScreen({
     if (serverTasks) {
       setOperationError(false);
       try {
-        await captureTask(title, 'inbox');
+        await captureTask(title, { destination: 'inbox' });
       } catch (error) {
         setOperationError(true);
         throw error;
@@ -214,7 +215,7 @@ export function InboxScreen({
       return;
     }
     if (demoIntegrated) {
-      await captureTask(title, 'inbox');
+      await captureTask(title, { destination: 'inbox' });
       setConfirmation('נוסף ל־Inbox');
       return;
     }
@@ -230,18 +231,20 @@ export function InboxScreen({
     setConfirmation('נוסף ל־Inbox');
   };
 
-  const processMove = async (task: InboxTask, destination: InboxDestination, day?: string) => {
+  const processMove = async (task: InboxTask, placement: InboxMove) => {
+    const { destination } = placement;
+    if (placement.destination === 'day' && !isPlanningDate(placement.plannedDate)) throw new Error('Choose a valid planning date');
     if (serverTasks) {
       const moved = await runServerAction(() => {
-        if (destination === 'deleted') return cancelMutation.mutateAsync(task.id);
+        if (placement.destination === 'deleted') return cancelMutation.mutateAsync(task.id);
         return updateMutation.mutateAsync({
           id: task.id,
           input: {
-            planning: destination === 'today'
+            planning: placement.destination === 'today'
               ? { plannedDate: todayDate, type: 'day' }
-              : destination === 'week'
+              : placement.destination === 'week'
                 ? { type: 'week', weekStart }
-                : { plannedDate: dateFromApprovedDayChoice(day ?? '', undefined, settings.timezone), type: 'day' },
+                : { plannedDate: placement.plannedDate, type: 'day' },
           },
         });
       });
@@ -249,7 +252,7 @@ export function InboxScreen({
     } else if (demoIntegrated) {
       if (destination === 'today') moveTaskToToday(task.id);
       if (destination === 'week') moveTaskToWeek(task.id);
-      if (destination === 'day' && day) scheduleTask(task.id, dayToPreviewDate(day));
+      if (placement.destination === 'day') scheduleTask(task.id, placement.plannedDate);
       if (destination === 'deleted') cancelDemoTask(task.id);
     } else {
       setFixtureItems((current) => current.filter((item) => item.id !== task.id));
@@ -257,13 +260,13 @@ export function InboxScreen({
     }
     if (destination === 'today') setConfirmation('נוסף להיום מה־Inbox · אותה משימה');
     if (destination === 'week') setConfirmation('נשלח לשבוע · אותה משימה, עכשיו בתכנון');
-    if (destination === 'day' && day) setConfirmation(`נקבע ל${day} · אותה משימה`);
+    if (placement.destination === 'day') setConfirmation(`נקבע ל${placement.plannedDate} · אותה משימה`);
     if (destination === 'deleted') setConfirmation('הפריט נמחק מה־Inbox');
   };
 
   if (screenState === 'processing') {
     return (
-      <InboxProcessingView
+      <InboxProcessingView defaultDate={defaultDate}
         initialIndex={serverTasks || demoIntegrated ? 0 : undefined}
         items={serverTasks || demoIntegrated ? items : undefined}
         onExit={() => setScreenState(items.length ? 'normal' : 'empty')}
@@ -318,13 +321,13 @@ export function InboxScreen({
           </ScrollView>
         </View>
       </MobileShell>
-      <QuickCaptureSheet
+      <QuickCaptureSheet defaultDate={defaultDate}
         onClose={() => setCaptureOpen(false)}
         onSave={captureTask}
         visible={captureOpen}
       />
       {selectedTask ? (
-        <InboxItemActionSheet
+        <InboxItemActionSheet defaultDate={defaultDate}
           key={selectedTask.id}
           confirmation={resolvedTaskId === selectedTask.id ? confirmation : null}
           confirmedDestination={resolvedTaskId === selectedTask.id ? 'week' : undefined}
@@ -349,9 +352,3 @@ const styles = StyleSheet.create({
   emptyContent: { flexGrow: 1 },
   contentWithConfirmation: { paddingTop: 64 },
 });
-
-function dayToPreviewDate(day: string) {
-  if (day.startsWith('שני')) return '2026-08-10';
-  if (day.startsWith('שלישי')) return '2026-08-11';
-  return '2026-08-09';
-}

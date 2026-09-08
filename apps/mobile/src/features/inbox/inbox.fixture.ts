@@ -112,5 +112,3 @@ export const processingInboxItems: InboxTask[] = [
     compactCreatedLabel: 'יום שני',
   },
 ];
-
-export const lightweightDayChoices = ['ראשון · 9/8', 'שני · 10/8', 'שלישי · 11/8'] as const;

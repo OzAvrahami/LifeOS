@@ -1,6 +1,6 @@
 const pad = (value: number) => String(value).padStart(2, '0');
 
-export type PlanningDateContext = { timeZone?: string; weekStartDay?: number };
+export type PlanningDateContext = { timeZone?: string; timezone?: string; weekStartDay?: number };
 
 function partsInTimezone(date: Date, timeZone?: string) {
   if (!timeZone) {
@@ -34,7 +34,7 @@ export function weekdayForDateKey(dateKey: string) {
 }
 
 export function currentWeekStart(date = new Date(), context: PlanningDateContext = {}) {
-  const today = localDateKey(date, context.timeZone);
+  const today = localDateKey(date, context.timezone ?? context.timeZone);
   const weekStartDay = context.weekStartDay ?? 0;
   const distance = (weekdayForDateKey(today) - weekStartDay + 7) % 7;
   return addDaysToDateKey(today, -distance);
@@ -71,23 +71,27 @@ export function hebrewWeekRange(date = new Date(), context: PlanningDateContext 
     : `${firstDay} ${firstMonth}–${lastDay} ${lastMonth}`;
 }
 
-export function dateFromApprovedDayChoice(label: string, date = new Date(), timeZone?: string) {
-  const match = label.match(/(\d{1,2})\/(\d{1,2})/);
-  if (!match) return localDateKey(date, timeZone);
-  const day = Number(match[1]);
-  const month = Number(match[2]) - 1;
-  const today = localDateKey(date, timeZone);
-  const currentMonth = Number(today.slice(5, 7)) - 1;
-  let year = Number(today.slice(0, 4));
-  if (month < currentMonth - 6) year += 1;
-  if (month > currentMonth + 6) year -= 1;
-  return `${year}-${pad(month + 1)}-${pad(day)}`;
-}
-
 export function hebrewDateLabel(date = new Date(), timeZone?: string) {
   return formatDateKey(localDateKey(date, timeZone), {
     day: 'numeric',
     month: 'long',
     weekday: 'long',
   });
+}
+
+// Match the API's YYYY-MM-DD calendar validation; never parse date-only input as UTC.
+export function isPlanningDate(value: unknown): value is string {
+  if (typeof value !== 'string' || !/^\d{4}-\d{2}-\d{2}$/.test(value)) return false;
+  const [year, month, day] = value.split('-').map(Number);
+  const date = new Date(Date.UTC(year!, month! - 1, day!));
+  return date.getUTCFullYear() === year && date.getUTCMonth() === month! - 1
+    && date.getUTCDate() === day;
+}
+
+export function planningDateToLocalDate(value: string) {
+  const [year, month, day] = value.split('-').map(Number);
+  const date = new Date(0);
+  date.setFullYear(year!, month! - 1, day!);
+  date.setHours(12, 0, 0, 0);
+  return date;
 }

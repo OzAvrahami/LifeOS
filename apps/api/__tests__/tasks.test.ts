@@ -357,3 +357,48 @@ describe('Task API', () => {
     assert.doesNotMatch(migration, /service_role/i);
   });
 });
+
+describe('Issue #13 calendar planning persistence', () => {
+  it('creates an exact date, moves across years, and preserves fields and execution history through fresh reads', async () => {
+    const data = database();
+    const app = createTaskTestApp(data);
+    const task = (await authenticated(app).post('/tasks').send({
+      title: 'Calendar fixture', description: 'Keep description', estimatedMinutes: 45,
+      priority: 'important', dueDate: '2027-06-01', position: 3,
+      planning: { type: 'day', plannedDate: '2026-12-31' },
+    }).expect(201)).body.task;
+    assert.equal(data.tasks[0]?.planned_date, '2026-12-31');
+    await authenticated(app).patch(`/tasks/${task.id}`).send({ status: 'in_progress' }).expect(200);
+    const active = (await authenticated(app).patch(`/tasks/${task.id}`).send({ planning: { type: 'day', plannedDate: '2027-01-02' } }).expect(200)).body.task;
+    assert.equal(active.status, 'in_progress');
+    const completed = (await authenticated(app).patch(`/tasks/${task.id}`).send({ status: 'completed' }).expect(200)).body.task;
+    const moved = (await authenticated(app).patch(`/tasks/${task.id}`).send({ planning: { type: 'day', plannedDate: '2028-02-29' } }).expect(200)).body.task;
+    assert.deepEqual(moved, { ...completed, plannedDate: '2028-02-29', updatedAt: moved.updatedAt });
+    assert.equal(moved.id, task.id);
+    assert.equal(data.tasks.length, 1);
+    assert.equal(data.tasks[0]?.due_date, '2027-06-01');
+    const fresh = createTaskTestApp(data);
+    assert.deepEqual((await authenticated(fresh).get('/tasks?plannedDate=2026-12-31').expect(200)).body.tasks, []);
+    assert.deepEqual((await authenticated(fresh).get('/tasks?plannedDate=2027-01-02').expect(200)).body.tasks, []);
+    assert.deepEqual((await authenticated(fresh).get('/tasks?plannedDateFrom=2028-02-28&plannedDateTo=2028-03-05').expect(200)).body.tasks, [moved]);
+    await authenticated(fresh).patch(`/tasks/${task.id}`).send({ status: 'open' }).expect(200);
+    const inbox = (await authenticated(fresh).patch(`/tasks/${task.id}`).send({ planning: { type: 'inbox' } }).expect(200)).body.task;
+    assert.equal(inbox.plannedDate, null);
+    assert.equal(inbox.weekPlanId, null);
+    assert.equal(inbox.dueDate, '2027-06-01');
+    assert.deepEqual((await authenticated(fresh).get('/tasks?placement=inbox').expect(200)).body.tasks, [inbox]);
+    assert.equal(data.tasks.length, 1);
+  });
+
+  it('rejects missing, empty, malformed and impossible planning dates without inserting or changing a task', async () => {
+    const data = database();
+    const app = createTaskTestApp(data);
+    const task = (await authenticated(app).post('/tasks').send({ title: 'Unscheduled' }).expect(201)).body.task;
+    for (const plannedDate of [undefined, '', '2027-02-29', '2027-13-01', '2027-01-02T00:00:00Z']) {
+      await authenticated(app).post('/tasks').send({ title: 'Invalid', planning: { type: 'day', plannedDate } }).expect(400);
+      await authenticated(app).patch(`/tasks/${task.id}`).send({ planning: { type: 'day', plannedDate } }).expect(400);
+    }
+    assert.equal(data.tasks.length, 1);
+    assert.deepEqual((await authenticated(app).get('/tasks?placement=inbox').expect(200)).body.tasks, [task]);
+  });
+});

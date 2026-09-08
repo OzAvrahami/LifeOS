@@ -1,8 +1,10 @@
 import { Ionicons } from '@expo/vector-icons';
 import { useState } from 'react';
-import { Pressable, StyleSheet, Text, View } from 'react-native';
+import { Keyboard, Platform, Pressable, StyleSheet, Text, View } from 'react-native';
 
 import { colors, radius, spacing, typography } from '@/theme/tokens';
+
+import { TaskDateSelection } from '@/features/tasks/task-date-selection';
 
 import { weekDateRange } from './week.fixture';
 import { UnscheduledWeekTask, WeekDay, WeeklyFocus, WeekWorkload } from './week.types';
@@ -130,12 +132,17 @@ export function WeekDayRow({ children, day, expanded = false, onAddCommitment }:
 }
 
 export function UnscheduledWeekTasks({
+  defaultDate,
+  onSchedule,
   onMoveToToday,
   tasks,
 }: {
+  defaultDate: string;
+  onSchedule: (taskId: string, date: string) => Promise<void> | void;
   onMoveToToday?: (taskId: string) => void;
   tasks: UnscheduledWeekTask[];
 }) {
+  const [pending, setPending] = useState(false);
   const [choosingTaskId, setChoosingTaskId] = useState<string | null>(null);
   const [expanded, setExpanded] = useState(false);
   const hiddenTaskCount = Math.max(0, tasks.length - 2);
@@ -144,38 +151,46 @@ export function UnscheduledWeekTasks({
   return (
     <View accessibilityLabel="לתכנן השבוע" style={styles.unscheduledCard}>
       {visibleTasks.map((task) => (
-        <View key={task.id} style={styles.unscheduledRow}>
-          <Text style={styles.unscheduledTitle}>{task.title}</Text>
-          <Text style={styles.duration}>{task.durationMinutes} דק׳</Text>
-          {choosingTaskId === task.id ? (
-            <View style={styles.dayChoices}>
+        <View key={task.id}>
+          <View style={styles.unscheduledRow}>
+            <Text style={styles.unscheduledTitle}>{task.title}</Text>
+            <Text style={styles.duration}>{task.durationMinutes} דק׳</Text>
+            {choosingTaskId === task.id ? (
+              <View style={styles.dayChoices}>
+                <Pressable
+                  accessibilityLabel={`שבץ להיום: ${task.title}`}
+                  accessibilityRole="button"
+                  disabled={pending || undefined}
+                  onPress={() => onMoveToToday?.(task.id)}
+                  style={styles.todayChoice}
+                >
+                  <Text style={styles.todayChoiceText}>היום</Text>
+                </Pressable>
+                <Pressable
+                  accessibilityLabel={`בטל שיבוץ: ${task.title}`}
+                  accessibilityRole="button"
+                  disabled={pending || undefined}
+                  onPress={() => setChoosingTaskId(null)}
+                  style={styles.cancelChoice}
+                >
+                  <Ionicons color={colors.textFaint} name="close" size={16} />
+                </Pressable>
+              </View>
+            ) : (
               <Pressable
-                accessibilityLabel={`שבץ להיום: ${task.title}`}
+                accessibilityLabel={`בחר יום עבור ${task.title}`}
                 accessibilityRole="button"
-                onPress={() => onMoveToToday?.(task.id)}
-                style={styles.todayChoice}
+                disabled={pending || undefined}
+                onPress={() => { if (Platform.OS !== 'web') Keyboard.dismiss(); setChoosingTaskId(task.id); }}
+                style={styles.chooseDay}
               >
-                <Text style={styles.todayChoiceText}>היום</Text>
+                <Text style={styles.chooseDayText}>בחר יום</Text>
               </Pressable>
-              <Pressable
-                accessibilityLabel={`בטל שיבוץ: ${task.title}`}
-                accessibilityRole="button"
-                onPress={() => setChoosingTaskId(null)}
-                style={styles.cancelChoice}
-              >
-                <Ionicons color={colors.textFaint} name="close" size={16} />
-              </Pressable>
-            </View>
-          ) : (
-            <Pressable
-              accessibilityLabel={`בחר יום עבור ${task.title}`}
-              accessibilityRole="button"
-              onPress={() => setChoosingTaskId(task.id)}
-              style={styles.chooseDay}
-            >
-              <Text style={styles.chooseDayText}>בחר יום</Text>
-            </Pressable>
-          )}
+            )}
+          </View>
+          {choosingTaskId === task.id ? <TaskDateSelection key={task.id} defaultDate={defaultDate} onPendingChange={setPending}
+            onCancel={() => setChoosingTaskId(null)}
+            onConfirm={async (date) => { await onSchedule(task.id, date); setChoosingTaskId(null); }} /> : null}
         </View>
       ))}
       {hiddenTaskCount > 0 ? (
@@ -183,6 +198,7 @@ export function UnscheduledWeekTasks({
           accessibilityLabel={expanded ? 'הצג פחות משימות' : `הצג ${hiddenTaskCount === 1 ? 'משימה נוספת' : `${hiddenTaskCount} משימות נוספות`}`}
           accessibilityRole="button"
           accessibilityState={{ expanded }}
+          disabled={pending || undefined}
           onPress={() => setExpanded((value) => !value)}
           style={styles.moreTask}
         >

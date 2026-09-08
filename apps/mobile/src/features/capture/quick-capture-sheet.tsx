@@ -1,6 +1,8 @@
-import { useState } from 'react';
+import { useRef, useState } from 'react';
 import {
+  Keyboard,
   KeyboardAvoidingView,
+  ScrollView,
   Modal,
   Platform,
   Pressable,
@@ -13,7 +15,11 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { colors, radius, spacing, typography } from '@/theme/tokens';
 
-export type CaptureDestination = 'inbox' | 'today' | 'week' | 'day';
+import type { CaptureDestination, TaskCapturePlacement } from '@/features/tasks/task-capture.types';
+import { TaskDateSelection } from '@/features/tasks/task-date-selection';
+import { isPlanningDate, localDateKey } from '@/features/tasks/task-dates';
+
+export type { CaptureDestination } from '@/features/tasks/task-capture.types';
 
 const destinations: { id: CaptureDestination; label: string; ltr?: boolean }[] = [
   { id: 'inbox', label: 'Inbox', ltr: true },
@@ -22,25 +28,39 @@ const destinations: { id: CaptureDestination; label: string; ltr?: boolean }[] =
   { id: 'day', label: 'בחר יום' },
 ];
 
-export function QuickCaptureSheet({
+type CaptureProps = {
+  initialDestination?: CaptureDestination;
+  defaultDate?: string;
+  onClose: () => void;
+  onSave: (title: string, placement: TaskCapturePlacement) => Promise<void> | void;
+  visible: boolean;
+};
+
+export function QuickCaptureSheet(props: CaptureProps) {
+  return props.visible ? <CaptureSession {...props} /> : null;
+}
+
+function CaptureSession({
   initialDestination = 'inbox',
+  defaultDate = localDateKey(),
   onClose,
   onSave,
   visible,
-}: {
-  initialDestination?: CaptureDestination;
-  onClose: () => void;
-  onSave?: (title: string, destination: CaptureDestination) => Promise<void> | void;
-  visible: boolean;
-}) {
+}: CaptureProps) {
   const insets = useSafeAreaInsets();
   const [title, setTitle] = useState('');
   const [destination, setDestination] = useState<CaptureDestination>(initialDestination);
+  const [plannedDate, setPlannedDate] = useState<string | null>(null);
+  const [choosingDay, setChoosingDay] = useState(false);
+  const busy = useRef(false);
   const [error, setError] = useState(false);
   const [saving, setSaving] = useState(false);
 
   const close = () => {
+    if (busy.current) return;
     setTitle('');
+    setPlannedDate(null);
+    setChoosingDay(false);
     setDestination(initialDestination);
     setError(false);
     setSaving(false);
@@ -49,17 +69,24 @@ export function QuickCaptureSheet({
 
   const save = async () => {
     const nextTitle = title.trim();
-    if (!nextTitle || saving) return;
+    if (!nextTitle || busy.current || choosingDay || (destination === 'day' && !isPlanningDate(plannedDate))) return;
+    busy.current = true;
     setError(false);
     setSaving(true);
     try {
-      await onSave?.(nextTitle, destination);
+      const placement: TaskCapturePlacement = destination === 'day'
+        ? { destination, plannedDate: plannedDate! } : { destination };
+      await onSave(nextTitle, placement);
+      busy.current = false;
       close();
     } catch {
+      busy.current = false;
       setError(true);
       setSaving(false);
     }
   };
+
+  const saveDisabled = !title.trim() || saving || choosingDay || (destination === 'day' && !isPlanningDate(plannedDate));
 
   return (
     <Modal animationType="slide" onRequestClose={close} transparent visible={visible}>
@@ -77,60 +104,73 @@ export function QuickCaptureSheet({
           accessibilityLabel="חלונית הוספה מהירה"
           style={[styles.sheet, { paddingBottom: Math.max(insets.bottom, spacing.md) }]}
         >
-          <View style={styles.handle} />
-          <Text style={styles.heading}>מה צריך לזכור?</Text>
-          <TextInput
-            accessibilityLabel="כותרת"
-            autoFocus
-            editable={!saving}
-            enterKeyHint="done"
-            onChangeText={setTitle}
-            onSubmitEditing={() => void save()}
-            placeholder="למשל, לקבוע טיפול לרכב"
-            placeholderTextColor={colors.textFaint}
-            returnKeyType="done"
-            style={styles.input}
-            textAlign="right"
-            value={title}
-          />
+          <ScrollView keyboardShouldPersistTaps="handled" keyboardDismissMode={Platform.OS === 'ios' ? 'interactive' : Platform.OS === 'android' ? 'on-drag' : 'none'}>
+            <View style={styles.handle} />
+            <Text style={styles.heading}>מה צריך לזכור?</Text>
+            <TextInput
+              accessibilityLabel="כותרת"
+              autoFocus
+              editable={!saving}
+              enterKeyHint="done"
+              onChangeText={setTitle}
+              onSubmitEditing={() => void save()}
+              placeholder="למשל, לקבוע טיפול לרכב"
+              placeholderTextColor={colors.textFaint}
+              returnKeyType="done"
+              style={styles.input}
+              textAlign="right"
+              value={title}
+            />
 
-          {error ? <Text accessibilityRole="alert" style={styles.error}>לא הצלחנו לשמור. אפשר לנסות שוב.</Text> : null}
+            {error ? <Text accessibilityRole="alert" style={styles.error}>לא הצלחנו לשמור. אפשר לנסות שוב.</Text> : null}
 
-          <Text style={styles.destinationLabel}>לאן זה הולך?</Text>
-          <View style={styles.destinations}>
-            {destinations.map((item) => {
-              const selected = destination === item.id;
-              return (
-                <Pressable
-                  accessibilityRole="button"
-                  accessibilityState={{ selected }}
-                  key={item.id}
-                  onPress={() => setDestination(item.id)}
-                  style={[styles.destination, selected && styles.destinationSelected]}
-                >
-                  <Text
-                    style={[
-                      styles.destinationText,
-                      selected && styles.destinationTextSelected,
-                      item.ltr && styles.ltr,
-                    ]}
+            <Text style={styles.destinationLabel}>לאן זה הולך?</Text>
+            <View style={styles.destinations}>
+              {destinations.map((item) => {
+                const selected = destination === item.id;
+                return (
+                  <Pressable
+                    accessibilityRole="button"
+                    accessibilityState={{ selected }}
+                    key={item.id}
+                    disabled={saving || undefined}
+                    onPress={() => {
+                      if (Platform.OS !== 'web') Keyboard.dismiss();
+                      if (item.id === 'day') setChoosingDay(true);
+                      else { setDestination(item.id); setPlannedDate(null); setChoosingDay(false); }
+                    }}
+                    style={[styles.destination, selected && styles.destinationSelected]}
                   >
-                    {item.label}
-                  </Text>
-                </Pressable>
-              );
-            })}
-          </View>
+                    <Text
+                      style={[
+                        styles.destinationText,
+                        selected && styles.destinationTextSelected,
+                        item.ltr && styles.ltr,
+                      ]}
+                    >
+                      {item.label}
+                    </Text>
+                  </Pressable>
+                );
+              })}
+            </View>
 
-          <Pressable
-            accessibilityRole="button"
-            accessibilityState={{ busy: saving, disabled: !title.trim() || saving }}
-            disabled={!title.trim() || saving}
-            onPress={() => void save()}
-            style={[styles.saveButton, (!title.trim() || saving) && styles.saveButtonDisabled]}
-          >
-            <Text style={styles.saveText}>{saving ? 'שומר…' : 'שמירה'}</Text>
-          </Pressable>
+            {destination === 'day' && plannedDate ? <Text accessibilityLabel="תאריך המשימה" style={styles.destinationLabel}>{plannedDate}</Text> : null}
+            {destination === 'day' && !plannedDate && !choosingDay ? <Text accessibilityRole="alert" style={styles.error}>יש לבחור ולאשר תאריך.</Text> : null}
+            {choosingDay ? <TaskDateSelection defaultDate={defaultDate} value={plannedDate}
+              onCancel={() => setChoosingDay(false)}
+              onConfirm={(date) => { setPlannedDate(date); setDestination('day'); setChoosingDay(false); }} /> : null}
+
+            <Pressable
+              accessibilityRole="button"
+              accessibilityState={{ busy: saving, disabled: saveDisabled }}
+              disabled={saveDisabled}
+              onPress={() => void save()}
+              style={[styles.saveButton, saveDisabled && styles.saveButtonDisabled]}
+            >
+              <Text style={styles.saveText}>{saving ? 'שומר…' : 'שמירה'}</Text>
+            </Pressable>
+          </ScrollView>
         </View>
       </KeyboardAvoidingView>
     </Modal>

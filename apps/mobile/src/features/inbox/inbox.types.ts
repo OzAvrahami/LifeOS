@@ -7,7 +7,11 @@ export type InboxTask = {
   compactCreatedLabel: string;
 };
 
-export type InboxDestination = 'today' | 'week' | 'day' | 'deleted';
+export type InboxMove =
+  | { destination: 'today' }
+  | { destination: 'week' }
+  | { destination: 'deleted' }
+  | { destination: 'day'; plannedDate: string };
 
 const demoStates: readonly InboxDemoState[] = ['normal', 'empty', 'busy', 'processing'];
 

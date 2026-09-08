@@ -97,6 +97,7 @@ function ensurePlacementCache(
     : planning.type === 'week'
       ? { weekStart: planning.weekStart }
       : { plannedDate: planning.plannedDate };
+  if (planning.type === 'inbox' && task.status !== 'open') return;
   const key = taskKeys.list(userId, filters);
   queryClient.setQueryData<Task[]>(key, (current = []) => upsertTask(current, task));
 }

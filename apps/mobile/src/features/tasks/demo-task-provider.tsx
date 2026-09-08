@@ -6,11 +6,12 @@ import {
   initialDemoTaskState,
 } from './demo-task.fixture';
 import {
-  DemoCaptureDestination,
   DemoTask,
   DemoTaskAction,
   DemoTaskState,
 } from './demo-task.types';
+
+import type { TaskCapturePlacement } from './task-capture.types';
 
 type DemoTaskContextValue = {
   tasks: DemoTask[];
@@ -20,7 +21,7 @@ type DemoTaskContextValue = {
   activeTask: DemoTask | undefined;
   openTodayTasks: DemoTask[];
   completedTodayTasks: DemoTask[];
-  captureTask: (title: string, destination: DemoCaptureDestination) => void;
+  captureTask: (title: string, placement: TaskCapturePlacement) => void;
   moveTaskToInbox: (taskId: string) => void;
   moveTaskToWeek: (taskId: string) => void;
   moveTaskToToday: (taskId: string) => void;
@@ -53,12 +54,12 @@ export function demoTaskReducer(state: DemoTaskState, action: DemoTaskAction): D
         completedAt: null,
         createdLabel: 'נוסף עכשיו',
         id: `local-task-${state.nextTaskSequence}`,
-        plannedDate: action.destination === 'today' ? DEMO_TODAY : null,
+        plannedDate: action.placement.destination === 'day' ? action.placement.plannedDate : action.placement.destination === 'today' ? DEMO_TODAY : null,
         position: -state.nextTaskSequence,
         status: 'open',
         title: action.title,
         weekPlanId:
-          action.destination === 'week' ? DEMO_CURRENT_WEEK_PLAN_ID : null,
+          action.placement.destination === 'week' ? DEMO_CURRENT_WEEK_PLAN_ID : null,
       };
 
       return {
@@ -70,28 +71,24 @@ export function demoTaskReducer(state: DemoTaskState, action: DemoTaskAction): D
       return updateTask(state, action.taskId, (task) => ({
         ...task,
         plannedDate: null,
-        status: task.status === 'cancelled' ? 'open' : task.status,
         weekPlanId: null,
       }));
     case 'move_to_week':
       return updateTask(state, action.taskId, (task) => ({
         ...task,
         plannedDate: null,
-        status: 'open',
         weekPlanId: DEMO_CURRENT_WEEK_PLAN_ID,
       }));
     case 'move_to_today':
       return updateTask(state, action.taskId, (task) => ({
         ...task,
         plannedDate: DEMO_TODAY,
-        status: 'open',
         weekPlanId: null,
       }));
     case 'schedule':
       return updateTask(state, action.taskId, (task) => ({
         ...task,
         plannedDate: action.plannedDate,
-        status: 'open',
         weekPlanId: null,
       }));
     case 'cancel':
@@ -146,7 +143,7 @@ export function DemoTaskProvider({
     return {
       activeTask,
       cancelTask: (taskId) => dispatch({ taskId, type: 'cancel' }),
-      captureTask: (title, destination) => dispatch({ destination, title, type: 'capture' }),
+      captureTask: (title, placement) => dispatch({ placement, title, type: 'capture' }),
       completeTask: (taskId) => dispatch({ taskId, type: 'complete' }),
       completedTodayTasks,
       inboxTasks,

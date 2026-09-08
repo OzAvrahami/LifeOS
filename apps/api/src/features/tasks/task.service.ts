@@ -171,10 +171,7 @@ export class TaskService implements TaskServiceContract {
     if (input.dueDate !== undefined) values.due_date = input.dueDate;
     if (input.position !== undefined) values.position = input.position;
     if (input.planning) {
-      Object.assign(values, await planningValues(this.store, input.planning), {
-        completed_at: null,
-        status: 'open',
-      });
+      Object.assign(values, await planningValues(this.store, input.planning));
     }
     if (input.status) {
       values.status = input.status;

@@ -20,6 +20,7 @@ import {
   currentWeekStart,
   hebrewWeekRange,
   localDateKey,
+  isPlanningDate,
   weekdayForDateKey,
 } from '@/features/tasks/task-dates';
 import { toWeekTask } from '@/features/tasks/task-presenters';
@@ -82,7 +83,7 @@ export function WeekScreen({
   const replaceWeeklyFocusMutation = useReplaceWeeklyFocuses();
   const createCommitmentMutation = useCreateCommitment();
   const updateMutation = useUpdateTask();
-  const { captureTask } = useTaskCapture(taskSource);
+  const { captureTask, defaultDate } = useTaskCapture(taskSource);
   const [operationError, setOperationError] = useState(false);
   const weekTasks = serverTasks
     ? (weekPlanQuery.data ?? []).map(toWeekTask)
@@ -148,6 +149,12 @@ export function WeekScreen({
           <OverloadedWeek />
         ) : (
           <NormalWeek
+            defaultDate={defaultDate}
+            onSchedule={async (id, plannedDate) => {
+              if (!isPlanningDate(plannedDate)) throw new Error('Choose a valid planning date');
+              if (serverTasks) await updateMutation.mutateAsync({ id, input: { planning: { type: 'day', plannedDate } } });
+              else demo.scheduleTask(id, plannedDate);
+            }}
             dateRange={serverTasks ? hebrewWeekRange(undefined, settings) : undefined}
             days={weekDays}
             notice={
@@ -192,7 +199,7 @@ export function WeekScreen({
           />
         )}
       </MobileShell>
-      <QuickCaptureSheet
+      <QuickCaptureSheet defaultDate={defaultDate}
         onClose={() => setCaptureOpen(false)}
         onSave={captureTask}
         visible={captureOpen}
@@ -210,6 +217,8 @@ export function WeekScreen({
 }
 
 function NormalWeek({
+  defaultDate,
+  onSchedule,
   dateRange,
   days,
   focusState,
@@ -220,6 +229,8 @@ function NormalWeek({
   onMoveToToday,
   tasks,
 }: {
+  defaultDate: string;
+  onSchedule: (id: string, plannedDate: string) => Promise<void> | void;
   dateRange?: string;
   days: typeof normalWeekDays;
   focusState?: 'error' | 'loading' | 'ready';
@@ -240,7 +251,7 @@ function NormalWeek({
         {days.map((day) => <WeekDayRow day={day} key={day.id} onAddCommitment={onAddCommitment} />)}
       </View>
       <WeekSectionLabel>לתכנן השבוע</WeekSectionLabel>
-      <UnscheduledWeekTasks onMoveToToday={onMoveToToday} tasks={tasks} />
+      <UnscheduledWeekTasks defaultDate={defaultDate} onSchedule={onSchedule} onMoveToToday={onMoveToToday} tasks={tasks} />
     </ScrollView>
   );
 }

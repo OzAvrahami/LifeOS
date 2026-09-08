@@ -1,7 +1,9 @@
 import { Ionicons } from '@expo/vector-icons';
 import { useState } from 'react';
 import {
+  Keyboard,
   KeyboardAvoidingView,
+  ScrollView,
   Modal,
   Platform,
   Pressable,
@@ -14,12 +16,13 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { colors, radius, spacing, typography } from '@/theme/tokens';
 
-import { lightweightDayChoices } from './inbox.fixture';
+import { TaskDateSelection } from '@/features/tasks/task-date-selection';
 import { InboxTask } from './inbox.types';
 
 type SheetMode = 'actions' | 'choose-day' | 'edit';
 
 export function InboxItemActionSheet({
+  defaultDate,
   confirmation,
   confirmedDestination,
   error = false,
@@ -32,10 +35,11 @@ export function InboxItemActionSheet({
   onStay,
   task,
 }: {
+  defaultDate: string;
   confirmation?: string | null;
   confirmedDestination?: 'week';
   error?: boolean;
-  onChooseDay: (task: InboxTask, day: string) => void;
+  onChooseDay: (task: InboxTask, day: string) => void | Promise<void>;
   onClose: () => void;
   onDelete: (task: InboxTask) => void;
   onEdit: (task: InboxTask, title: string) => void;
@@ -45,6 +49,8 @@ export function InboxItemActionSheet({
   task: InboxTask;
 }) {
   const insets = useSafeAreaInsets();
+  const [pending, setPending] = useState(false);
+  const close = () => { if (!pending) onClose(); };
   const [mode, setMode] = useState<SheetMode>('actions');
   const [title, setTitle] = useState(task.title);
 
@@ -55,7 +61,7 @@ export function InboxItemActionSheet({
   };
 
   return (
-    <Modal animationType="slide" onRequestClose={onClose} transparent visible>
+    <Modal animationType="slide" onRequestClose={close} transparent visible>
       <KeyboardAvoidingView
         behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
         style={styles.overlay}
@@ -74,40 +80,40 @@ export function InboxItemActionSheet({
         <Pressable
           accessibilityLabel="סגור פעולות Inbox"
           accessibilityRole="button"
-          onPress={onClose}
+          onPress={close}
           style={styles.backdrop}
         />
         <View
           accessibilityLabel="מה צריך לקרות עם זה"
           style={[styles.sheet, { paddingBottom: Math.max(insets.bottom, spacing.lg) }]}
         >
-          <View style={styles.handle} />
-          {error ? <Text accessibilityRole="alert" style={styles.error}>לא הצלחנו לעדכן. אפשר לנסות שוב.</Text> : null}
-          {mode === 'actions' ? (
-            <ActionChoices
-              onChooseDay={() => setMode('choose-day')}
-              onDelete={() => onDelete(task)}
-              onEdit={() => setMode('edit')}
-              onMoveToToday={() => onMoveToToday(task)}
-              onMoveToWeek={() => onMoveToWeek(task)}
-              onStay={() => onStay(task)}
-              weekConfirmed={confirmedDestination === 'week'}
-              task={task}
-            />
-          ) : mode === 'choose-day' ? (
-            <DayChoices
-              onBack={() => setMode('actions')}
-              onChoose={(day) => onChooseDay(task, day)}
-              task={task}
-            />
-          ) : (
-            <EditTask
-              onBack={() => setMode('actions')}
-              onChangeTitle={setTitle}
-              onSave={saveEdit}
-              title={title}
-            />
-          )}
+          <ScrollView keyboardShouldPersistTaps="handled">
+            <View style={styles.handle} />
+            {error ? <Text accessibilityRole="alert" style={styles.error}>לא הצלחנו לעדכן. אפשר לנסות שוב.</Text> : null}
+            {mode === 'actions' ? (
+              <ActionChoices
+                onChooseDay={() => { if (Platform.OS !== 'web') Keyboard.dismiss(); setMode('choose-day'); }}
+                onDelete={() => onDelete(task)}
+                onEdit={() => setMode('edit')}
+                onMoveToToday={() => onMoveToToday(task)}
+                onMoveToWeek={() => onMoveToWeek(task)}
+                onStay={() => onStay(task)}
+                weekConfirmed={confirmedDestination === 'week'}
+                task={task}
+              />
+            ) : mode === 'choose-day' ? (
+              <TaskDateSelection defaultDate={defaultDate} onPendingChange={setPending}
+                onCancel={() => setMode('actions')}
+                onConfirm={(day) => onChooseDay(task, day)} />
+            ) : (
+              <EditTask
+                onBack={() => setMode('actions')}
+                onChangeTitle={setTitle}
+                onSave={saveEdit}
+                title={title}
+              />
+            )}
+          </ScrollView>
         </View>
       </KeyboardAvoidingView>
     </Modal>
@@ -179,34 +185,6 @@ function ActionButton({
   );
 }
 
-function DayChoices({
-  onBack,
-  onChoose,
-  task,
-}: {
-  onBack: () => void;
-  onChoose: (day: string) => void;
-  task: InboxTask;
-}) {
-  return (
-    <>
-      <Text style={styles.eyebrow}>לבחור יום</Text>
-      <Text style={styles.taskTitle}>{task.title}</Text>
-      <View style={styles.primaryActions}>
-        {lightweightDayChoices.map((day) => (
-          <Pressable accessibilityRole="button" key={day} onPress={() => onChoose(day)} style={styles.dayButton}>
-            <Text style={styles.actionText}>{day}</Text>
-            <Ionicons color={colors.textFaint} name="calendar-clear-outline" size={18} />
-          </Pressable>
-        ))}
-      </View>
-      <Pressable accessibilityRole="button" onPress={onBack} style={styles.backButton}>
-        <Text style={styles.secondaryText}>חזרה</Text>
-      </Pressable>
-    </>
-  );
-}
-
 function EditTask({
   onBack,
   onChangeTitle,
@@ -255,6 +233,7 @@ const styles = StyleSheet.create({
     backgroundColor: colors.surface,
     borderTopLeftRadius: 28,
     borderTopRightRadius: 28,
+    maxHeight: '85%',
     paddingHorizontal: 22,
     paddingTop: 14,
   },

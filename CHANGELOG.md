@@ -8,6 +8,8 @@ LifeOS follows Semantic Versioning for development and release tags.
 
 ### Fixed
 
+- Fixed task day selection (#13): shared calendar drafts and confirmation across capture, Inbox processing/actions, and Week moves; exact planning-date persistence, retry protection, timezone-aware placement, and preserved task identity/history/deadlines. Desktop and physical-iPhone acceptance remain pending.
+
 - Fixed commitment keyboard interactions (#12): blank form taps and non-text actions request native dismissal without swallowing controls, with platform-specific scroll dismissal and preserved Web focus. Physical-iPhone acceptance remains pending.
 - Fixed commitment time selection (#11): arbitrary minutes, an editor-wide iOS draft picker with explicit confirmation/cancellation, native Android confirmation, and protection against abandoned selections. Physical-iPhone acceptance remains pending.
 - Replaced More’s stale hardcoded version label with the shared metadata-derived version/build footer, preserving LifeOS branding, Hebrew/RTL styling, and development/web fallbacks.

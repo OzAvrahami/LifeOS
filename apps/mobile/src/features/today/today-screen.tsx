@@ -73,7 +73,7 @@ export function TodayScreen({
   const createCommitmentMutation = useCreateCommitment();
   const updateCommitmentMutation = useUpdateCommitment();
   const deleteCommitmentMutation = useDeleteCommitment();
-  const { captureTask } = useTaskCapture(taskSource);
+  const { captureTask, defaultDate } = useTaskCapture(taskSource);
   const [operationError, setOperationError] = useState(false);
   const integrated = serverTasks || initialState === 'normal';
   const isHydrating = serverTasks && (
@@ -264,7 +264,7 @@ export function TodayScreen({
         />
         {isHydrating ? null : content}
       </MobileShell>
-      <QuickCaptureSheet
+      <QuickCaptureSheet defaultDate={defaultDate}
         initialDestination={captureInitialDestination}
         key={captureInitialDestination}
         onClose={() => setCaptureOpen(false)}

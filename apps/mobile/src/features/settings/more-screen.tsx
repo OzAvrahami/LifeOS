@@ -31,7 +31,7 @@ export function MoreScreen({
 }) {
   const { user } = useAuth();
   const [captureOpen, setCaptureOpen] = useState(false);
-  const { captureTask } = useTaskCapture('server');
+  const { captureTask, defaultDate } = useTaskCapture('server');
   return (
     <>
       <MobileShell
@@ -60,7 +60,7 @@ export function MoreScreen({
           </View>
         </ScrollView>
       </MobileShell>
-      <QuickCaptureSheet onClose={() => setCaptureOpen(false)} onSave={captureTask} visible={captureOpen} />
+      <QuickCaptureSheet defaultDate={defaultDate} onClose={() => setCaptureOpen(false)} onSave={captureTask} visible={captureOpen} />
     </>
   );
 }

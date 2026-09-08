@@ -1,4 +1,4 @@
-import { render, screen, userEvent, waitFor, within } from '@testing-library/react-native';
+import { fireEvent, render, screen, userEvent, waitFor, within } from '@testing-library/react-native';
 import { notifyManager } from '@tanstack/react-query';
 
 import * as commitmentApi from '@/features/commitments/commitment.api';
@@ -454,4 +454,73 @@ describe('persistent server Task experience', () => {
     expect(await screen.findByText('לא הצלחנו לטעון את המשימות · נסו שוב')).toBeTruthy();
   });
 
+});
+
+it('moves an existing Inbox item to a distant calendar date only after confirmation, retaining all unrelated fields', async () => {
+  const original = makeTask({ title: 'calendar move', description: 'retain description', dueDate: '2027-06-01', estimatedMinutes: 45, priority: 'important' });
+  tasks = [original];
+  await renderFlow('inbox');
+  await fireEvent.press(await screen.findByLabelText('פתח פעולות עבור calendar move'));
+  await fireEvent.press(screen.getByText('לבחור יום'));
+  await fireEvent(screen.getByLabelText('תאריך לתכנון'), 'valueChange', {}, new Date(2027, 0, 2, 12));
+  await fireEvent.press(screen.getByLabelText('ביטול בחירת תאריך'));
+  expect(updateTaskMock).not.toHaveBeenCalled();
+  expect(tasks).toEqual([original]);
+  await fireEvent.press(screen.getByText('לבחור יום'));
+  await fireEvent(screen.getByLabelText('תאריך לתכנון'), 'valueChange', {}, new Date(2027, 0, 2, 12));
+  updateTaskMock.mockRejectedValueOnce(new Error('offline'));
+  await fireEvent.press(screen.getByLabelText('אישור תאריך'));
+  await waitFor(() => expect(screen.getByText('לא הצלחנו לעדכן. אפשר לנסות שוב או לבטל.')).toBeTruthy());
+  expect(tasks).toEqual([original]);
+  expect(screen.getByLabelText('תאריך בבחירה').props.children).toBe('2027-01-02');
+  await fireEvent.press(screen.getByLabelText('אישור תאריך'));
+  await waitFor(() => expect(screen.queryByLabelText('מה צריך לקרות עם זה')).toBeNull());
+  expect(updateTaskMock.mock.calls[1]?.[0]).toEqual({ id: original.id, input: { planning: { type: 'day', plannedDate: '2027-01-02' } } });
+  expect(tasks).toEqual([{ ...original, plannedDate: '2027-01-02', updatedAt: tasks[0].updatedAt }]);
+  expect(screen.queryByLabelText('פריט Inbox: calendar move')).toBeNull();
+  expect(createTaskMock).not.toHaveBeenCalled();
+  expect(cancelTaskMock).not.toHaveBeenCalled();
+});
+
+it('uses the calendar in Inbox processing and Week scheduling without recreating tasks', async () => {
+  tasks = [makeTask({ title: 'processing calendar' })];
+  const id = tasks[0].id;
+  await renderFlow('inbox');
+  await screen.findByText('processing calendar');
+  await fireEvent.press(screen.getByText('מיין כמה עכשיו'));
+  await fireEvent.press(screen.getByText('לבחור יום'));
+  await fireEvent(screen.getByLabelText('תאריך לתכנון'), 'valueChange', {}, new Date(2027, 0, 2, 12));
+  await fireEvent.press(screen.getByLabelText('ביטול בחירת תאריך'));
+  expect(updateTaskMock).not.toHaveBeenCalled();
+  await fireEvent.press(screen.getByText('השבוע'));
+  await waitFor(() => expect(screen.queryByLabelText('מיון מהיר')).toBeNull());
+  await fireEvent.press(within(screen.getByLabelText('ניווט ראשי')).getByText('שבוע'));
+  await fireEvent.press(await screen.findByLabelText('בחר יום עבור processing calendar'));
+  await fireEvent(screen.getByLabelText('תאריך לתכנון'), 'valueChange', {}, new Date(2028, 1, 29, 12));
+  await fireEvent.press(screen.getByLabelText('אישור תאריך'));
+  await waitFor(() => expect(screen.queryByLabelText('בחר יום עבור processing calendar')).toBeNull());
+  expect(updateTaskMock.mock.calls[1]?.[0]).toEqual({ id, input: { planning: { type: 'day', plannedDate: '2028-02-29' } } });
+  expect(tasks).toHaveLength(1);
+  expect(tasks[0]).toEqual(expect.objectContaining({ id, plannedDate: '2028-02-29', weekPlanId: null }));
+  expect(createTaskMock).not.toHaveBeenCalled();
+  expect(cancelTaskMock).not.toHaveBeenCalled();
+});
+
+it('confirms a date directly in Inbox processing and advances only after successful persistence', async () => {
+  tasks = [makeTask({ title: 'process date' })];
+  const original = tasks[0];
+  await renderFlow('inbox');
+  await screen.findByText('process date');
+  await fireEvent.press(screen.getByText('מיין כמה עכשיו'));
+  await fireEvent.press(screen.getByText('לבחור יום'));
+  await fireEvent(screen.getByLabelText('תאריך לתכנון'), 'valueChange', {}, new Date(2027, 0, 2, 12));
+  updateTaskMock.mockRejectedValueOnce(new Error('offline'));
+  await fireEvent.press(screen.getByLabelText('אישור תאריך'));
+  await screen.findByText('לא הצלחנו לעדכן. אפשר לנסות שוב או לבטל.');
+  expect(screen.getByLabelText('מיון מהיר')).toBeTruthy();
+  expect(tasks).toEqual([original]);
+  await fireEvent.press(screen.getByLabelText('אישור תאריך'));
+  await waitFor(() => expect(screen.queryByLabelText('מיון מהיר')).toBeNull());
+  expect(tasks).toEqual([{ ...original, plannedDate: '2027-01-02', updatedAt: tasks[0].updatedAt }]);
+  expect(createTaskMock).not.toHaveBeenCalled();
 });
