@@ -1,5 +1,12 @@
 # Issue #13 verification and owner review
 
+## Current status — 2026-09-08 release preparation
+
+The owner committed and pushed #11 (`6bbccdc`), #12 (`3db8d52`), and #13 (`544cde0`). Owner-reported desktop-browser acceptance passed for #11/#12; isolated preview/demo acceptance passed for #13. All three issues remain open in Verify. Physical-iPhone acceptance and #13 authenticated live-database persistence/history acceptance remain pending.
+
+Version 0.2.1/build 3 is prepared separately, with no native build/install in this step. GitHub records successful Railway deployment for exact SHA `544cde042a83684bc389d903ef17f51adee8af2f`, and live `/health` matches the contract. Direct provider/active-deployment identity was not inspected; health and deployment success do not prove task writes/history behavior. See [the current release preparation record](release-0.2.1-verification.md) for evidence and the manual Git checkpoint. Earlier local/undeployed, desktop-pending, and uncommitted references below are historical implementation/handoff observations; their automated results and unchecked native acceptance remain intact.
+
+
 ## Baseline and scope
 
 Implemented on macOS in `/Users/ozavrahami/code/lifeOS`, starting from clean `main` at `3db8d52` (the owner's committed #11/#12 fixes). Node `v26.3.0`, npm `11.16.0`, installed date picker `9.1.0`, Expo `~57.0.14`, and React Native `0.86.2`. No dependency, migration, native configuration, version/build, staging, commit, push, branch, release, deployment, or device-build changes.

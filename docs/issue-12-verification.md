@@ -1,5 +1,12 @@
 # Issue #12 verification and owner review
 
+## Current status — 2026-09-08 release preparation
+
+The owner committed and pushed #11 (`6bbccdc`), #12 (`3db8d52`), and #13 (`544cde0`). Owner-reported desktop-browser acceptance passed for #11/#12; isolated preview/demo acceptance passed for #13. All three issues remain open in Verify. Physical-iPhone acceptance and #13 authenticated live-database persistence/history acceptance remain pending.
+
+Version 0.2.1/build 3 is prepared separately, with no native build/install in this step. GitHub records successful Railway deployment for exact SHA `544cde042a83684bc389d903ef17f51adee8af2f`, and live `/health` matches the contract. Direct provider/active-deployment identity was not inspected; health and deployment success do not prove task writes/history behavior. See [the current release preparation record](release-0.2.1-verification.md) for evidence and the manual Git checkpoint. Earlier local/undeployed, desktop-pending, and uncommitted references below are historical implementation/handoff observations; their automated results and unchecked native acceptance remain intact.
+
+
 Started on clean `main` at `6bbccdc7ce655fda60cae2cd29a1c8212d36ca65`, the owner's committed #11 fix. Verified Node 24.11.1, npm 11.6.2, Expo ~57.0.14, React Native 0.86.2, Jest 29.7, and the existing picker 9.1.0. No dependency, native configuration, version, persistence, or Git state changes were performed.
 
 ## Confirmed interaction paths and fix

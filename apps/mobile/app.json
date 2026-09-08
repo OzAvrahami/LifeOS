@@ -2,7 +2,7 @@
   "expo": {
     "name": "LifeOS",
     "slug": "lifeos",
-    "version": "0.2.0",
+    "version": "0.2.1",
     "icon": "./assets/icon.png",
     "orientation": "portrait",
     "scheme": "lifeos",
@@ -10,7 +10,7 @@
     "ios": {
       "supportsTablet": false,
       "bundleIdentifier": "il.co.ozavrahami.lifeos",
-      "buildNumber": "2"
+      "buildNumber": "3"
     },
     "android": {
       "package": "com.lifeos.mobile",

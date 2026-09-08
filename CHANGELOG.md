@@ -8,11 +8,28 @@ LifeOS follows Semantic Versioning for development and release tags.
 
 ### Fixed
 
-- Fixed task day selection (#13): shared calendar drafts and confirmation across capture, Inbox processing/actions, and Week moves; exact planning-date persistence, retry protection, timezone-aware placement, and preserved task identity/history/deadlines. Desktop and physical-iPhone acceptance remain pending.
-
-- Fixed commitment keyboard interactions (#12): blank form taps and non-text actions request native dismissal without swallowing controls, with platform-specific scroll dismissal and preserved Web focus. Physical-iPhone acceptance remains pending.
-- Fixed commitment time selection (#11): arbitrary minutes, an editor-wide iOS draft picker with explicit confirmation/cancellation, native Android confirmation, and protection against abandoned selections. Physical-iPhone acceptance remains pending.
 - Replaced More’s stale hardcoded version label with the shared metadata-derived version/build footer, preserving LifeOS branding, Hebrew/RTL styling, and development/web fallbacks.
+
+## [0.2.1] — Unreleased preparation
+
+Prepared on 2026-09-08 for the next locally signed standalone internal iPhone update, version `0.2.1`, build `3`, from committed/pushed `544cde042a83684bc389d903ef17f51adee8af2f`. Not built, installed, or published in this step. Owner-reported desktop checks passed for #11/#12 and isolated preview/demo checks passed for #13; physical-iPhone acceptance and #13 authenticated live-database persistence/history acceptance remain pending.
+
+### Fixed
+
+- #11: precise commitment time selection, including 09:17, with visible full-width iOS hour/minute selection, explicit confirmation/cancellation, reopening, and optional-end set/clear semantics pending device review.
+- #12: blank-space keyboard dismissal and preserved one-tap date/time/actions, natural text focus, multiline description, and reachable Save.
+- #13: confirmed calendar-date capture/rescheduling across months/years through Capture, Inbox, and Week; planning-only moves preserve task identity, unrelated fields, deadlines, status, and execution history. Isolated automated coverage passes; live authenticated acceptance remains separate.
+- Retained deterministic Week/settings regression stabilization, calendar/cache coverage, and complementary iOS/Android and Web picker/keyboard coverage without new skips.
+
+### Changed
+
+- Followed the existing shared version convention: root, API, Mobile, Expo, and the four corresponding lockfile version fields now read `0.2.1`; iOS build is `3`. Dependency versions and lockfile resolutions are unchanged.
+- Synchronized only the ignored native Info.plist and Debug/Release version/build settings. Known native/cached Release evidence was `0.2.0 (2)`, cached Debug was `0.1.0 (1)`, no archives or build 3 were found, and the registered device was unavailable for installed-metadata inspection.
+
+### Verification boundary
+
+- GitHub records the successful Railway deployment for the exact #13 SHA, and live `/health` returns the expected HTTP 200 service/status contract. No direct Railway provider session was available; this does not prove the active deployment's identity or database writes/history behavior.
+- Full release-preparation evidence and the pending device checklist are in [the 0.2.1 verification record](docs/release-0.2.1-verification.md). #11/#12/#13 remain open in Verify. Manual Git checkpoint precedes any later build/install.
 
 ## [0.2.0] — Unreleased preparation
 
