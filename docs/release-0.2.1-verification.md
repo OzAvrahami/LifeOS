@@ -1,4 +1,34 @@
-# LifeOS 0.2.1/build 3 — standalone iPhone preparation
+# LifeOS 0.2.1/build 3 — preparation and owner acceptance
+
+## Current owner acceptance — 2026-09-08
+
+On 2026-09-08, after manually committing/pushing release preparation `2aa6bc4a246a06efc31a6c7753b1ad9f51b8a102`, the owner built and installed the standalone internal iPhone Release, confirmed the app displays **0.2.1 / build 3**, and replied **"מאשר הכל" — "I approve everything."** This is **owner-reported acceptance**, not an independently observed device test. Standalone opening/data loading over cellular without the Mac/Metro and retention of the tested commitment/task times/dates after saving and reopening the app were approved.
+
+- [x] #11: visible hour/minute controls, precise 09:17 without premature dismissal, confirm/reopen/cancel, and optional-end set/clear.
+- [x] #12: blank-space keyboard dismissal without closing the form or losing text, one-tap date/time activation, and the requested text-field/description interactions.
+- [x] #13: selecting a planning date, correct visible placement, selecting a distant date, cancelling a change, and moving a disposable task without a visible duplicate.
+- [x] Saving and reopening the app preserves the tested commitment and task with their selected times/dates.
+
+Previous automated tests remain the evidence for internal IDs, unrelated-field/deadline/status/history preservation, cache membership, and timezone invariants. No new instrumented live-database/history/RLS test, full accessibility audit, exhaustive platform matrix, direct Railway active-deployment inspection, or extraction of the installed binary's exact source SHA was performed. The reported device persistence is accepted user-flow evidence, separate from the earlier preview/demo acceptance. Unrelated older release checks and backlog work are not approved by this record.
+
+Read-only Git checks for this finalization found clean tracked `main`, with local HEAD and remote `main` both at `2aa6bc4a246a06efc31a6c7753b1ad9f51b8a102`. Full implementation SHAs, all ancestors of that baseline:
+
+| Issue | Implementation SHA | Verified final GitHub state | Preserved priority |
+| --- | --- | --- | --- |
+| [#11](https://github.com/OzAvrahami/LifeOS/issues/11#issuecomment-5581736859) | `6bbccdc7ce655fda60cae2cd29a1c8212d36ca65` | CLOSED / COMPLETED / Done | P1 — High |
+| [#12](https://github.com/OzAvrahami/LifeOS/issues/12#issuecomment-5581738239) | `3db8d52d90389a0da132cb1857a651b497e2ab44` | CLOSED / COMPLETED / Done | P2 — Medium |
+| [#13](https://github.com/OzAvrahami/LifeOS/issues/13#issuecomment-5581739385) | `544cde042a83684bc389d903ef17f51adee8af2f` | CLOSED / COMPLETED / Done | P1 — High |
+
+One acceptance comment per issue was posted with macOS `gh` and read back after checking for duplicates. Supported acceptance boxes were reconciled with their evidence; broad unperformed accessibility audits remain explicit. Existing Project automation moved each original item to Done after closure, with no duplicate item or manual Project-field mutation. Labels, assignees, milestones, titles, and priorities were preserved. No unrelated issue was changed.
+
+This update records an **installed, owner-accepted internal build**, not a GitHub Release, TestFlight, or App Store publication. No tag or GitHub Release was created. Documentation changes still require the owner's manual commit/push: `docs(release): record 0.2.1 iPhone acceptance`. No rebuild, test-suite rerun, or production action occurred in this finalization.
+
+Finalization checks passed: documentation consistency, local file/fragment links, unchanged 0.2.1/build 3 metadata, preservation of all existing ignored native/environment file contents, and `git diff --check`. Only the eight intended documentation files changed; the Git index remains untouched. The test counts below are retained preparation results, not new runs.
+
+## Historical preparation stage — earlier on 2026-09-08
+
+The following preparation-stage results, availability statements, and build instructions describe the state before the owner's later installation/approval. They are preserved as historical evidence and are superseded by the current acceptance above wherever they say acceptance or installation was pending.
+
 
 Prepared on 2026-09-08 in `/Users/ozavrahami/code/lifeOS`. **Stop point: owner manual Git checkpoint.** No native compilation, build, installation, publication, Git state-changing operation, API deployment, migration, dependency installation, or production data mutation was performed.
 
@@ -86,21 +116,20 @@ npm run test --workspace @lifeos/mobile -- --runTestsByPath \
 
 No new skips, weakened assertions, dependency changes, or test-source changes were introduced. The standard run covers the iOS-only cases excluded by Android; Android covers the standard run's Android-only exclusion. API tests use isolated stores/fake external boundaries. The opt-in live PostgreSQL/Auth/RLS harness was not run; no current isolated full-stack environment or approved usable test account was confirmed. Historical retained test-account records are not proof of current suitability/authorization. No simulator/browser test counts as physical-iPhone acceptance.
 
-## Later installed Release checklist — all pending
+## Original extended Release checklist — evidence reconciliation
 
-Use only clearly disposable records in an approved account/environment for writes. If no suitable account is available, pause the persistence/history portion; do not use real tasks automatically or request secrets in documentation/comments.
+The owner approval above accepts the reported #11/#12/#13 device flows. The original combined checklist also contained broader claims, separated here rather than marked complete mechanically:
 
-- [ ] Settings and More show version **0.2.1**, native build **3**.
-- [ ] Launch without preview/demo and authenticate normally.
-- [ ] Stop Metro/local API, disconnect the Mac, and relaunch using Railway over cellular or another non-development connection.
-- [ ] #11: full visible hour/minute wheels, 09:17, confirm/cancel/reopen, optional end set/clear, save/reopen.
-- [ ] #12: blank-space dismissal, one-tap date/time controls, natural text focus, multiline description, reachable Save.
-- [ ] #13: current-week and distant-date selection, cancel with title/previous-selection retention, reschedule an existing disposable task, title-only unscheduled Inbox capture, and persistence after relaunch.
-- [ ] Verify stable task identity and preserved unrelated fields, deadlines, status, and execution history on clearly disposable records, including fresh reads after relaunch. Record exact installed version/build, account/environment approval, and observed results without credentials.
+- [x] Installed app displays version **0.2.1**, native build **3** — owner-reported; no independent inspection of both footer locations or binary source SHA.
+- [x] Standalone opening and data loading without the Mac/Metro over cellular — owner-reported, distinct from preview/demo checks; no separate instrumented authentication trace.
+- [x] #11/#12/#13 visible interactions and save/app-reopen persistence — owner-reported scope listed above. Prior automated/desktop tests remain separate evidence for additional creation/editing, title-only Inbox capture, and shared entry points.
+- [x] Internal identity, unrelated fields, deadlines, status/history, cache membership, and timezone invariants — supported by the prior automated tests, not by owner inspection of database rows or internal IDs.
+- [ ] New instrumented live-database/history/RLS inspection of the installed flow — not performed or required as a new test in this finalization.
+- [ ] Full accessibility/VoiceOver audit and physical device-timezone/near-midnight matrix — not reported. Usable controls and accepted touch/text flows are not a full audit.
 
-Retain the broader still-pending release checks in [DEPLOYMENT.md](DEPLOYMENT.md), including inherited Day Window/Today/Week/Weekly Focus acceptance. Do not close #11/#12/#13 or mark native acceptance complete based on this preparation.
+The older Day Window/Today/Week/Weekly Focus checks in [DEPLOYMENT.md](DEPLOYMENT.md) retain their prior status. They and unrelated backlog features are not included in this acceptance.
 
-## Manual Git checkpoint and later command
+## Historical preparation checkpoint and build command
 
 The owner reviews the tracked diff, stages the intended tracked files, commits, and pushes manually. Keep ignored native/environment files ignored. Suggested conventional commit:
 

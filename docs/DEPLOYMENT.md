@@ -1,6 +1,8 @@
 # LifeOS Deployment
 
-This document describes the existing standalone internal iPhone delivery path and the prepared v0.2.1/build 3 update containing #11/#12/#13. v0.1.1 remains the latest published GitHub Release. This preparation stops before the owner’s manual Git checkpoint; no v0.2.1 build, installation, publication, or device acceptance has occurred. Historical standalone verification does not accept this prepared binary. See [the current preparation record](release-0.2.1-verification.md).
+LifeOS 0.2.1/build 3 is installed and **owner-accepted through the standalone internal iPhone delivery path** for #11/#12/#13. On 2026-09-08, after manually committing/pushing preparation `2aa6bc4a246a06efc31a6c7753b1ad9f51b8a102`, the owner built/installed, confirmed the displayed version/build, and replied "מאשר הכל" — "I approve everything." Standalone cellular opening/data loading without Mac/Metro and tested commitment/task save/app-reopen persistence were approved. See [the acceptance record](release-0.2.1-verification.md) for the precise scope and prior automated evidence.
+
+This is owner-reported acceptance, not independent device observation, binary-SHA extraction, or a new instrumented database/history/RLS/accessibility audit. No direct Railway active-deployment inspection was performed. No tag, GitHub Release, TestFlight, or App Store publication was created here; v0.1.1 remains the latest GitHub Release recorded during preparation. Older unrelated acceptance checks remain outstanding. This finalization changes documentation/workflow only.
 
 ## Architecture
 
@@ -24,11 +26,11 @@ The installed iPhone application sends authenticated requests to the public Rail
 
 `GET /health` is unauthenticated and returns only the service name and status. Railway provides `PORT` at runtime; it must not be hard-coded.
 
-### Deployment evidence checked on 2026-09-08
+### Historical deployment evidence checked during preparation on 2026-09-08
 
 Local HEAD and remote `main` both matched `544cde042a83684bc389d903ef17f51adee8af2f` (#13, containing #11/#12). GitHub commit context `LifeOS - @lifeos/api` reports success at `2026-09-08T06:55:17Z`, linking Railway deployment `88584cb4-e0a1-4b79-86b1-396f55ff0017`. GitHub deployment `6322298644` for that SHA and `LifeOS / production` reports success at `06:55:20Z`; it is the newest deployment returned by the repository deployment listing. Read-only `GET /health` from this Mac returned HTTP 200 with exactly `{"service":"lifeos-api","status":"ok"}`.
 
-No Railway CLI/provider session or provider credential was available. The evidence is GitHub's recorded successful deployment plus current public health, not independent inspection of the currently active Railway deployment. Health does not identify its commit and does not prove database writes or task-history preservation. No production mutation, deployment, rollback, setting change, or migration was performed. #13 authenticated persistence/history acceptance remains pending.
+No Railway CLI/provider session or provider credential was available. The evidence is GitHub's recorded successful deployment plus current public health, not independent inspection of the currently active Railway deployment. Health does not identify its commit and does not prove database writes or task-history preservation. No production mutation, deployment, rollback, setting change, or migration was performed. The owner later accepted the tested on-device save/reopen persistence flow; internal history/ID/RLS invariants still rely on prior automated evidence, not a newly instrumented production test.
 
 ### Railway environment variables
 
@@ -53,20 +55,20 @@ https://lifeosapi-production-0362.up.railway.app
 
 Mobile also needs its existing public Supabase configuration. Environment values remain untracked and must not be embedded in documentation or committed.
 
-## Standalone iPhone Release build
+## Standalone iPhone Release build — reference for future authorized updates
 
-Run Expo commands from `apps/mobile`, where this monorepo's Expo configuration lives. On the prepared Mac, connect and unlock the registered iPhone, with Developer Mode enabled and the existing Apple development team available in Xcode. After the owner manually reviews, commits, and pushes the prepared update, build/install manually in a separate step:
+Run Expo commands from `apps/mobile`, where this monorepo's Expo configuration lives. On the prepared Mac, connect and unlock the registered iPhone, with Developer Mode enabled and the existing Apple development team available in Xcode. The owner reports completing this delivery path after the preparation commit for 0.2.1/build 3. For a future separately authorized update, after its manual Git checkpoint, build/install with:
 
 ```bash
 cd /Users/ozavrahami/code/lifeOS/apps/mobile
 NODE_ENV=production npx --no-install expo run:ios --device --configuration Release
 ```
 
-Select the intended physical iPhone when prompted. This command compiles, signs, and installs the Release app; it was not run during preparation. The iOS bundle identifier remains `il.co.ozavrahami.lifeos`, with the existing automatic Apple Development signing/team configuration.
+Select the intended physical iPhone when prompted. This command compiles, signs, and installs the Release app; it was not run by the assistant during preparation or acceptance finalization. The later build/install was performed by the owner. The iOS bundle identifier remains `il.co.ozavrahami.lifeos`, with the existing automatic Apple Development signing/team configuration.
 
 The installed standalone Release app contains its JavaScript and native metadata. It needs a new build/install to receive these changes. A development refresh or git push does not update that installed binary. There is no EAS Update or other over-the-air delivery configured for this path.
 
-### Native version synchronization
+### Native version synchronization — historical 0.2.1 preparation
 
 `apps/mobile/app.json` now specifies version `0.2.1` and `ios.buildNumber: "3"`. Before this preparation, app configuration, native Info.plist, Debug/Release project settings, and the cached Release artifact used `0.2.0 (2)`; cached Debug was `0.1.0 (1)`. No local archives or evidence of build 3 were found. Build 3 is greater than all relevant available build evidence. The registered iPhone was unavailable, so its installed metadata was not inspected; cached artifacts do not establish what is installed.
 
@@ -107,7 +109,7 @@ PY
 
 Expo maps the version/build fields to these Info.plist keys; the Settings footer reads `Constants.expoConfig.version` and `Constants.platform.ios.buildNumber`. The latter comes from the binary's Info.plist. Web/development labels and unavailable-build text avoid treating `expoConfig.ios.buildNumber` as installed-binary evidence. See [Expo Constants](https://docs.expo.dev/versions/latest/sdk/constants/) and [app versions](https://docs.expo.dev/build-reference/app-versions/).
 
-### Local prerequisites checked on 2026-09-08
+### Historical local prerequisites checked during preparation on 2026-09-08
 
 - Node `26.3.0`, npm `11.16.0`, Xcode `26.6` (`17F113`), and CocoaPods `1.17.0` are installed. Node 24 LTS remains the repository preference; Node 26 is supported by the documented baseline.
 - Xcode lists the existing `LifeOS` workspace/scheme. `Podfile.lock` matches `Pods/Manifest.lock`; `.xcode.env.local` references the existing Node 26.3.0 executable. The existing automatic signing team is unchanged and one valid Apple Development signing identity is available. No certificate/provisioning material was exported.
@@ -132,24 +134,29 @@ console.log('Railway endpoint matches; public Supabase configuration is present.
 JS
 ```
 
-### Physical-iPhone acceptance for v0.2.1/build 3 — pending
+### Physical-iPhone acceptance for v0.2.1/build 3 — evidence reconciliation
 
-- [ ] Settings and More show version `0.2.1`, native build `3`; confirm the footer is readable in Hebrew/RTL.
-- [ ] Launch the ordinary app without preview/demo and authenticate normally.
-- [ ] #11: verify visible hour/minute wheels, 09:17, confirm/cancel/reopen, optional-end set/clear, and save/reopen.
-- [ ] #12: verify blank-space dismissal, one-tap date/time controls, natural text focus, multiline description, and reachable Save.
-- [ ] #13: verify current-week and distant-date selection, cancellation, rescheduling, title-only Inbox capture, and persistence after relaunch.
-- [ ] Verify task identity, unrelated fields, deadline, status, and history preservation using only clearly disposable records in an approved test account/environment. No suitable current test account was confirmed in preparation; do not use real tasks automatically or interpret historical test accounts as present authorization.
-- [ ] With Metro/local API stopped and the Mac disconnected, relaunch over cellular; authenticate and verify Today hydration and persisted data.
+The completed items below are owner-reported on 2026-09-08, separate from historical automated checks. No broader audit is inferred.
+
+- [x] Installed app displays version `0.2.1`, build `3`; no independent inspection of both footer locations or binary source SHA.
+- [x] Ordinary standalone opening/data loading without the Mac/Metro over cellular; no new instrumented authentication trace.
+- [x] #11: visible hour/minute controls, 09:17 without premature dismissal, confirm/reopen/cancel, optional-end set/clear, and tested save/app-reopen retention.
+- [x] #12: blank-space dismissal without form closure/text loss, one-tap date/time activation, and requested text-field/description interactions.
+- [x] #13: planning-date selection and visible placement, a distant date, cancellation, a disposable-task move without visible duplication, and selected-date retention after saving/reopening the app. Prior automated/preview evidence separately covers title-only Inbox capture and shared entry points.
+- [ ] New instrumented inspection of internal task IDs, unrelated fields, deadlines, status/history, and RLS in the live installed flow — not performed; existing automated tests remain evidence for these invariants.
+- [ ] Full accessibility/VoiceOver and physical device-timezone/near-midnight matrix — not reported as performed.
+
+The following older unrelated acceptance items retain their prior status and are not covered by this approval:
+
 - [ ] Save/reopen Day Window, test an overnight pair and clearing, then confirm persistence after restart/logout-login. A server-update-required notice is not a successful save.
 - [ ] Today shows actual Task time, discloses missing estimates, keeps Commitments separate, and has no fixture/Weekly Focus items masquerading as Tasks (#8).
 - [ ] Today inline Add Task defaults to Today; global capture defaults to Inbox. Follow one Task through Inbox → Today/Week → Active → Completed without duplication.
 - [ ] Week expands/collapses remaining Tasks with working scheduling controls; day counts/durations agree with actual Tasks.
 - [ ] Weekly Focus opens the current account/week data, saves/reopens, cancels without saving, clears, and retains edits for retry on a failed save; no fixture wizard appears in authenticated use.
 
-All checks above remain unchecked. Record results against the eventual installed version/build. Keep #11/#12/#13 open in Verify until their required acceptance is complete; deployment success and preview acceptance do not complete these checks. Keep #8 open in Verify until its required acceptance is complete. #3's full planning lifecycle and #4's broader week navigation/day-detail behavior remain incomplete and open in In Progress even if these checks pass.
+The owner-approved #11/#12/#13 flows are complete; the issues are Closed/Completed and their existing Project items were read back as Done with priorities preserved. The specialized and older unchecked items above must not be represented as completed by that approval. Keep #8 open in Verify until its required acceptance is complete. #3's full planning lifecycle and #4's broader week navigation/day-detail behavior remain incomplete and open in In Progress even if these checks pass.
 
-The historical standalone test on 2026-08-20 used the installed Release build with Metro stopped, the local API stopped, the Mac disconnected, and the iPhone on cellular networking. Normal use therefore does not require the Mac, Metro, or a LAN-hosted API. Repeat that acceptance for v0.2.1/build 3.
+The historical standalone test on 2026-08-20 used the installed Release build with Metro stopped, the local API stopped, the Mac disconnected, and the iPhone on cellular networking. Normal use therefore does not require the Mac, Metro, or a LAN-hosted API. The owner separately reports that standalone cellular opening/data loading passed for 0.2.1/build 3 on 2026-09-08.
 
 ## Distribution limitation
 

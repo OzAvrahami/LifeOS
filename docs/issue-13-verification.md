@@ -1,10 +1,19 @@
 # Issue #13 verification and owner review
 
-## Current status — 2026-09-08 release preparation
+## Current owner acceptance — 2026-09-08
 
-The owner committed and pushed #11 (`6bbccdc`), #12 (`3db8d52`), and #13 (`544cde0`). Owner-reported desktop-browser acceptance passed for #11/#12; isolated preview/demo acceptance passed for #13. All three issues remain open in Verify. Physical-iPhone acceptance and #13 authenticated live-database persistence/history acceptance remain pending.
+On 2026-09-08, after manually committing/pushing release preparation `2aa6bc4a246a06efc31a6c7753b1ad9f51b8a102`, the owner built and installed the standalone internal iPhone Release, confirmed the app displays **0.2.1 / build 3**, and replied **"מאשר הכל" — "I approve everything."** This is **owner-reported acceptance**, not an independently observed device test. Standalone opening/data loading over cellular without the Mac/Metro and retention of the tested commitment/task times/dates after saving and reopening the app were approved.
 
-Version 0.2.1/build 3 is prepared separately, with no native build/install in this step. GitHub records successful Railway deployment for exact SHA `544cde042a83684bc389d903ef17f51adee8af2f`, and live `/health` matches the contract. Direct provider/active-deployment identity was not inspected; health and deployment success do not prove task writes/history behavior. See [the current release preparation record](release-0.2.1-verification.md) for evidence and the manual Git checkpoint. Earlier local/undeployed, desktop-pending, and uncommitted references below are historical implementation/handoff observations; their automated results and unchecked native acceptance remain intact.
+- [x] Planning-date selection, correct visible placement, a distant date, cancellation, a disposable-task move without a visible duplicate, and save/app-reopen retention of its selected date. **Owner-reported physical-iPhone acceptance.**
+
+Previous automated tests remain the evidence for internal IDs, unrelated-field/deadline/status/history preservation, cache membership, and timezone invariants. No new instrumented live-database/history/RLS test, full accessibility audit, exhaustive platform matrix, direct Railway active-deployment inspection, or extraction of the installed binary's exact source SHA was performed. The reported device persistence is accepted user-flow evidence, separate from the earlier preview/demo acceptance. Unrelated older release checks and backlog work are not approved by this record.
+
+[Acceptance comment](https://github.com/OzAvrahami/LifeOS/issues/13#issuecomment-5581739385) posted and read back using macOS `gh`. Issue #13 is **CLOSED / COMPLETED**, its existing Project item is **Done**, and **P1 — High** is preserved. Existing automation applied Done; other issue metadata was preserved. See [the release acceptance record](release-0.2.1-verification.md). These documentation changes await the owner's manual commit/push; no tag or GitHub Release was created.
+
+## Historical implementation and preparation evidence
+
+The earlier implementation/desktop/preparation observations below are retained as dated evidence. Their pending-device/open-issue/uncommitted statements describe those earlier stages and are superseded by the current acceptance above. Automated results are prior runs, not new tests.
+
 
 
 ## Baseline and scope
@@ -84,13 +93,13 @@ Stop that Expo process with Ctrl-C when finished. A future full-stack review mus
 
 This task does not add distant-week browsing, general day-detail editing, task times, description UI, templates, recurrence, calendar integration, or day replanning. No owner re-review of unchanged #11/#12 desktop behavior is needed before reviewing #13.
 
-## Physical-iPhone acceptance — pending
+## Physical-iPhone acceptance — evidence reconciliation
 
-In a **separate follow-up after desktop review and the owner's manual Git checkpoint**, prepare the updated Release build containing #11/#12/#13. No such build/install is initiated here.
+The owner subsequently built/installed 0.2.1/build 3 after the manual preparation checkpoint and approved the flows above. The original extended combinations below retain unchecked details that were not separately reported; no exhaustive entry-point/device-timezone/accessibility audit is inferred.
 
 - [ ] Repeat capture, first/later cancel, changing month/year components before Confirm, reopening, destination switching, save/reload, Inbox/processing/Week moves, and return to Inbox on a physical iPhone.
 - [ ] Verify keyboard dismissal, scrolling with the wheel visible, Hebrew RTL, safe areas, and VoiceOver focus/announced dates. Confirm no intermediate wheel change closes selection.
-- [ ] Verify #11's exact-minute time picker and #12's native keyboard interactions together using their existing pending device checklists.
+- [x] Verify #11's exact-minute time picker and #12's native keyboard interactions together — owner-reported scope in their current acceptance records.
 - [ ] Check device timezone differing from LifeOS settings and a date near midnight. No selected date or deadline should shift.
 
 Android event behavior is covered in automation; no Android device acceptance is claimed.

@@ -10,26 +10,28 @@ LifeOS follows Semantic Versioning for development and release tags.
 
 - Replaced More’s stale hardcoded version label with the shared metadata-derived version/build footer, preserving LifeOS branding, Hebrew/RTL styling, and development/web fallbacks.
 
-## [0.2.1] — Unreleased preparation
+## [0.2.1] — Internal iPhone owner acceptance — 2026-09-08
 
-Prepared on 2026-09-08 for the next locally signed standalone internal iPhone update, version `0.2.1`, build `3`, from committed/pushed `544cde042a83684bc389d903ef17f51adee8af2f`. Not built, installed, or published in this step. Owner-reported desktop checks passed for #11/#12 and isolated preview/demo checks passed for #13; physical-iPhone acceptance and #13 authenticated live-database persistence/history acceptance remain pending.
+**Installed and owner-accepted internally as 0.2.1/build 3; not published as a GitHub Release, TestFlight, or App Store release.** After manually committing/pushing preparation `2aa6bc4a246a06efc31a6c7753b1ad9f51b8a102`, the owner built/installed the standalone Release, confirmed its displayed version/build, and replied "מאשר הכל" — "I approve everything." Owner-reported acceptance covers standalone cellular opening/data loading without the Mac/Metro, #11 precise picker interactions, #12 keyboard/text interactions, #13 date placement/cancellation/disposable-task movement, and retention of the tested commitment/task times/dates after saving and reopening the app.
+
+Historical preparation on 2026-09-08 used `544cde042a83684bc389d903ef17f51adee8af2f` and did not build, install, or publish in that preparation step. Earlier #11/#12 desktop and #13 preview/demo approvals and automated results remain separate evidence from the later owner device acceptance.
 
 ### Fixed
 
-- #11: precise commitment time selection, including 09:17, with visible full-width iOS hour/minute selection, explicit confirmation/cancellation, reopening, and optional-end set/clear semantics pending device review.
+- #11: precise commitment time selection, including 09:17, with visible full-width iOS hour/minute selection, explicit confirmation/cancellation, reopening, and optional-end set/clear semantics, now owner-accepted on the installed iPhone build.
 - #12: blank-space keyboard dismissal and preserved one-tap date/time/actions, natural text focus, multiline description, and reachable Save.
-- #13: confirmed calendar-date capture/rescheduling across months/years through Capture, Inbox, and Week; planning-only moves preserve task identity, unrelated fields, deadlines, status, and execution history. Isolated automated coverage passes; live authenticated acceptance remains separate.
+- #13: confirmed calendar-date capture/rescheduling across months/years through Capture, Inbox, and Week; planning-only moves preserve task identity, unrelated fields, deadlines, status, and execution history. Prior isolated automated coverage supports these internal invariants; owner-reported device saving/reopening confirms the tested visible persistence flow without internal-ID/history inspection.
 - Retained deterministic Week/settings regression stabilization, calendar/cache coverage, and complementary iOS/Android and Web picker/keyboard coverage without new skips.
 
 ### Changed
 
 - Followed the existing shared version convention: root, API, Mobile, Expo, and the four corresponding lockfile version fields now read `0.2.1`; iOS build is `3`. Dependency versions and lockfile resolutions are unchanged.
-- Synchronized only the ignored native Info.plist and Debug/Release version/build settings. Known native/cached Release evidence was `0.2.0 (2)`, cached Debug was `0.1.0 (1)`, no archives or build 3 were found, and the registered device was unavailable for installed-metadata inspection.
+- Synchronized only the ignored native Info.plist and Debug/Release version/build settings. During preparation, known native/cached Release evidence was `0.2.0 (2)`, cached Debug was `0.1.0 (1)`, no archives or build 3 were found, and the registered device was unavailable for installed-metadata inspection.
 
 ### Verification boundary
 
-- GitHub records the successful Railway deployment for the exact #13 SHA, and live `/health` returns the expected HTTP 200 service/status contract. No direct Railway provider session was available; this does not prove the active deployment's identity or database writes/history behavior.
-- Full release-preparation evidence and the pending device checklist are in [the 0.2.1 verification record](docs/release-0.2.1-verification.md). #11/#12/#13 remain open in Verify. Manual Git checkpoint precedes any later build/install.
+- Historical preparation checked GitHub deployment success for the exact #13 SHA and the expected HTTP 200 health contract. No new provider or service inspection was performed for acceptance finalization; active-deployment identity was not directly inspected.
+- [The 0.2.1 verification record](docs/release-0.2.1-verification.md) separates prior automation, owner-reported device acceptance, and unperformed specialized checks. #11/#12/#13 are closed as Completed, with their existing Project items read back as Done and priorities preserved. No new instrumented database/history/RLS test or full accessibility audit was run; unrelated older acceptance checks remain unchanged. Documentation finalization awaits the owner’s manual commit/push; no tag or GitHub Release was created.
 
 ## [0.2.0] — Unreleased preparation
 

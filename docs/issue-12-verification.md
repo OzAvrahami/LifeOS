@@ -1,10 +1,19 @@
 # Issue #12 verification and owner review
 
-## Current status — 2026-09-08 release preparation
+## Current owner acceptance — 2026-09-08
 
-The owner committed and pushed #11 (`6bbccdc`), #12 (`3db8d52`), and #13 (`544cde0`). Owner-reported desktop-browser acceptance passed for #11/#12; isolated preview/demo acceptance passed for #13. All three issues remain open in Verify. Physical-iPhone acceptance and #13 authenticated live-database persistence/history acceptance remain pending.
+On 2026-09-08, after manually committing/pushing release preparation `2aa6bc4a246a06efc31a6c7753b1ad9f51b8a102`, the owner built and installed the standalone internal iPhone Release, confirmed the app displays **0.2.1 / build 3**, and replied **"מאשר הכל" — "I approve everything."** This is **owner-reported acceptance**, not an independently observed device test. Standalone opening/data loading over cellular without the Mac/Metro and retention of the tested commitment/task times/dates after saving and reopening the app were approved.
 
-Version 0.2.1/build 3 is prepared separately, with no native build/install in this step. GitHub records successful Railway deployment for exact SHA `544cde042a83684bc389d903ef17f51adee8af2f`, and live `/health` matches the contract. Direct provider/active-deployment identity was not inspected; health and deployment success do not prove task writes/history behavior. See [the current release preparation record](release-0.2.1-verification.md) for evidence and the manual Git checkpoint. Earlier local/undeployed, desktop-pending, and uncommitted references below are historical implementation/handoff observations; their automated results and unchecked native acceptance remain intact.
+- [x] Blank-space dismissal without closing the form or losing text, one-tap date/time activation, the requested text-field/description interactions, and saving/reopening the tested commitment. **Owner-reported physical-iPhone acceptance.**
+
+Previous automated tests remain the evidence for internal IDs, unrelated-field/deadline/status/history preservation, cache membership, and timezone invariants. No new instrumented live-database/history/RLS test, full accessibility audit, exhaustive platform matrix, direct Railway active-deployment inspection, or extraction of the installed binary's exact source SHA was performed. The reported device persistence is accepted user-flow evidence, separate from the earlier preview/demo acceptance. Unrelated older release checks and backlog work are not approved by this record.
+
+[Acceptance comment](https://github.com/OzAvrahami/LifeOS/issues/12#issuecomment-5581738239) posted and read back using macOS `gh`. Issue #12 is **CLOSED / COMPLETED**, its existing Project item is **Done**, and **P2 — Medium** is preserved. Existing automation applied Done; other issue metadata was preserved. See [the release acceptance record](release-0.2.1-verification.md). These documentation changes await the owner's manual commit/push; no tag or GitHub Release was created.
+
+## Historical implementation and preparation evidence
+
+The earlier implementation/desktop/preparation observations below are retained as dated evidence. Their pending-device/open-issue/uncommitted statements describe those earlier stages and are superseded by the current acceptance above. Automated results are prior runs, not new tests.
+
 
 
 Started on clean `main` at `6bbccdc7ce655fda60cae2cd29a1c8212d36ca65`, the owner's committed #11 fix. Verified Node 24.11.1, npm 11.6.2, Expo ~57.0.14, React Native 0.86.2, Jest 29.7, and the existing picker 9.1.0. No dependency, native configuration, version, persistence, or Git state changes were performed.
@@ -59,16 +68,16 @@ In a disposable test account, review both creation and editing: title/descriptio
 
 This diff needs a Web/JS reload only with an already compatible development client. It does not require a native rebuild. A standalone Release app does not load this checkout from Metro.
 
-## Physical-iPhone acceptance — pending
+## Physical-iPhone acceptance — evidence reconciliation
 
-No iOS device or simulator verification was performed. Repeat this checklist for both **creating and editing** a disposable commitment:
+The historical implementation session performed no device/simulator verification. The later owner approval accepts the normal touch, text, picker, and save/reopen flows above. The original extended checklist below retains combined cases without implying a full VoiceOver, safe-area, deletion, or exhaustive gesture audit:
 
-- [ ] Type in the title, tap sheet padding, heading gaps, and form gaps. Keyboard dismisses; editor and entered data remain. Repeat from multiline description.
-- [ ] Transfer directly between title and description; reposition/select text, continue typing, and insert a newline. No ancestor blur or swallowed gesture.
-- [ ] From a focused text field, tap Date, Start, and End individually. Each dismisses and activates in one tap. Change hour then minutes to 09:17, confirm, reopen, and cancel a change; keep #11's precise value and isolated draft.
+- [x] Type in the title, tap sheet padding, heading gaps, and form gaps. Keyboard dismisses; editor and entered data remain. Repeat from multiline description.
+- [x] Transfer directly between title and description; reposition/select text, continue typing, and insert a newline. No ancestor blur or swallowed gesture.
+- [x] From a focused text field, tap Date, Start, and End individually. Each dismisses and activates in one tap. Change hour then minutes to 09:17, confirm, reopen, and cancel a change; keep #11's precise value and isolated draft.
 - [ ] Open details, choose/toggle life area, set/clear optional end, and intentionally Save in one interaction each. Reopen and confirm title, description, date, times, and area. Invalid end-before/equal-start still blocks Save. Delete requires explicit confirmation; cancel preserves edits.
 - [ ] With keyboard open, drag the form and reach all fields/actions. Check interactive dismissal, narrow-screen Hebrew RTL, safe areas, and VoiceOver focus order. Wheel manipulation and text selection must not trigger background dismissal or unintended close/save.
-- [ ] While a time draft is open, tap a blank area; it neither confirms nor cancels the draft. Verify Confirm/Cancel remain reachable. Recheck #11's separate [pending device checklist](issue-11-verification.md#physical-iphone-checklist--pending).
+- [ ] While a time draft is open, tap a blank area; it neither confirms nor cancels the draft. Verify Confirm/Cancel remain reachable. Recheck #11's separate [device evidence reconciliation](issue-11-verification.md#physical-iphone-checklist--evidence-reconciliation).
 
 ## Project and manual Git checkpoint
 

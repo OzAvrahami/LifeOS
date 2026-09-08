@@ -1,10 +1,19 @@
 # Issue #11 verification and owner review
 
-## Current status — 2026-09-08 release preparation
+## Current owner acceptance — 2026-09-08
 
-The owner committed and pushed #11 (`6bbccdc`), #12 (`3db8d52`), and #13 (`544cde0`). Owner-reported desktop-browser acceptance passed for #11/#12; isolated preview/demo acceptance passed for #13. All three issues remain open in Verify. Physical-iPhone acceptance and #13 authenticated live-database persistence/history acceptance remain pending.
+On 2026-09-08, after manually committing/pushing release preparation `2aa6bc4a246a06efc31a6c7753b1ad9f51b8a102`, the owner built and installed the standalone internal iPhone Release, confirmed the app displays **0.2.1 / build 3**, and replied **"מאשר הכל" — "I approve everything."** This is **owner-reported acceptance**, not an independently observed device test. Standalone opening/data loading over cellular without the Mac/Metro and retention of the tested commitment/task times/dates after saving and reopening the app were approved.
 
-Version 0.2.1/build 3 is prepared separately, with no native build/install in this step. GitHub records successful Railway deployment for exact SHA `544cde042a83684bc389d903ef17f51adee8af2f`, and live `/health` matches the contract. Direct provider/active-deployment identity was not inspected; health and deployment success do not prove task writes/history behavior. See [the current release preparation record](release-0.2.1-verification.md) for evidence and the manual Git checkpoint. Earlier local/undeployed, desktop-pending, and uncommitted references below are historical implementation/handoff observations; their automated results and unchecked native acceptance remain intact.
+- [x] Visible hour/minute controls, precise 09:17 without premature dismissal, confirm/reopen/cancel, optional-end set/clear, and save/app-reopen retention of the tested commitment times. **Owner-reported physical-iPhone acceptance.**
+
+Previous automated tests remain the evidence for internal IDs, unrelated-field/deadline/status/history preservation, cache membership, and timezone invariants. No new instrumented live-database/history/RLS test, full accessibility audit, exhaustive platform matrix, direct Railway active-deployment inspection, or extraction of the installed binary's exact source SHA was performed. The reported device persistence is accepted user-flow evidence, separate from the earlier preview/demo acceptance. Unrelated older release checks and backlog work are not approved by this record.
+
+[Acceptance comment](https://github.com/OzAvrahami/LifeOS/issues/11#issuecomment-5581736859) posted and read back using macOS `gh`. Issue #11 is **CLOSED / COMPLETED**, its existing Project item is **Done**, and **P1 — High** is preserved. Existing automation applied Done; other issue metadata was preserved. See [the release acceptance record](release-0.2.1-verification.md). These documentation changes await the owner's manual commit/push; no tag or GitHub Release was created.
+
+## Historical implementation and preparation evidence
+
+The earlier implementation/desktop/preparation observations below are retained as dated evidence. Their pending-device/open-issue/uncommitted statements describe those earlier stages and are superseded by the current acceptance above. Automated results are prior runs, not new tests.
+
 
 
 Implementation against `main` at `9db574e448f11dd48556ef10c4539239c21affc2`, using Node 24.11.1, npm 11.6.2, Expo ~57.0.14, and the installed `@react-native-community/datetimepicker` 9.1.0. Initial worktree was clean. No Git staging, commits, branch operations, package/version changes, or native regeneration were performed.
@@ -89,9 +98,9 @@ Open the resulting Metro link/QR code in the LifeOS development client on the sa
 
 This diff changes JavaScript/TypeScript and tests/docs only. An already compatible development client needs a JS reload, not a native rebuild. A standalone Release installation does not load this checkout from Metro; use an existing development client for this review. No rebuild, release, or deployment was initiated.
 
-## Physical-iPhone checklist — pending
+## Physical-iPhone checklist — evidence reconciliation
 
-No device or simulator was available in this Windows session. Mocked tests and DOM tests do not establish native wheel layout or touch accessibility.
+No device or simulator was available in the historical Windows implementation session. The owner later accepted the physical flows recorded above. The original extended combined scenarios below remain unchecked where extra literal times, validation cases, layout details, or accessibility checks were not separately reported; they do not negate the approved 09:17/confirm/cancel/end/save-reopen flow.
 
 - [ ] **Create:** open start; change the hour and then minutes repeatedly (09:10, 09:25, 09:17); verify both wheels remain usable; confirm; reopen; change and cancel. Confirm the prior value remains and the editor stays open.
 - [ ] **Optional end:** open an empty end and cancel (still empty); set a later end and confirm; reopen and cancel another change; clear it; reopen/cancel and confirm it remains empty. Check end-before/equal-start validation.
