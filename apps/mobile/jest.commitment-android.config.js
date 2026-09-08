@@ -11,7 +11,7 @@ module.exports = {
   ...android,
   rootDir: __dirname,
   setupFiles: [...android.setupFiles, '<rootDir>/jest.setup.js'],
-  testMatch: ['<rootDir>/__tests__/commitment-time-picker-test.tsx'],
+  testMatch: ['<rootDir>/__tests__/commitment-time-picker-test.tsx', '<rootDir>/__tests__/commitment-keyboard-test.tsx'],
   transform: {
     ...android.transform,
     [transformKey]: [transformer, { ...options, caller: { ...options.caller, platform: 'android' } }],

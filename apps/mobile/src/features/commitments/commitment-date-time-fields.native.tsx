@@ -33,7 +33,7 @@ export function CommitmentDateField({ value, onChange }: { value: string; onChan
   };
   return (
     <View>
-      <Pressable accessibilityLabel="תאריך התחייבות" accessibilityRole="button" onPress={() => setOpen((current) => !current)} style={styles.field}>
+      <Pressable accessibilityLabel="תאריך התחייבות" accessibilityRole="button" onPress={() => { Keyboard.dismiss(); setOpen((current) => !current); }} style={styles.field}>
         <Text style={styles.dateText}>{new Intl.DateTimeFormat('he-IL', { day: 'numeric', month: 'long', weekday: 'long' }).format(dateFromKey(value))}</Text>
       </Pressable>
       {open ? (
@@ -187,7 +187,7 @@ function TimeField({
           <Text style={[styles.timeText, !value && styles.placeholder]}>{value ?? placeholder}</Text>
         </Pressable>
         {optional && value ? (
-          <Pressable accessibilityLabel="נקה שעת סיום" accessibilityRole="button" onPress={() => { picker.close(); onChange(null); }} style={styles.clear}>
+          <Pressable accessibilityLabel="נקה שעת סיום" accessibilityRole="button" onPress={() => { Keyboard.dismiss(); picker.close(); onChange(null); }} style={styles.clear}>
             <Text style={styles.clearText}>×</Text>
           </Pressable>
         ) : null}

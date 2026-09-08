@@ -1,6 +1,7 @@
 import { Ionicons } from '@expo/vector-icons';
-import { useState } from 'react';
+import { useRef, useState } from 'react';
 import {
+  Keyboard,
   KeyboardAvoidingView,
   Modal,
   Platform,
@@ -10,6 +11,7 @@ import {
   Text,
   TextInput,
   View,
+  type GestureResponderEvent,
 } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
@@ -25,6 +27,10 @@ import {
 } from './commitment.types';
 
 type FieldErrors = { date?: string; general?: string; time?: string; title?: string };
+
+function dismissKeyboard() {
+  if (Platform.OS !== 'web') Keyboard.dismiss();
+}
 
 type CommitmentEditorProps = {
   commitment?: Commitment | null;
@@ -63,9 +69,17 @@ function CommitmentEditorSession({
   const [errors, setErrors] = useState<FieldErrors>({});
   const [saving, setSaving] = useState(false);
   const [confirmingDelete, setConfirmingDelete] = useState(false);
+  const touchMoved = useRef(false);
+
+  // Observe only direct background taps. Leave scrolling to keyboardDismissMode
+  // and preserve child input/wheel gestures, without capturing any responder.
+  const dismissOnBackgroundTouch = (event: GestureResponderEvent) => {
+    if (!touchMoved.current && event.target === event.currentTarget) dismissKeyboard();
+  };
 
   const save = async () => {
     if (saving) return;
+    dismissKeyboard();
     const nextErrors: FieldErrors = {};
     if (!title.trim()) nextErrors.title = 'צריך להוסיף כותרת.';
     if (!/^\d{4}-\d{2}-\d{2}$/.test(date)) nextErrors.date = 'צריך לבחור תאריך.';
@@ -130,77 +144,79 @@ function CommitmentEditorSession({
             </Pressable>
           </View>
         ) : (
-          <View accessibilityLabel="עורך התחייבות" style={[styles.sheet, { paddingBottom: Math.max(insets.bottom, spacing.md) }]}>
+          <View accessibilityLabel="עורך התחייבות" onTouchStart={() => { touchMoved.current = false; }} onTouchMove={() => { touchMoved.current = true; }} onTouchEnd={dismissOnBackgroundTouch} style={[styles.sheet, { paddingBottom: Math.max(insets.bottom, spacing.md) }]}>
             <View style={styles.handle} />
-            <View style={styles.headingRow}>
+            <View onTouchEnd={dismissOnBackgroundTouch} style={styles.headingRow}>
               <Text style={styles.heading}>{commitment ? 'עריכת התחייבות' : 'התחייבות חדשה'}</Text>
               <Pressable accessibilityRole="button" onPress={onClose} style={styles.closeButton}>
                 <Text style={styles.closeText}>{commitment ? 'סגירה' : 'ביטול'}</Text>
               </Pressable>
             </View>
-            <ScrollView contentContainerStyle={styles.form} keyboardShouldPersistTaps="handled" showsVerticalScrollIndicator={false}>
-              <Text style={styles.label}>כותרת</Text>
-              <TextInput
-                accessibilityLabel="כותרת התחייבות"
-                autoFocus={!commitment}
-                editable={!saving}
-                onChangeText={(value) => { setTitle(value); setErrors((current) => ({ ...current, title: undefined })); }}
-                placeholder={commitment ? undefined : 'תור לרופא'}
-                placeholderTextColor={colors.textFaint}
-                style={[styles.input, errors.title && styles.invalidField]}
-                textAlign="right"
-                value={title}
-              />
-              {errors.title ? <Text accessibilityRole="alert" style={styles.error}>{errors.title}</Text> : null}
+            <ScrollView keyboardDismissMode={Platform.OS === 'ios' ? 'interactive' : Platform.OS === 'android' ? 'on-drag' : 'none'} keyboardShouldPersistTaps="handled" showsVerticalScrollIndicator={false} testID="commitment-form-scroll">
+              <View onTouchEnd={dismissOnBackgroundTouch} style={styles.form} testID="commitment-form-content">
+                <Text style={styles.label}>כותרת</Text>
+                <TextInput
+                  accessibilityLabel="כותרת התחייבות"
+                  autoFocus={!commitment}
+                  editable={!saving}
+                  onChangeText={(value) => { setTitle(value); setErrors((current) => ({ ...current, title: undefined })); }}
+                  placeholder={commitment ? undefined : 'תור לרופא'}
+                  placeholderTextColor={colors.textFaint}
+                  style={[styles.input, errors.title && styles.invalidField]}
+                  textAlign="right"
+                  value={title}
+                />
+                {errors.title ? <Text accessibilityRole="alert" style={styles.error}>{errors.title}</Text> : null}
 
-              <Text style={styles.label}>תאריך</Text>
-              <CommitmentDateField onChange={(value) => { setDate(value); setErrors((current) => ({ ...current, date: undefined })); }} value={date} />
-              {errors.date ? <Text accessibilityRole="alert" style={styles.error}>{errors.date}</Text> : null}
+                <Text style={styles.label}>תאריך</Text>
+                <CommitmentDateField onChange={(value) => { setDate(value); setErrors((current) => ({ ...current, date: undefined })); }} value={date} />
+                {errors.date ? <Text accessibilityRole="alert" style={styles.error}>{errors.date}</Text> : null}
 
-              <Text style={styles.label}>שעה</Text>
-              <View style={styles.timeRow}>
-                <CommitmentTimeField accessibilityLabel="שעת התחלה" onChange={(value) => { setStartTime(value); setErrors((current) => ({ ...current, time: undefined })); }} placeholder="--:--" value={startTime} />
-                <Text style={styles.until}>עד</Text>
-                <CommitmentTimeField accessibilityLabel="שעת סיום" onChange={(value) => { setEndTime(value); setErrors((current) => ({ ...current, time: undefined })); }} optional placeholder="שעת סיום" value={endTime} />
+                <Text style={styles.label}>שעה</Text>
+                <View onTouchEnd={dismissOnBackgroundTouch} style={styles.timeRow}>
+                  <CommitmentTimeField accessibilityLabel="שעת התחלה" onChange={(value) => { setStartTime(value); setErrors((current) => ({ ...current, time: undefined })); }} placeholder="--:--" value={startTime} />
+                  <Text style={styles.until}>עד</Text>
+                  <CommitmentTimeField accessibilityLabel="שעת סיום" onChange={(value) => { setEndTime(value); setErrors((current) => ({ ...current, time: undefined })); }} optional placeholder="שעת סיום" value={endTime} />
+                </View>
+                <CommitmentTimePicker />
+                <Text style={styles.hint}>שעת הסיום היא רשות — אפשר להשאיר אירוע נקודתי.</Text>
+                {errors.time ? <Text accessibilityRole="alert" style={styles.error}>{errors.time}</Text> : null}
+
+                {!detailsOpen ? (
+                  <Pressable accessibilityRole="button" onPress={() => { dismissKeyboard(); setDetailsOpen(true); }} style={styles.detailsButton}>
+                    <Ionicons color={colors.accent} name="add" size={16} />
+                    <Text style={styles.detailsButtonText}>תיאור או תחום בחיים</Text>
+                  </Pressable>
+                ) : (
+                  <>
+                    <Text style={styles.label}>תיאור</Text>
+                    <TextInput accessibilityLabel="תיאור התחייבות" multiline onChangeText={setDescription} placeholder="פרטים נוספים (רשות)" placeholderTextColor={colors.textFaint} style={[styles.input, styles.description]} textAlign="right" textAlignVertical="top" value={description} />
+                    <Text style={styles.label}>תחום בחיים</Text>
+                    <View onTouchEnd={dismissOnBackgroundTouch} style={styles.lifeAreas}>
+                      {commitmentLifeAreas.map((area) => {
+                        const selected = lifeArea === area;
+                        return (
+                          <Pressable accessibilityRole="button" accessibilityState={{ selected }} key={area} onPress={() => { dismissKeyboard(); setLifeArea(selected ? null : area); }} style={[styles.lifeArea, selected && styles.lifeAreaSelected]}>
+                            <View style={[styles.areaDot, { backgroundColor: colors.lifeArea[area] }]} />
+                            <Text style={[styles.lifeAreaText, selected && styles.lifeAreaTextSelected]}>{commitmentLifeAreaLabels[area]}</Text>
+                          </Pressable>
+                        );
+                      })}
+                    </View>
+                  </>
+                )}
+
+                {errors.general ? <Text accessibilityRole="alert" style={styles.error}>{errors.general}</Text> : null}
+                <Pressable accessibilityLabel="שמירת התחייבות" accessibilityRole="button" accessibilityState={{ busy: saving }} disabled={saving} onPress={() => void save()} style={[styles.saveButton, saving && styles.disabled]}>
+                  <Text style={styles.saveText}>{saving ? 'שומר…' : commitment ? 'שמירת שינויים' : 'שמירה'}</Text>
+                </Pressable>
+                {commitment && onDelete ? (
+                  <Pressable accessibilityRole="button" disabled={saving} onPress={() => { dismissKeyboard(); setConfirmingDelete(true); }} style={styles.deleteButton}>
+                    <Ionicons color={colors.warningText} name="trash-outline" size={17} />
+                    <Text style={styles.deleteText}>מחיקת ההתחייבות</Text>
+                  </Pressable>
+                ) : null}
               </View>
-              <CommitmentTimePicker />
-              <Text style={styles.hint}>שעת הסיום היא רשות — אפשר להשאיר אירוע נקודתי.</Text>
-              {errors.time ? <Text accessibilityRole="alert" style={styles.error}>{errors.time}</Text> : null}
-
-              {!detailsOpen ? (
-                <Pressable accessibilityRole="button" onPress={() => setDetailsOpen(true)} style={styles.detailsButton}>
-                  <Ionicons color={colors.accent} name="add" size={16} />
-                  <Text style={styles.detailsButtonText}>תיאור או תחום בחיים</Text>
-                </Pressable>
-              ) : (
-                <>
-                  <Text style={styles.label}>תיאור</Text>
-                  <TextInput accessibilityLabel="תיאור התחייבות" multiline onChangeText={setDescription} placeholder="פרטים נוספים (רשות)" placeholderTextColor={colors.textFaint} style={[styles.input, styles.description]} textAlign="right" textAlignVertical="top" value={description} />
-                  <Text style={styles.label}>תחום בחיים</Text>
-                  <View style={styles.lifeAreas}>
-                    {commitmentLifeAreas.map((area) => {
-                      const selected = lifeArea === area;
-                      return (
-                        <Pressable accessibilityRole="button" accessibilityState={{ selected }} key={area} onPress={() => setLifeArea(selected ? null : area)} style={[styles.lifeArea, selected && styles.lifeAreaSelected]}>
-                          <View style={[styles.areaDot, { backgroundColor: colors.lifeArea[area] }]} />
-                          <Text style={[styles.lifeAreaText, selected && styles.lifeAreaTextSelected]}>{commitmentLifeAreaLabels[area]}</Text>
-                        </Pressable>
-                      );
-                    })}
-                  </View>
-                </>
-              )}
-
-              {errors.general ? <Text accessibilityRole="alert" style={styles.error}>{errors.general}</Text> : null}
-              <Pressable accessibilityLabel="שמירת התחייבות" accessibilityRole="button" accessibilityState={{ busy: saving }} disabled={saving} onPress={() => void save()} style={[styles.saveButton, saving && styles.disabled]}>
-                <Text style={styles.saveText}>{saving ? 'שומר…' : commitment ? 'שמירת שינויים' : 'שמירה'}</Text>
-              </Pressable>
-              {commitment && onDelete ? (
-                <Pressable accessibilityRole="button" disabled={saving} onPress={() => setConfirmingDelete(true)} style={styles.deleteButton}>
-                  <Ionicons color={colors.warningText} name="trash-outline" size={17} />
-                  <Text style={styles.deleteText}>מחיקת ההתחייבות</Text>
-                </Pressable>
-              ) : null}
             </ScrollView>
           </View>
         )}

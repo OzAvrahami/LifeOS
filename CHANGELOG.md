@@ -8,6 +8,7 @@ LifeOS follows Semantic Versioning for development and release tags.
 
 ### Fixed
 
+- Fixed commitment keyboard interactions (#12): blank form taps and non-text actions request native dismissal without swallowing controls, with platform-specific scroll dismissal and preserved Web focus. Physical-iPhone acceptance remains pending.
 - Fixed commitment time selection (#11): arbitrary minutes, an editor-wide iOS draft picker with explicit confirmation/cancellation, native Android confirmation, and protection against abandoned selections. Physical-iPhone acceptance remains pending.
 - Replaced More’s stale hardcoded version label with the shared metadata-derived version/build footer, preserving LifeOS branding, Hebrew/RTL styling, and development/web fallbacks.
 
