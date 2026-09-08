@@ -11,10 +11,10 @@ Status is based on repository evidence. A phase can contain implemented code whi
 - **v0.1.0** — first internal MVP where the daily/weekly planning loop works end to end on a real iPhone with persisted authenticated data.
 - **v0.1.1** — standalone internal deployment milestone: Railway HTTPS API and a Release iPhone build that operates without the development Mac, Metro, or local API.
 - **v0.2.0** — historical standalone internal iPhone preparation: Day Window, task-backed summaries, capture/Week fixes, Weekly Focus stabilization, and visible version metadata; not published; historical preparation does not establish device acceptance.
-- **v0.2.1** — installed standalone internal iPhone update, build 3. Owner-reported #11 precise commitment times, #12 keyboard interactions, #13 date placement/moves, and tested save/app-reopen persistence were accepted on 2026-09-08. No GitHub Release, TestFlight, or App Store publication is implied.
+- **v0.2.1** — installed standalone internal iPhone update, build 3. Owner-reported #11 precise commitment times, #12 keyboard interactions, #13 date placement/moves, and tested save/app-reopen persistence were accepted on 2026-09-08. Published on GitHub the same day as Latest; not TestFlight or App Store distribution.
 - **v1.0.0** — a later stable-product milestone; it is not the current target.
 
-Published GitHub Releases are authoritative for released versions, as defined in `github-development-standard.md`. v0.1.1 is published; 0.2.1/build 3 is installed and owner-accepted internally for #11/#12/#13, with no new GitHub Release/tag created. See [the acceptance record](release-0.2.1-verification.md).
+Published GitHub Releases are authoritative for released versions, as defined in `github-development-standard.md`. [LifeOS v0.2.1 — Planning fixes](https://github.com/OzAvrahami/LifeOS/releases/tag/v0.2.1) is Latest, non-draft, non-prerelease, published 2026-09-08 at 09:19:03 UTC. Its annotated tag resolves to `93fde4306132f2301f5e2b02c3c374f5c203a1cd`. Preparation, acceptance documentation, and publication checkpoints are complete. See [the release record](release-0.2.1-verification.md#current-publication-and-workflow--2026-09-08).
 
 ## Phase 1 — Product definition
 
@@ -114,15 +114,15 @@ The `lifeos-api` Railway service runs the compiled API behind HTTPS. A Release i
 
 **Release milestone:** v0.1.1 — published on GitHub on 2026-08-27; standalone verification was recorded on 2026-08-20.
 
-## Phase 9 — Real-world usage and v0.2.1 internal acceptance
+## Phase 9 — Real-world usage and the completed v0.2.1 milestone
 
-**Goal:** Use the standalone v0.1 MVP in real planning and identify only the next capabilities justified by evidence.
+**Ongoing purpose:** Use LifeOS in real planning, capture defects and friction, and select further work only when supported by evidence. Ongoing usage does not imply an issue is actively being implemented.
 
-**Scope:** Real daily/weekly usage, defect and friction capture, missing-flow observations, and high-level v0.2.0 planning. Possible later expansion includes calendar integration, notifications, Life Areas, recurring commitments, AI, habits, goals, or automation.
+**Completed milestone:** The owner completed preparation and acceptance-documentation checkpoints, installed 0.2.1/build 3, approved the documented #11/#12/#13 physical flows and tested persistence, and published v0.2.1 from final documentation commit `93fde4306132f2301f5e2b02c3c374f5c203a1cd`.
 
-**Exit criteria:** The owner completed the manual preparation checkpoint, installed 0.2.1/build 3, and approved the documented #11/#12/#13 physical flows and tested persistence. The evidence is owner-reported and scoped in `DEPLOYMENT.md`; broader specialized audits and older unrelated acceptance checks are not implied. Previously reported Day Window migration/browser checks remain separate. Issue #3’s full planning lifecycle and Issue #4’s broader week navigation/day-detail scope remain incomplete and In Progress; #8 remains open in Verify.
+**Milestone exit criteria: MET.** Installed version/build confirmation, scoped owner acceptance, and GitHub publication are recorded. No broader specialized audit or unrelated feature acceptance is implied.
 
-**Current status: IN PROGRESS**
+**Remaining work:** #3’s full Weekly Planning lifecycle and #4’s complete week/day task/commitment navigation are unfinished and Open / Ready. #7/#8/#10 remain Open / Verify for specific owner acceptance; prior Day Window migration/browser reports remain separate. Other backlog work, including Google Calendar integration and #16, is unchanged. No next feature implementation or new release target is selected. See [current workflow](IMPLEMENTATION_STATUS.md#current-workflow--2026-09-08) and [targeted owner checks](DEPLOYMENT.md#remaining-targeted-owner-checks).
 
 ## Release gate — v0.1.0-alpha.1
 

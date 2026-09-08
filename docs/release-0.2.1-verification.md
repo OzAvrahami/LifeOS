@@ -1,6 +1,17 @@
-# LifeOS 0.2.1/build 3 — preparation and owner acceptance
+# LifeOS 0.2.1/build 3 — preparation, owner acceptance, and publication
 
-## Current publication preparation — 2026-09-08
+## Current publication and workflow — 2026-09-08
+
+Authenticated macOS GitHub inspection confirms [LifeOS v0.2.1 — Planning fixes](https://github.com/OzAvrahami/LifeOS/releases/tag/v0.2.1), published **2026-09-08 at 09:19:03 UTC**, is **Latest, non-draft, non-prerelease**. The annotated `v0.2.1` tag resolves to **`93fde4306132f2301f5e2b02c3c374f5c203a1cd`**. Local HEAD and remote main matched that commit and the worktree was clean before this reconciliation.
+
+The owner’s preparation (`2aa6bc4`), acceptance-documentation (`1712389`), and final publication-documentation (`93fde43`) checkpoints are complete. The release source contains #11/#12/#13 and only documentation changes after the owner-built preparation baseline. Later workflow/documentation reconciliation is separate from the fixed published tag; no installed-binary SHA was extracted. The internal iPhone remains owner-accepted **0.2.1 / build 3**, not TestFlight or App Store distribution.
+
+Post-publication Status reconciliation was read back: #3/#4 Open / Ready and #7/#8/#10 Open / Verify, all P1 — High. #11/#12/#13 remain Closed / Completed / Done. No additional acceptance is inferred from publication. Full remaining scope, comments, and #6’s still-pending owner decision are recorded in [current workflow](IMPLEMENTATION_STATUS.md#current-workflow--2026-09-08); exact #7/#8/#10 checks are in [Deployment](DEPLOYMENT.md#remaining-targeted-owner-checks). No new tests, builds, production operations, or device checks were performed for this reconciliation.
+
+## Historical publication preparation — earlier on 2026-09-08
+
+The snapshot below predates the owner’s final commit/tag/publication. Its absent-release and pending-checkpoint statements describe that earlier stage and are superseded by the completed publication above.
+
 
 Acceptance documentation was manually committed and pushed as `17123893b8d10f87278a71871f330d8141bce275` (`docs(release): record 0.2.1 iPhone acceptance`). Read-only checks found a clean worktree and local/remote `main` at that SHA before these final documentation edits. The acceptance-documentation checkpoint is complete; only this publication-preparation documentation awaits approval and a new manual commit/push.
 
@@ -47,7 +58,7 @@ Read-only Git checks during the earlier acceptance finalization found clean trac
 
 One acceptance comment per issue was posted with macOS `gh` and read back after checking for duplicates. Supported acceptance boxes were reconciled with their evidence; broad unperformed accessibility audits remain explicit. Existing Project automation moved each original item to Done after closure, with no duplicate item or manual Project-field mutation. Labels, assignees, milestones, titles, and priorities were preserved. No unrelated issue was changed.
 
-This update records an **installed, owner-accepted internal build**, not a GitHub Release, TestFlight, or App Store publication. No tag or GitHub Release was created. The owner completed that acceptance-documentation commit/push as `17123893b8d10f87278a71871f330d8141bce275`. The separate publication-preparation edits described above still need approval and their own manual Git checkpoint. No rebuild, test-suite rerun, or production action occurred in this finalization.
+The acceptance finalization recorded an **installed, owner-accepted internal build** and did not itself publish a GitHub Release, TestFlight, or App Store update. The owner completed the acceptance-documentation commit/push as `17123893b8d10f87278a71871f330d8141bce275`, then completed publication documentation and published v0.2.1 at `93fde4306132f2301f5e2b02c3c374f5c203a1cd`, as recorded above. No rebuild, test-suite rerun, or production action occurred during acceptance finalization.
 
 Historical acceptance-finalization checks passed: documentation consistency, local file/fragment links, unchanged 0.2.1/build 3 metadata, preservation of all existing ignored native/environment file contents, and `git diff --check`. Only the eight intended documentation files changed; the Git index remains untouched. The test counts below are retained preparation results, not new runs.
 

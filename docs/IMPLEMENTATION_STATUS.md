@@ -1,17 +1,33 @@
 # LifeOS Implementation Status
 
 - **Last updated:** 2026-09-08
-- **Current work item:** Finalize the v0.2.1 product changelog and notes for owner publication. Acceptance documentation was committed/pushed in `17123893b8d10f87278a71871f330d8141bce275`; that checkpoint is complete. These separate final documentation edits require approval and their own manual commit/push. No runtime or issue-workflow changes.
-- **Project status:** #11/#12/#13 read back CLOSED / COMPLETED, with their existing Project items Done. Priorities preserved: #11 P1 — High, #12 P2 — Medium, #13 P1 — High; other metadata unchanged.
-- **Latest published release:** [v0.1.1](https://github.com/OzAvrahami/LifeOS/releases/tag/v0.1.1), rechecked through authenticated GitHub inspection on 2026-09-08. No remote v0.2.0/v0.2.1 tag or Release exists. Publication readiness does not mean publication is complete.
-- **Installed internal version:** 0.2.1/build 3, confirmed by the owner on 2026-09-08 after building/installing from the owner-reported preparation checkpoint `2aa6bc4a246a06efc31a6c7753b1ad9f51b8a102`. Current local HEAD and remote main match acceptance-documentation commit `17123893b8d10f87278a71871f330d8141bce275`; differences since the owner-built baseline are documentation only. No source SHA was extracted from the binary.
+- **Current work item:** Post-publication workflow reconciliation. No feature implementation is selected or active in this handoff.
+- **Project status:** #3/#4 are Open / Ready; #7/#8/#10 are Open / Verify, all P1 — High. #11/#12/#13 remain CLOSED / COMPLETED / Done with P1/P2/P1 preserved. Other issue states, priorities, and membership are unchanged; see the current workflow below.
+- **Latest published release:** [LifeOS v0.2.1 — Planning fixes](https://github.com/OzAvrahami/LifeOS/releases/tag/v0.2.1), published 2026-09-08 at 09:19:03 UTC; authenticated GitHub inspection confirms Latest, non-draft, non-prerelease. Annotated tag target: `93fde4306132f2301f5e2b02c3c374f5c203a1cd`.
+- **Installed internal version:** 0.2.1/build 3, confirmed by the owner on 2026-09-08 after building/installing from the owner-reported preparation checkpoint `2aa6bc4a246a06efc31a6c7753b1ad9f51b8a102`. Acceptance documentation is committed/pushed in `17123893b8d10f87278a71871f330d8141bce275`; final publication documentation is committed/pushed in `93fde4306132f2301f5e2b02c3c374f5c203a1cd`. Those checkpoints and publication are complete. The release source includes only documentation changes after the owner-built baseline; no source SHA was extracted from the binary. Later documentation reconciliation does not move the published tag.
 - **Acceptance:** Owner replied "מאשר הכל" — "I approve everything." Standalone cellular opening/data loading without Mac/Metro, the requested #11/#12/#13 device interactions, and save/app-reopen retention of tested times/dates are owner-accepted. This is separate from prior desktop/demo acceptance and automated tests; no independent device observation or new instrumented database/history/RLS/accessibility audit is claimed.
 - **API evidence:** The prior preparation record contains GitHub deployment success and HTTP 200 health for #13's SHA. No direct Railway active-deployment inspection was performed then or in this documentation-only finalization.
-- **Current phase:** Phase 9 remains in progress; only #11/#12/#13 acceptance is finalized. Unrelated older acceptance and backlog work are unchanged.
+- **Current phase:** Phase 9’s 0.2.1 acceptance/publication milestone is complete. Real-world usage continues; unfinished planning/navigation and older acceptance remain separate, with no next implementation selected.
 - **Phase 8 status:** Historical standalone verification remains recorded for 2026-08-20; current 0.2.1 owner evidence is separately dated 2026-09-08.
-- **Next action:** Owner approves and manually commits/pushes the final publication documentation, then manually tags that final commit as v0.2.1 and publishes a normal, non-prerelease GitHub Release marked Latest. Codex creates neither tags nor Releases, including drafts. See [publication settings and baseline evidence](release-0.2.1-verification.md#current-publication-preparation--2026-09-08). No next issue or rebuild is started.
+- **Next action:** Targeted owner acceptance for #7/#8/#10, using the [remaining checks](DEPLOYMENT.md#remaining-targeted-owner-checks). #3/#4 are Ready for a later explicit implementation selection. No rebuild or new release cycle is required.
 
 This document is the current source of truth for implementation status. “Verified” means supported by tracked code plus a repeatable repository check; it does not imply remote or real-device verification unless stated.
+
+## Current workflow — 2026-09-08
+
+The focused reconciliation changed only the existing Status field for #3 (Verify → Ready), #4 (In Progress → Ready), and #10 (In Progress → Verify). Issues remain open and P1 — High. No implementation, acceptance checkboxes, issue scope, or priorities were changed.
+
+| Issue | Current state / Status | Evidence and remaining gate |
+| --- | --- | --- |
+| [#3](https://github.com/OzAvrahami/LifeOS/issues/3#issuecomment-5583631633) | Open / Ready | `5a18f28` implements authenticated Weekly Focus editing; the wizard is preview-only. Full persisted lifecycle/progress, resume, completion, and completed-plan review/edit remain unimplemented. No inspected active implementation. |
+| [#4](https://github.com/OzAvrahami/LifeOS/issues/4#issuecomment-5583631766) | Open / Ready | `82e911b`, `a0bd7eb`, and #13 provide summaries, week-only expansion, and scheduling. Selected-week navigation, full day task/commitment inspection, day navigation, detail access, and return context remain incomplete; committed work is paused. |
+| [#7](https://github.com/OzAvrahami/LifeOS/issues/7#issuecomment-5583632191) | Open / Verify | `bc6b2f6` and existing settings/API tests support Day Window. Owner same-day/overnight/cleared persistence and independent Today task-time acceptance remain pending. |
+| [#8](https://github.com/OzAvrahami/LifeOS/issues/8#issuecomment-5583632405) | Open / Verify | `3bbbc8a` excludes hardcoded preview suggestions from authenticated Today; empty/populated hydration tests cover the root cause. Owner fixture-exclusion checks across restart/logout-login remain pending. Orphan-record cleanup hypotheses do not describe the discovered source. |
+| [#10](https://github.com/OzAvrahami/LifeOS/issues/10#issuecomment-5583631959) | Open / Verify | `82e911b`, aggregation tests, and cache regressions support real plannedDate membership, active-status filtering, explicit-duration totals, and updates. Known-data iPhone totals/freshness acceptance remains pending; #4’s missing day-detail UI is not a blocker. |
+
+#2 remains Open / Ready / P1. #6 remains Open / Ready / P1, with its body unchanged. **Owner decision pending: close as NOT_PLANNED, superseded by #7's retired Today capacity display; not a claim that the historical calculation was repaired.** No disposition was applied.
+
+#11/#12/#13 remain Closed / Completed / Done. #1/#5/#9/#14–#18 remain Backlog with existing priorities; #16 has not begun. The owner’s #11–#13 acceptance is not extended to unrelated checks. Prior automated results remain historical evidence; no new test or device verification was performed during reconciliation.
 
 ## Issue #11 historical implementation review — 2026-09-07
 
@@ -34,12 +50,12 @@ The owner previously accepted isolated preview/demo behavior and now reports acc
 | Tasks | ✅ Verified remotely and on device | Remote migration and authenticated API persistence verified | API, Mobile, local real-JWT/RLS harness, remote Phase 7C E2E | Stable UUIDs survived the remote Core Flow; single-active handoff, two-user isolation, and real-device Core Flow passed. |
 | Quick Capture | ✅ Verified remotely and on device | Remote API capture persistence verified | Mobile API/cache/flow tests; remote Phase 7C E2E | Capture persisted through fresh reads, API restart, logout/login, app restart, and the final real-iPhone smoke. Issue #13 date selection and save/app-reopen persistence are now owner-accepted on 0.2.1/build 3; internal invariants retain prior automated evidence. |
 | Inbox | ✅ Verified remotely and on device | Remote API persistence verified | UI, processing, routing, Task flow tests; remote Phase 7C E2E | The same Task persisted through Inbox → Week/Today without duplication; the real-iPhone Core Flow passed. |
-| Today | 🟡 New-build acceptance pending | Tasks, DailyPlan, Commitments, Settings previously verified remotely | Today, hydration, task-flow, planning, commitment, settings tests | Committed source shows planned Task time without a capacity denominator, discloses missing estimates, and excludes fixture suggestions. The user reported Day Window/browser checks passed; new-build iPhone acceptance remains pending. |
-| Week | 🟡 Weekly Focus cleanup pending acceptance | Tasks, WeekPlan, WeeklyFocus, Commitments verified remotely | Week, planning, commitments, settings-boundary tests; remote Phase 7C E2E | Normal authenticated use now exposes an account/week-scoped Weekly Focus editor; fixture planning content is development-preview-only. The stabilization is committed at `5a18f28`; new-build iPhone acceptance remains pending. Task expansion does not complete Issue #4 navigation/day-detail scope. |
+| Today | 🟡 Specific owner acceptance pending | Tasks, DailyPlan, Commitments, Settings previously verified remotely | Today, hydration, task-flow, planning, commitment, settings tests | Committed source shows planned Task time without a capacity denominator, discloses missing estimates, and excludes fixture suggestions. The user reported Day Window/browser checks passed; specific #7/#8 iPhone acceptance remains pending. |
+| Week | 🟡 Aggregation/focus acceptance pending | Tasks, WeekPlan, WeeklyFocus, Commitments verified remotely | Week, planning, commitments, settings-boundary tests; remote Phase 7C E2E | Normal authenticated use now exposes an account/week-scoped Weekly Focus editor; fixture planning content is development-preview-only. The stabilization is committed at `5a18f28`; Weekly Focus and #10 aggregation acceptance remain pending. #4’s full task/commitment day inspection and navigation remain incomplete in Ready. |
 | Daily/Weekly planning | 🟡 Partial | DailyPlan/WeeklyFocus migrations + APIs verified remotely | API, cache, UI, local and remote RLS checks | DailyPlan and ordered WeeklyFocus persistence survived restart and logout/login. The focused Weekly Focus editor is implemented; Issue #3's full not-started/in-progress/completed lifecycle and resume behavior remain incomplete. |
 | Commitments | ✅ Verified remotely | Commitment migration + API verified remotely | API, UI/cache/workload, local and remote RLS checks | One-time remote persistence and two-user isolation passed. Recurrence and calendar sync are deferred. |
 | Workload/availability | 🟡 Retired from Today | Legacy DailyPlan override + UserSettings default retained | Legacy metrics/data-integrity tests | Today no longer claims availability or capacity-derived status. Commitments remain separate; missing Task estimates are disclosed rather than treated as known time. |
-| More / Settings | 🟡 New-build acceptance pending | Legacy UserSettings verified remotely; user reports Day Window migration applied and browser checks passed | API, UI/cache/date, local RLS tests | “היום שלי” stores nullable recurring local clock times. Pre-upgrade servers are detected and no device-only save is claimed. Owner confirms the installed app displays 0.2.1/build 3; unrelated Settings/Day Window acceptance remains unchanged. |
+| More / Settings | 🟡 Specific owner acceptance pending | Legacy UserSettings verified remotely; user reports Day Window migration applied and browser checks passed | API, UI/cache/date, local RLS tests | “היום שלי” stores nullable recurring local clock times. Pre-upgrade servers are detected and no device-only save is claimed. Owner confirms the installed app displays 0.2.1/build 3; unrelated Settings/Day Window acceptance remains unchanged. |
 | API | ✅ Deployed and verified | Stateless Railway HTTPS service over caller-scoped Supabase | API unit/integration suite; Railway health and authenticated identity checks | `lifeos-api` runs compiled JavaScript on Railway; public health and authenticated `/auth/me` checks passed. |
 | Authentication | ✅ Verified remotely and on device | Remote Supabase Auth session flow verified | Auth provider/UI/callback/API and bootstrap-race tests; remote Phase 7C E2E | Remote and real-iPhone login, logout/login restoration, and restart persistence passed; the stale-bootstrap session race is fixed. |
 | Supabase/database | ✅ Historical verification + user-reported Day Window rollout | Five baseline migrations verified remotely; sixth Day Window migration reported applied by user | Local reset/lint, remote history/dry-run/lint, opt-in local integration harness | Phase 7 history/dry-run/lint verified the five baseline migrations. Day Window rollout is user-reported; no production migration or fresh remote schema audit was run during v0.2.0 preparation. |
@@ -96,20 +112,20 @@ The owner previously accepted isolated preview/demo behavior and now reports acc
 3. The Product Spec mentions an “All Tasks” screen and Life Areas, but neither is part of the narrow v0.1 release gate; Life Areas are explicitly disabled/deferred.
 4. Expo Web is a secondary review/development target, not the v0.1 release platform.
 5. The standalone iPhone build uses the current Apple Personal Team/development-distribution setup. TestFlight and App Store distribution are not complete.
-6. The user reported Issue #7’s Day Window migration applied and browser checks passed. This task did not repeat migrations or independently verify the deployed API/schema; new-build physical-iPhone acceptance remains required.
+6. The user reported Issue #7’s Day Window migration applied and browser checks passed. This task did not repeat migrations or independently verify the deployed API/schema; the specific Day Window physical-iPhone acceptance remains required.
 7. Issue #3 still requires an explicit Weekly Planning lifecycle, persisted progress, and resume/review behavior; the focused Weekly Focus editor is only a stabilization slice.
-8. Issue #4 still requires previous/next/current-week navigation, selected-week state, full day-task discovery/detail and individual task access, including RTL iPhone acceptance. Task-backed summaries and expansion are partial progress.
+8. Issue #4 remains Ready and requires previous/next/current-week navigation, selected-week/date context, complete task and commitment inspection/detail access, previous/next-day navigation, and return context, including RTL iPhone acceptance. Summaries, scheduling, and week-only task expansion are partial progress.
 
 ## Current Critical Path
 
-1. Acceptance documentation is already committed/pushed in `1712389`. Owner reviews and manually commits/pushes the final changelog/publication documentation, then manually tags that final approved commit and creates the Release.
+1. Publication is complete at `93fde43`. Obtain only the outstanding #7/#8/#10 owner evidence described in the [targeted checklist](DEPLOYMENT.md#remaining-targeted-owner-checks); no repeat #11–#13 acceptance is required.
 2. #11/#12/#13 are complete; no rebuild or next issue begins in this finalization. Broader #3/#4 scope, Google Calendar integration, and unrelated older acceptance/backlog work remain unchanged.
 
 ## Current release gate
 
 ### v0.2.1/build 3
 
-**Status: INSTALLED AND OWNER-ACCEPTED INTERNALLY FOR #11/#12/#13 — NOT PUBLISHED AS A GITHUB RELEASE.** The owner built/installed after preparation commit `2aa6bc4`, confirmed the displayed version/build, and approved the documented physical flows and tested save/app-reopen persistence on 2026-09-08. Prior preparation/test results below remain historical. Internal IDs/history/RLS were not newly inspected, and broad accessibility/device-timezone checks are not implied. Unrelated Day Window/Today/Week/Weekly Focus acceptance is unchanged. See [the detailed evidence boundary](release-0.2.1-verification.md).
+**Status: PUBLISHED ON GITHUB; INSTALLED AND OWNER-ACCEPTED INTERNALLY FOR #11/#12/#13.** The owner built/installed after preparation commit `2aa6bc4`, confirmed the displayed version/build, and approved the documented physical flows and tested save/app-reopen persistence on 2026-09-08. Prior preparation/test results below remain historical. Internal IDs/history/RLS were not newly inspected, and broad accessibility/device-timezone checks are not implied. Unrelated Day Window/Today/Week/Weekly Focus acceptance is unchanged. See [the detailed evidence boundary](release-0.2.1-verification.md).
 
 ## Historical release gates
 
@@ -131,7 +147,7 @@ The owner previously accepted isolated preview/demo behavior and now reports acc
 
 ## Next Action
 
-**Manual publication-documentation checkpoint:** `docs(release): finalize v0.2.1 changelog and publication notes`. The future v0.2.1 tag must target the resulting final approved documentation commit, not an earlier baseline. Only the owner creates the tag and normal Release marked Latest; Codex creates no draft or published Release, PR, deployment, or new implementation.
+**Targeted owner verification:** #7 Day Window, #8 authenticated fixture exclusion, and #10 known-task totals/freshness. Preserve #3/#4’s Ready scope for later selection and #6’s pending owner disposition. No implementation or release operation is selected.
 
 ## v0.2.0 preparation validation — 2026-09-06
 

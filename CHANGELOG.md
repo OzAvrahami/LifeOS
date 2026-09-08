@@ -8,9 +8,9 @@ LifeOS follows Semantic Versioning for development and release tags.
 
 No unreleased changes recorded.
 
-## [0.2.1] — Ready for owner publication
+## [0.2.1] — 2026-09-08
 
-Internal iPhone **0.2.1 / build 3**, installed and owner-accepted on 2026-09-08. GitHub publication is pending the owner's final documentation approval, commit, and manual tag/release steps. This is not an App Store or TestFlight release.
+Internal iPhone **0.2.1 / build 3**, installed and owner-accepted on 2026-09-08. [LifeOS v0.2.1 — Planning fixes](https://github.com/OzAvrahami/LifeOS/releases/tag/v0.2.1) was published on 2026-09-08 at 09:19:03 UTC as the Latest, non-draft, non-prerelease GitHub Release. The annotated tag resolves to `93fde4306132f2301f5e2b02c3c374f5c203a1cd`. This is not an App Store or TestFlight release.
 
 ### Fixed
 
@@ -32,11 +32,11 @@ The previous GitHub Release is v0.1.1. The following improvements were prepared 
 
 The owner approved standalone cellular opening/data loading without the Mac/Metro, #11–#13 interactions, and retention of tested commitment/task times and dates after saving and reopening the app. Prior automated regression tests separately support internal field/history/cache/timezone invariants; no new instrumented database/history/RLS test or full accessibility audit is claimed.
 
-Older acceptance checks for inherited improvements retain their documented status. Full week/day navigation (#4), the broader planning lifecycle, and Google Calendar integration remain outside this completed scope. Detailed preparation, owner acceptance, and publication-baseline evidence are in [the 0.2.1 verification record](docs/release-0.2.1-verification.md).
+Specific owner acceptance remains pending for Day Window (#7), authenticated Today fixture exclusion (#8), and Week count/duration freshness (#10), all open in Verify. #3 and #4 are open in Ready with their full planning lifecycle and week/day task/commitment navigation scopes incomplete. Google Calendar integration remains Backlog. Detailed preparation, owner acceptance, and publication evidence are in [the 0.2.1 verification record](docs/release-0.2.1-verification.md).
 
 ## [0.2.0] — Historical preparation; not publicly released
 
-The following is the historical preparation record; its scope is inherited by 0.2.1, and its outstanding acceptance items are not automatically approved by #11–#13 acceptance.
+The following is the historical preparation record; its scope is inherited by 0.2.1, and its outstanding acceptance items are not automatically approved by #11–#13 acceptance. Status and next-action statements below describe that preparation snapshot; current workflow is recorded in [Implementation Status](docs/IMPLEMENTATION_STATUS.md#current-workflow--2026-09-08).
 
 Prepared for the next standalone internal iPhone build; not published and pending physical-iPhone acceptance. Scope reviewed against `v0.1.1..5a18f28`, plus this release preparation. The user reported that the Day Window migration was applied and browser checks passed; this is user-reported evidence, not a new remote verification or acceptance of this binary.
 

@@ -2,9 +2,9 @@
 
 LifeOS 0.2.1/build 3 is installed and **owner-accepted through the standalone internal iPhone delivery path** for #11/#12/#13. On 2026-09-08, after manually committing/pushing preparation `2aa6bc4a246a06efc31a6c7753b1ad9f51b8a102`, the owner built/installed, confirmed the displayed version/build, and replied "מאשר הכל" — "I approve everything." Standalone cellular opening/data loading without Mac/Metro and tested commitment/task save/app-reopen persistence were approved. See [the acceptance record](release-0.2.1-verification.md) for the precise scope and prior automated evidence.
 
-This is owner-reported acceptance, not independent device observation, binary-SHA extraction, or a new instrumented database/history/RLS/accessibility audit. No direct Railway active-deployment inspection was performed. No tag, GitHub Release, TestFlight, or App Store publication was created here; v0.1.1 remains the latest GitHub Release, rechecked during publication preparation. No remote v0.2.0/v0.2.1 tag or Release exists. Older unrelated acceptance checks remain outstanding. This finalization changes documentation/workflow only.
+This is owner-reported acceptance, not independent device observation, binary-SHA extraction, or a new instrumented database/history/RLS/accessibility audit. No direct Railway active-deployment inspection was performed. Older unrelated acceptance checks remain outstanding. This is internal iPhone delivery, not TestFlight or App Store distribution.
 
-The acceptance-documentation checkpoint is complete in pushed commit `17123893b8d10f87278a71871f330d8141bce275`. Only the final publication-documentation approval/commit remains before the owner manually creates v0.2.1 at that final commit and publishes a normal, non-prerelease Release marked Latest. See [the publication handoff](release-0.2.1-verification.md#owner-publication-settings-and-stop-point). Codex must not create a tag or GitHub Release, including a draft. No binary attachment or further app build is required for this documentation release.
+The preparation, acceptance-documentation (`1712389`), and final publication-documentation checkpoints are complete. [LifeOS v0.2.1 — Planning fixes](https://github.com/OzAvrahami/LifeOS/releases/tag/v0.2.1) was published on 2026-09-08 at 09:19:03 UTC and is Latest, non-draft, non-prerelease. Its annotated tag resolves to `93fde4306132f2301f5e2b02c3c374f5c203a1cd`. Later documentation changes do not alter this release source. See [the publication record](release-0.2.1-verification.md#current-publication-and-workflow--2026-09-08). No further build or binary attachment is required for this workflow reconciliation.
 
 ## Architecture
 
@@ -148,15 +148,23 @@ The completed items below are owner-reported on 2026-09-08, separate from histor
 - [ ] New instrumented inspection of internal task IDs, unrelated fields, deadlines, status/history, and RLS in the live installed flow — not performed; existing automated tests remain evidence for these invariants.
 - [ ] Full accessibility/VoiceOver and physical device-timezone/near-midnight matrix — not reported as performed.
 
-The following older unrelated acceptance items retain their prior status and are not covered by this approval:
+### Remaining targeted owner checks
 
-- [ ] Save/reopen Day Window, test an overnight pair and clearing, then confirm persistence after restart/logout-login. A server-update-required notice is not a successful save.
-- [ ] Today shows actual Task time, discloses missing estimates, keeps Commitments separate, and has no fixture/Weekly Focus items masquerading as Tasks (#8).
-- [ ] Today inline Add Task defaults to Today; global capture defaults to Inbox. Follow one Task through Inbox → Today/Week → Active → Completed without duplication.
-- [ ] Week expands/collapses remaining Tasks with working scheduling controls; day counts/durations agree with actual Tasks.
+The following checks remain pending on the installed authenticated iPhone app; the #11–#13 approval does not cover them. Use an approved account and clearly disposable records. No suitable known-estimate fixture set was established by this reconciliation.
+
+- [ ] #7: Save/reopen same-day, overnight (for example 06:30→00:00), and cleared Day Windows; confirm persistence after restart/logout-login and understandable RTL copy. Today task-time presentation remains independent of the window. A server-update-required notice is not a successful save.
+- [ ] #7/#8: Today shows actual Task time, discloses missing estimates, and keeps Commitments separate. Inspect authenticated empty and populated Today for fabricated weekly-task suggestions; confirm exclusion survives restart/logout-login. The discovered #8 source was hardcoded preview content, not an orphaned database record.
+- [ ] #10: Reconcile known disposable Task dates/statuses/estimates with Week counts/totals and freshness after supported changes, restart, and logout/login. Week includes open/in-progress Tasks only; absent estimates add no invented time. A known set of 45m, 30m, and no estimate should show three active Tasks / 1:15. Current UI lacks duration editing and complete day inspection; if suitable known-estimate records are unavailable, approved fixture preparation is a separate prerequisite. Retain automated coverage for unsupported mutation paths; #4’s future day-detail UI does not block this fix.
+
+Restart/logout-login can be consolidated across these checks. No already accepted #11–#13 interaction needs repetition.
+
+The following older slice checks also retain their prior status; they do not complete #3/#4’s broader scope:
+
+- [ ] Today inline Add Task defaults to Today; global capture defaults to Inbox. Follow one Task through Inbox → Today/Week → Active → Completed without duplication. This historical combined checklist is not a request to repeat steps already covered by specific accepted evidence.
+- [ ] Week expands/collapses remaining week-only Tasks; working scheduling controls retain their existing evidence. The specific day-count/duration gate is listed under #10 above.
 - [ ] Weekly Focus opens the current account/week data, saves/reopens, cancels without saving, clears, and retains edits for retry on a failed save; no fixture wizard appears in authenticated use.
 
-The owner-approved #11/#12/#13 flows are complete; the issues are Closed/Completed and their existing Project items were read back as Done with priorities preserved. The specialized and older unchecked items above must not be represented as completed by that approval. Keep #8 open in Verify until its required acceptance is complete. #3's full planning lifecycle and #4's broader week navigation/day-detail behavior remain incomplete and open in In Progress even if these checks pass.
+The owner-approved #11/#12/#13 flows are complete; the issues remain Closed/Completed/Done with priorities preserved. #7/#8/#10 are Open / Verify / P1 — High awaiting the specific checks above. #3/#4 are Open / Ready / P1 — High: full planning lifecycle and complete week/day task/commitment inspection/navigation remain unimplemented, even if their implemented slices pass acceptance. No active feature implementation is selected. See [current workflow and #6’s pending disposition](IMPLEMENTATION_STATUS.md#current-workflow--2026-09-08).
 
 The historical standalone test on 2026-08-20 used the installed Release build with Metro stopped, the local API stopped, the Mac disconnected, and the iPhone on cellular networking. Normal use therefore does not require the Mac, Metro, or a LAN-hosted API. The owner separately reports that standalone cellular opening/data loading passed for 0.2.1/build 3 on 2026-09-08.
 
