@@ -4,6 +4,7 @@ import { notifyManager } from '@tanstack/react-query';
 import * as commitmentApi from '@/features/commitments/commitment.api';
 import type { Commitment } from '@/features/commitments/commitment.types';
 import * as planningApi from '@/features/planning/planning.api';
+import * as settingsApi from '@/features/settings/settings.api';
 import * as taskApi from '@/features/tasks/task.api';
 import { currentWeekDates, localDateKey } from '@/features/tasks/task-dates';
 import type { Task } from '@/features/tasks/task.types';
@@ -22,6 +23,8 @@ jest.mock('@react-native-community/datetimepicker', () => {
     );
   };
 });
+
+jest.mock('@/features/settings/settings.api', () => ({ getSettings: jest.fn(), putSettings: jest.fn() }));
 
 jest.mock('@/features/tasks/task.api', () => ({
   cancelTask: jest.fn(), createTask: jest.fn(), listTasks: jest.fn(), updateTask: jest.fn(),
@@ -75,6 +78,7 @@ afterAll(() => notifyManager.setScheduler((callback) => setTimeout(callback, 0))
 
 beforeEach(() => {
   jest.clearAllMocks();
+  jest.mocked(settingsApi.getSettings).mockResolvedValue({ defaultDailyCapacityMinutes: 360, weekStartDay: 0, timezone: Intl.DateTimeFormat().resolvedOptions().timeZone, persisted: true, dayWindowSupported: true, dayStartTime: null, dayEndTime: null });
   jest.mocked(taskApi.listTasks).mockImplementation(async (filters) => filters?.plannedDate ? [task] : []);
   jest.mocked(planningApi.getDailyPlan).mockResolvedValue({
     availableMinutes: 360,
@@ -156,7 +160,7 @@ it('shows validation before sending an invalid time range', async () => {
   expect(createCommitmentMock).not.toHaveBeenCalled();
 });
 
-it('uses the earliest real Week hint and prefills the selected Week day', async () => {
+it('shows real Week commitments and prefills creation after opening the selected day', async () => {
   const monday = localDateKey(currentWeekDates()[1]);
   listCommitmentsMock.mockResolvedValue([
     item({ date: monday, id: 'later', startTime: '14:00' }),
@@ -164,10 +168,11 @@ it('uses the earliest real Week hint and prefills the selected Week day', async 
   ]);
   createCommitmentMock.mockImplementation(async (input) => item({ ...input, date: input.date, id: 'week-created' }));
   await render(<TestProviders><WeekScreen taskSource="server" /></TestProviders>);
-  expect(await screen.findByText('08:15')).toBeTruthy();
+  expect(await screen.findByText('08:15–11:00')).toBeTruthy();
 
   const user = userEvent.setup();
-  await user.press(screen.getByLabelText('הוסף התחייבות ליום שני'));
+  await user.press(screen.getByLabelText(`פתח יום ${monday}`));
+  await user.press(screen.getByLabelText('הוסף התחייבות ליום הזה'));
   const formattedMonday = new Intl.DateTimeFormat('he-IL', { day: 'numeric', month: 'long', weekday: 'long' }).format(currentWeekDates()[1]);
   expect(within(screen.getByLabelText('תאריך התחייבות')).getByText(formattedMonday)).toBeTruthy();
   await user.type(screen.getByLabelText('כותרת התחייבות'), 'מהשבוע');

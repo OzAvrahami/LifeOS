@@ -1,258 +1,62 @@
 import { Ionicons } from '@expo/vector-icons';
-import { ReactNode, useState } from 'react';
+import { useState } from 'react';
 import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 
 import { MobileShell } from '@/components/mobile-shell';
 import { QuickCaptureSheet } from '@/features/capture/quick-capture-sheet';
-import { CommitmentEditor } from '@/features/commitments/commitment-editor';
-import { formatMinutes } from '@/features/commitments/commitment.metrics';
-import { useCommitments, useCreateCommitment } from '@/features/commitments/commitment.queries';
-import {
-  useReplaceWeeklyFocuses,
-  useWeeklyFocuses,
-} from '@/features/planning/planning.queries';
-import type { WeeklyFocus } from '@/features/planning/planning.types';
-import { useEffectiveSettings } from '@/features/settings/settings.queries';
-import { weekdayLabels } from '@/features/settings/settings.types';
 import { useDemoTasks } from '@/features/tasks/demo-task-provider';
-import {
-  currentWeekDateKeys,
-  currentWeekStart,
-  hebrewWeekRange,
-  localDateKey,
-  isPlanningDate,
-  weekdayForDateKey,
-} from '@/features/tasks/task-dates';
-import { toWeekTask } from '@/features/tasks/task-presenters';
-import { TaskQueryNotice } from '@/features/tasks/task-query-notice';
-import { useTasks, useUpdateTask } from '@/features/tasks/task.queries';
 import { TaskSource } from '@/features/tasks/task.types';
 import { useTaskCapture } from '@/features/tasks/use-task-capture';
 import { colors, radius, spacing, typography } from '@/theme/tokens';
 
-import {
-  UnscheduledWeekTasks,
-  WeekDayRow,
-  WeekHeader,
-  WeeklyFocusCard,
-  WeekOverloadNotice,
-  WeekSectionLabel,
-} from './week.components';
-import {
-  normalWeekDays,
-  overloadedDayTasks,
-  overloadedWeekDays,
-  unplannedWeekCommitments,
-  unscheduledWeekTasks,
-  weeklyFocuses,
-} from './week.fixture';
+import { UnscheduledWeekTasks, WeekDayRow, WeekHeader, WeeklyFocusCard, WeekOverloadNotice, WeekSectionLabel } from './week.components';
+import { normalWeekDays, overloadedDayTasks, overloadedWeekDays, unplannedWeekCommitments, weeklyFocuses } from './week.fixture';
 import { WeekPlanningFlow } from './week-planning-flow';
-import { tasksByPlannedDate } from './week-aggregation';
 import { WeekDemoState } from './week.types';
-import { WeeklyFocusEditor } from './weekly-focus-editor';
+import { ServerWeekScreen } from './server-week-screen';
 
-export function WeekScreen({
-  initialState = 'normal',
-  onNavigateInbox,
-  onNavigateMore,
-  onNavigateToday,
-  taskSource = 'preview',
-}: {
+export type WeekScreenProps = {
   initialState?: WeekDemoState;
   onNavigateInbox?: () => void;
   onNavigateMore?: () => void;
   onNavigateToday?: () => void;
   taskSource?: TaskSource;
-}) {
-  const serverTasks = taskSource === 'server';
-  const [weekState, setWeekState] = useState<WeekDemoState>(serverTasks ? 'normal' : initialState);
-  const [planningInitialStep, setPlanningInitialStep] = useState(initialState === 'planning' ? 2 : 0);
-  const [focusEditorFocuses, setFocusEditorFocuses] = useState<WeeklyFocus[] | null>(null);
-  const [captureOpen, setCaptureOpen] = useState(false);
-  const [commitmentEditorDate, setCommitmentEditorDate] = useState<string | null>(null);
-  const demo = useDemoTasks();
-  const { effective: settings, query: settingsQuery } = useEffectiveSettings(serverTasks);
-  const weekStart = currentWeekStart(undefined, settings);
-  const currentDateKeys = currentWeekDateKeys(undefined, settings);
-  const weekEnd = currentDateKeys[6]!;
-  const todayDate = localDateKey(undefined, settings.timezone);
-  const weekQuery = useTasks({ plannedDateFrom: weekStart, plannedDateTo: weekEnd }, serverTasks);
-  const weekPlanQuery = useTasks({ weekStart }, serverTasks);
-  const commitmentQuery = useCommitments({ dateFrom: weekStart, dateTo: weekEnd }, serverTasks);
-  const weeklyFocusQuery = useWeeklyFocuses(weekStart, serverTasks);
-  const replaceWeeklyFocusMutation = useReplaceWeeklyFocuses();
-  const createCommitmentMutation = useCreateCommitment();
-  const updateMutation = useUpdateTask();
-  const { captureTask, defaultDate } = useTaskCapture(taskSource);
-  const [operationError, setOperationError] = useState(false);
-  const weekTasks = serverTasks
-    ? (weekPlanQuery.data ?? []).map(toWeekTask)
-    : demo.weekTasks.map((task) => ({
-        durationMinutes: task.estimatedMinutes ?? 0,
-        id: task.id,
-        title: task.title,
-      }));
-  const dailyTasks = tasksByPlannedDate(weekQuery.data ?? [], currentDateKeys);
-  const weekDays = serverTasks
-    ? normalWeekDays.map((day, index) => ({
-        commitmentTime: commitmentQuery.data
-          ?.filter((commitment) => commitment.date === currentDateKeys[index])
-          .reduce<string | undefined>(
-            (earliest, commitment) => !earliest || commitment.startTime < earliest
-              ? commitment.startTime
-              : earliest,
-            undefined,
-          ),
-        date: Number(currentDateKeys[index]!.slice(8)),
-        dateKey: currentDateKeys[index],
-        id: currentDateKeys[index]!,
-        isPast: currentDateKeys[index]! < todayDate,
-        isToday: currentDateKeys[index] === todayDate,
-        plannedTime: formatMinutes(dailyTasks.get(currentDateKeys[index]!)!.plannedMinutes),
-        taskCount: dailyTasks.get(currentDateKeys[index]!)!.tasks.length,
-        weekday: weekdayLabels[weekdayForDateKey(currentDateKeys[index]!)]!,
-      }))
-    : normalWeekDays;
+};
 
-  if (serverTasks && focusEditorFocuses) {
-    return (
-      <WeeklyFocusEditor
-        focuses={focusEditorFocuses}
-        onCancel={() => setFocusEditorFocuses(null)}
-        onSave={(titles) => replaceWeeklyFocusMutation.mutateAsync({ titles, weekStart })}
-        onSaved={() => setFocusEditorFocuses(null)}
-      />
-    );
-  }
-
-  if (!serverTasks && weekState === 'planning') {
-    return (
-      <WeekPlanningFlow
-        initialStep={planningInitialStep}
-        onDone={() => setWeekState('normal')}
-      />
-    );
-  }
-
-  return (
-    <>
-      <MobileShell
-        onNavigateInbox={onNavigateInbox}
-        onNavigateMore={onNavigateMore}
-        onNavigateToday={onNavigateToday}
-        onQuickCapture={() => setCaptureOpen(true)}
-        selected="week"
-      >
-        {weekState === 'unplanned' ? (
-          <UnplannedWeek onPlan={() => { setPlanningInitialStep(0); setWeekState('planning'); }} />
-        ) : weekState === 'overloaded' ? (
-          <OverloadedWeek />
-        ) : (
-          <NormalWeek
-            defaultDate={defaultDate}
-            onSchedule={async (id, plannedDate) => {
-              if (!isPlanningDate(plannedDate)) throw new Error('Choose a valid planning date');
-              if (serverTasks) await updateMutation.mutateAsync({ id, input: { planning: { type: 'day', plannedDate } } });
-              else demo.scheduleTask(id, plannedDate);
-            }}
-            dateRange={serverTasks ? hebrewWeekRange(undefined, settings) : undefined}
-            days={weekDays}
-            notice={
-              <TaskQueryNotice
-                error={serverTasks && (weekQuery.isError || weekPlanQuery.isError || commitmentQuery.isError || weeklyFocusQuery.isError || settingsQuery.isError || operationError)}
-                loading={serverTasks && (weekQuery.isPending || weekPlanQuery.isPending || commitmentQuery.isPending || weeklyFocusQuery.isPending || settingsQuery.isPending)}
-                onRetry={() => void Promise.all([weekQuery.refetch(), weekPlanQuery.refetch(), commitmentQuery.refetch(), weeklyFocusQuery.refetch(), settingsQuery.refetch()])}
-              />
-            }
-            focuses={serverTasks ? weeklyFocusQuery.data ?? [] : weeklyFocuses}
-            focusState={serverTasks
-              ? weeklyFocusQuery.isPending
-                ? 'loading'
-                : weeklyFocusQuery.isError
-                  ? 'error'
-                  : 'ready'
-              : 'ready'}
-            onEditFocuses={serverTasks
-              ? weeklyFocusQuery.isSuccess
-                ? () => setFocusEditorFocuses(weeklyFocusQuery.data.map((focus) => ({ ...focus })))
-                : undefined
-              : () => { setPlanningInitialStep(2); setWeekState('planning'); }}
-            onAddCommitment={serverTasks ? setCommitmentEditorDate : undefined}
-            onMoveToToday={async (taskId) => {
-              if (serverTasks) {
-                setOperationError(false);
-                try {
-                  await updateMutation.mutateAsync({
-                    id: taskId,
-                    input: { planning: { plannedDate: todayDate, type: 'day' } },
-                  });
-                } catch {
-                  setOperationError(true);
-                  return;
-                }
-              } else {
-                demo.moveTaskToToday(taskId);
-              }
-              onNavigateToday?.();
-            }}
-            tasks={weekTasks}
-          />
-        )}
-      </MobileShell>
-      <QuickCaptureSheet defaultDate={defaultDate}
-        onClose={() => setCaptureOpen(false)}
-        onSave={captureTask}
-        visible={captureOpen}
-      />
-      {serverTasks && commitmentEditorDate ? (
-        <CommitmentEditor
-          initialDate={commitmentEditorDate}
-          onClose={() => setCommitmentEditorDate(null)}
-          onSave={async (input) => { await createCommitmentMutation.mutateAsync(input); }}
-          visible
-        />
-      ) : null}
-    </>
-  );
+export function WeekScreen(props: WeekScreenProps) {
+  return props.taskSource === 'server' ? <ServerWeekScreen {...props} /> : <PreviewWeekScreen {...props} />;
 }
 
-function NormalWeek({
-  defaultDate,
-  onSchedule,
-  dateRange,
-  days,
-  focusState,
-  focuses,
-  notice,
-  onEditFocuses,
-  onAddCommitment,
-  onMoveToToday,
-  tasks,
-}: {
-  defaultDate: string;
-  onSchedule: (id: string, plannedDate: string) => Promise<void> | void;
-  dateRange?: string;
-  days: typeof normalWeekDays;
-  focusState?: 'error' | 'loading' | 'ready';
-  focuses: typeof weeklyFocuses;
-  notice?: ReactNode;
-  onEditFocuses?: () => void;
-  onAddCommitment?: (date: string) => void;
-  onMoveToToday: (taskId: string) => Promise<void> | void;
-  tasks: typeof unscheduledWeekTasks;
-}) {
+function PreviewWeekScreen({ initialState = 'normal', onNavigateInbox, onNavigateMore, onNavigateToday }: WeekScreenProps) {
+  const [weekState, setWeekState] = useState(initialState);
+  const [planningInitialStep, setPlanningInitialStep] = useState(initialState === 'planning' ? 2 : 0);
+  const [captureOpen, setCaptureOpen] = useState(false);
+  const demo = useDemoTasks();
+  const { captureTask, defaultDate } = useTaskCapture('preview');
+  if (weekState === 'planning') return <WeekPlanningFlow initialStep={planningInitialStep} onDone={() => setWeekState('normal')} />;
   return (
-    <ScrollView contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
-      <WeekHeader dateRange={dateRange} />
-      {notice}
-      <WeeklyFocusCard focuses={focuses} onEdit={onEditFocuses} state={focusState} />
-      <WeekSectionLabel>השבוע שלך</WeekSectionLabel>
-      <View accessibilityLabel="סקירת שבעת ימי השבוע" style={styles.days}>
-        {days.map((day) => <WeekDayRow day={day} key={day.id} onAddCommitment={onAddCommitment} />)}
-      </View>
-      <WeekSectionLabel>לתכנן השבוע</WeekSectionLabel>
-      <UnscheduledWeekTasks defaultDate={defaultDate} onSchedule={onSchedule} onMoveToToday={onMoveToToday} tasks={tasks} />
-    </ScrollView>
+    <>
+      <MobileShell onNavigateInbox={onNavigateInbox} onNavigateMore={onNavigateMore} onNavigateToday={onNavigateToday}
+        onQuickCapture={() => setCaptureOpen(true)} selected="week">
+        {weekState === 'unplanned' ? <UnplannedWeek onPlan={() => { setPlanningInitialStep(0); setWeekState('planning'); }} />
+          : weekState === 'overloaded' ? <OverloadedWeek /> : (
+            <ScrollView contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
+              <WeekHeader />
+              <WeeklyFocusCard focuses={weeklyFocuses} onEdit={() => { setPlanningInitialStep(2); setWeekState('planning'); }} />
+              <WeekSectionLabel>השבוע שלך</WeekSectionLabel>
+              <View accessibilityLabel="סקירת שבעת ימי השבוע" style={styles.days}>
+                {normalWeekDays.map(day => <WeekDayRow day={day} key={day.id} />)}
+              </View>
+              <WeekSectionLabel>לתכנן השבוע</WeekSectionLabel>
+              <UnscheduledWeekTasks defaultDate={defaultDate}
+                onSchedule={(id, date) => demo.scheduleTask(id, date)}
+                onMoveToToday={(id) => { demo.moveTaskToToday(id); onNavigateToday?.(); }}
+                tasks={demo.weekTasks.map(task => ({ id: task.id, title: task.title, durationMinutes: task.estimatedMinutes ?? 0 }))} />
+            </ScrollView>
+          )}
+      </MobileShell>
+      <QuickCaptureSheet defaultDate={defaultDate} onClose={() => setCaptureOpen(false)} onSave={captureTask} visible={captureOpen} />
+    </>
   );
 }
 

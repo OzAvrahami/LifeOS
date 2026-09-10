@@ -35,9 +35,7 @@ export function weekdayForDateKey(dateKey: string) {
 
 export function currentWeekStart(date = new Date(), context: PlanningDateContext = {}) {
   const today = localDateKey(date, context.timezone ?? context.timeZone);
-  const weekStartDay = context.weekStartDay ?? 0;
-  const distance = (weekdayForDateKey(today) - weekStartDay + 7) % 7;
-  return addDaysToDateKey(today, -distance);
+  return weekStartForDateKey(today, context.weekStartDay);
 }
 
 export function currentWeekDateKeys(date = new Date(), context: PlanningDateContext = {}) {
@@ -94,4 +92,23 @@ export function planningDateToLocalDate(value: string) {
   date.setFullYear(year!, month! - 1, day!);
   date.setHours(12, 0, 0, 0);
   return date;
+}
+
+// Calendar arithmetic stays on date keys; account timezone only determines today's key.
+export function weekStartForDateKey(dateKey: string, weekStartDay = 0) {
+  return addDaysToDateKey(dateKey, -((weekdayForDateKey(dateKey) - weekStartDay + 7) % 7));
+}
+
+export function weekDateKeys(start: string) {
+  return Array.from({ length: 7 }, (_, index) => addDaysToDateKey(start, index));
+}
+
+export function hebrewPlanningDate(dateKey: string) {
+  return formatDateKey(dateKey, { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' });
+}
+
+export function hebrewSelectedWeekRange(start: string) {
+  const end = addDaysToDateKey(start, 6);
+  const options: Intl.DateTimeFormatOptions = { day: 'numeric', month: 'long', year: 'numeric' };
+  return `${formatDateKey(start, options)} – ${formatDateKey(end, options)}`;
 }

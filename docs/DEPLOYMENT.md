@@ -4,7 +4,7 @@ LifeOS 0.2.1/build 3 is installed and **owner-accepted through the standalone in
 
 This is owner-reported acceptance, not independent device observation, binary-SHA extraction, or a new instrumented database/history/RLS/accessibility audit. No direct Railway active-deployment inspection was performed. Older unrelated acceptance checks remain outstanding. This is internal iPhone delivery, not TestFlight or App Store distribution.
 
-The preparation, acceptance-documentation (`1712389`), and final publication-documentation checkpoints are complete. [LifeOS v0.2.1 — Planning fixes](https://github.com/OzAvrahami/LifeOS/releases/tag/v0.2.1) was published on 2026-09-08 at 09:19:03 UTC and is Latest, non-draft, non-prerelease. Its annotated tag resolves to `93fde4306132f2301f5e2b02c3c374f5c203a1cd`. Later documentation changes do not alter this release source. See [the publication record](release-0.2.1-verification.md#current-publication-and-workflow--2026-09-08). No further build or binary attachment is required for this workflow reconciliation.
+The preparation, acceptance-documentation (`1712389`), and final publication-documentation checkpoints are complete. [LifeOS v0.2.1 — Planning fixes](https://github.com/OzAvrahami/LifeOS/releases/tag/v0.2.1) was published on 2026-09-08 at 09:19:03 UTC and is Latest, non-draft, non-prerelease. Its annotated tag resolves to `93fde4306132f2301f5e2b02c3c374f5c203a1cd`. Later documentation changes do not alter this release source. See [the publication record](release-0.2.1-verification.md#current-publication-and-workflow--2026-09-08). No further build or binary attachment was required for that workflow reconciliation. The later #4 implementation is unreleased and needs its own owner-reviewed build before physical acceptance; the installed 0.2.1 binary is not evidence for it.
 
 ## Architecture
 
@@ -150,7 +150,9 @@ The completed items below are owner-reported on 2026-09-08, separate from histor
 
 ### Remaining targeted owner checks
 
-The following checks remain pending on the installed authenticated iPhone app; the #11–#13 approval does not cover them. Use an approved account and clearly disposable records. No suitable known-estimate fixture set was established by this reconciliation.
+**Current #4 handoff — 2026-09-10:** Use [the Week/day owner checklist](issue-4-verification.md#physical-iphone-owner-checklist) after the owner’s Git checkpoint and a build containing #4. No device build, installation, version change, or production-data operation was performed during implementation.
+
+**Historical checklist — 2026-09-08:** The following was the pending checklist at reconciliation. Live #7/#8/#10 are now Closed/Completed/Done, and the owner identifies these behaviors as accepted. These older unchecked items are retained as historical scope, not a request to repeat accepted tests. No suitable known-estimate fixture set was established by that reconciliation.
 
 - [ ] #7: Save/reopen same-day, overnight (for example 06:30→00:00), and cleared Day Windows; confirm persistence after restart/logout-login and understandable RTL copy. Today task-time presentation remains independent of the window. A server-update-required notice is not a successful save.
 - [ ] #7/#8: Today shows actual Task time, discloses missing estimates, and keeps Commitments separate. Inspect authenticated empty and populated Today for fabricated weekly-task suggestions; confirm exclusion survives restart/logout-login. The discovered #8 source was hardcoded preview content, not an orphaned database record.
@@ -164,7 +166,7 @@ The following older slice checks also retain their prior status; they do not com
 - [ ] Week expands/collapses remaining week-only Tasks; working scheduling controls retain their existing evidence. The specific day-count/duration gate is listed under #10 above.
 - [ ] Weekly Focus opens the current account/week data, saves/reopens, cancels without saving, clears, and retains edits for retry on a failed save; no fixture wizard appears in authenticated use.
 
-The owner-approved #11/#12/#13 flows are complete; the issues remain Closed/Completed/Done with priorities preserved. #7/#8/#10 are Open / Verify / P1 — High awaiting the specific checks above. #3/#4 are Open / Ready / P1 — High: full planning lifecycle and complete week/day task/commitment inspection/navigation remain unimplemented, even if their implemented slices pass acceptance. No active feature implementation is selected. See [current workflow and #6’s pending disposition](IMPLEMENTATION_STATUS.md#current-workflow--2026-09-08).
+The owner-approved #11/#12/#13 flows remain complete. #7/#8/#10 also remain Closed/Completed/Done as found before #4 implementation; no unrelated issue state or priority was changed. #3 remains Open / Ready for its unfinished full planning lifecycle. #4’s software scope and pending physical acceptance are documented in [its verification record](issue-4-verification.md). See [Implementation Status](IMPLEMENTATION_STATUS.md) for current work and #6’s unchanged pending disposition.
 
 The historical standalone test on 2026-08-20 used the installed Release build with Metro stopped, the local API stopped, the Mac disconnected, and the iPhone on cellular networking. Normal use therefore does not require the Mac, Metro, or a LAN-hosted API. The owner separately reports that standalone cellular opening/data loading passed for 0.2.1/build 3 on 2026-09-08.
 

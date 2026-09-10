@@ -30,6 +30,8 @@ const destinations: { id: CaptureDestination; label: string; ltr?: boolean }[] =
 
 type CaptureProps = {
   initialDestination?: CaptureDestination;
+  initialPlannedDate?: string;
+  weekLabel?: string;
   defaultDate?: string;
   onClose: () => void;
   onSave: (title: string, placement: TaskCapturePlacement) => Promise<void> | void;
@@ -42,6 +44,8 @@ export function QuickCaptureSheet(props: CaptureProps) {
 
 function CaptureSession({
   initialDestination = 'inbox',
+  initialPlannedDate,
+  weekLabel = 'השבוע',
   defaultDate = localDateKey(),
   onClose,
   onSave,
@@ -50,7 +54,7 @@ function CaptureSession({
   const insets = useSafeAreaInsets();
   const [title, setTitle] = useState('');
   const [destination, setDestination] = useState<CaptureDestination>(initialDestination);
-  const [plannedDate, setPlannedDate] = useState<string | null>(null);
+  const [plannedDate, setPlannedDate] = useState<string | null>(initialDestination === 'day' && isPlanningDate(initialPlannedDate) ? initialPlannedDate : null);
   const [choosingDay, setChoosingDay] = useState(false);
   const busy = useRef(false);
   const [error, setError] = useState(false);
@@ -148,7 +152,7 @@ function CaptureSession({
                         item.ltr && styles.ltr,
                       ]}
                     >
-                      {item.label}
+                      {item.id === 'week' ? weekLabel : item.label}
                     </Text>
                   </Pressable>
                 );

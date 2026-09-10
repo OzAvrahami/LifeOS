@@ -6,7 +6,13 @@ LifeOS follows Semantic Versioning for development and release tags.
 
 ## [Unreleased]
 
-No unreleased changes recorded.
+### Added
+
+- Week now browses previous/next weeks and returns to “השבוע הזה”, with the selected range driving real task, commitment, and Weekly Focus data (#4).
+- Open any date to inspect separate task and commitment lists, navigate days across week/month/year boundaries, and return to Today. Compact previews show real titles, counts, estimates, and commitment times without inventing durations.
+- Create tasks/commitments for the inspected date and use existing edit, reschedule, lifecycle, and delete actions while retaining day/week context. Completed tasks are separate from active totals; Weekly Focus never counts as a task.
+
+Issue #4 awaits physical-iPhone owner acceptance; these changes are not part of published v0.2.1. See [implementation verification and the owner checklist](docs/issue-4-verification.md).
 
 ## [0.2.1] — 2026-09-08
 
@@ -32,7 +38,7 @@ The previous GitHub Release is v0.1.1. The following improvements were prepared 
 
 The owner approved standalone cellular opening/data loading without the Mac/Metro, #11–#13 interactions, and retention of tested commitment/task times and dates after saving and reopening the app. Prior automated regression tests separately support internal field/history/cache/timezone invariants; no new instrumented database/history/RLS test or full accessibility audit is claimed.
 
-Specific owner acceptance remains pending for Day Window (#7), authenticated Today fixture exclusion (#8), and Week count/duration freshness (#10), all open in Verify. #3 and #4 are open in Ready with their full planning lifecycle and week/day task/commitment navigation scopes incomplete. Google Calendar integration remains Backlog. Detailed preparation, owner acceptance, and publication evidence are in [the 0.2.1 verification record](docs/release-0.2.1-verification.md).
+**Historical workflow snapshot — 2026-09-08:** Specific owner acceptance remained pending for Day Window (#7), authenticated Today fixture exclusion (#8), and Week count/duration freshness (#10), all open in Verify. #3 and #4 are open in Ready with their full planning lifecycle and week/day task/commitment navigation scopes incomplete. This snapshot is superseded by [current implementation status](docs/IMPLEMENTATION_STATUS.md); it is not the current #4 gate. Google Calendar integration remains Backlog. Detailed preparation, owner acceptance, and publication evidence are in [the 0.2.1 verification record](docs/release-0.2.1-verification.md).
 
 ## [0.2.0] — Historical preparation; not publicly released
 

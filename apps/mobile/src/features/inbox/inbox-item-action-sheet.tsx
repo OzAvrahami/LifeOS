@@ -185,13 +185,17 @@ function ActionButton({
   );
 }
 
-function EditTask({
+export function EditTask({
+  accessibilityLabel = 'עריכת כותרת Inbox',
+  disabled = false,
   onBack,
   onChangeTitle,
   onSave,
   title,
 }: {
   onBack: () => void;
+  accessibilityLabel?: string;
+  disabled?: boolean;
   onChangeTitle: (title: string) => void;
   onSave: () => void;
   title: string;
@@ -200,7 +204,8 @@ function EditTask({
     <>
       <Text style={styles.eyebrow}>עריכת כותרת</Text>
       <TextInput
-        accessibilityLabel="עריכת כותרת Inbox"
+        accessibilityLabel={accessibilityLabel}
+        editable={!disabled}
         autoFocus
         onChangeText={onChangeTitle}
         onSubmitEditing={onSave}
@@ -209,10 +214,10 @@ function EditTask({
         textAlign="right"
         value={title}
       />
-      <Pressable accessibilityRole="button" onPress={onSave} style={styles.saveButton}>
+      <Pressable accessibilityRole="button" disabled={disabled} onPress={onSave} style={styles.saveButton}>
         <Text style={styles.saveText}>שמירה</Text>
       </Pressable>
-      <Pressable accessibilityRole="button" onPress={onBack} style={styles.backButton}>
+      <Pressable accessibilityRole="button" disabled={disabled} onPress={onBack} style={styles.backButton}>
         <Text style={styles.secondaryText}>חזרה</Text>
       </Pressable>
     </>

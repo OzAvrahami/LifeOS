@@ -1,3 +1,4 @@
+import { weekStartForDateKey, weekDateKeys, addDaysToDateKey } from '@/features/tasks/task-dates';
 import { Task } from '@/features/tasks/task.types';
 import { tasksByPlannedDate } from '@/features/week/week-aggregation';
 
@@ -52,5 +53,21 @@ describe('Week Task aggregation', () => {
     const after = tasksByPlannedDate([movedAndResized], dates);
     expect(after.get('2026-08-23')?.tasks).toHaveLength(0);
     expect(after.get('2026-08-24')).toEqual(expect.objectContaining({ plannedMinutes: 75 }));
+  });
+});
+
+
+describe('selected-week calendar keys', () => {
+  it.each([
+    ['2027-01-01', 0, '2026-12-27'],
+    ['2027-01-01', 1, '2026-12-28'],
+    ['2026-09-06', 1, '2026-08-31'],
+  ])('anchors %s with week start %i to %s', (date, startDay, expected) => {
+    expect(weekStartForDateKey(date, startDay)).toBe(expected);
+  });
+  it('keeps leap-day and year transitions on calendar keys', () => {
+    expect(addDaysToDateKey('2028-02-28', 1)).toBe('2028-02-29');
+    expect(addDaysToDateKey('2028-03-01', -1)).toBe('2028-02-29');
+    expect(weekDateKeys('2026-12-28')).toEqual(['2026-12-28','2026-12-29','2026-12-30','2026-12-31','2027-01-01','2027-01-02','2027-01-03']);
   });
 });

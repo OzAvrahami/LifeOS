@@ -7,6 +7,7 @@ import { useState } from 'react';
 import { InboxScreen } from '@/features/inbox/inbox-screen';
 import * as planningApi from '@/features/planning/planning.api';
 import type { DailyPlan, WeeklyFocus } from '@/features/planning/planning.types';
+import * as settingsApi from '@/features/settings/settings.api';
 import * as taskApi from '@/features/tasks/task.api';
 import { addDaysToDateKey, currentWeekStart, localDateKey } from '@/features/tasks/task-dates';
 import { CreateTaskInput, Task, TaskListFilters, UpdateTaskInput } from '@/features/tasks/task.types';
@@ -14,6 +15,8 @@ import { TodayScreen } from '@/features/today/today-screen';
 import { WeekScreen } from '@/features/week/week-screen';
 
 import { TestProviders } from '../test-utils/test-providers';
+
+jest.mock('@/features/settings/settings.api', () => ({ getSettings: jest.fn(), putSettings: jest.fn() }));
 
 jest.mock('@/features/tasks/task.api', () => ({
   cancelTask: jest.fn(),
@@ -238,6 +241,7 @@ beforeEach(() => {
   installFakeTaskApi();
   installFakePlanningApi();
   listCommitmentsMock.mockResolvedValue([]);
+  jest.mocked(settingsApi.getSettings).mockResolvedValue({ persisted: true, timezone: Intl.DateTimeFormat().resolvedOptions().timeZone, weekStartDay: 0, defaultDailyCapacityMinutes: 360, dayWindowSupported: true, dayStartTime: null, dayEndTime: null });
 });
 
 describe('persistent server Task experience', () => {
@@ -258,11 +262,11 @@ describe('persistent server Task experience', () => {
 
     await renderFlow('week');
 
-    expect(await screen.findByText('3 משימות · 1:05')).toBeTruthy();
-    expect(screen.getByText('1 משימה · 0:15')).toBeTruthy();
-    expect(screen.getAllByText('0 משימות · 0:00')).toHaveLength(5);
+    expect(await screen.findByText('3 משימות · 1:05 זמן משימות מתוכנן')).toBeTruthy();
+    expect(screen.getByText('1 משימה · 0:15 זמן משימות מתוכנן')).toBeTruthy();
+    expect(screen.getAllByText('0 משימות · 0:00 זמן משימות מתוכנן')).toHaveLength(5);
     expect(screen.getByText('Focus is not a Task')).toBeTruthy();
-    expect(screen.queryByText('5 משימות · 4:30')).toBeNull();
+    expect(screen.queryByText('5 משימות · 4:30 זמן משימות מתוכנן')).toBeNull();
     expect(screen.queryByText('פנוי')).toBeNull();
     expect(screen.queryByText('מאוזן')).toBeNull();
     expect(screen.queryByText('עמוס')).toBeNull();
@@ -338,7 +342,7 @@ describe('persistent server Task experience', () => {
   it('captures once from the inline Today action, defaults it to Today, and preserves global capture cancellation and Inbox default', async () => {
     const user = userEvent.setup();
     await renderFlow('week');
-    expect(await screen.findAllByText('0 משימות · 0:00')).toHaveLength(7);
+    expect(await screen.findAllByText('0 משימות · 0:00 זמן משימות מתוכנן')).toHaveLength(7);
 
     await user.press(within(screen.getByLabelText('ניווט ראשי')).getByText('היום'));
     expect(await screen.findByText('0 משימות')).toBeTruthy();
@@ -371,7 +375,7 @@ describe('persistent server Task experience', () => {
     expect(tasks).toHaveLength(1);
 
     await user.press(within(screen.getByLabelText('ניווט ראשי')).getByText('שבוע'));
-    expect(await screen.findByText('1 משימה · 0:00')).toBeTruthy();
+    expect(await screen.findByText('1 משימה · 0:00 זמן משימות מתוכנן')).toBeTruthy();
   });
 
   it('expands all week-planned Tasks and schedules a previously hidden Task without creating or duplicating it', async () => {
@@ -406,7 +410,7 @@ describe('persistent server Task experience', () => {
     expect(within(section).queryByText('רביעית שהוסתרה')).toBeNull();
     expect(within(section).getAllByLabelText(/^בחר יום עבור /)).toHaveLength(2);
     expect(within(section).getByLabelText('הצג משימה נוספת')).toBeTruthy();
-    expect(await screen.findByText('1 משימה · 0:00')).toBeTruthy();
+    expect(await screen.findByText('1 משימה · 0:00 זמן משימות מתוכנן')).toBeTruthy();
   });
 
   it('moves Inbox directly to Today and cancels without deleting the persisted identity', async () => {

@@ -284,7 +284,7 @@ describe('configured Week start with a controlled calendar date', () => {
       const overview = within(screen.getByLabelText('סקירת שבעת ימי השבוע'));
       const rows = overview.getAllByRole('button');
       expect(rows.map((row) => row.props.accessibilityLabel)).toEqual(
-        expected.map(([weekday]) => `הוסף התחייבות ליום ${weekday}`),
+        expected.map(([, day]) => `פתח יום 2026-09-${String(day).padStart(2, '0')}`),
       );
       expect(overview.getAllByText('היום')).toHaveLength(1);
       expected.forEach(([weekday, dayOfMonth], index) => {
