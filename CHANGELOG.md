@@ -8,6 +8,9 @@ LifeOS follows Semantic Versioning for development and release tags.
 
 ### Added
 
+- Weekly Planning now has selected-week start/resume/completed/review/edit states and a four-step authenticated flow, backed by the existing WeekPlan owner (#3). Focus edits and saved progress survive returning to the flow; completed edits preserve completion and identity.
+- Prepared a forward migration for lifecycle constraints and an atomic caller-scoped planning RPC. Local PostgreSQL/Auth/RLS integration passed all 11 verification groups, including lifecycle constraints, atomic retries, completed edits, and compatible Focus owners; production rollout and physical acceptance remain pending. See [the #3 handoff](docs/issue-3-verification.md).
+
 - Week now browses previous/next weeks and returns to “השבוע הזה”, with the selected range driving real task, commitment, and Weekly Focus data (#4).
 - Open any date to inspect separate task and commitment lists, navigate days across week/month/year boundaries, and return to Today. Compact previews show real titles, counts, estimates, and commitment times without inventing durations.
 - Create tasks/commitments for the inspected date and use existing edit, reschedule, lifecycle, and delete actions while retaining day/week context. Completed tasks are separate from active totals; Weekly Focus never counts as a task.

@@ -20,3 +20,18 @@ export type WeeklyFocus = {
   createdAt: string;
   updatedAt: string;
 };
+
+export type WeeklyPlan = {
+  id: string;
+  weekStart: string;
+  status: 'not_started' | 'in_progress' | 'completed';
+  resumeStep: number;
+  completedAt: string | null;
+  createdAt: string;
+  updatedAt: string;
+};
+
+export type WeeklyPlanningState = { weekPlan: WeeklyPlan | null; focuses: WeeklyFocus[] };
+export type WeeklyPlanningInput =
+  | { action: 'start' | 'complete' }
+  | { action: 'save'; step: number; advance: boolean; titles?: string[] };

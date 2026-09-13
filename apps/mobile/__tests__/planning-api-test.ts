@@ -1,6 +1,8 @@
 import { apiRequest } from '@/lib/api/client';
 
 import {
+  getWeeklyPlan,
+  saveWeeklyPlan,
   getDailyPlan,
   getWeeklyFocuses,
   putDailyPlan,
@@ -73,4 +75,23 @@ describe('Planning API client', () => {
       method: 'PUT',
     });
   });
+});
+
+
+it('loads/saves an explicit weekly lifecycle through authenticated selected-week endpoints', async () => {
+  const state = { weekPlan: { id: 'stable', weekStart: '2026-09-21', status: 'in_progress', resumeStep: 3 }, focuses: [focus] };
+  request.mockResolvedValue(state);
+  await expect(getWeeklyPlan('2026-09-21')).resolves.toEqual(state);
+  expect(request).toHaveBeenLastCalledWith('/week-plans/2026-09-21', { auth: 'required' });
+  await expect(saveWeeklyPlan({ weekStart: '2026-09-21', input: { action: 'save', step: 3, advance: false, titles: ['Direction'] } })).resolves.toEqual(state);
+  expect(request).toHaveBeenLastCalledWith('/week-plans/2026-09-21', {
+    auth: 'required', method: 'PUT', headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ action: 'save', step: 3, advance: false, titles: ['Direction'] }),
+  });
+});
+
+it('propagates lifecycle load/completion errors without synthesizing a successful plan', async () => {
+  request.mockRejectedValue(new Error('migration required'));
+  await expect(getWeeklyPlan('2026-09-21')).rejects.toThrow('migration required');
+  await expect(saveWeeklyPlan({ weekStart: '2026-09-21', input: { action: 'complete' } })).rejects.toThrow('migration required');
 });

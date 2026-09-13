@@ -8,6 +8,7 @@ import { setTimeout as sleep } from 'node:timers/promises';
 import { fileURLToPath, URL } from 'node:url';
 
 import { createClient } from '@supabase/supabase-js';
+import { verifyWeeklyPlanning } from './verify-weekly-planning.mjs';
 
 const repositoryRoot = fileURLToPath(new URL('../../..', import.meta.url));
 const supabaseWorkdir = process.env.LIFEOS_INTEGRATION_SUPABASE_WORKDIR
@@ -757,6 +758,11 @@ async function main() {
     assert.ok(anonymousFocusDelete.error, 'Anonymous WeeklyFocus delete unexpectedly succeeded');
     assert.ok(anonymousCommitmentDelete.error, 'Anonymous Commitment delete unexpectedly succeeded');
     assert.ok(anonymousSettingsUpdate.error, 'Anonymous Settings update unexpectedly succeeded');
+
+    await verifyWeeklyPlanning({ apiRequest, tokenA, tokenB, callerA, callerB, anonymous,
+      freshTokenA: async () => (await signIn(supabaseUrl, publishableKey, users[0].email, password)).access_token,
+    });
+    console.log('PASS Weekly Planning lifecycle, atomic saves/retries, completed edits, compatible focus owners, and caller RLS');
 
     console.log('PASS local stack and real Auth sessions');
     console.log('PASS anonymous table and application RPC privileges are denied');

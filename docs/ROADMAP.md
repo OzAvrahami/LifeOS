@@ -122,7 +122,7 @@ The `lifeos-api` Railway service runs the compiled API behind HTTPS. A Release i
 
 **Milestone exit criteria: MET.** Installed version/build confirmation, scoped owner acceptance, and GitHub publication are recorded. No broader specialized audit or unrelated feature acceptance is implied.
 
-**Remaining work:** #4’s selected-week queries, task/commitment day inspection, day navigation, and editing/return context are implemented and await [physical-iPhone owner acceptance](issue-4-verification.md). This unreleased work does not change the completed v0.2.1 milestone. #3’s full Weekly Planning lifecycle remains Open / Ready. Live #7/#8/#10 are Closed/Completed/Done and their accepted behavior is preserved. Other backlog work, including Google Calendar integration and #16, is unchanged; no new release target is selected.
+**Remaining work:** #4’s selected-week queries, task/commitment day inspection, day navigation, and editing/return context are implemented and await [physical-iPhone owner acceptance](issue-4-verification.md). This unreleased work does not change the completed v0.2.1 milestone. #3’s persisted lifecycle and four-step authenticated flow are implemented, with software checks and independent local PostgreSQL/Auth/RLS integration passing (all 11 groups). It is Open / Verify; owner review/manual Git checkpoint, controlled schema/API rollout, and [physical acceptance](issue-3-verification.md) remain. No production migration or device acceptance is implied by local verification. Live #7/#8/#10 are Closed/Completed/Done and their accepted behavior is preserved. Other backlog work, including Google Calendar integration and #16, is unchanged; no new release target is selected.
 
 ## Release gate — v0.1.0-alpha.1
 

@@ -1,4 +1,4 @@
-import type { DailyPlanInput } from './planning.types.js';
+import type { DailyPlanInput, WeeklyPlanningInput } from './planning.types.js';
 
 export class PlanningApiError extends Error {
   constructor(
@@ -79,4 +79,19 @@ export function parseWeeklyFocuses(value: unknown) {
   });
   if (new Set(titles).size !== titles.length) invalid('Weekly focus titles must be unique');
   return titles;
+}
+
+export function parseWeeklyPlanning(value: unknown): WeeklyPlanningInput {
+  const body = objectValue(value);
+  if (body.action === 'start' || body.action === 'complete') {
+    rejectUnknownKeys(body, new Set(['action']));
+    return { action: body.action };
+  }
+  if (body.action !== 'save') invalid('Invalid weekly planning action');
+  rejectUnknownKeys(body, new Set(['action', 'step', 'advance', 'titles']));
+  if (!Number.isInteger(body.step) || (body.step as number) < 1 || (body.step as number) > 4) invalid('Invalid planning step');
+  if ('advance' in body && typeof body.advance !== 'boolean') invalid('Invalid planning advance');
+  if ('titles' in body && body.step !== 3) invalid('Focuses belong to step 3');
+  return { action: 'save', step: body.step as number, advance: body.advance === true,
+    ...('titles' in body ? { titles: parseWeeklyFocuses({ titles: body.titles }) } : {}) };
 }

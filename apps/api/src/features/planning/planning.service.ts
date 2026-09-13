@@ -7,6 +7,9 @@ import type {
   PlanningServiceContract,
   WeeklyFocus,
   WeeklyFocusRow,
+  WeeklyPlanRow,
+  WeeklyPlan,
+  WeeklyPlanningInput,
 } from './planning.types.js';
 import { PlanningApiError } from './planning.validation.js';
 
@@ -32,7 +35,10 @@ function mapWeeklyFocus(row: WeeklyFocusRow): WeeklyFocus {
   };
 }
 
-function dataError(error: PostgrestError): never {
+function dataError(error: PostgrestError, weeklyLifecycle = false): never {
+  if (weeklyLifecycle && ['42703', '42883', 'PGRST202', 'PGRST204'].includes(error.code)) throw new PlanningApiError(503, 'Weekly planning requires a database update');
+  if (error.code === '55000') throw new PlanningApiError(409, 'Complete preceding planning steps first');
+  if (error.code === '22023') throw new PlanningApiError(400, 'Invalid weekly planning input');
   if (error.code === '23505') throw new PlanningApiError(409, 'Planning state conflict');
   if (['22P02', '23503', '23514', '42501', 'P0001'].includes(error.code)) {
     throw new PlanningApiError(400, 'Invalid planning input');
@@ -45,6 +51,28 @@ export class SupabasePlanningService implements PlanningServiceContract {
     private readonly client: SupabaseClient,
     private readonly userId: string,
   ) {}
+
+  async getWeeklyPlan(weekStart: string) {
+    const { data, error } = await this.client.from('week_plans')
+      .select('id,week_start,planning_status,planning_step,planning_completed_at,created_at,updated_at,weekly_focuses(*)')
+      .eq('user_id', this.userId).eq('week_start', weekStart).maybeSingle();
+    if (error) dataError(error, true);
+    const row = data as WeeklyPlanRow | null;
+    return { weekPlan: row ? mapWeeklyPlan(row) : null,
+      focuses: (row?.weekly_focuses ?? []).map(mapWeeklyFocus).sort((a, b) => a.position - b.position) };
+  }
+
+  async saveWeeklyPlan(weekStart: string, input: WeeklyPlanningInput) {
+    const { data, error } = await this.client.rpc('save_weekly_planning', {
+      p_week_start: weekStart, p_action: input.action,
+      p_step: input.action === 'save' ? input.step : null,
+      p_advance: input.action === 'save' ? input.advance : false,
+      p_titles: input.action === 'save' ? input.titles ?? null : null,
+    });
+    if (error) dataError(error, true);
+    const result = data as { week_plan: WeeklyPlanRow; focuses: WeeklyFocusRow[] };
+    return { weekPlan: mapWeeklyPlan(result.week_plan), focuses: result.focuses.map(mapWeeklyFocus) };
+  }
 
   async getDailyPlan(date: string) {
     const { data, error } = await this.client
@@ -120,4 +148,10 @@ export class SupabasePlanningService implements PlanningServiceContract {
 
 export function createPlanningService(client: SupabaseClient, userId: string) {
   return new SupabasePlanningService(client, userId);
+}
+
+function mapWeeklyPlan(row: WeeklyPlanRow): WeeklyPlan {
+  return { id: row.id, weekStart: row.week_start, status: row.planning_status,
+    resumeStep: row.planning_step, completedAt: row.planning_completed_at,
+    createdAt: row.created_at, updatedAt: row.updated_at };
 }

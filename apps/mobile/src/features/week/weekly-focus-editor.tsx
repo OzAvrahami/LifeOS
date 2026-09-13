@@ -16,12 +16,14 @@ function normalizedFocusTitle(title: string) {
 export function WeeklyFocusEditor({
   focuses,
   dateRange,
+  contextLabel,
   onCancel,
   onSave,
   onSaved,
 }: {
   focuses: WeeklyFocus[];
   dateRange?: string;
+  contextLabel?: string;
   onCancel: () => void;
   onSave: (titles: string[]) => Promise<WeeklyFocus[]>;
   onSaved: () => void;
@@ -114,6 +116,7 @@ export function WeeklyFocusEditor({
           keyboardShouldPersistTaps="handled"
           showsVerticalScrollIndicator={false}
         >
+          {contextLabel ? <Text style={styles.subtitle}>{contextLabel}</Text> : null}
           {dateRange ? <Text style={styles.subtitle}>{dateRange}</Text> : null}
           <Text style={styles.heading}>מה חשוב שיקרה השבוע?</Text>
           <Text style={styles.subtitle}>

@@ -13,6 +13,8 @@ import type {
   DailyPlanInput,
   PlanningServiceContract,
   WeeklyFocus,
+  WeeklyPlan,
+  WeeklyPlanningInput,
 } from '../src/features/planning/planning.types.js';
 import { PlanningApiError } from '../src/features/planning/planning.validation.js';
 import { createRequireAuth } from '../src/middleware/auth.middleware.js';
@@ -23,6 +25,7 @@ const today = '2026-08-14';
 
 type MemoryPlanningDatabase = {
   plans: Map<string, DailyPlan>;
+  weeks: Map<string, WeeklyPlan>;
   focuses: Map<string, WeeklyFocus[]>;
   tasks: Array<{ id: string; userId: string; plannedDate: string; status: string }>;
 };
@@ -36,6 +39,38 @@ class MemoryPlanningService implements PlanningServiceContract {
     private readonly database: MemoryPlanningDatabase,
     private readonly userId: string,
   ) {}
+
+  ensureWeek(weekStart: string) {
+    const key = planKey(this.userId, weekStart);
+    if (!this.database.weeks.has(key)) this.database.weeks.set(key, {
+      id: `week-${this.userId}-${weekStart}`, weekStart, status: 'not_started', resumeStep: 0,
+      completedAt: null, createdAt: new Date().toISOString(), updatedAt: new Date().toISOString(),
+    });
+    return this.database.weeks.get(key)!;
+  }
+
+  async getWeeklyPlan(weekStart: string) {
+    return { weekPlan: this.database.weeks.get(planKey(this.userId, weekStart)) ?? null,
+      focuses: await this.getWeeklyFocuses(weekStart) };
+  }
+
+  // Disposable route fixture; actual locking/constraints/RLS are tested by the local DB harness.
+  async saveWeeklyPlan(weekStart: string, input: WeeklyPlanningInput) {
+    const plan = input.action === 'start' ? this.ensureWeek(weekStart)
+      : this.database.weeks.get(planKey(this.userId, weekStart));
+    if (!plan) throw new PlanningApiError(409, 'Start weekly planning first');
+    if (input.action === 'start' && plan.status === 'not_started') {
+      plan.status = 'in_progress'; plan.resumeStep = 1;
+    } else if (input.action === 'save') {
+      if (plan.status === 'not_started' || input.step > plan.resumeStep) throw new PlanningApiError(409, 'Complete preceding planning steps first');
+      if (input.titles) await this.replaceWeeklyFocuses(weekStart, input.titles);
+      plan.resumeStep = Math.max(plan.resumeStep, Math.min(4, input.step + (input.advance ? 1 : 0)));
+    } else if (input.action === 'complete' && plan.status !== 'completed') {
+      if (plan.status !== 'in_progress' || plan.resumeStep !== 4) throw new PlanningApiError(409, 'Complete preceding planning steps first');
+      plan.status = 'completed'; plan.completedAt = new Date().toISOString();
+    }
+    return this.getWeeklyPlan(weekStart);
+  }
 
   async getDailyPlan(date: string) {
     return this.database.plans.get(planKey(this.userId, date)) ?? null;
@@ -75,6 +110,7 @@ class MemoryPlanningService implements PlanningServiceContract {
   }
 
   async replaceWeeklyFocuses(weekStart: string, titles: string[]) {
+    this.ensureWeek(weekStart);
     const timestamp = new Date().toISOString();
     const focuses = titles.map((title, position): WeeklyFocus => ({
       createdAt: timestamp,
@@ -92,6 +128,7 @@ class MemoryPlanningService implements PlanningServiceContract {
 function database(): MemoryPlanningDatabase {
   return {
     focuses: new Map(),
+    weeks: new Map(),
     plans: new Map(),
     tasks: [
       { id: 'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa', plannedDate: today, status: 'open', userId: userA.id },
@@ -250,4 +287,83 @@ describe('Planning API', () => {
     assert.match(migration, /security invoker/i);
     assert.doesNotMatch(migration, /service_role/i);
   });
+});
+
+
+describe('Weekly Planning lifecycle HTTP contract (isolated store)', () => {
+  const path = '/week-plans/2026-09-21';
+  it('returns untouched state without creating a row and requires authentication', async () => {
+    const data = database(); const app = createPlanningTestApp(data);
+    await request(app).get(path).expect(401);
+    await request(app).put(path).send({ action: 'start' }).expect(401);
+    assert.deepEqual((await authenticated(app).get(path).expect(200)).body, { weekPlan: null, focuses: [] });
+    assert.equal(data.weeks.size, 0);
+    await authenticated(app).put(path).send({ action: 'complete' }).expect(409);
+    assert.equal(data.weeks.size, 0);
+  });
+
+  it('starts once, persists/resumes ordered progress in a fresh app, completes idempotently and edits the same completed owner', async () => {
+    const data = database(); const app = createPlanningTestApp(data);
+    const starts = await Promise.all([1,2,3].map(() => authenticated(app).put(path).send({ action: 'start' }).expect(200)));
+    const id = starts[0]!.body.weekPlan.id;
+    for (const response of starts) assert.deepEqual([response.body.weekPlan.status, response.body.weekPlan.resumeStep, response.body.weekPlan.id], ['in_progress',1,id]);
+    assert.equal(data.weeks.size, 1);
+    await authenticated(app).put(path).send({ action: 'complete' }).expect(409);
+    await authenticated(app).put(path).send({ action: 'save', step: 3, advance: true }).expect(409);
+    for (const step of [1,2]) await authenticated(app).put(path).send({ action: 'save', step, advance: true }).expect(200);
+    await authenticated(app).put(path).send({ action: 'save', step: 3, titles: ['Persisted focus'] }).expect(200);
+    const restored = (await authenticated(createPlanningTestApp(data)).get(path).expect(200)).body;
+    assert.equal(restored.weekPlan.resumeStep, 3);
+    assert.equal(restored.focuses[0].title, 'Persisted focus');
+    const back = await authenticated(app).put(path).send({ action: 'save', step: 1, advance: true }).expect(200);
+    assert.equal(back.body.weekPlan.resumeStep, 3);
+    await authenticated(app).put(path).send({ action: 'save', step: 3, advance: true }).expect(200);
+    const completed = (await authenticated(app).put(path).send({ action: 'complete' }).expect(200)).body.weekPlan;
+    assert.equal(completed.status, 'completed'); assert.ok(completed.completedAt);
+    const repeat = await authenticated(app).put(path).send({ action: 'complete' }).expect(200);
+    assert.deepEqual(repeat.body.weekPlan, completed);
+    const edit = await authenticated(app).put(path).send({ action: 'save', step: 3, titles: ['Edited focus'] }).expect(200);
+    assert.equal(edit.body.weekPlan.id, id); assert.equal(edit.body.weekPlan.status, 'completed');
+    assert.equal(edit.body.weekPlan.completedAt, completed.completedAt);
+    assert.equal(edit.body.focuses[0].title, 'Edited focus');
+    const restarted = await authenticated(app).put(path).send({ action: 'start' }).expect(200);
+    assert.equal(restarted.body.weekPlan.status, 'completed'); assert.equal(data.weeks.size, 1);
+  });
+
+  it('keeps independent weeks/users and preserves existing focus-only and empty owner rows', async () => {
+    const data = database(); const app = createPlanningTestApp(data);
+    const original = await authenticated(app).put(`${path}/focuses`).send({ titles: ['Legacy focus'] }).expect(200);
+    const before = await authenticated(app).get(path).expect(200);
+    assert.equal(before.body.weekPlan.status, 'not_started');
+    assert.equal(before.body.weekPlan.resumeStep, 0);
+    const started = await authenticated(app).put(path).send({ action: 'start' }).expect(200);
+    assert.equal(started.body.weekPlan.id, original.body.focuses[0].weekPlanId);
+    assert.deepEqual(started.body.focuses, original.body.focuses);
+    assert.equal((await authenticated(app, 'token-b').get(path).expect(200)).body.weekPlan, null);
+    const b = await authenticated(app, 'token-b').put(path).send({ action: 'start' }).expect(200);
+    assert.notEqual(b.body.weekPlan.id, started.body.weekPlan.id);
+    const other = '/week-plans/2026-09-28';
+    await authenticated(app).put(`${other}/focuses`).send({ titles: [] }).expect(200);
+    assert.equal((await authenticated(app).get(other).expect(200)).body.weekPlan.status, 'not_started');
+    assert.equal((await authenticated(app).get(path).expect(200)).body.weekPlan.status, 'in_progress');
+  });
+
+  for (const date of ['2026-02-29','2026-13-01','2026-9-1','not-a-date','2026-09-13T00:00:00Z']) {
+    it(`rejects invalid lifecycle date ${date}`, async () => {
+      const app = createPlanningTestApp(database());
+      await authenticated(app).get(`/week-plans/${date}`).expect(400);
+      await authenticated(app).put(`/week-plans/${date}`).send({ action: 'start' }).expect(400);
+    });
+  }
+  for (const input of [{}, { action: 'completed' }, { action: 'start', step: 1 }, { action: 'save', step: 0 },
+    { action: 'save', step: 5 }, { action: 'save', step: 2.5 }, { action: 'save', step: 1, advance: 'true' },
+    { action: 'save', step: 2, titles: [] }, { action: 'save', step: 3, titles: ['same','same'] },
+    { action: 'save', step: 3, titles: ['a','b','c','d'] }, { action: 'start', userId: userB.id },
+    { action: 'save', step: 3, titles: null }]) {
+    it(`rejects invalid transition payload ${JSON.stringify(input)} without mutation`, async () => {
+      const data = database(); const app = createPlanningTestApp(data);
+      await authenticated(app).put(path).send(input).expect(400);
+      assert.equal(data.weeks.size, 0);
+    });
+  }
 });

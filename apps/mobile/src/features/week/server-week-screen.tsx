@@ -24,6 +24,7 @@ import type { WeekScreenProps } from './week-screen';
 import { WeekTaskDetails } from './week-task-details';
 import { UnscheduledWeekTasks, WeeklyFocusCard, WeekSectionLabel } from './week.components';
 import { WeeklyFocusEditor } from './weekly-focus-editor';
+import { WeeklyPlanningEntry } from './weekly-planning-entry';
 
 export function ServerWeekScreen({ onNavigateInbox, onNavigateMore, onNavigateToday }: WeekScreenProps) {
   const { effective: settings, query: settingsQuery } = useEffectiveSettings();
@@ -95,6 +96,7 @@ export function ServerWeekScreen({ onNavigateInbox, onNavigateMore, onNavigateTo
             onCommitment={id => { const item = commitmentsFor(selectedDate).find(c => c.id === id); if (item) setCommitmentEditor({ date: selectedDate, item }); }}
             onAddTask={() => setCapture({ date: selectedDate, day: true, weekStart })}
             onAddCommitment={() => setCommitmentEditor({ date: selectedDate })} /> : null) : <>
+            <WeeklyPlanningEntry key={weekStart} weekStart={weekStart} enabled={settingsQuery.isSuccess} />
             <WeeklyFocusCard focuses={focusQuery.data ?? []} state={focusQuery.isPending ? 'loading' : focusQuery.isError ? 'error' : 'ready'}
               onEdit={focusQuery.isSuccess ? () => setFocusEditor({ weekStart, focuses: focusQuery.data.map(f => ({ ...f })) }) : undefined} />
             {!loading && !error ? <View accessibilityLabel="סקירת שבעת ימי השבוע" style={styles.days}>

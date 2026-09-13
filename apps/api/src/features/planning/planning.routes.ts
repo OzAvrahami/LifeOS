@@ -8,6 +8,7 @@ import {
   parseDailyPlan,
   parsePlanningDate,
   parseWeeklyFocuses,
+  parseWeeklyPlanning,
   PlanningApiError,
 } from './planning.validation.js';
 
@@ -16,6 +17,18 @@ export function createPlanningRouter(
   serviceFactory: PlanningServiceFactory = createPlanningService,
 ) {
   const router = Router();
+
+  router.get('/week-plans/:weekStart', authMiddleware, async (request, response) => {
+    const service = serviceFactory(request.auth.supabase, request.auth.user.id);
+    response.json(await service.getWeeklyPlan(parsePlanningDate(request.params.weekStart, 'weekStart')));
+  });
+
+  router.put('/week-plans/:weekStart', authMiddleware, async (request, response) => {
+    const service = serviceFactory(request.auth.supabase, request.auth.user.id);
+    response.json(await service.saveWeeklyPlan(
+      parsePlanningDate(request.params.weekStart, 'weekStart'), parseWeeklyPlanning(request.body),
+    ));
+  });
 
   router.get('/daily-plans/:date', authMiddleware, async (request, response) => {
     const service = serviceFactory(request.auth.supabase, request.auth.user.id);

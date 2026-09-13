@@ -6,6 +6,12 @@ This is owner-reported acceptance, not independent device observation, binary-SH
 
 The preparation, acceptance-documentation (`1712389`), and final publication-documentation checkpoints are complete. [LifeOS v0.2.1 — Planning fixes](https://github.com/OzAvrahami/LifeOS/releases/tag/v0.2.1) was published on 2026-09-08 at 09:19:03 UTC and is Latest, non-draft, non-prerelease. Its annotated tag resolves to `93fde4306132f2301f5e2b02c3c374f5c203a1cd`. Later documentation changes do not alter this release source. See [the publication record](release-0.2.1-verification.md#current-publication-and-workflow--2026-09-08). No further build or binary attachment was required for that workflow reconciliation. The later #4 implementation is unreleased and needs its own owner-reviewed build before physical acceptance; the installed 0.2.1 binary is not evidence for it.
 
+## Weekly Planning lifecycle rollout — Issue #3, 2026-09-13
+
+The unreleased #3 implementation requires the seventh forward migration, `20260913120000_add_weekly_planning_lifecycle.sql`, and the updated planning API. It extends existing WeekPlan owners without replacing IDs/focuses or changing #4 navigation behavior. Legacy rows start as `not_started`, not completed. Local PostgreSQL/Auth/RLS verification passed on an independent rerun on 2026-09-13: exit 0, all 11 PASS groups, including the lifecycle checks. The existing owner-prepared local schema was reused; local migration history includes `20260913120000`. No database reset, migration application, production operation, or deployment occurred in this follow-up.
+
+The local integration gate is complete and #3 is Open / Verify. Follow [the verification record and exact owner rollout commands](issue-3-verification.md#required-database-verification-and-rollout): owner review/manual commit and push first, review linked migration history/dry run, apply the schema under owner control, then roll out the API through the existing Railway path before loading the mobile changes. The test process used the existing OrbStack Docker executable through a temporary PATH addition; no persistent environment file changed. An older API/schema produces a visible planning error rather than an invented not-started state. Device acceptance waits for the schema/API and a build containing #3; installed 0.2.1 is not evidence for this new lifecycle. Version/build and release settings are unchanged.
+
 ## Architecture
 
 ```text

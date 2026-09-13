@@ -43,6 +43,8 @@ export type WeeklyFocus = {
 };
 
 export type PlanningServiceContract = {
+  getWeeklyPlan(weekStart: string): Promise<WeeklyPlanningState>;
+  saveWeeklyPlan(weekStart: string, input: WeeklyPlanningInput): Promise<WeeklyPlanningState>;
   getDailyPlan(date: string): Promise<DailyPlan | null>;
   putDailyPlan(date: string, input: DailyPlanInput): Promise<DailyPlan | null>;
   getWeeklyFocuses(weekStart: string): Promise<WeeklyFocus[]>;
@@ -53,3 +55,24 @@ export type PlanningServiceFactory = (
   client: SupabaseClient,
   userId: string,
 ) => PlanningServiceContract;
+
+export type WeeklyPlan = {
+  id: string;
+  weekStart: string;
+  status: 'not_started' | 'in_progress' | 'completed';
+  resumeStep: number;
+  completedAt: string | null;
+  createdAt: string;
+  updatedAt: string;
+};
+
+export type WeeklyPlanningState = { weekPlan: WeeklyPlan | null; focuses: WeeklyFocus[] };
+export type WeeklyPlanningInput =
+  | { action: 'start' | 'complete' }
+  | { action: 'save'; step: number; advance: boolean; titles?: string[] };
+
+export type WeeklyPlanRow = {
+  id: string; week_start: string; planning_status: WeeklyPlan['status'];
+  planning_step: number; planning_completed_at: string | null;
+  created_at: string; updated_at: string; weekly_focuses?: WeeklyFocusRow[];
+};

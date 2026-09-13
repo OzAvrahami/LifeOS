@@ -1,18 +1,22 @@
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { render, screen, userEvent, waitFor } from '@testing-library/react-native';
+import { act, fireEvent, render, screen, userEvent, waitFor } from '@testing-library/react-native';
 import { useState } from 'react';
 import { Pressable, Text } from 'react-native';
 
 import * as planningApi from '@/features/planning/planning.api';
 import {
+  useWeeklyPlan,
+  useSaveWeeklyPlan,
   planningKeys,
   usePutDailyPlan,
   useReplaceWeeklyFocuses,
 } from '@/features/planning/planning.queries';
-import type { DailyPlan, WeeklyFocus } from '@/features/planning/planning.types';
+import type { DailyPlan, WeeklyFocus, WeeklyPlanningState } from '@/features/planning/planning.types';
 import { TaskQueryScopeProvider } from '@/features/tasks/task-query-scope';
 
 jest.mock('@/features/planning/planning.api', () => ({
+  getWeeklyPlan: jest.fn(),
+  saveWeeklyPlan: jest.fn(),
   getDailyPlan: jest.fn(),
   getWeeklyFocuses: jest.fn(),
   putDailyPlan: jest.fn(),
@@ -140,4 +144,61 @@ describe('Planning query cache synchronization', () => {
     await waitFor(() => expect(screen.getByText('failed')).toBeTruthy());
     expect(queryClient.getQueryData(planningKeys.dailyPlan(userId, date))).toBe(previous);
   });
+});
+
+
+const completedState: WeeklyPlanningState = { weekPlan: { id: 'stable-plan', weekStart, status: 'completed', resumeStep: 4, completedAt: 'completed', createdAt: 'created', updatedAt: 'updated' }, focuses: [] };
+
+it('updates only the selected user/week lifecycle and Focus cache from a save response', async () => {
+  const client = makeQueryClient();
+  const otherKey = planningKeys.weeklyPlan(userId, '2026-08-16');
+  const otherUserKey = planningKeys.weeklyPlan('other-user', weekStart);
+  client.setQueryData(otherKey, completedState); client.setQueryData(otherUserKey, completedState);
+  const result = { ...completedState, focuses: [{ id: 'saved', weekPlanId: 'stable-plan', position: 0, title: 'Saved', createdAt: '', updatedAt: '' }] };
+  jest.mocked(planningApi.saveWeeklyPlan).mockResolvedValueOnce(result);
+  function Harness() { const save = useSaveWeeklyPlan(); return <Pressable accessibilityLabel="save plan" onPress={() => save.mutate({ weekStart, input: { action: 'save', step: 3, advance: false, titles: ['Saved'] } })}><Text>Save</Text></Pressable>; }
+  await render(<Providers queryClient={client}><Harness /></Providers>); await fireEvent.press(screen.getByLabelText('save plan'));
+  await waitFor(() => expect(client.getQueryData(planningKeys.weeklyPlan(userId, weekStart))).toEqual(result));
+  expect(client.getQueryData(planningKeys.weeklyFocuses(userId, weekStart))).toEqual(result.focuses);
+  expect(client.getQueryData(otherKey)).toBe(completedState); expect(client.getQueryData(otherUserKey)).toBe(completedState);
+  expect(client.getQueryState(otherKey)?.isInvalidated).toBe(false); expect(client.getQueryState(otherUserKey)?.isInvalidated).toBe(false);
+});
+
+it('refreshes the correct lifecycle after a standalone Focus edit without resetting completed state', async () => {
+  const client = makeQueryClient();
+  client.setQueryData(planningKeys.weeklyPlan(userId, weekStart), completedState);
+  jest.mocked(planningApi.getWeeklyPlan).mockResolvedValue(completedState);
+  replaceWeeklyFocusesMock.mockResolvedValueOnce([]);
+  function Harness() { const query = useWeeklyPlan(weekStart); const save = useReplaceWeeklyFocuses(); return <>
+    <Text>{query.data?.weekPlan?.status}</Text><Pressable accessibilityLabel="clear focuses" onPress={() => save.mutate({ weekStart, titles: [] })}><Text>Clear</Text></Pressable>
+  </>; }
+  await render(<Providers queryClient={client}><Harness /></Providers>);
+  await fireEvent.press(screen.getByLabelText('clear focuses'));
+  await waitFor(() => expect(planningApi.getWeeklyPlan).toHaveBeenCalledWith(weekStart));
+  expect(await screen.findByText('completed')).toBeTruthy();
+  expect(client.getQueryData(planningKeys.weeklyPlan(userId, weekStart))).toEqual(completedState);
+});
+
+it('cancels an obsolete load so it cannot overwrite a saved lifecycle response', async () => {
+  const client = makeQueryClient(); let resolveOld!: (state: WeeklyPlanningState) => void;
+  jest.mocked(planningApi.getWeeklyPlan).mockImplementationOnce(() => new Promise(resolve => { resolveOld = resolve; })).mockResolvedValue(completedState);
+  jest.mocked(planningApi.saveWeeklyPlan).mockResolvedValueOnce(completedState);
+  function Harness() { const query = useWeeklyPlan(weekStart); const save = useSaveWeeklyPlan(); return <>
+    <Text>{query.data?.weekPlan?.status ?? 'loading'}</Text><Pressable accessibilityLabel="complete known plan" onPress={() => save.mutate({ weekStart, input: { action: 'complete' } })}><Text>Complete</Text></Pressable>
+  </>; }
+  await render(<Providers queryClient={client}><Harness /></Providers>);
+  await screen.findByText('loading'); await fireEvent.press(screen.getByLabelText('complete known plan'));
+  await screen.findByText('completed'); await act(async () => resolveOld({ weekPlan: null, focuses: [] }));
+  expect(screen.getByText('completed')).toBeTruthy();
+  expect(client.getQueryData(planningKeys.weeklyPlan(userId, weekStart))).toEqual(completedState);
+});
+
+it('keeps a failed lifecycle write recoverable without caching false completion', async () => {
+  const client = makeQueryClient();
+  const before = { ...completedState, weekPlan: { ...completedState.weekPlan!, status: 'in_progress' as const, completedAt: null } };
+  client.setQueryData(planningKeys.weeklyPlan(userId, weekStart), before);
+  jest.mocked(planningApi.saveWeeklyPlan).mockRejectedValueOnce(new Error('offline'));
+  function Harness() { const save = useSaveWeeklyPlan(); return <><Text>{save.isError ? 'failed' : 'ready'}</Text><Pressable accessibilityLabel="fail completion" onPress={() => save.mutate({ weekStart, input: { action: 'complete' } })}><Text>Save</Text></Pressable></>; }
+  await render(<Providers queryClient={client}><Harness /></Providers>); await fireEvent.press(screen.getByLabelText('fail completion'));
+  await screen.findByText('failed'); expect(client.getQueryData(planningKeys.weeklyPlan(userId, weekStart))).toEqual(before);
 });
