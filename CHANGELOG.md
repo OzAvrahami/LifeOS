@@ -6,6 +6,14 @@ LifeOS follows Semantic Versioning for development and release tags.
 
 ## [Unreleased]
 
+### Development workflow
+
+- Establish a canonical development/release standard, mandatory mobile version/build review in AGENTS.md, and release-impact fields in all Issue Forms. Schema-dependent API rollout requires verified schema before deployment.
+
+## [0.3.0] — Verification candidate / unreleased
+
+Prepared internal candidate **0.3.0 / iOS build 4**, grouping #3 and #4 for physical-iPhone acceptance. Neither installed nor owner-accepted; no 0.3.0 tag/GitHub Release or App Store/TestFlight publication is claimed. Latest published release remains v0.2.1. See [candidate preparation](docs/release-0.3.0-verification.md).
+
 ### Added
 
 - Weekly Planning now has selected-week start/resume/completed/review/edit states and a four-step authenticated flow, backed by the existing WeekPlan owner (#3). Focus edits and saved progress survive returning to the flow; completed edits preserve completion and identity.
@@ -15,7 +23,7 @@ LifeOS follows Semantic Versioning for development and release tags.
 - Open any date to inspect separate task and commitment lists, navigate days across week/month/year boundaries, and return to Today. Compact previews show real titles, counts, estimates, and commitment times without inventing durations.
 - Create tasks/commitments for the inspected date and use existing edit, reschedule, lifecycle, and delete actions while retaining day/week context. Completed tasks are separate from active totals; Weekly Focus never counts as a task.
 
-Issue #4 awaits physical-iPhone owner acceptance; these changes are not part of published v0.2.1. See [implementation verification and the owner checklist](docs/issue-4-verification.md).
+Issues #3 and #4 remain Open / Verify and await physical-iPhone owner acceptance on the same 0.3.0 (4) candidate after schema/API readiness is confirmed; these changes are not part of published v0.2.1. See [implementation verification and the owner checklist](docs/issue-4-verification.md).
 
 ## [0.2.1] — 2026-09-08
 

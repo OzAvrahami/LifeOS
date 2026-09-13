@@ -6,11 +6,15 @@ This is owner-reported acceptance, not independent device observation, binary-SH
 
 The preparation, acceptance-documentation (`1712389`), and final publication-documentation checkpoints are complete. [LifeOS v0.2.1 — Planning fixes](https://github.com/OzAvrahami/LifeOS/releases/tag/v0.2.1) was published on 2026-09-08 at 09:19:03 UTC and is Latest, non-draft, non-prerelease. Its annotated tag resolves to `93fde4306132f2301f5e2b02c3c374f5c203a1cd`. Later documentation changes do not alter this release source. See [the publication record](release-0.2.1-verification.md#current-publication-and-workflow--2026-09-08). No further build or binary attachment was required for that workflow reconciliation. The later #4 implementation is unreleased and needs its own owner-reviewed build before physical acceptance; the installed 0.2.1 binary is not evidence for it.
 
+## Current verification candidate — LifeOS 0.3.0 (4)
+
+The combined #3 Weekly Planning lifecycle and #4 Week/day navigation candidate is **0.3.0 / iOS build 4**, prepared but not built, installed or owner-accepted. Both issues remain Open / Verify / P1 — High. Latest published release and last owner-accepted binary remain v0.2.1/build 3. See [candidate preparation](release-0.3.0-verification.md) and the mandatory [Mobile Version / Build Policy](DEVELOPMENT_WORKFLOW.md#mobile-version--build-policy).
+
 ## Weekly Planning lifecycle rollout — Issue #3, 2026-09-13
 
 The unreleased #3 implementation requires the seventh forward migration, `20260913120000_add_weekly_planning_lifecycle.sql`, and the updated planning API. It extends existing WeekPlan owners without replacing IDs/focuses or changing #4 navigation behavior. Legacy rows start as `not_started`, not completed. Local PostgreSQL/Auth/RLS verification passed on an independent rerun on 2026-09-13: exit 0, all 11 PASS groups, including the lifecycle checks. The existing owner-prepared local schema was reused; local migration history includes `20260913120000`. No database reset, migration application, production operation, or deployment occurred in this follow-up.
 
-The local integration gate is complete and #3 is Open / Verify. Follow [the verification record and exact owner rollout commands](issue-3-verification.md#required-database-verification-and-rollout): owner review/manual commit and push first, review linked migration history/dry run, apply the schema under owner control, then roll out the API through the existing Railway path before loading the mobile changes. The test process used the existing OrbStack Docker executable through a temporary PATH addition; no persistent environment file changed. An older API/schema produces a visible planning error rather than an invented not-started state. Device acceptance waits for the schema/API and a build containing #3; installed 0.2.1 is not evidence for this new lifecycle. Version/build and release settings are unchanged.
+The local integration gate is complete and #3 is Open / Verify. The owner has already pushed implementation `286cec4`; this preparation did not inspect linked production migration history or establish the active API deployment. Before building 0.3.0 (4), confirm the required schema and compatible API are actually deployed. For future schema-dependent changes, follow [the canonical ordering](DEVELOPMENT_WORKFLOW.md#database--api-rollout): local commit checkpoint, inspect linked pending migrations/dry run, explicitly authorized schema application, verify history, then push/deploy API code. See [the exact migration commands](issue-3-verification.md#required-database-verification-and-rollout); do not infer rollout from a pushed commit or local integration pass. The test process used the existing OrbStack Docker executable through a temporary PATH addition; no persistent environment file changed. An older API/schema produces a visible planning error rather than an invented not-started state. Device acceptance waits for the schema/API and a build containing #3; installed 0.2.1 is not evidence for this new lifecycle. This preparation changes candidate version/build metadata only; production and published release settings are unchanged.
 
 ## Architecture
 
@@ -65,7 +69,7 @@ Mobile also needs its existing public Supabase configuration. Environment values
 
 ## Standalone iPhone Release build — reference for future authorized updates
 
-Run Expo commands from `apps/mobile`, where this monorepo's Expo configuration lives. On the prepared Mac, connect and unlock the registered iPhone, with Developer Mode enabled and the existing Apple development team available in Xcode. The owner reports completing this delivery path after the preparation commit for 0.2.1/build 3. For a future separately authorized update, after its manual Git checkpoint, build/install with:
+Run Expo commands from `apps/mobile`, where this monorepo's Expo configuration lives. On the prepared Mac, connect and unlock the registered iPhone, with Developer Mode enabled and the existing Apple development team available in Xcode. The owner reports completing this delivery path after the preparation commit for 0.2.1/build 3. For a future separately authorized update, first complete the mandatory [pre-device gate](DEVELOPMENT_WORKFLOW.md#mandatory-pre-device-gate): review SemVer/build and last accepted binary, synchronize native metadata, verify schema/API and Release environment/signing prerequisites, and complete the owner Git checkpoint. **Do not run the following command during 0.3.0 (4) preparation.** Only after those gates and owner build authorization, build/install with:
 
 ```bash
 cd /Users/ozavrahami/code/lifeOS/apps/mobile
@@ -76,23 +80,23 @@ Select the intended physical iPhone when prompted. This command compiles, signs,
 
 The installed standalone Release app contains its JavaScript and native metadata. It needs a new build/install to receive these changes. A development refresh or git push does not update that installed binary. There is no EAS Update or other over-the-air delivery configured for this path.
 
-### Native version synchronization — historical 0.2.1 preparation
+### Native version synchronization — existing iOS project
 
-`apps/mobile/app.json` now specifies version `0.2.1` and `ios.buildNumber: "3"`. Before this preparation, app configuration, native Info.plist, Debug/Release project settings, and the cached Release artifact used `0.2.0 (2)`; cached Debug was `0.1.0 (1)`. No local archives or evidence of build 3 were found. Build 3 is greater than all relevant available build evidence. The registered iPhone was unavailable, so its installed metadata was not inspected; cached artifacts do not establish what is installed.
+**Historical 0.2.1 preparation:** `apps/mobile/app.json` was set to version `0.2.1` and `ios.buildNumber: "3"`. Before that preparation, app configuration, native Info.plist, Debug/Release project settings, and the cached Release artifact used `0.2.0 (2)`; cached Debug was `0.1.0 (1)`. No local archives or evidence of build 3 were found. Build 3 is greater than all relevant available build evidence. The registered iPhone was unavailable, so its installed metadata was not inspected; cached artifacts do not establish what is installed.
 
 This Mac already has ignored `apps/mobile/ios` files. The installed Expo CLI only prebuilds when the native directory is absent, so changing `app.json` alone would leave the existing native version stale. Preparation synchronized only:
 
 - `ios/LifeOS/Info.plist`: `CFBundleShortVersionString = 0.2.1`, `CFBundleVersion = 3`.
 - `ios/LifeOS.xcodeproj/project.pbxproj`: Debug/Release `MARKETING_VERSION = 0.2.1`, `CURRENT_PROJECT_VERSION = 3`.
 
-Signing, team, bundle identifier, icons, entitlements, and other settings were preserved. These generated native files remain ignored; do not force-add them. No further version synchronization is needed on this prepared Mac unless the native project or app configuration changes. Its existing Expo Constants Pod phase regenerates bundled `app.config` on each build from the mobile project root.
+Signing, team, bundle identifier, icons, entitlements, and other settings were preserved. These generated native files remain ignored; do not force-add them. Those values describe the historical 0.2.1 preparation. The current candidate has since synchronized the same fields to **0.3.0 / 4**. Recheck the actual native project before every build; historical synchronization is not a permanent guarantee. Its existing Expo Constants Pod phase regenerates bundled `app.config` on each build from the mobile project root.
 
 On another existing native checkout, or after changing the app version again, run this targeted synchronization from `apps/mobile` before building. It validates both file shapes before writing and changes only version fields; it does not regenerate native directories or install Pods:
 
 ```bash
 cd /Users/ozavrahami/code/lifeOS/apps/mobile
 python3 - <<'PY'
-import json, re
+import json, plistlib, re, subprocess
 from pathlib import Path
 
 config = json.loads(Path('app.json').read_text())['expo']
@@ -101,6 +105,12 @@ assert re.fullmatch(r'\d+\.\d+\.\d+', version)
 assert re.fullmatch(r'\d+', build)
 plist = Path('ios/LifeOS/Info.plist')
 project = Path('ios/LifeOS.xcodeproj/project.pbxproj')
+for path in [plist, project]:
+    subprocess.run(['plutil', '-lint', str(path)], check=True)
+original_plist = plistlib.loads(plist.read_bytes())
+original_project = json.loads(subprocess.check_output(['plutil', '-convert', 'json', '-o', '-', str(project)]))
+assert int(build) >= int(original_plist['CFBundleVersion']), 'Do not lower native build'
+assert tuple(map(int, version.split('.'))) >= tuple(map(int, original_plist['CFBundleShortVersionString'].split('.'))), 'Do not lower native version'
 plist_text, project_text = plist.read_text(), project.read_text()
 for key, value in [('CFBundleShortVersionString', version), ('CFBundleVersion', build)]:
     pattern = r'(<key>' + key + r'</key>\s*<string>)[^<]*(</string>)'
@@ -111,7 +121,16 @@ for key, value in [('MARKETING_VERSION', version), ('CURRENT_PROJECT_VERSION', b
     assert count == 2, key
 plist.write_text(plist_text)
 project.write_text(project_text)
-print('Native version synchronized:', version, build)
+for path in [plist, project]:
+    subprocess.run(['plutil', '-lint', str(path)], check=True)
+original_plist.update(CFBundleShortVersionString=version, CFBundleVersion=build)
+assert plistlib.loads(plist.read_bytes()) == original_plist
+for obj in original_project['objects'].values():
+    settings = obj.get('buildSettings', {})
+    if 'MARKETING_VERSION' in settings:
+        settings.update(MARKETING_VERSION=version, CURRENT_PROJECT_VERSION=build)
+assert json.loads(subprocess.check_output(['plutil', '-convert', 'json', '-o', '-', str(project)])) == original_project
+print('Info.plist and Debug/Release native versions verified:', version, build)
 PY
 ```
 
@@ -156,7 +175,7 @@ The completed items below are owner-reported on 2026-09-08, separate from histor
 
 ### Remaining targeted owner checks
 
-**Current #4 handoff — 2026-09-10:** Use [the Week/day owner checklist](issue-4-verification.md#physical-iphone-owner-checklist) after the owner’s Git checkpoint and a build containing #4. No device build, installation, version change, or production-data operation was performed during implementation.
+**Historical #4 implementation handoff — 2026-09-10:** Use [the Week/day owner checklist](issue-4-verification.md#physical-iphone-owner-checklist) after the owner’s Git checkpoint and a build containing #4. No device build, installation, version change, or production-data operation was performed during implementation.
 
 **Historical checklist — 2026-09-08:** The following was the pending checklist at reconciliation. Live #7/#8/#10 are now Closed/Completed/Done, and the owner identifies these behaviors as accepted. These older unchecked items are retained as historical scope, not a request to repeat accepted tests. No suitable known-estimate fixture set was established by that reconciliation.
 
@@ -194,4 +213,4 @@ For a target environment that has not received this change, the required rollout
 
 Do not reverse steps 1 and 2. A local Expo Web refresh only loads local frontend code; it does not deploy the local API to Railway or apply the Supabase migration. Until the Railway API response includes both Day Window fields, the updated client shows a non-destructive “server update required” state and does not claim an account save.
 
-Day Window itself adds no native dependency. Under the existing standalone Release delivery path, its JavaScript changes still require building/installing a new app after the database/API prerequisites are live. The historical v0.2.0 preparation changed native metadata; the current v0.2.1/build 3 preparation advances it as described above.
+Day Window itself adds no native dependency. Under the existing standalone Release delivery path, its JavaScript changes still require building/installing a new app after the database/API prerequisites are live. The historical v0.2.0 and v0.2.1 preparations changed native metadata; the current 0.3.0/build 4 candidate advances it as described above.

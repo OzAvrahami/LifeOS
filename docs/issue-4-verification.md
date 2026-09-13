@@ -1,6 +1,21 @@
 # Issue #4 — Week/day navigation verification
 
-## Baseline and scope — 2026-09-10
+## Release candidate
+
+| Field | Value |
+| --- | --- |
+| SemVer impact | Minor — new Weekly Planning and Week/day capabilities |
+| Candidate version | 0.3.0 |
+| Candidate iOS build | 4 |
+| Version prepared | Yes — tracked app/root/API/Mobile and lockfile metadata synchronized on 2026-09-13 |
+| Native version synchronized | Yes — this Mac's ignored Info.plist and Debug/Release project fields verified as 0.3.0 / 4 |
+| Physical build installed | Pending; 0.3.0 (4) has not been built or installed |
+| Owner accepted exact build | Pending; accepted 0.2.1 (3) predates #3/#4 |
+| Included issues | #3, #4; pushed implementation baseline `286cec4`, containing #4 `7785381` |
+
+Both issues remain Open / Verify / P1 — High. See [candidate evidence and rollout prerequisites](release-0.3.0-verification.md). Apply the [mandatory version/build gate](DEVELOPMENT_WORKFLOW.md#mandatory-pre-device-gate) before installation; record the exact installed build before marking physical acceptance. Prior test results below remain historical runs, not new candidate device evidence.
+
+## Historical implementation baseline and scope — 2026-09-10
 
 Started from clean `main` at `c5443a01c8b8a73b153bfc4e72532609049e8e13` after reading `git status`, the latest commit, repository instructions, the full issue/comments, existing Week code/tests, and Task/Commitment editing and cache flows. Only the existing #4 Project item was moved from Ready to In Progress, then read back as Open / In Progress / P1 — High. The original approved task/commitment scope is preserved.
 
@@ -64,7 +79,7 @@ Mocks establish software/query/cache behavior, not real database persistence, RL
 
 ## Physical-iPhone owner checklist
 
-Use a build containing this implementation after the owner's review and manual Git checkpoint. The already installed 0.2.1 binary predates #4. Use the ordinary authenticated app, not `preview=1`, an approved account, and clearly disposable records. No suitable live test fixture set or connected device was established during this implementation. If tasks with known estimates are unavailable, arranging an approved fixture is a separate prerequisite: the current UI does not edit estimates.
+Use the combined **0.3.0 (4)** candidate after the preparation review/Git checkpoint, schema/API readiness checks and authorized build. Confirm the installed version/build before recording results. The already installed 0.2.1 binary predates #4. Use the ordinary authenticated app, not `preview=1`, an approved account, and clearly disposable records. No suitable live test fixture set or connected device was established during this implementation. If tasks with known estimates are unavailable, arranging an approved fixture is a separate prerequisite: the current UI does not edit estimates.
 
 - [ ] In Hebrew RTL, browse previous/next weeks and return using “השבוע הזה”. Check the visible range, subtle Today/current-week indication, and actual changing content. With a configured Monday week start, confirm all seven dates and the range follow it.
 - [ ] Open days containing only Tasks, only commitments, both, and neither. Check titles, separate counts, explicit Task estimates/missing estimates, and complete lists. Include at least three commitments in time order and one without an end; include completed Tasks separately from active totals. A known 45m + 30m + unestimated active set should remain three Tasks / 1:15, without counting Weekly Focus.
@@ -77,6 +92,8 @@ Use a build containing this implementation after the owner's review and manual G
 
 Only owner-reported results can complete these boxes. This is targeted acceptance of the new Week entry points and context, not a request to reopen accepted #7/#8/#10/#11–#13 or claim a full accessibility/database audit.
 
-## Workflow handoff
+## Historical workflow handoff — 2026-09-10
 
 [Verification handoff comment](https://github.com/OzAvrahami/LifeOS/issues/4#issuecomment-5616279054) was posted once and read back. After all software checks passed, the existing #4 item was moved from In Progress to **Verify** and read back as **Open / Verify / P1 — High**. Physical-iPhone owner acceptance is the remaining completion gate. No acceptance checkbox or original requirement was removed or marked complete. All implementation/documentation changes remain for owner review. No staging, commit, push, branch change, tag, release, deployment, version/dependency/native/environment change, or next issue is included.
+
+The implementation checkpoint was subsequently committed/pushed at `7785381` and is included in `286cec4`. The current Release candidate section supersedes the historical uncommitted/version statements above; the original automated and acceptance evidence is preserved.

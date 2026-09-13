@@ -1,6 +1,7 @@
 # LifeOS Implementation Status
 
 - **Last updated:** 2026-09-13
+- **Verification candidate:** LifeOS **0.3.0 (4)** includes #3 + #4, both Open / Verify / P1 — High. Tracked/native version preparation is complete; physical build/installation and owner acceptance are pending. See [candidate evidence](release-0.3.0-verification.md) and the canonical [development workflow](DEVELOPMENT_WORKFLOW.md).
 - **Current work item:** Issue #3 — persisted Weekly Planning lifecycle, resume and completed review/edit. Implementation and automated verification are complete, including an independent local PostgreSQL/Auth/RLS rerun (exit 0, all 11 PASS groups). Production rollout and owner/device acceptance remain pending. See [the #3 handoff](issue-3-verification.md).
 - **Project status:** #4 is Open / Verify / P1 — High, read back after full software checks passed; owner physical acceptance remains pending. #3 is Open / Verify / P1 — High, read back after the local database integration gate passed. Live inspection found #7/#8/#10 already Closed / Completed / Done; the owner identifies those behaviors as accepted, and this work preserves them. #11/#12/#13 remain CLOSED / COMPLETED / Done with P1/P2/P1 preserved. Other issue states, priorities, and membership are unchanged; see the current workflow below.
 - **Latest published release:** [LifeOS v0.2.1 — Planning fixes](https://github.com/OzAvrahami/LifeOS/releases/tag/v0.2.1), published 2026-09-08 at 09:19:03 UTC; authenticated GitHub inspection confirms Latest, non-draft, non-prerelease. Annotated tag target: `93fde4306132f2301f5e2b02c3c374f5c203a1cd`.
@@ -9,7 +10,7 @@
 - **API evidence:** The prior preparation record contains GitHub deployment success and HTTP 200 health for #13's SHA. No direct Railway active-deployment inspection was performed then or during work on #4.
 - **Current phase:** Phase 9’s 0.2.1 acceptance/publication milestone is complete. Real-world usage continues. #4 navigation is committed at `7785381` and remains in owner verification. #3’s lifecycle implementation and local database verification are complete; controlled rollout and its own physical acceptance remain outstanding.
 - **Phase 8 status:** Historical standalone verification remains recorded for 2026-08-20; current 0.2.1 owner evidence is separately dated 2026-09-08.
-- **Next action:** Owner review and manual Git checkpoint for #3, then [controlled schema/API rollout and acceptance](issue-3-verification.md#required-database-verification-and-rollout). The local integration gate is complete. Preserve #4’s separate owner verification; its Git checkpoint was completed in `7785381`. No version/release preparation is included.
+- **Next action:** Owner review of the workflow and 0.3.0 (4) preparation, then confirm [schema/API readiness](issue-3-verification.md#required-database-verification-and-rollout) before authorizing a combined #3/#4 iPhone build. The local integration gate is complete. Preserve #4’s separate owner verification; its Git checkpoint was completed in `7785381`. The implementation checkpoint is pushed at `286cec4`; candidate preparation does not authorize publication.
 
 This document is the current source of truth for implementation status. “Verified” means supported by tracked code plus a repeatable repository check; it does not imply remote or real-device verification unless stated.
 
@@ -120,7 +121,7 @@ The owner previously accepted isolated preview/demo behavior and now reports acc
 
 ## Current Critical Path
 
-1. Publication is complete at `93fde43`; #4 is committed at `7785381` and remains in owner verification. #3’s disposable database integration gate passed and its status is Verify; owner review and the manual Git checkpoint precede rollout.
+1. Publication is complete at `93fde43`; #4 is committed at `7785381` and remains in owner verification. #3’s disposable database integration gate passed and its status is Verify; its implementation checkpoint is pushed at `286cec4`. Candidate 0.3.0 (4) is prepared; confirm remote schema/API readiness before installation.
 2. Preserve accepted #7/#8/#10/#11/#12/#13 behavior. Schema/API rollout and the #3 owner checklist follow verified software and the manual Git checkpoint; Google Calendar and unrelated backlog are unchanged.
 
 ## Current release gate
@@ -149,7 +150,7 @@ The owner previously accepted isolated preview/demo behavior and now reports acc
 
 ## Next Action
 
-**Next gate:** Owner review and manual Git checkpoint for #3, followed by [controlled schema/API rollout and its device checklist](issue-3-verification.md#required-database-verification-and-rollout). Local database integration is complete; #3 remains Open / Verify until acceptance. [#4’s owner verification](issue-4-verification.md#physical-iphone-owner-checklist) remains separate and unchanged. #6’s pending disposition and unrelated backlog are unchanged. No release operation is selected.
+**Next gate:** Owner review of the permanent workflow and 0.3.0 (4) preparation, followed by [schema/API readiness verification and the combined candidate device checklists](release-0.3.0-verification.md#before-physical-installation). Local database integration is complete; #3 remains Open / Verify until acceptance. [#4’s owner verification](issue-4-verification.md#physical-iphone-owner-checklist) remains separate and unchanged. #6’s pending disposition and unrelated backlog are unchanged. No build/install or publication is authorized in this preparation.
 
 ## v0.2.0 preparation validation — 2026-09-06
 

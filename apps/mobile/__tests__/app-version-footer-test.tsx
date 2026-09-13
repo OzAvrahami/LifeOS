@@ -2,6 +2,8 @@ import { render, screen } from '@testing-library/react-native';
 import Constants from 'expo-constants';
 import { Platform } from 'react-native';
 
+import appConfig from '../app.json';
+
 import { AppVersionFooter } from '@/features/settings/app-version-footer';
 
 jest.mock('expo-constants', () => ({
@@ -46,4 +48,18 @@ it('handles missing app and platform metadata without inventing a version or bui
   jest.replaceProperty(Constants, 'platform', undefined);
   await render(<AppVersionFooter />);
   expect(screen.getByText('גרסת פיתוח לא זמינה · מספר בנייה לא זמין')).toBeTruthy();
+});
+
+it('renders the prepared app version with corresponding simulated native build metadata', async () => {
+  jest.replaceProperty(Platform, 'OS', 'ios');
+  jest.replaceProperty(globalThis as typeof globalThis & { __DEV__: boolean }, '__DEV__', false);
+  jest.replaceProperty(Constants, 'expoConfig', {
+    name: appConfig.expo.name, slug: appConfig.expo.slug, version: appConfig.expo.version,
+  });
+  // This simulates the future binary; app.json alone does not prove an installed build.
+  jest.replaceProperty(Constants, 'platform', {
+    ios: { buildNumber: appConfig.expo.ios.buildNumber },
+  } as typeof Constants.platform);
+  await render(<AppVersionFooter />);
+  expect(screen.getByText(`גרסה ${appConfig.expo.version} · בנייה ${appConfig.expo.ios.buildNumber}`)).toBeTruthy();
 });

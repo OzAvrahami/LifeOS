@@ -1,6 +1,6 @@
 # LifeOS GitHub Development Standard
 
-LifeOS follows Oz GitHub Development Standard v1 for Issues, Project workflow, priority, and releases. This document describes how the standard is applied in this repository.
+The canonical development, acceptance, version/build and rollout rules are in [DEVELOPMENT_WORKFLOW.md](DEVELOPMENT_WORKFLOW.md). This companion describes LifeOS GitHub labels, priorities and views, retaining Oz GitHub Development Standard v1 conventions. Follow the canonical workflow for gates and authorization.
 
 ## Status workflow
 
@@ -10,11 +10,11 @@ GitHub Project Status is the source of truth for workflow state:
 Backlog → Ready → In Progress → Verify → Done
 ```
 
-- **Backlog:** Captured work that is not currently planned for active implementation.
-- **Ready:** Defined, prioritized, and ready to be started.
+- **Backlog:** Defined work, not yet selected.
+- **Ready:** Scope sufficiently understood and intentionally queued.
 - **In Progress:** Currently being implemented.
-- **Verify:** Implementation is complete and awaiting verification.
-- **Done:** Completed and verified.
+- **Verify:** Full software scope and automated gates passed; owner acceptance or a documented external gate remains.
+- **Done:** Owner acceptance and all required issue release/build/device gates passed; automated tests alone cannot replace required physical acceptance.
 
 New Issues enter Backlog. Moving work through Ready, In Progress, and Verify is a deliberate development decision. Closing an Issue moves it to Done; reopened work is reviewed and moved manually when native automation is unavailable.
 

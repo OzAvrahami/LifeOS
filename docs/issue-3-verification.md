@@ -1,14 +1,29 @@
 # Issue #3 — Weekly Planning lifecycle verification
 
-## Current handoff — 2026-09-13
+## Release candidate
 
-The implementation is complete in the working tree. **Issue #3 is Open / Verify / P1 — High.** The local PostgreSQL/Auth/RLS integration command was independently rerun successfully after the owner prepared the local stack: exit 0, all 11 verification groups passed, including the new Weekly Planning checks. Previously completed Mobile/API tests, typecheck, lint, build and export results remain separate evidence below. Production migration/API rollout and owner/device acceptance remain pending; do not close the issue before acceptance.
+| Field | Value |
+| --- | --- |
+| SemVer impact | Minor — new Weekly Planning and Week/day capabilities |
+| Candidate version | 0.3.0 |
+| Candidate iOS build | 4 |
+| Version prepared | Yes — tracked app/root/API/Mobile and lockfile metadata synchronized on 2026-09-13 |
+| Native version synchronized | Yes — this Mac's ignored Info.plist and Debug/Release project fields verified as 0.3.0 / 4 |
+| Physical build installed | Pending; 0.3.0 (4) has not been built or installed |
+| Owner accepted exact build | Pending; accepted 0.2.1 (3) predates #3/#4 |
+| Included issues | #3, #4; pushed implementation baseline `286cec4`, containing #4 `7785381` |
+
+Both issues remain Open / Verify / P1 — High. See [candidate evidence and rollout prerequisites](release-0.3.0-verification.md). Apply the [mandatory version/build gate](DEVELOPMENT_WORKFLOW.md#mandatory-pre-device-gate) before installation; record the exact installed build before marking physical acceptance. Prior test results below remain historical runs, not new candidate device evidence.
+
+## Implementation and local integration handoff — 2026-09-13
+
+The implementation and local integration checkpoint is now committed/pushed as `286cec4`; it contains #4 at `7785381`. **Issue #3 is Open / Verify / P1 — High.** The local PostgreSQL/Auth/RLS integration command was independently rerun successfully after the owner prepared the local stack: exit 0, all 11 verification groups passed, including the new Weekly Planning checks. Previously completed Mobile/API tests, typecheck, lint, build and export results remain separate evidence below. Production schema/API readiness has not been verified in this preparation; owner/device acceptance remains pending. Do not close the issue before acceptance.
 
 The [earlier implementation/blocker comment](https://github.com/OzAvrahami/LifeOS/issues/3#issuecomment-5655051501) records the initial failed attempt. The [successful local verification follow-up](https://github.com/OzAvrahami/LifeOS/issues/3#issuecomment-5655173219) supersedes that blocker. Only #3 was moved In Progress → Verify and read back as Open/Verify/P1; #4 remains Open/Verify/P1. Priorities, issue metadata, other states and the existing 18-item membership are preserved.
 
 **Historical implementation baseline:** Started from clean `main` at `778538155ea13587d11f4892a71973a64791dfd4` (`feat(week): add week and day navigation`). Local `main`, `origin/main`, and live remote main matched. Read the full #3 issue and its only existing comment, repository instructions, current records, planning/Week implementation/tests, schema/RPCs, and local integration process. Only #3 was moved Ready → In Progress and read back. #4 was Open / Verify / P1 and its workflow is unchanged. Its navigation/day implementation is preserved; the Week integration adds the lifecycle entry and an optional context caption to the existing Focus editor.
 
-No production data or schema changes, deployment, device build/install, version/build, dependency, signing, or persistent environment changes were performed. Existing accepted #7/#8/#10/#11–#13 behavior remains unchanged. The local integration rerun used disposable Auth users and records; its real PostgreSQL/RPC/RLS evidence does not imply production rollout or physical-device acceptance.
+During the implementation/local integration stage, no production data or schema changes, deployment, device build/install, version/build, dependency, signing, or persistent environment changes were performed. The later candidate metadata preparation is recorded above. Existing accepted #7/#8/#10/#11–#13 behavior remains unchanged. The local integration rerun used disposable Auth users and records; its real PostgreSQL/RPC/RLS evidence does not imply production rollout or physical-device acceptance.
 
 ## Lifecycle and compatibility
 
@@ -118,7 +133,7 @@ npm run test:integration:local --workspace @lifeos/api
 
 A reset destroys the selected local test database. For an already isolated alternate Supabase workdir/project, the harness supports `LIFEOS_INTEGRATION_SUPABASE_WORKDIR` and `LIFEOS_INTEGRATION_SUPABASE_PROJECT_ID`; the migrations must be present/applied there. Do not reset an owner's non-disposable database or use `--linked` for reset. The local integration gate has passed and #3 is now Verify, preserving Open/P1 and #4's Verify state.
 
-Production rollout is owner-controlled and has not happened. After the owner reviews and commits/pushes the implementation, the owner must confirm the intended linked project and pending migration history, then review the dry run before applying:
+The earlier implementation handoff did not perform production rollout. The implementation is now pushed at `286cec4`; this candidate preparation has not verified current production migration history or active API deployment. Confirm actual schema/API readiness before device verification. For any still-pending migration, the owner must confirm the intended linked project and full pending set, then review the dry run before explicitly authorized application:
 
 ```sh
 npx supabase migration list --linked
@@ -130,7 +145,7 @@ Proceed only when the pending set is understood and includes the new migration i
 
 ## Physical-iPhone owner checklist
 
-Run only after the migration and updated API are available and a build containing #3 is loaded, using ordinary authenticated mode and an approved account. Use disposable test planning data. Do not repeat accepted unrelated checklists.
+Run only after the migration and updated API are available and the combined **0.3.0 (4)** candidate is installed with its displayed version/build confirmed, using ordinary authenticated mode and an approved account. Use disposable test planning data. Do not repeat accepted unrelated checklists.
 
 - [ ] An untouched current week shows `תכנן את השבוע`, without an Edit-plan action.
 - [ ] Start it and confirm step 1 of 4, the correct selected-week range, and real prior-work review.

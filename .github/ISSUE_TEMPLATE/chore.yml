@@ -44,3 +44,45 @@ body:
       label: Relevant technical context
       description: Add useful files, dependencies, constraints, or implementation notes.
 
+  - type: markdown
+    attributes:
+      value: |
+        ### Release impact
+        The exact semantic version may be grouped with other issues later; no numeric version is required now.
+        A mobile issue cannot complete physical acceptance on a binary that predates its implementation.
+        [LifeOS Development Workflow](https://github.com/OzAvrahami/LifeOS/blob/main/docs/DEVELOPMENT_WORKFLOW.md) is authoritative.
+
+  - type: dropdown
+    id: mobile-installable-impact
+    attributes:
+      label: Does this affect installable mobile behavior?
+      options:
+        - "Yes"
+        - "No"
+        - "Needs review"
+    validations:
+      required: true
+
+  - type: dropdown
+    id: semantic-version-impact
+    attributes:
+      label: Expected semantic version impact
+      options:
+        - "None"
+        - "Patch candidate"
+        - "Minor candidate"
+        - "Major candidate"
+        - "Needs review"
+    validations:
+      required: true
+
+  - type: dropdown
+    id: ios-acceptance-build
+    attributes:
+      label: Requires new iOS acceptance build?
+      options:
+        - "Yes"
+        - "No"
+        - "Needs review"
+    validations:
+      required: true
