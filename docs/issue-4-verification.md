@@ -5,15 +5,18 @@
 | Field | Value |
 | --- | --- |
 | SemVer impact | Minor — new Weekly Planning and Week/day capabilities |
-| Candidate version | 0.3.0 |
-| Candidate iOS build | 4 |
+| Candidate/accepted version | 0.3.0 |
+| Accepted iOS build | 4 |
 | Version prepared | Yes — tracked app/root/API/Mobile and lockfile metadata synchronized on 2026-09-13 |
 | Native version synchronized | Yes — this Mac's ignored Info.plist and Debug/Release project fields verified as 0.3.0 / 4 |
-| Physical build installed | Pending; 0.3.0 (4) has not been built or installed |
-| Owner accepted exact build | Pending; accepted 0.2.1 (3) predates #3/#4 |
-| Included issues | #3, #4; pushed implementation baseline `286cec4`, containing #4 `7785381` |
+| Physical build installed | Yes — owner reports installed LifeOS 0.3.0 (4), visibly confirmed |
+| Owner accepted exact build | Yes — LifeOS 0.3.0 (4), owner-reported physical iPhone verification |
+| Owner acceptance date | 2026-09-13 |
+| Included issues | #3, #4; preparation `e1a3470`, containing implementation `286cec4` / `7785381` |
 
-Both issues remain Open / Verify / P1 — High. See [candidate evidence and rollout prerequisites](release-0.3.0-verification.md). Apply the [mandatory version/build gate](DEVELOPMENT_WORKFLOW.md#mandatory-pre-device-gate) before installation; record the exact installed build before marking physical acceptance. Prior test results below remain historical runs, not new candidate device evidence.
+Both issues are **Closed / Completed / Done / P1 — High**, read back after finalization. The owner explicitly confirmed the remaining #3/#4 physical scenarios were satisfactory on **LifeOS 0.3.0 (4)** on **2026-09-13**. [Final acceptance comment](https://github.com/OzAvrahami/LifeOS/issues/4#issuecomment-5655480067). This is owner-reported acceptance, not independent Codex observation or extraction of the binary's source SHA.
+
+Production readiness was already verified before the physical test, as confirmed in the owner's handoff: remote migration `20260913120000` applied and candidate Railway API deployment successful. No remote operation was repeated here. Prior automated/component/API and local PostgreSQL/Auth/RLS results remain separate evidence for internal invariants; no new instrumented production/history/RLS or full accessibility audit is claimed. See [release acceptance and publication state](release-0.3.0-verification.md). Publication is pending; the issue no longer has an acceptance blocker.
 
 ## Historical implementation baseline and scope — 2026-09-10
 
@@ -79,18 +82,18 @@ Mocks establish software/query/cache behavior, not real database persistence, RL
 
 ## Physical-iPhone owner checklist
 
-Use the combined **0.3.0 (4)** candidate after the preparation review/Git checkpoint, schema/API readiness checks and authorized build. Confirm the installed version/build before recording results. The already installed 0.2.1 binary predates #4. Use the ordinary authenticated app, not `preview=1`, an approved account, and clearly disposable records. No suitable live test fixture set or connected device was established during this implementation. If tasks with known estimates are unavailable, arranging an approved fixture is a separate prerequisite: the current UI does not edit estimates.
+**Owner-reported acceptance completed on 2026-09-13, LifeOS 0.3.0 (4).** The owner confirmed the remaining scenarios below were satisfactory after production prerequisites were verified. Checked items record that scoped approval; exact IDs, cache/atomicity/RLS invariants rely on the existing automated evidence, not an owner database inspection. Hebrew RTL/touch acceptance is not a full accessibility audit.
 
-- [ ] In Hebrew RTL, browse previous/next weeks and return using “השבוע הזה”. Check the visible range, subtle Today/current-week indication, and actual changing content. With a configured Monday week start, confirm all seven dates and the range follow it.
-- [ ] Open days containing only Tasks, only commitments, both, and neither. Check titles, separate counts, explicit Task estimates/missing estimates, and complete lists. Include at least three commitments in time order and one without an end; include completed Tasks separately from active totals. A known 45m + 30m + unestimated active set should remain three Tasks / 1:15, without counting Weekly Focus.
-- [ ] Navigate previous/next day across a week and month/year boundary, return to Today, and return to Week. Open and cancel Task/Commitment details and confirm the selected date/week survives.
-- [ ] From a browsed day, create one disposable Task and one commitment using the separate actions; verify default and saved dates. Global capture still defaults to Inbox; explicit “השבוע המוצג” capture appears in the browsed week's unscheduled list.
-- [ ] Edit a Task title, cancel a date change, move it to another week, complete/reopen it, and confirm deletion only on the disposable record. Inspect source and destination summaries/lists: one identity, no visible duplicate/stale membership, active totals consistent with the lists. Existing deadline/estimate/status behavior must be preserved by planning-only moves.
-- [ ] Edit/move a disposable commitment between dates/weeks and check both memberships; create/delete and cancel the existing editor without losing the inspected date. Actual start/end presentation must remain correct and commitments must have no Task completion action.
-- [ ] Edit/save/reopen/cancel Weekly Focus in a future week; check that returning to the current week shows its own focuses and that neither week's Task counts include them. Schedule a week-only Task and confirm its date membership.
-- [ ] Save/reopen the app and inspect the changed records again in their saved dates/weeks. Confirm authenticated freshness/persistence and comfortable iPhone scrolling, keyboard/form access, and touch targets. Selection itself is not promised across app relaunch; navigate back to the saved date to inspect persistence.
+- [x] In Hebrew RTL, browse previous/next weeks and return using “השבוע הזה”. Check the visible range, subtle Today/current-week indication, and actual changing content. With a configured Monday week start, confirm all seven dates and the range follow it.
+- [x] Open days containing only Tasks, only commitments, both, and neither. Check titles, separate counts, explicit Task estimates/missing estimates, and complete lists. Include at least three commitments in time order and one without an end; include completed Tasks separately from active totals. A known 45m + 30m + unestimated active set should remain three Tasks / 1:15, without counting Weekly Focus.
+- [x] Navigate previous/next day across a week and month/year boundary, return to Today, and return to Week. Open and cancel Task/Commitment details and confirm the selected date/week survives.
+- [x] From a browsed day, create one disposable Task and one commitment using the separate actions; verify default and saved dates. Global capture still defaults to Inbox; explicit “השבוע המוצג” capture appears in the browsed week's unscheduled list.
+- [x] Edit a Task title, cancel a date change, move it to another week, complete/reopen it, and confirm deletion only on the disposable record. Inspect source and destination summaries/lists: one identity, no visible duplicate/stale membership, active totals consistent with the lists. Existing deadline/estimate/status behavior must be preserved by planning-only moves.
+- [x] Edit/move a disposable commitment between dates/weeks and check both memberships; create/delete and cancel the existing editor without losing the inspected date. Actual start/end presentation must remain correct and commitments must have no Task completion action.
+- [x] Edit/save/reopen/cancel Weekly Focus in a future week; check that returning to the current week shows its own focuses and that neither week's Task counts include them. Schedule a week-only Task and confirm its date membership.
+- [x] Save/reopen the app and inspect the changed records again in their saved dates/weeks. Confirm authenticated freshness/persistence and comfortable iPhone scrolling, keyboard/form access, and touch targets. Selection itself is not promised across app relaunch; navigate back to the saved date to inspect persistence.
 
-Only owner-reported results can complete these boxes. This is targeted acceptance of the new Week entry points and context, not a request to reopen accepted #7/#8/#10/#11–#13 or claim a full accessibility/database audit.
+This completes targeted acceptance of the new Week entry points and context without reopening accepted #7/#8/#10/#11–#13 or implying a full accessibility/database audit. The old known-estimate fixture prerequisite belonged to preparation; the owner has now accepted the remaining scenarios, without claiming a new estimate-editing UI.
 
 ## Historical workflow handoff — 2026-09-10
 

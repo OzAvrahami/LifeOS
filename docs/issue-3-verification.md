@@ -5,17 +5,22 @@
 | Field | Value |
 | --- | --- |
 | SemVer impact | Minor — new Weekly Planning and Week/day capabilities |
-| Candidate version | 0.3.0 |
-| Candidate iOS build | 4 |
+| Candidate/accepted version | 0.3.0 |
+| Accepted iOS build | 4 |
 | Version prepared | Yes — tracked app/root/API/Mobile and lockfile metadata synchronized on 2026-09-13 |
 | Native version synchronized | Yes — this Mac's ignored Info.plist and Debug/Release project fields verified as 0.3.0 / 4 |
-| Physical build installed | Pending; 0.3.0 (4) has not been built or installed |
-| Owner accepted exact build | Pending; accepted 0.2.1 (3) predates #3/#4 |
-| Included issues | #3, #4; pushed implementation baseline `286cec4`, containing #4 `7785381` |
+| Physical build installed | Yes — owner reports installed LifeOS 0.3.0 (4), visibly confirmed |
+| Owner accepted exact build | Yes — LifeOS 0.3.0 (4), owner-reported physical iPhone verification |
+| Owner acceptance date | 2026-09-13 |
+| Included issues | #3, #4; preparation `e1a3470`, containing implementation `286cec4` / `7785381` |
 
-Both issues remain Open / Verify / P1 — High. See [candidate evidence and rollout prerequisites](release-0.3.0-verification.md). Apply the [mandatory version/build gate](DEVELOPMENT_WORKFLOW.md#mandatory-pre-device-gate) before installation; record the exact installed build before marking physical acceptance. Prior test results below remain historical runs, not new candidate device evidence.
+Both issues are **Closed / Completed / Done / P1 — High**, read back after finalization. The owner explicitly confirmed the remaining #3/#4 physical scenarios were satisfactory on **LifeOS 0.3.0 (4)** on **2026-09-13**. [Final acceptance comment](https://github.com/OzAvrahami/LifeOS/issues/3#issuecomment-5655476777). This is owner-reported acceptance, not independent Codex observation or extraction of the binary's source SHA.
 
-## Implementation and local integration handoff — 2026-09-13
+Production readiness was already verified before the physical test, as confirmed in the owner's handoff: remote migration `20260913120000` applied and candidate Railway API deployment successful. No remote operation was repeated here. Prior automated/component/API and local PostgreSQL/Auth/RLS results remain separate evidence for internal invariants; no new instrumented production/history/RLS or full accessibility audit is claimed. See [release acceptance and publication state](release-0.3.0-verification.md). Publication is pending; the issue no longer has an acceptance blocker.
+
+## Historical implementation and local integration handoff — 2026-09-13
+
+The following snapshot predates the later owner installation/acceptance above; its pending rollout/device statements are historical, not current gates.
 
 The implementation and local integration checkpoint is now committed/pushed as `286cec4`; it contains #4 at `7785381`. **Issue #3 is Open / Verify / P1 — High.** The local PostgreSQL/Auth/RLS integration command was independently rerun successfully after the owner prepared the local stack: exit 0, all 11 verification groups passed, including the new Weekly Planning checks. Previously completed Mobile/API tests, typecheck, lint, build and export results remain separate evidence below. Production schema/API readiness has not been verified in this preparation; owner/device acceptance remains pending. Do not close the issue before acceptance.
 
@@ -115,6 +120,8 @@ The established local harness executed `verify-weekly-planning.mjs` after its ex
 
 ## Required database verification and rollout
 
+**Historical rollout instructions:** Local integration passed during implementation; the owner subsequently confirmed the remote migration and successful API deployment before the accepted device test. The commands and earlier preparation limitations below are retained as historical evidence, not outstanding actions.
+
 **Resolved local gate — 2026-09-13:** The earlier implementation attempt failed before fixtures because Docker/Podman was unavailable. The owner subsequently prepared OrbStack and the local Supabase stack and reported a passing run. The assistant independently reran the command. This tool session initially still lacked Docker on PATH; using the existing OrbStack executable through a process-only PATH addition resolved that environment mismatch:
 
 ```sh
@@ -145,17 +152,17 @@ Proceed only when the pending set is understood and includes the new migration i
 
 ## Physical-iPhone owner checklist
 
-Run only after the migration and updated API are available and the combined **0.3.0 (4)** candidate is installed with its displayed version/build confirmed, using ordinary authenticated mode and an approved account. Use disposable test planning data. Do not repeat accepted unrelated checklists.
+**Owner-reported acceptance completed on 2026-09-13, LifeOS 0.3.0 (4).** The owner confirmed the remaining scenarios below were satisfactory after production prerequisites were verified. Checked items record that scoped approval; exact IDs, cache/atomicity/RLS invariants rely on the existing automated evidence, not an owner database inspection. Hebrew RTL/touch acceptance is not a full accessibility audit.
 
-- [ ] An untouched current week shows `תכנן את השבוע`, without an Edit-plan action.
-- [ ] Start it and confirm step 1 of 4, the correct selected-week range, and real prior-work review.
-- [ ] Continue through commitment review, save Focus on step 3, and exit.
-- [ ] Week shows `המשך תכנון` and the correct saved progress.
-- [ ] Resume at the saved step with Focus restored; Back inspects earlier steps without losing saved values.
-- [ ] Reach the final review and press `סיום תכנון`; Week clearly shows completion.
-- [ ] Open `סקירת התכנון`, deliberately choose `עריכת התכנון`, change/save Focus, and confirm completed review returns with the same values and completed state.
-- [ ] Browse next/previous weeks; their lifecycle is independent. Return to the original week and confirm its own state.
-- [ ] Force-close/reopen and log out/in; navigate back to the saved week and confirm progress/completion and Focus persist.
-- [ ] Check Hebrew RTL, touch targets, keyboard, scrolling, safe exit/cancel, and visible retry behavior. #4 week/day navigation, Tasks and commitments remain available.
+- [x] An untouched current week shows `תכנן את השבוע`, without an Edit-plan action.
+- [x] Start it and confirm step 1 of 4, the correct selected-week range, and real prior-work review.
+- [x] Continue through commitment review, save Focus on step 3, and exit.
+- [x] Week shows `המשך תכנון` and the correct saved progress.
+- [x] Resume at the saved step with Focus restored; Back inspects earlier steps without losing saved values.
+- [x] Reach the final review and press `סיום תכנון`; Week clearly shows completion.
+- [x] Open `סקירת התכנון`, deliberately choose `עריכת התכנון`, change/save Focus, and confirm completed review returns with the same values and completed state.
+- [x] Browse next/previous weeks; their lifecycle is independent. Return to the original week and confirm its own state.
+- [x] Force-close/reopen and log out/in; navigate back to the saved week and confirm progress/completion and Focus persist.
+- [x] Check Hebrew RTL, touch targets, keyboard, scrolling, safe exit/cancel, and visible retry behavior. #4 week/day navigation, Tasks and commitments remain available.
 
-No checkbox is completed by software evidence alone. Plan identity, concurrency and internal database invariants are supported by the passing isolated database checks; device observations must still be recorded separately as owner-reported acceptance.
+These checkboxes are completed by the owner-reported physical acceptance above, with prior automated integration evidence supporting internal identity/concurrency invariants. No new device test was performed by Codex during this finalization.

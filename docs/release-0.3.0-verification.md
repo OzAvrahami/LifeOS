@@ -1,12 +1,20 @@
-# LifeOS 0.3.0 (4) — internal verification candidate
+# LifeOS 0.3.0 (4) — owner accepted, publication pending
 
-## Current candidate — 2026-09-13
+## Current acceptance — 2026-09-13
 
-**Prepared, not built, installed, owner-accepted or published.** Includes #3 Weekly Planning lifecycle and #4 Week/day navigation. Both issues remain **Open / Verify / P1 — High**. Latest published release and last owner-accepted binary remain **v0.2.1 / build 3**. Read-only remote tag/release inspection found no v0.3.0 tag or Release. The candidate is a MINOR update because these are substantial new user-facing planning capabilities, grouped into one acceptance build rather than separate versions per issue.
+**LifeOS 0.3.0 (4) is installed and owner-accepted; publication is pending.** The owner confirmed the remaining physical scenarios for #3 Weekly Planning lifecycle and #4 Week/day navigation were satisfactory on a real iPhone, with the installed application visibly reporting **0.3.0 (4)**. Acceptance date: **2026-09-13**. This is OWNER-REPORTED verification; Codex did not independently observe the device or extract its source SHA.
+
+Both issues are **Closed / Completed / Done / P1 — High**, with complete Release / Build gates: [#3 acceptance](https://github.com/OzAvrahami/LifeOS/issues/3#issuecomment-5655476777), [#4 acceptance](https://github.com/OzAvrahami/LifeOS/issues/4#issuecomment-5655480067). Prior automated and local integration checks were already complete. The owner confirms production migration **20260913120000** was applied remotely and the candidate API deployment on Railway verified successful before the physical test. These are satisfied readiness prerequisites from the owner's handoff, not a new provider inspection or production operation by this finalization.
+
+Preparation is committed/pushed at **`e1a3470af233a1e10108f57eec73daed35551376`**, containing #3 `286cec4` and #4 `7785381`. Acceptance finalization began from that clean `main`, equal to fetched `origin/main`. The accepted binary remains 0.3.0 (4); this follow-up changes documentation/status only.
+
+**No v0.3.0 tag or GitHub Release exists at inspection, and none is created here. Latest published remains v0.2.1.** Internal acceptance is not App Store/TestFlight publication. No new instrumented history/RLS/accessibility audit is claimed; earlier tests support the internal invariants and owner acceptance covers the provided physical checklist.
 
 [Development Workflow](DEVELOPMENT_WORKFLOW.md) is now the canonical standard, with the automatic pre-device gate referenced by root AGENTS.md and all four Issue Forms. The standard requires every future new acceptance binary to have a fresh increasing build number, even when SemVer stays unchanged. No release date or future commit/tag target is assigned here.
 
-## Baseline and version evidence
+## Historical preparation baseline and version evidence
+
+The preparation-stage facts below predate the owner-performed installation/acceptance. Earlier not-installed or unverified-rollout statements describe that stage, not the current accepted state.
 
 The initial worktree was clean on `main` at **`286cec4fc68d1a4f8c24788bc411e79047929f61`** (`feat(planning): add weekly planning lifecycle`). The authorized `git fetch origin` completed; HEAD and `origin/main` match. This contains #4 implementation `7785381`. Their implementation checkpoints are pushed; this later preparation does not identify an installed binary's source SHA.
 
@@ -71,6 +79,8 @@ This verifies bundling, not production endpoint readiness or an installed binary
 
 ## Before physical installation
 
+**Historical preparation instructions — superseded by completed owner installation/acceptance above.** Do not repeat the accepted scenarios or rebuild merely to finalize documentation.
+
 The version/native preparation is complete. **Do not build/install during this task.** The owner reviews and manually commits/pushes the intended preparation files. No tag or GitHub Release is implied by that checkpoint.
 
 Before a later authorized build, verify that `20260913120000_add_weekly_planning_lifecycle.sql` is applied to the intended server database and that the deployed API contains the #3 contract. Implementation `286cec4` is already pushed, but current linked migration history and the active API deployment were not independently inspected in this preparation. Do not assume that a push or successful local integration establishes remote readiness. Follow the [schema/API ordering standard](DEVELOPMENT_WORKFLOW.md#database--api-rollout) for pending work; any production mutation requires explicit authorization.
@@ -81,6 +91,14 @@ The owner should first confirm the installed footer says **0.3.0 / build 4**, th
 
 If runtime code changes after this candidate is built, prepare a new increasing build number and repeat affected acceptance. Documentation-only edits before this unbuilt candidate do not consume another build number. Official tag/GitHub Release/Latest publication remains a separate owner-controlled action after approval.
 
-## GitHub readback
+## Historical preparation GitHub readback
 
 The Release / Build gate was appended to both original issue bodies. Impact, candidate version/build, tracked preparation and local native synchronization are checked; installation, owner acceptance and exact accepted build remain unchecked. Readback confirms #3 and #4 remain Open / Verify / P1 — High, with original requirements/comments, labels, assignees and milestones preserved. All 18 Project items, priorities and memberships are unchanged; no workflow Status mutation was performed.
+
+## Acceptance finalization checks and publication stop
+
+The issue bodies' Release / Build gates now record the exact accepted build/date/source and all eight steps are complete. Original requirements and comments are retained; only #3/#4 state/Status changed, with priorities, labels, assignees, milestones and all Project memberships preserved. Readback confirms Closed/Completed/Done for both.
+
+Focused documentation/version checks, all 46 local Markdown file/anchor links, and `git diff --check` passed. All tracked root/API/Mobile versions remain 0.3.0, Expo build remains "4", and inspected ignored native/environment files are unchanged. No full feature suite, integration test, export, native build/install or production mutation was repeated for this documentation-only checkpoint; results above are prior runs.
+
+The owner explicitly authorized the acceptance documentation commit and push with message `docs(release): record LifeOS 0.3.0 owner acceptance`. Publication remains a separate owner-controlled step. After this checkpoint is pushed, the final documentation source is ready for owner review and manual annotated tag/GitHub Release publication; never tag the earlier preparation commit if that would omit acceptance documentation. No tag or Release is created by this checkpoint. An automatic Railway deployment after a documentation push, if any, is not new physical acceptance evidence.

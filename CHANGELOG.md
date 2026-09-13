@@ -10,20 +10,20 @@ LifeOS follows Semantic Versioning for development and release tags.
 
 - Establish a canonical development/release standard, mandatory mobile version/build review in AGENTS.md, and release-impact fields in all Issue Forms. Schema-dependent API rollout requires verified schema before deployment.
 
-## [0.3.0] — Verification candidate / unreleased
+## [0.3.0] — Owner accepted / publication pending
 
-Prepared internal candidate **0.3.0 / iOS build 4**, grouping #3 and #4 for physical-iPhone acceptance. Neither installed nor owner-accepted; no 0.3.0 tag/GitHub Release or App Store/TestFlight publication is claimed. Latest published release remains v0.2.1. See [candidate preparation](docs/release-0.3.0-verification.md).
+Installed internal build **0.3.0 / iOS build 4** is **owner-accepted on 2026-09-13** for combined #3/#4 physical-iPhone verification. Both issues are Closed / Completed / Done. This is owner-reported acceptance, separate from previous automated verification. **0.3.0 is not published**: no tag/GitHub Release or App Store/TestFlight publication; Latest remains v0.2.1. See [acceptance and preparation evidence](docs/release-0.3.0-verification.md).
 
 ### Added
 
 - Weekly Planning now has selected-week start/resume/completed/review/edit states and a four-step authenticated flow, backed by the existing WeekPlan owner (#3). Focus edits and saved progress survive returning to the flow; completed edits preserve completion and identity.
-- Prepared a forward migration for lifecycle constraints and an atomic caller-scoped planning RPC. Local PostgreSQL/Auth/RLS integration passed all 11 verification groups, including lifecycle constraints, atomic retries, completed edits, and compatible Focus owners; production rollout and physical acceptance remain pending. See [the #3 handoff](docs/issue-3-verification.md).
+- Prepared a forward migration for lifecycle constraints and an atomic caller-scoped planning RPC. Local PostgreSQL/Auth/RLS integration passed all 11 verification groups, including lifecycle constraints, atomic retries, completed edits, and compatible Focus owners; the owner confirms remote migration/API readiness was verified before accepting the physical build. See [the #3 handoff](docs/issue-3-verification.md).
 
 - Week now browses previous/next weeks and returns to “השבוע הזה”, with the selected range driving real task, commitment, and Weekly Focus data (#4).
 - Open any date to inspect separate task and commitment lists, navigate days across week/month/year boundaries, and return to Today. Compact previews show real titles, counts, estimates, and commitment times without inventing durations.
 - Create tasks/commitments for the inspected date and use existing edit, reschedule, lifecycle, and delete actions while retaining day/week context. Completed tasks are separate from active totals; Weekly Focus never counts as a task.
 
-Issues #3 and #4 remain Open / Verify and await physical-iPhone owner acceptance on the same 0.3.0 (4) candidate after schema/API readiness is confirmed; these changes are not part of published v0.2.1. See [implementation verification and the owner checklist](docs/issue-4-verification.md).
+Issues #3 and #4 are complete following owner-reported acceptance on the same 0.3.0 (4) binary. Prior automated results remain evidence for internal invariants; no new instrumented production or full accessibility audit is implied. These changes are not part of published v0.2.1. See [Week/day acceptance](docs/issue-4-verification.md).
 
 ## [0.2.1] — 2026-09-08
 
