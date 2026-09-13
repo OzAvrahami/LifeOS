@@ -12,9 +12,10 @@ Status is based on repository evidence. A phase can contain implemented code whi
 - **v0.1.1** — standalone internal deployment milestone: Railway HTTPS API and a Release iPhone build that operates without the development Mac, Metro, or local API.
 - **v0.2.0** — historical standalone internal iPhone preparation: Day Window, task-backed summaries, capture/Week fixes, Weekly Focus stabilization, and visible version metadata; not published; historical preparation does not establish device acceptance.
 - **v0.2.1** — installed standalone internal iPhone update, build 3. Owner-reported #11 precise commitment times, #12 keyboard interactions, #13 date placement/moves, and tested save/app-reopen persistence were accepted on 2026-09-08. Published on GitHub the same day as Latest; not TestFlight or App Store distribution.
+- **v0.3.0** — published 2026-09-13 at 19:24:14 UTC, Latest, non-draft and non-prerelease. Internal 0.3.0 (4) is owner-accepted for #3 Weekly Planning lifecycle and #4 Week/day navigation; tag target `cefd84a6d8e21c631bc666d49d20ac91ccce2657`. Not App Store/TestFlight.
 - **v1.0.0** — a later stable-product milestone; it is not the current target.
 
-Published GitHub Releases are authoritative for released versions, as defined in `github-development-standard.md`. [LifeOS v0.2.1 — Planning fixes](https://github.com/OzAvrahami/LifeOS/releases/tag/v0.2.1) is Latest, non-draft, non-prerelease, published 2026-09-08 at 09:19:03 UTC. Its annotated tag resolves to `93fde4306132f2301f5e2b02c3c374f5c203a1cd`. Preparation, acceptance documentation, and publication checkpoints are complete. See [the release record](release-0.2.1-verification.md#current-publication-and-workflow--2026-09-08).
+Published GitHub Releases are authoritative for released versions, as defined in `github-development-standard.md`. [LifeOS v0.3.0 — Weekly planning and week navigation](https://github.com/OzAvrahami/LifeOS/releases/tag/v0.3.0) is Latest, non-draft and non-prerelease, published **2026-09-13T19:24:14Z**. Its annotated tag resolves to `cefd84a6d8e21c631bc666d49d20ac91ccce2657`. Acceptance/publication are complete; post-publication documentation does not move the tag. See [the release record](release-0.3.0-verification.md#current-publication--2026-09-13).
 
 ## Phase 1 — Product definition
 
@@ -124,7 +125,9 @@ The `lifeos-api` Railway service runs the compiled API behind HTTPS. A Release i
 
 **0.3.0 internal milestone: ACCEPTED.** The owner accepted the combined #3 Weekly Planning lifecycle and #4 Week/day navigation scenarios on installed **LifeOS 0.3.0 (4)** on **2026-09-13**. Both are Closed / Completed / Done / P1 — High. The owner confirms remote migration `20260913120000` and the candidate Railway deployment were verified before physical testing. Prior software/local integration evidence remains separate from this owner-reported physical acceptance; no independent device observation or broader audit is implied.
 
-**Remaining work:** v0.3.0 publication is pending; no tag or GitHub Release is created by acceptance finalization, and Latest remains v0.2.1. Broader Daily Planning, Tasks vs Weekly Focus, Google Calendar integration and other backlog scope are unchanged; no new issue is selected. The [canonical workflow](DEVELOPMENT_WORKFLOW.md) keeps accepted internal builds distinct from publication. See [the acceptance record](release-0.3.0-verification.md).
+**Publication milestone: COMPLETE.** [LifeOS v0.3.0 — Weekly planning and week navigation](https://github.com/OzAvrahami/LifeOS/releases/tag/v0.3.0) was published on 2026-09-13 at 19:24:14 UTC and is Latest, non-draft and non-prerelease, with fixed annotated tag target `cefd84a6d8e21c631bc666d49d20ac91ccce2657`. No further v0.3.0 action remains.
+
+**Remaining work:** Broader Daily Planning, Tasks vs Weekly Focus, Google Calendar integration and other backlog scope are unchanged; no new issue is selected. The [canonical workflow](DEVELOPMENT_WORKFLOW.md) keeps accepted internal builds distinct from publication. See [the acceptance record](release-0.3.0-verification.md).
 
 ## Release gate — v0.1.0-alpha.1
 

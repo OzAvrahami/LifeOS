@@ -6,13 +6,9 @@ LifeOS follows Semantic Versioning for development and release tags.
 
 ## [Unreleased]
 
-### Development workflow
+## [0.3.0] — 2026-09-13
 
-- Establish a canonical development/release standard, mandatory mobile version/build review in AGENTS.md, and release-impact fields in all Issue Forms. Schema-dependent API rollout requires verified schema before deployment.
-
-## [0.3.0] — Owner accepted / publication pending
-
-Installed internal build **0.3.0 / iOS build 4** is **owner-accepted on 2026-09-13** for combined #3/#4 physical-iPhone verification. Both issues are Closed / Completed / Done. This is owner-reported acceptance, separate from previous automated verification. **0.3.0 is not published**: no tag/GitHub Release or App Store/TestFlight publication; Latest remains v0.2.1. See [acceptance and preparation evidence](docs/release-0.3.0-verification.md).
+Installed internal build **0.3.0 / iOS build 4** is **owner-accepted on 2026-09-13** for combined #3/#4 physical-iPhone verification. Both issues are Closed / Completed / Done. This is owner-reported acceptance, separate from previous automated verification. [LifeOS v0.3.0 — Weekly planning and week navigation](https://github.com/OzAvrahami/LifeOS/releases/tag/v0.3.0) was published **2026-09-13T19:24:14Z**, non-draft, non-prerelease and **Latest**, superseding v0.2.1. Its annotated tag resolves to `cefd84a6d8e21c631bc666d49d20ac91ccce2657`. Internal iPhone build remains **0.3.0 (4)**; no App Store/TestFlight publication occurred. See [acceptance and preparation evidence](docs/release-0.3.0-verification.md).
 
 ### Added
 
@@ -24,6 +20,10 @@ Installed internal build **0.3.0 / iOS build 4** is **owner-accepted on 2026-09-
 - Create tasks/commitments for the inspected date and use existing edit, reschedule, lifecycle, and delete actions while retaining day/week context. Completed tasks are separate from active totals; Weekly Focus never counts as a task.
 
 Issues #3 and #4 are complete following owner-reported acceptance on the same 0.3.0 (4) binary. Prior automated results remain evidence for internal invariants; no new instrumented production or full accessibility audit is implied. These changes are not part of published v0.2.1. See [Week/day acceptance](docs/issue-4-verification.md).
+
+### Development workflow
+
+- Establish a canonical development/release standard, mandatory mobile version/build review in AGENTS.md, and release-impact fields in all Issue Forms. Schema-dependent API rollout requires verified schema before deployment.
 
 ## [0.2.1] — 2026-09-08
 

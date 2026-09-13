@@ -2,6 +2,8 @@
 
 ## Current publication and workflow — 2026-09-08
 
+**Historical snapshot:** This section records publication-day evidence for v0.2.1. [v0.3.0 publication](release-0.3.0-verification.md#current-publication--2026-09-13) superseded it as Latest on 2026-09-13. The older tag and acceptance evidence remain unchanged.
+
 Authenticated macOS GitHub inspection confirms [LifeOS v0.2.1 — Planning fixes](https://github.com/OzAvrahami/LifeOS/releases/tag/v0.2.1), published **2026-09-08 at 09:19:03 UTC**, is **Latest, non-draft, non-prerelease**. The annotated `v0.2.1` tag resolves to **`93fde4306132f2301f5e2b02c3c374f5c203a1cd`**. Local HEAD and remote main matched that commit and the worktree was clean before this reconciliation.
 
 The owner’s preparation (`2aa6bc4`), acceptance-documentation (`1712389`), and final publication-documentation (`93fde43`) checkpoints are complete. The release source contains #11/#12/#13 and only documentation changes after the owner-built preparation baseline. Later workflow/documentation reconciliation is separate from the fixed published tag; no installed-binary SHA was extracted. The internal iPhone remains owner-accepted **0.2.1 / build 3**, not TestFlight or App Store distribution.

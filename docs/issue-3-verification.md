@@ -12,11 +12,14 @@
 | Physical build installed | Yes — owner reports installed LifeOS 0.3.0 (4), visibly confirmed |
 | Owner accepted exact build | Yes — LifeOS 0.3.0 (4), owner-reported physical iPhone verification |
 | Owner acceptance date | 2026-09-13 |
+| Published release | [v0.3.0](https://github.com/OzAvrahami/LifeOS/releases/tag/v0.3.0) |
+| Published | 2026-09-13 |
+| Accepted binary | 0.3.0 (4) |
 | Included issues | #3, #4; preparation `e1a3470`, containing implementation `286cec4` / `7785381` |
 
 Both issues are **Closed / Completed / Done / P1 — High**, read back after finalization. The owner explicitly confirmed the remaining #3/#4 physical scenarios were satisfactory on **LifeOS 0.3.0 (4)** on **2026-09-13**. [Final acceptance comment](https://github.com/OzAvrahami/LifeOS/issues/3#issuecomment-5655476777). This is owner-reported acceptance, not independent Codex observation or extraction of the binary's source SHA.
 
-Production readiness was already verified before the physical test, as confirmed in the owner's handoff: remote migration `20260913120000` applied and candidate Railway API deployment successful. No remote operation was repeated here. Prior automated/component/API and local PostgreSQL/Auth/RLS results remain separate evidence for internal invariants; no new instrumented production/history/RLS or full accessibility audit is claimed. See [release acceptance and publication state](release-0.3.0-verification.md). Publication is pending; the issue no longer has an acceptance blocker.
+Production readiness was already verified before the physical test, as confirmed in the owner's handoff: remote migration `20260913120000` applied and candidate Railway API deployment successful. No remote operation was repeated here. Prior automated/component/API and local PostgreSQL/Auth/RLS results remain separate evidence for internal invariants; no new instrumented production/history/RLS or full accessibility audit is claimed. See [release acceptance and publication state](release-0.3.0-verification.md). Published in **v0.3.0** on **2026-09-13**, with annotated tag target `cefd84a6d8e21c631bc666d49d20ac91ccce2657`. Later documentation reconciliation does not alter the tag or owner-acceptance attribution; the issue has no remaining acceptance/publication gate.
 
 ## Historical implementation and local integration handoff — 2026-09-13
 

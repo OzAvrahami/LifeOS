@@ -1,16 +1,16 @@
 # LifeOS Implementation Status
 
 - **Last updated:** 2026-09-13
-- **Accepted internal build:** LifeOS **0.3.0 (4)** includes #3 + #4, owner-accepted on a real iPhone on **2026-09-13**. Both are Closed / Completed / Done / P1 — High. Publication is pending. See [acceptance evidence](release-0.3.0-verification.md) and the canonical [development workflow](DEVELOPMENT_WORKFLOW.md).
-- **Current work item:** #3/#4 implementation and required acceptance are complete. No next implementation issue is selected. The remaining release action is separate owner-controlled v0.3.0 publication.
+- **Accepted internal build:** LifeOS **0.3.0 (4)** includes #3 + #4, owner-accepted on a real iPhone on **2026-09-13**. Both are Closed / Completed / Done / P1 — High. Published as v0.3.0 on 2026-09-13. See [acceptance and publication evidence](release-0.3.0-verification.md) and the canonical [development workflow](DEVELOPMENT_WORKFLOW.md).
+- **Current work item:** #3/#4 implementation and required acceptance are complete. No next implementation issue is selected. v0.3.0 publication is complete; live Project inspection shows no item In Progress.
 - **Project status:** #3 and #4 are Closed / Completed / Done / P1 — High, read back after the owner accepted 0.3.0 (4). #7/#8/#10 and #11/#12/#13 remain Closed / Completed / Done. Priorities, unrelated states, labels, assignees, milestones and membership are preserved.
-- **Latest published release:** [LifeOS v0.2.1 — Planning fixes](https://github.com/OzAvrahami/LifeOS/releases/tag/v0.2.1), published 2026-09-08 at 09:19:03 UTC; authenticated GitHub inspection confirms Latest, non-draft, non-prerelease. Annotated tag target: `93fde4306132f2301f5e2b02c3c374f5c203a1cd`.
+- **Latest published release:** [LifeOS v0.3.0 — Weekly planning and week navigation](https://github.com/OzAvrahami/LifeOS/releases/tag/v0.3.0), published **2026-09-13T19:24:14Z**, non-draft and non-prerelease. Annotated tag target: `cefd84a6d8e21c631bc666d49d20ac91ccce2657`, the accepted #3/#4 checkpoint. v0.2.1 is historical; post-publication docs do not move the tag.
 - **Installed internal version:** **0.3.0/build 4**, visibly confirmed and owner-accepted on 2026-09-13; preparation baseline `e1a3470af233a1e10108f57eec73daed35551376`. No binary source SHA was extracted. Historical 0.2.1/build 3 acceptance and its completed preparation/publication checkpoints remain in [the 0.2.1 record](release-0.2.1-verification.md).
 - **Acceptance:** The owner explicitly confirmed the remaining #3/#4 physical acceptance scenarios were satisfactory on 0.3.0 (4). This is owner-reported verification, not independent Codex observation. Earlier #11–#13 approval ("מאשר הכל") on 0.2.1 remains separate historical evidence; no new instrumented production/history/RLS or full accessibility audit is claimed.
 - **API evidence:** The owner confirms migration `20260913120000` was applied remotely and candidate Railway API deployment verified successful before the 0.3.0 (4) physical test. No production operation or independent active-provider inspection was repeated during acceptance finalization.
-- **Current phase:** Phase 9’s v0.2.1 acceptance/publication milestone remains complete. The 0.3.0 (4) #3/#4 internal acceptance milestone is complete; v0.3.0 publication is pending. Real-world usage and unrelated backlog continue.
+- **Current phase:** Phase 9’s v0.2.1 acceptance/publication milestone remains complete. The 0.3.0 (4) #3/#4 internal acceptance milestone is complete; v0.3.0 publication is complete. Real-world usage and unrelated backlog continue.
 - **Phase 8 status:** Historical standalone verification remains recorded for 2026-08-20; current 0.2.1 owner evidence is separately dated 2026-09-08.
-- **Next action:** Separate owner review and authorization for v0.3.0 tag/GitHub Release publication. Acceptance is complete; no new issue, build or version change is required.
+- **Next action:** No further v0.3.0 action remains. Await owner selection of future work; no implementation issue is currently active and no build/version change is required.
 
 This document is the current source of truth for implementation status. “Verified” means supported by tracked code plus a repeatable repository check; it does not imply remote or real-device verification unless stated.
 
@@ -121,14 +121,14 @@ The owner previously accepted isolated preview/demo behavior and now reports acc
 
 ## Current Critical Path
 
-1. #3 and #4 are complete on owner-accepted 0.3.0 (4); acceptance documentation is the authorized Git checkpoint.
-2. v0.3.0 publication remains a separate owner step. Preserve accepted behavior and unrelated backlog; no further implementation or build is selected.
+1. #3 and #4 are complete on owner-accepted 0.3.0 (4); acceptance checkpoint `cefd84a` is the fixed published v0.3.0 tag source.
+2. v0.3.0 publication is complete. Preserve the fixed tag, accepted behavior and unrelated backlog; no further implementation or build is selected.
 
 ## Current release gate
 
 ### v0.3.0/build 4
 
-**Status: INSTALLED AND OWNER-ACCEPTED; PUBLICATION PENDING.** #3 and #4 are Closed/Completed/Done after owner-reported physical acceptance on 2026-09-13. Production prerequisites were confirmed before the test. No v0.3.0 tag or GitHub Release exists yet; Latest remains v0.2.1. See [the acceptance record](release-0.3.0-verification.md).
+**Status: PUBLISHED ON GITHUB; INSTALLED AND OWNER-ACCEPTED.** #3 and #4 are Closed/Completed/Done after owner-reported physical acceptance on 2026-09-13. Production prerequisites were confirmed before the test. v0.3.0 is Latest, published 2026-09-13 at 19:24:14 UTC, non-draft and non-prerelease. Its annotated tag remains at `cefd84a6d8e21c631bc666d49d20ac91ccce2657`; later documentation commits are separate. See [the acceptance record](release-0.3.0-verification.md).
 
 ### v0.2.1/build 3
 
@@ -154,7 +154,7 @@ The owner previously accepted isolated preview/demo behavior and now reports acc
 
 ## Next Action
 
-**Next gate:** Separate owner approval for final annotated v0.3.0 tag and GitHub Release publication after the acceptance documentation checkpoint. Physical acceptance is complete. #6’s pending disposition and unrelated backlog are unchanged; no publication or new build is performed by this finalization.
+**Next gate:** None for v0.3.0; acceptance and publication are complete. Await owner selection of future work. #6’s pending disposition and unrelated backlog are unchanged; no new issue, release, build or version change is selected.
 
 ## v0.2.0 preparation validation — 2026-09-06
 

@@ -1,6 +1,28 @@
-# LifeOS 0.3.0 (4) — owner accepted, publication pending
+# LifeOS 0.3.0 (4) — published and owner-accepted
 
-## Current acceptance — 2026-09-13
+## Current publication — 2026-09-13
+
+Authenticated GitHub readback confirms **v0.3.0 is published successfully and Latest**, superseding v0.2.1.
+
+| Field | Verified value |
+| --- | --- |
+| GitHub Release | [LifeOS v0.3.0 — Weekly planning and week navigation](https://github.com/OzAvrahami/LifeOS/releases/tag/v0.3.0) |
+| Published timestamp | `2026-09-13T19:24:14Z` |
+| Draft | false |
+| Prerelease | false |
+| Latest | v0.3.0 |
+| Annotated tag | v0.3.0 |
+| Tag target / accepted source checkpoint | `cefd84a6d8e21c631bc666d49d20ac91ccce2657` |
+| Installed and owner-accepted internal binary | LifeOS 0.3.0 (4) |
+| Issues | #3 and #4: Closed / Completed / Done / P1 — High |
+
+The owner intentionally tagged the final #3/#4 acceptance checkpoint, containing preparation `e1a3470` and both implementations. This is the published source; no installed-binary SHA was independently extracted. Post-publication documentation commits are later reconciliation and **must not move, recreate or replace the v0.3.0 tag**. The accepted binary remains unchanged. No App Store/TestFlight publication occurred, and no further v0.3.0 release action is pending.
+
+This reconciliation began from clean `main` at `cefd84a6d8e21c631bc666d49d20ac91ccce2657`, equal to fetched `origin/main`. GitHub Release and Project reads are independent live evidence; the physical acceptance below remains owner-reported. No release/tag edit, build, deployment, version change, or new acceptance test was performed.
+
+## Historical owner acceptance — 2026-09-13
+
+The following acceptance snapshot predates publication at 19:24:14 UTC. Its pending-publication/no-tag statements record that earlier stage and are superseded by the current publication section above.
 
 **LifeOS 0.3.0 (4) is installed and owner-accepted; publication is pending.** The owner confirmed the remaining physical scenarios for #3 Weekly Planning lifecycle and #4 Week/day navigation were satisfactory on a real iPhone, with the installed application visibly reporting **0.3.0 (4)**. Acceptance date: **2026-09-13**. This is OWNER-REPORTED verification; Codex did not independently observe the device or extract its source SHA.
 
@@ -95,10 +117,14 @@ If runtime code changes after this candidate is built, prepare a new increasing 
 
 The Release / Build gate was appended to both original issue bodies. Impact, candidate version/build, tracked preparation and local native synchronization are checked; installation, owner acceptance and exact accepted build remain unchecked. Readback confirms #3 and #4 remain Open / Verify / P1 — High, with original requirements/comments, labels, assignees and milestones preserved. All 18 Project items, priorities and memberships are unchanged; no workflow Status mutation was performed.
 
-## Acceptance finalization checks and publication stop
+## Historical acceptance finalization checks and publication stop
 
 The issue bodies' Release / Build gates now record the exact accepted build/date/source and all eight steps are complete. Original requirements and comments are retained; only #3/#4 state/Status changed, with priorities, labels, assignees, milestones and all Project memberships preserved. Readback confirms Closed/Completed/Done for both.
 
 Focused documentation/version checks, all 46 local Markdown file/anchor links, and `git diff --check` passed. All tracked root/API/Mobile versions remain 0.3.0, Expo build remains "4", and inspected ignored native/environment files are unchanged. No full feature suite, integration test, export, native build/install or production mutation was repeated for this documentation-only checkpoint; results above are prior runs.
 
 The owner explicitly authorized the acceptance documentation commit and push with message `docs(release): record LifeOS 0.3.0 owner acceptance`. Publication remains a separate owner-controlled step. After this checkpoint is pushed, the final documentation source is ready for owner review and manual annotated tag/GitHub Release publication; never tag the earlier preparation commit if that would omit acceptance documentation. No tag or Release is created by this checkpoint. An automatic Railway deployment after a documentation push, if any, is not new physical acceptance evidence.
+
+## Post-publication reconciliation checks
+
+All 56 local documentation file/anchor links, version/preservation checks, and `git diff --check` passed. Root/API/Mobile/Expo versions remain 0.3.0, iOS build remains 4, and inspected native/environment files are unchanged. No feature suites were rerun for this documentation-only update. The GitHub Release remains unedited, #3/#4 remain completed, and later main documentation commits do not change the published tag target. No next implementation issue is selected in the inspected Project.
