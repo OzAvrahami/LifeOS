@@ -7,13 +7,13 @@ import { colors } from '@/theme/tokens';
 import type { TaskDateControlProps } from './task-date-control.types';
 import { localDateKey, planningDateToLocalDate } from './task-dates';
 
-export function TaskDateControl({ value, onChange, onConfirm, onCancel }: TaskDateControlProps) {
+export function TaskDateControl({ value, onChange, onConfirm, onCancel, accessibilityLabel = 'תאריך לתכנון' }: TaskDateControlProps) {
   const active = useRef(true);
   useEffect(() => { active.current = true; return () => { active.current = false; }; }, []);
   const ios = Platform.OS === 'ios';
   return (
     <DateTimePicker
-      accessibilityLabel="תאריך לתכנון"
+      accessibilityLabel={accessibilityLabel}
       display={ios ? 'spinner' : 'default'}
       mode="date"
       onValueChange={(_event, selected) => {

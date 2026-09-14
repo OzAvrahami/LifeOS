@@ -18,8 +18,9 @@ import { colors, radius, spacing, typography } from '@/theme/tokens';
 
 import { TaskDateSelection } from '@/features/tasks/task-date-selection';
 import { InboxTask } from './inbox.types';
+import { TaskReminderEditor } from '@/features/notifications/task-reminder-editor';
 
-type SheetMode = 'actions' | 'choose-day' | 'edit';
+type SheetMode = 'actions' | 'choose-day' | 'edit' | 'reminder';
 
 export function InboxItemActionSheet({
   defaultDate,
@@ -34,7 +35,11 @@ export function InboxItemActionSheet({
   onMoveToWeek,
   onStay,
   task,
+  reminderAt,
+  onReminder,
 }: {
+  reminderAt?: string | null;
+  onReminder?: (value: string | null) => Promise<void>;
   defaultDate: string;
   confirmation?: string | null;
   confirmedDestination?: 'week';
@@ -90,6 +95,7 @@ export function InboxItemActionSheet({
           <ScrollView keyboardShouldPersistTaps="handled">
             <View style={styles.handle} />
             {error ? <Text accessibilityRole="alert" style={styles.error}>לא הצלחנו לעדכן. אפשר לנסות שוב.</Text> : null}
+            {onReminder && mode === 'actions' ? <Pressable accessibilityRole="button" onPress={() => setMode('reminder')} style={styles.secondaryButton}><Text style={styles.secondaryText}>הזכר לי</Text></Pressable> : null}
             {mode === 'actions' ? (
               <ActionChoices
                 onChooseDay={() => { if (Platform.OS !== 'web') Keyboard.dismiss(); setMode('choose-day'); }}
@@ -101,6 +107,8 @@ export function InboxItemActionSheet({
                 weekConfirmed={confirmedDestination === 'week'}
                 task={task}
               />
+            ) : mode === 'reminder' && onReminder ? (
+              <TaskReminderEditor value={reminderAt ?? null} onCancel={() => setMode('actions')} onSave={async value => { setPending(true); try { await onReminder(value); } finally { setPending(false); } }} />
             ) : mode === 'choose-day' ? (
               <TaskDateSelection defaultDate={defaultDate} onPendingChange={setPending}
                 onCancel={() => setMode('actions')}

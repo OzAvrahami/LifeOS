@@ -8,6 +8,8 @@ export const TASK_STALE_TIME_MS = 30_000;
 
 function normalizedFilters(filters: TaskListFilters) {
   return {
+    id: filters.id ?? null,
+    reminders: filters.reminders ?? false,
     placement: filters.placement ?? null,
     plannedDate: filters.plannedDate ?? null,
     plannedDateFrom: filters.plannedDateFrom ?? null,
@@ -68,6 +70,8 @@ function taskBelongsInList(
   wasPresent: boolean,
   planning: TaskPlanningInput | undefined,
 ) {
+  if (filters.id && task.id !== filters.id) return false;
+  if (filters.reminders && (!task.reminderAt || !['open', 'in_progress'].includes(task.status))) return false;
   if (filters.status ? task.status !== filters.status : task.status === 'cancelled') return false;
   if (filters.placement === 'inbox') {
     return task.status === 'open' && task.plannedDate === null && task.weekPlanId === null;

@@ -11,11 +11,13 @@ import { timezoneOptions, weekdayLabels } from './settings.types';
 
 export function SettingsScreen({
   onBack,
+  onNotifications,
   onDayWindow,
   onTimezone,
   onWeekStart,
 }: {
   onBack: () => void;
+  onNotifications?: () => void;
   onDayWindow: () => void;
   onTimezone: () => void;
   onWeekStart: () => void;
@@ -54,6 +56,7 @@ export function SettingsScreen({
         <SettingsRow label="תחילת שבוע" onPress={onWeekStart} value={weekdayLabels[effective.weekStartDay] ?? weekdayLabels[0]} />
       </SettingsCard>
       <SettingsSectionLabel>מערכת</SettingsSectionLabel>
+      {onNotifications ? <SettingsCard><SettingsRow label="התראות" onPress={onNotifications} value="משימות ותכנון שבועי" /></SettingsCard> : null}
       <SettingsCard>
         <SettingsRow label="אזור זמן" onPress={onTimezone} value={`${timezoneLabel} · ${timezoneOffsetLabel(effective.timezone)}`} />
       </SettingsCard>

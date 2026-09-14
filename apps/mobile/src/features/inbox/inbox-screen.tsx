@@ -327,7 +327,9 @@ export function InboxScreen({
         visible={captureOpen}
       />
       {selectedTask ? (
-        <InboxItemActionSheet defaultDate={defaultDate}
+          <InboxItemActionSheet defaultDate={defaultDate}
+            reminderAt={inboxQuery.data?.find(task => task.id === selectedTask.id)?.reminderAt}
+            onReminder={serverTasks ? async reminderAt => { await updateMutation.mutateAsync({ id: selectedTask.id, input: { reminderAt } }); } : undefined}
           key={selectedTask.id}
           confirmation={resolvedTaskId === selectedTask.id ? confirmation : null}
           confirmedDestination={resolvedTaskId === selectedTask.id ? 'week' : undefined}

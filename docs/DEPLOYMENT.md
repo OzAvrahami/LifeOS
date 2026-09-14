@@ -1,5 +1,15 @@
 # LifeOS Deployment
 
+## Notifications candidate — Issue #1, 2026-09-14
+
+Candidate target: **LifeOS 0.4.0 (5)**, not installed/accepted/published. The first slice adds local iOS notification delivery with persisted account settings and Task reminder intent. Migration `20260914120000_add_notification_intent.sql` extends existing `tasks`/`user_settings`, preserving RLS and old-client defaults. The disposable local gate passed, including exact timestamps, clear/history behavior, settings patch preservation, invalid values, user isolation and 1,001 reminder rows across pagination.
+
+**Hold deployment-triggering push until schema readiness is verified.** After the owner's local Git checkpoint, inspect all linked pending migrations and the remote dry run; apply only with explicit authorization, verify remote history, then authorize API push/deployment and verify the compatible API. No remote migration or deployment occurred here. An old API cannot persist notification settings; the client shows that limitation rather than pretending local state is authoritative.
+
+The final added dependency is Expo-compatible `expo-notifications` **57.0.12** (plus `expo-application`/`badgin`), with existing locked resolutions preserved and no duplicate iOS native modules in autolinking verification. There is no APNs entitlement/plugin, push registration or remote infrastructure. A JS reload alone cannot add this native module to the accepted 0.3.0 binary: the existing Mac iOS project needs normal CocoaPods synchronization and a later separately authorized new binary. **Do not build/install yet.** This Windows checkout lacks the ignored `apps/mobile/ios` project, CocoaPods and Xcode; ignored native version fields and Pods remain pending, and no project was regenerated. Synchronize the established 0.4.0 / 5 plist/pbxproj fields and preserve signing/bundle settings on that Mac before any authorized build.
+
+See [Issue #1 verification](issue-1-verification.md) for exact automated evidence, permission/device semantics, release gate and pending physical checklist. Published/accepted 0.3.0 history below remains accurate.
+
 **Historical 0.2.1 acceptance:** LifeOS 0.2.1/build 3 was installed and **owner-accepted through the standalone internal iPhone delivery path** for #11/#12/#13. On 2026-09-08, after manually committing/pushing preparation `2aa6bc4a246a06efc31a6c7753b1ad9f51b8a102`, the owner built/installed, confirmed the displayed version/build, and replied "מאשר הכל" — "I approve everything." Standalone cellular opening/data loading without Mac/Metro and tested commitment/task save/app-reopen persistence were approved. See [the acceptance record](release-0.2.1-verification.md) for the precise scope and prior automated evidence.
 
 This is owner-reported acceptance, not independent device observation, binary-SHA extraction, or a new instrumented database/history/RLS/accessibility audit. No direct Railway active-deployment inspection was performed. Older unrelated acceptance checks remain outstanding. This is internal iPhone delivery, not TestFlight or App Store distribution.

@@ -27,12 +27,14 @@ export function CommitmentTimeField({
   onChange,
   placeholder,
   value,
+  webMinuteStep = 15,
 }: {
   accessibilityLabel: string;
   onChange: (value: string | null) => void;
   optional?: boolean;
   placeholder: string;
   value: string | null;
+  webMinuteStep?: 1 | 15;
 }) {
   return (
     <div style={styles.timeContainer}>
@@ -41,7 +43,7 @@ export function CommitmentTimeField({
         dir="ltr"
         onChange={(event: ChangeEvent<HTMLInputElement>) => onChange(event.target.value || null)}
         placeholder={placeholder}
-        step={900}
+        step={webMinuteStep * 60}
         style={{ ...styles.field, ...styles.time }}
         type="time"
         value={value ?? ''}

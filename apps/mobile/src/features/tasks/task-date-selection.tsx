@@ -7,7 +7,8 @@ import { TaskDateControl } from './task-date-control';
 import { isPlanningDate } from './task-dates';
 
 // Mount for each selection attempt. Cancel/unmount discards this draft entirely.
-export function TaskDateSelection({ value, defaultDate, onConfirm, onCancel, onPendingChange }: {
+export function TaskDateSelection({ value, defaultDate, onConfirm, onCancel, onPendingChange, label = 'תאריך לתכנון' }: {
+  label?: string;
   value?: string | null;
   defaultDate: string;
   onConfirm: (date: string) => void | Promise<void>;
@@ -32,10 +33,10 @@ export function TaskDateSelection({ value, defaultDate, onConfirm, onCancel, onP
     finally { busy.current = false; setPending(false); onPendingChange?.(false); }
   };
   return (
-    <View accessibilityLabel="בחירת תאריך לתכנון" style={styles.container}>
-      <Text style={styles.label}>תאריך לתכנון</Text>
+    <View accessibilityLabel={`בחירת ${label}`} style={styles.container}>
+      <Text style={styles.label}>{label}</Text>
       {!pending && (Platform.OS !== 'android' || nativeOpen) ? (
-        <TaskDateControl value={draft} onChange={setDraft} onConfirm={(date) => void confirm(date)} onCancel={onCancel} />
+        <TaskDateControl accessibilityLabel={label} value={draft} onChange={setDraft} onConfirm={(date) => void confirm(date)} onCancel={onCancel} />
       ) : null}
       <Text accessibilityLabel="תאריך בבחירה" style={styles.label}>{draft}</Text>
       {!isPlanningDate(draft) ? <Text accessibilityRole="alert" style={styles.error}>יש לבחור תאריך תקין.</Text> : null}

@@ -1,10 +1,10 @@
 import type { TaskDateControlProps } from './task-date-control.types';
 import { colors, radius, typography } from '@/theme/tokens';
 
-export function TaskDateControl({ value, onChange }: TaskDateControlProps) {
+export function TaskDateControl({ value, onChange, accessibilityLabel = 'תאריך לתכנון' }: TaskDateControlProps) {
   return (
     <input
-      aria-label="תאריך לתכנון"
+      aria-label={accessibilityLabel}
       autoFocus
       dir="ltr"
       type="date"

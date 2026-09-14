@@ -7,14 +7,17 @@ import type { Task, UpdateTaskInput } from '@/features/tasks/task.types';
 import { colors, spacing, typography } from '@/theme/tokens';
 
 import { DayAction, taskEstimateLabel } from './week-day-view';
+import { TaskReminderEditor } from '@/features/notifications/task-reminder-editor';
+import { localDateKey } from '@/features/tasks/task-dates';
 
 // A focused entry to existing title/date/lifecycle operations, not a new description editor.
-export function WeekTaskDetails({ task, onClose, onUpdate, onDelete }: {
+export function WeekTaskDetails({ task, onClose, onUpdate, onDelete, backLabel = 'חזרה ליום' }: {
+  backLabel?: string;
   task: Task; onClose: () => void;
   onUpdate: (input: UpdateTaskInput) => Promise<void>;
   onDelete: () => Promise<void>;
 }) {
-  const [mode, setMode] = useState<'details' | 'title' | 'date' | 'delete'>('details');
+  const [mode, setMode] = useState<'details' | 'title' | 'date' | 'delete' | 'reminder'>('details');
   const [title, setTitle] = useState(task.title);
   const [pending, setPending] = useState(false);
   const [error, setError] = useState(false);
@@ -27,9 +30,10 @@ export function WeekTaskDetails({ task, onClose, onUpdate, onDelete }: {
     finally { busy.current = false; setPending(false); }
   };
   return <View accessibilityLabel="פרטי משימה" style={styles.content}>
-    <DayAction label="חזרה ליום" disabled={pending} onPress={onClose} />
+    <DayAction label={backLabel} disabled={pending} onPress={onClose} />
     {error ? <Text accessibilityRole="alert" style={styles.error}>לא הצלחנו לעדכן. אפשר לנסות שוב.</Text> : null}
-    {mode === 'date' ? <TaskDateSelection value={task.plannedDate} defaultDate={task.plannedDate!}
+    {mode === 'reminder' ? <TaskReminderEditor value={task.reminderAt ?? null} onCancel={() => setMode('details')} onSave={reminderAt => onUpdate({ reminderAt })} />
+      : mode === 'date' ? <TaskDateSelection value={task.plannedDate} defaultDate={task.plannedDate ?? localDateKey()}
       onPendingChange={setPending} onCancel={() => setMode('details')}
       onConfirm={async date => { await onUpdate({ planning: { type: 'day', plannedDate: date } }); onClose(); }} />
       : mode === 'title' ? <EditTask accessibilityLabel="עריכת כותרת משימה" disabled={pending} title={title}
@@ -46,6 +50,8 @@ export function WeekTaskDetails({ task, onClose, onUpdate, onDelete }: {
           {task.dueDate ? <Text style={styles.text}>מועד אחרון: {task.dueDate}</Text> : null}
           <Text style={styles.text}>{task.status === 'completed' ? 'הושלמה' : task.status === 'in_progress' ? 'בביצוע' : 'לביצוע'}</Text>
           <DayAction label="עריכת כותרת" disabled={pending} onPress={() => setMode('title')} />
+          {task.reminderAt ? <Text style={styles.text}>תזכורת: {new Date(task.reminderAt).toLocaleString('he-IL', { hour12: false })}</Text> : null}
+          <DayAction label="הזכר לי" disabled={pending} onPress={() => setMode('reminder')} />
           <DayAction label="שינוי תאריך המשימה" disabled={pending} onPress={() => setMode('date')} />
           <DayAction label={task.status === 'completed' ? 'פתיחה מחדש' : 'סימון כהושלמה'} disabled={pending}
             onPress={() => void run(() => onUpdate({ status: task.status === 'completed' ? 'open' : 'completed' }))} />

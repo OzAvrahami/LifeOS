@@ -16,6 +16,7 @@ import { SessionQueryCacheBoundary } from '@/features/auth/session-query-cache';
 import { DemoTaskProvider } from '@/features/tasks/demo-task-provider';
 import { TaskQueryScopeProvider } from '@/features/tasks/task-query-scope';
 import { QueryProvider } from '@/lib/query/query-provider';
+import { NotificationProvider } from '@/features/notifications/notification-provider';
 
 export default function RootLayout() {
   const [fontsLoaded] = useFonts({
@@ -33,9 +34,11 @@ export default function RootLayout() {
   return (
     <QueryProvider>
       <AuthProvider>
-        <SessionQueryCacheBoundary>
-          <AuthenticatedStack />
-        </SessionQueryCacheBoundary>
+        <NotificationProvider>
+          <SessionQueryCacheBoundary>
+            <AuthenticatedStack />
+          </SessionQueryCacheBoundary>
+        </NotificationProvider>
       </AuthProvider>
     </QueryProvider>
   );
@@ -73,6 +76,7 @@ function AuthenticatedStack() {
           <Stack.Screen name="more" />
           <Stack.Screen name="settings" />
           <Stack.Screen name="account" />
+          <Stack.Screen name="task" />
         </Stack.Protected>
         <Stack.Screen name="auth/callback" />
         <Stack.Protected guard={__DEV__}>

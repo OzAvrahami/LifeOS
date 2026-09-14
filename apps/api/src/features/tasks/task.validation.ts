@@ -113,6 +113,7 @@ function parsePlanning(value: unknown): TaskPlanningInput {
 }
 
 const writableKeys = new Set([
+  'reminderAt',
   'title',
   'description',
   'estimatedMinutes',
@@ -126,6 +127,7 @@ export function parseCreateTask(value: unknown): CreateTaskInput {
   const body = objectValue(value);
   rejectUnknownKeys(body, writableKeys);
   const input: CreateTaskInput = { title: parseTitle(body.title) };
+  if ('reminderAt' in body) input.reminderAt = parseReminder(body.reminderAt);
   if ('description' in body) input.description = parseNullableString(body.description, 'description');
   if ('estimatedMinutes' in body) input.estimatedMinutes = parseEstimatedMinutes(body.estimatedMinutes);
   if ('priority' in body) input.priority = parsePriority(body.priority);
@@ -141,6 +143,7 @@ export function parseUpdateTask(value: unknown): UpdateTaskInput {
   if (Object.keys(body).length === 0) invalid('At least one task field is required');
 
   const input: UpdateTaskInput = {};
+  if ('reminderAt' in body) input.reminderAt = parseReminder(body.reminderAt);
   if ('title' in body) input.title = parseTitle(body.title);
   if ('description' in body) input.description = parseNullableString(body.description, 'description');
   if ('estimatedMinutes' in body) input.estimatedMinutes = parseEstimatedMinutes(body.estimatedMinutes);
@@ -161,6 +164,8 @@ export function parseUpdateTask(value: unknown): UpdateTaskInput {
 
 export function parseTaskFilters(query: Record<string, unknown>): TaskListFilters {
   rejectUnknownKeys(query, new Set([
+    'id',
+    'reminders',
     'status',
     'plannedDate',
     'plannedDateFrom',
@@ -169,6 +174,14 @@ export function parseTaskFilters(query: Record<string, unknown>): TaskListFilter
     'placement',
   ]));
   const filters: TaskListFilters = {};
+  if (query.id !== undefined) {
+    if (typeof query.id !== 'string') invalid('Invalid task id');
+    filters.id = parseTaskId(query.id);
+  }
+  if (query.reminders !== undefined) {
+    if (query.reminders !== 'true' || Object.keys(query).length !== 1) invalid('Invalid reminder query');
+    filters.reminders = true;
+  }
   if (query.status !== undefined) filters.status = parseStatus(query.status);
   if (query.plannedDate !== undefined) filters.plannedDate = parseDate(query.plannedDate, 'plannedDate');
   if (query.plannedDateFrom !== undefined) {
@@ -200,4 +213,14 @@ export function parseTaskFilters(query: Record<string, unknown>): TaskListFilter
   ].filter(Boolean);
   if (planningFilters.length > 1) invalid('Use only one planning filter');
   return filters;
+}
+
+export function parseReminder(value: unknown): string | null {
+  if (value === null) return null;
+  if (typeof value !== 'string' || !/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(?:\.\d{1,3})?(?:Z|[+-]\d{2}:\d{2})$/.test(value)) invalid('Invalid reminderAt');
+  parseDate(value.slice(0, 10), 'reminderAt');
+  if (Number(value.slice(11, 13)) > 23 || Number(value.slice(14, 16)) > 59 || Number(value.slice(17, 19)) > 59) invalid('Invalid reminderAt');
+  const instant = new Date(value);
+  if (!Number.isFinite(instant.getTime()) || instant.getTime() <= Date.now()) invalid('reminderAt must be a future timestamp');
+  return instant.toISOString();
 }

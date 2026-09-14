@@ -1,8 +1,9 @@
 # LifeOS Implementation Status
 
-- **Last updated:** 2026-09-13
+- **Last updated:** 2026-09-14
+- **#1 handoff status:** Open / Verify / P2 — Medium, read back on the existing Project #2 item. Tracked **0.4.0 (5)** and production config/export are verified. Native synchronization/Pods, schema/API rollout and physical acceptance remain explicit external gates. [Handoff](https://github.com/OzAvrahami/LifeOS/issues/1#issuecomment-5664472014).
 - **Accepted internal build:** LifeOS **0.3.0 (4)** includes #3 + #4, owner-accepted on a real iPhone on **2026-09-13**. Both are Closed / Completed / Done / P1 — High. Published as v0.3.0 on 2026-09-13. See [acceptance and publication evidence](release-0.3.0-verification.md) and the canonical [development workflow](DEVELOPMENT_WORKFLOW.md).
-- **Current work item:** #3/#4 implementation and required acceptance are complete. No next implementation issue is selected. v0.3.0 publication is complete; live Project inspection shows no item In Progress.
+- **Current work item:** #1 Notifications MVP first slice: local iOS permission/settings, explicit Task and recurring Weekly Planning reminders, persisted intent, device reconciliation and tap routing. Software verification is recorded in [Issue #1](issue-1-verification.md); native Mac preparation, schema/API rollout and physical-iPhone acceptance remain pending. Candidate target: **0.4.0 (5)**; the accepted/published 0.3.0 record below remains unchanged.
 - **Project status:** #3 and #4 are Closed / Completed / Done / P1 — High, read back after the owner accepted 0.3.0 (4). #7/#8/#10 and #11/#12/#13 remain Closed / Completed / Done. Priorities, unrelated states, labels, assignees, milestones and membership are preserved.
 - **Latest published release:** [LifeOS v0.3.0 — Weekly planning and week navigation](https://github.com/OzAvrahami/LifeOS/releases/tag/v0.3.0), published **2026-09-13T19:24:14Z**, non-draft and non-prerelease. Annotated tag target: `cefd84a6d8e21c631bc666d49d20ac91ccce2657`, the accepted #3/#4 checkpoint. v0.2.1 is historical; post-publication docs do not move the tag.
 - **Installed internal version:** **0.3.0/build 4**, visibly confirmed and owner-accepted on 2026-09-13; preparation baseline `e1a3470af233a1e10108f57eec73daed35551376`. No binary source SHA was extracted. Historical 0.2.1/build 3 acceptance and its completed preparation/publication checkpoints remain in [the 0.2.1 record](release-0.2.1-verification.md).
@@ -10,7 +11,7 @@
 - **API evidence:** The owner confirms migration `20260913120000` was applied remotely and candidate Railway API deployment verified successful before the 0.3.0 (4) physical test. No production operation or independent active-provider inspection was repeated during acceptance finalization.
 - **Current phase:** Phase 9’s v0.2.1 acceptance/publication milestone remains complete. The 0.3.0 (4) #3/#4 internal acceptance milestone is complete; v0.3.0 publication is complete. Real-world usage and unrelated backlog continue.
 - **Phase 8 status:** Historical standalone verification remains recorded for 2026-08-20; current 0.2.1 owner evidence is separately dated 2026-09-08.
-- **Next action:** No further v0.3.0 action remains. Await owner selection of future work; no implementation issue is currently active and no build/version change is required.
+- **Next action:** Review #1 at the local Git checkpoint; hold deployment-triggering push until the required schema rollout is explicitly authorized and verified. Complete native preparation before any separately authorized device build. No device acceptance or publication is claimed for 0.4.0 (5).
 
 This document is the current source of truth for implementation status. “Verified” means supported by tracked code plus a repeatable repository check; it does not imply remote or real-device verification unless stated.
 
@@ -66,7 +67,8 @@ The owner previously accepted isolated preview/demo behavior and now reports acc
 | Cross-screen synchronization | ✅ Verified in automation, remotely, and on device | TanStack Query user-scoped caches | Cache membership/request-audit tests | Targeted cache updates prevent copies and request multipliers; remote and real-device Core Flow remained consistent. |
 | Automated tests | ✅ #3 software and local integration checks passed | N/A | Prior #3 runs: 40 Mobile suites, 258 passed / 1 existing Android exclusion; 8 API suites, 77 passed; separate Android regression 3 passed | Independent local harness rerun passed all 11 PostgreSQL/Auth/RLS groups on 2026-09-13. Full suites were not rerun for the documentation follow-up. See [exact commands and evidence boundaries](issue-3-verification.md#automated-evidence). |
 | Real-device verification | ✅ Historical verification + owner-accepted 0.2.1 flows | Remote authenticated persistence observed on device | Real-iPhone development and Release-build smokes | The installed Release build operated over cellular with Metro, the local API, and the Mac unavailable. It remains development-signed and is not a TestFlight or App Store release. |
-| Life Areas and broader product modules | ⏸️ Deferred | None | None | Life Areas UI remains disabled; recurring schedules, external calendars, notifications, AI, projects, habits, and billing are outside the current gate. |
+| Notifications first slice (#1) | Software implemented; physical acceptance pending | Local notification Settings and explicit reminder intent | Focused mobile/API and disposable DB/RLS verification | See [#1](issue-1-verification.md). No remote push, summaries, missed-task intelligence or smart suggestions. |
+| Life Areas and broader product modules | ⏸️ Deferred | None | None | Life Areas UI remains disabled; recurring task schedules, external calendars, AI, projects, habits, and billing are outside the current gate. |
 
 ## Evidence by subsystem
 

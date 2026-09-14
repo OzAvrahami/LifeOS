@@ -9,6 +9,7 @@ import { fileURLToPath, URL } from 'node:url';
 
 import { createClient } from '@supabase/supabase-js';
 import { verifyWeeklyPlanning } from './verify-weekly-planning.mjs';
+import { verifyNotifications, notificationDefaults } from './verify-notifications.mjs';
 
 const repositoryRoot = fileURLToPath(new URL('../../..', import.meta.url));
 const supabaseWorkdir = process.env.LIFEOS_INTEGRATION_SUPABASE_WORKDIR
@@ -217,6 +218,7 @@ async function main() {
     const defaultSettingsA = (await apiRequest('GET', '/settings', tokenA)).settings;
     const defaultSettingsB = (await apiRequest('GET', '/settings', tokenB)).settings;
     assert.deepEqual(defaultSettingsA, {
+      notifications: notificationDefaults,
       dayEndTime: null,
       dayStartTime: null,
       defaultDailyCapacityMinutes: 360,
@@ -268,6 +270,7 @@ async function main() {
       weekStartDay: 1,
     })).settings;
     assert.deepEqual(savedSettingsA, {
+      notifications: notificationDefaults,
       dayEndTime: '01:00',
       dayStartTime: '07:00',
       defaultDailyCapacityMinutes: 480,
@@ -285,6 +288,7 @@ async function main() {
       weekStartDay: 6,
     })).settings;
     assert.deepEqual(oldClientSettingsA, {
+      notifications: notificationDefaults,
       dayEndTime: '01:00',
       dayStartTime: '07:00',
       defaultDailyCapacityMinutes: 600,
@@ -393,6 +397,7 @@ async function main() {
     assert.ok(partialDayWindow.error, 'PostgreSQL unexpectedly accepted a partial Day Window');
     assert.deepEqual((await apiRequest('GET', '/settings', tokenA)).settings, oldClientSettingsA);
     assert.deepEqual((await apiRequest('GET', '/settings', tokenB)).settings, {
+      notifications: notificationDefaults,
       dayEndTime: null,
       dayStartTime: null,
       defaultDailyCapacityMinutes: 300,
@@ -409,6 +414,7 @@ async function main() {
       weekStartDay: 6,
     })).settings;
     assert.deepEqual(clearedDayWindow, {
+      notifications: notificationDefaults,
       dayEndTime: null,
       dayStartTime: null,
       defaultDailyCapacityMinutes: 600,
@@ -763,6 +769,8 @@ async function main() {
       freshTokenA: async () => (await signIn(supabaseUrl, publishableKey, users[0].email, password)).access_token,
     });
     console.log('PASS Weekly Planning lifecycle, atomic saves/retries, completed edits, compatible focus owners, and caller RLS');
+    await verifyNotifications({ apiRequest, tokenA, tokenB, callerA, callerB, anonymous, userA: users[0].id, userB: users[1].id });
+    console.log('PASS notification defaults, settings patch/old-client preservation, exact task reminder lifecycle, validation and caller RLS');
 
     console.log('PASS local stack and real Auth sessions');
     console.log('PASS anonymous table and application RPC privileges are denied');

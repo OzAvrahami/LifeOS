@@ -13,6 +13,8 @@ async function taskRequest<T>(path: string, options: RequestInit) {
 
 function taskQuery(filters: TaskListFilters) {
   const query = new URLSearchParams();
+  if (filters.id) query.set('id', filters.id);
+  if (filters.reminders) query.set('reminders', 'true');
   if (filters.status) query.set('status', filters.status);
   if (filters.plannedDate) query.set('plannedDate', filters.plannedDate);
   if (filters.plannedDateFrom) query.set('plannedDateFrom', filters.plannedDateFrom);

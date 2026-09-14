@@ -3,6 +3,7 @@ export type TaskStatus = 'open' | 'in_progress' | 'completed' | 'cancelled';
 export type TaskPriority = 'normal' | 'important';
 
 export type Task = {
+  reminderAt?: string | null;
   id: string;
   title: string;
   description: string | null;
@@ -24,6 +25,8 @@ export type TaskPlanningInput =
   | { type: 'day'; plannedDate: string };
 
 export type TaskListFilters = {
+  id?: string;
+  reminders?: boolean;
   status?: TaskStatus;
   plannedDate?: string;
   plannedDateFrom?: string;
@@ -33,6 +36,7 @@ export type TaskListFilters = {
 };
 
 export type CreateTaskInput = {
+  reminderAt?: string | null;
   title: string;
   description?: string | null;
   estimatedMinutes?: number | null;

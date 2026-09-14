@@ -7,6 +7,7 @@ export default function SettingsRoute() {
   return (
     <SettingsScreen
       onBack={() => router.back()}
+      onNotifications={() => router.navigate('/settings/notifications' as Href)}
       onDayWindow={() => router.navigate('/settings/day-window' as Href)}
       onTimezone={() => router.navigate('/settings/timezone' as Href)}
       onWeekStart={() => router.navigate('/settings/week-start' as Href)}

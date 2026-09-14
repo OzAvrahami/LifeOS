@@ -150,6 +150,7 @@ function TimeSelectionSurface({ selection }: { selection: TimeSelection }) {
 }
 
 type TimeFieldProps = {
+  webMinuteStep?: 1 | 15;
   accessibilityLabel: string;
   onChange: (value: string | null) => void;
   optional?: boolean;

@@ -54,6 +54,8 @@ class MemoryTaskStore implements TaskStore {
   async list(filters: TaskListFilters & { weekPlanId?: string | null }) {
     return this.database.tasks.filter((task) => {
       if (task.user_id !== this.userId) return false;
+      if (filters.id && task.id !== filters.id) return false;
+      if (filters.reminders && (!task.reminder_at || !['open', 'in_progress'].includes(task.status))) return false;
       if (filters.status ? task.status !== filters.status : task.status === 'cancelled') return false;
       if (filters.plannedDate && task.planned_date !== filters.plannedDate) return false;
       if (filters.plannedDateFrom && (!task.planned_date || task.planned_date < filters.plannedDateFrom)) return false;
@@ -153,6 +155,59 @@ function authenticated(app: ReturnType<typeof createApp>, token = 'token-a') {
     post: (path: string) => request(app).post(path).set('Authorization', `Bearer ${token}`),
   };
 }
+
+describe('Explicit task reminders', () => {
+  it('creates, retrieves, edits and clears exact instants without changing other task fields', async () => {
+    const app = createTaskTestApp(database());
+    const api = authenticated(app);
+    const original = (await api.post('/tasks').send({ title: 'Reminder task', description: 'Keep details', estimatedMinutes: 25,
+      dueDate: '2099-03-10', reminderAt: '2099-03-09T09:17:00+02:00' }).expect(201)).body.task;
+    assert.equal(original.reminderAt, '2099-03-09T07:17:00.000Z');
+    const moved = (await api.patch(`/tasks/${original.id}`).send({ planning: { type: 'day', plannedDate: '2099-03-08' } }).expect(200)).body.task;
+    assert.equal(moved.reminderAt, original.reminderAt);
+    for (const time of ['09:10', '09:25', '09:17']) {
+      const reminderAt = `2099-03-09T${time}:00.000Z`;
+      const updated = (await api.patch(`/tasks/${original.id}`).send({ reminderAt }).expect(200)).body.task;
+      assert.equal(updated.reminderAt, reminderAt);
+      for (const key of ['title', 'description', 'dueDate', 'estimatedMinutes', 'plannedDate', 'id']) assert.equal(updated[key], moved[key]);
+      assert.equal((await api.get(`/tasks?id=${original.id}`).expect(200)).body.tasks[0].reminderAt, reminderAt);
+    }
+    const cleared = (await api.patch(`/tasks/${original.id}`).send({ reminderAt: null }).expect(200)).body.task;
+    assert.equal(cleared.reminderAt, null);
+    assert.equal((await api.get('/tasks?reminders=true').expect(200)).body.tasks.length, 0);
+  });
+
+  it('preserves reminder history on complete/cancel/reopen and isolates detail/reminder queries', async () => {
+    const app = createTaskTestApp(database());
+    const api = authenticated(app);
+    const reminderAt = '2099-03-09T09:17:00.000Z';
+    const task = (await api.post('/tasks').send({ title: 'History', reminderAt }).expect(201)).body.task;
+    for (const status of ['completed', 'open', 'cancelled', 'open']) {
+      assert.equal((await api.patch(`/tasks/${task.id}`).send({ status }).expect(200)).body.task.reminderAt, reminderAt);
+      assert.equal((await api.get('/tasks?reminders=true').expect(200)).body.tasks.length, status === 'open' ? 1 : 0);
+    }
+    assert.deepEqual((await authenticated(app, 'token-b').get(`/tasks?id=${task.id}`).expect(200)).body.tasks, []);
+    assert.deepEqual((await authenticated(app, 'token-b').get('/tasks?reminders=true').expect(200)).body.tasks, []);
+    await authenticated(app, 'token-b').patch(`/tasks/${task.id}`).send({ reminderAt: null }).expect(404);
+  });
+
+  it('keeps old clients compatible and validates only explicitly assigned reminders', async () => {
+    const rows = database();
+    const app = createTaskTestApp(rows);
+    const api = authenticated(app);
+    const task = (await api.post('/tasks').send({ title: 'Old client' }).expect(201)).body.task;
+    assert.equal(task.reminderAt, null);
+    for (const reminderAt of ['2000-01-01T09:17:00Z', '2099-01-01', '2099-01-01T09:17:00', '2099-02-30T09:17:00Z', '2099-01-01T24:00:00Z', 'infinity', 17]) {
+      await api.post('/tasks').send({ title: 'Invalid', reminderAt }).expect(400);
+      await api.patch(`/tasks/${task.id}`).send({ reminderAt }).expect(400);
+    }
+    rows.tasks[0]!.reminder_at = '2000-01-01T09:17:00Z';
+    assert.equal((await api.patch(`/tasks/${task.id}`).send({ title: 'Still editable' }).expect(200)).body.task.reminderAt, rows.tasks[0]!.reminder_at);
+    await api.get('/tasks?reminders=false').expect(400);
+    await api.get('/tasks?id=invalid').expect(400);
+    await request(app).get('/tasks?reminders=true').expect(401);
+  });
+});
 
 describe('Task API', () => {
   it('requires authentication for every Task route', async () => {

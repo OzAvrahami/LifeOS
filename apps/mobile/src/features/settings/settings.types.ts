@@ -2,6 +2,7 @@ export const DEFAULT_DAILY_CAPACITY_MINUTES = 360;
 export const DEFAULT_WEEK_START_DAY = 0;
 
 export type UserSettings = {
+  notifications?: import('@/features/notifications/notification.types').NotificationPreferences;
   dayEndTime?: string | null;
   dayStartTime?: string | null;
   dayWindowSupported?: boolean;

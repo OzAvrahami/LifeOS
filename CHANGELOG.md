@@ -6,6 +6,12 @@ LifeOS follows Semantic Versioning for development and release tags.
 
 ## [Unreleased]
 
+### Added
+
+- Notifications MVP (#1): contextual iOS permission management, account-scoped master/task/weekly Settings, explicit exact-minute Task reminders, and one local wall-clock Weekly Planning reminder. Reminder intent persists independently of planned/due dates; device reconciliation handles changes, completion, clearing, retries and account switching without accumulating duplicates.
+- Notification taps reuse Task details or Week. Quick Capture stays lightweight. Summaries, missed-task intelligence, smart suggestions and remote push remain deferred. Forward migration `20260914120000` passed disposable local API/PostgreSQL/RLS checks; remote rollout and physical-iPhone acceptance remain pending.
+- Tracked candidate metadata prepared for **LifeOS 0.4.0 (5)**; production Expo config and iOS JavaScript export passed. Not installed, accepted or published. Native preparation on the existing Mac iOS project remains pending. See [Issue #1 verification](docs/issue-1-verification.md).
+
 ## [0.3.0] — 2026-09-13
 
 Installed internal build **0.3.0 / iOS build 4** is **owner-accepted on 2026-09-13** for combined #3/#4 physical-iPhone verification. Both issues are Closed / Completed / Done. This is owner-reported acceptance, separate from previous automated verification. [LifeOS v0.3.0 — Weekly planning and week navigation](https://github.com/OzAvrahami/LifeOS/releases/tag/v0.3.0) was published **2026-09-13T19:24:14Z**, non-draft, non-prerelease and **Latest**, superseding v0.2.1. Its annotated tag resolves to `cefd84a6d8e21c631bc666d49d20ac91ccce2657`. Internal iPhone build remains **0.3.0 (4)**; no App Store/TestFlight publication occurred. See [acceptance and preparation evidence](docs/release-0.3.0-verification.md).

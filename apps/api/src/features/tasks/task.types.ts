@@ -12,6 +12,7 @@ export type TaskRow = {
   estimated_minutes: number | null;
   priority: TaskPriority;
   due_date: string | null;
+  reminder_at?: string | null;
   planned_date: string | null;
   week_plan_id: string | null;
   position: number;
@@ -28,6 +29,7 @@ export type Task = {
   estimatedMinutes: number | null;
   priority: TaskPriority;
   dueDate: string | null;
+  reminderAt?: string | null;
   plannedDate: string | null;
   weekPlanId: string | null;
   position: number;
@@ -42,6 +44,7 @@ export type TaskPlanningInput =
   | { type: 'day'; plannedDate: string };
 
 export type CreateTaskInput = {
+  reminderAt?: string | null;
   title: string;
   description?: string | null;
   estimatedMinutes?: number | null;
@@ -52,6 +55,7 @@ export type CreateTaskInput = {
 };
 
 export type UpdateTaskInput = {
+  reminderAt?: string | null;
   title?: string;
   description?: string | null;
   estimatedMinutes?: number | null;
@@ -63,6 +67,8 @@ export type UpdateTaskInput = {
 };
 
 export type TaskListFilters = {
+  id?: string;
+  reminders?: boolean;
   status?: TaskStatus;
   plannedDate?: string;
   plannedDateFrom?: string;

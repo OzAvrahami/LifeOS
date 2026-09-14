@@ -18,6 +18,7 @@ function mapTask(row: TaskRow): Task {
     createdAt: row.created_at,
     description: row.description,
     dueDate: row.due_date,
+    reminderAt: row.reminder_at ?? null,
     estimatedMinutes: row.estimated_minutes,
     id: row.id,
     plannedDate: row.planned_date,
@@ -72,7 +73,21 @@ export class SupabaseTaskStore implements TaskStore {
   }
 
   async list(filters: TaskListFilters & { weekPlanId?: string | null }) {
+    if (filters.reminders) {
+      // A complete snapshot is necessary before cancelling local schedules.
+      // Page beyond PostgREST's row limit, with a deterministic unique order.
+      const rows: TaskRow[] = [];
+      for (let offset = 0; ; offset += 500) {
+        const { data, error } = await this.client.from('tasks').select('*')
+          .eq('user_id', this.userId).not('reminder_at', 'is', null)
+          .in('status', ['open', 'in_progress']).order('id').range(offset, offset + 499);
+        if (error) dataError(error);
+        rows.push(...(data ?? []) as TaskRow[]);
+        if (!data || data.length < 500) return rows;
+      }
+    }
     let query = this.client.from('tasks').select('*').eq('user_id', this.userId);
+    if (filters.id) query = query.eq('id', filters.id);
     if (filters.status) query = query.eq('status', filters.status);
     else query = query.neq('status', 'cancelled');
     if (filters.plannedDate) query = query.eq('planned_date', filters.plannedDate);
@@ -156,6 +171,7 @@ export class TaskService implements TaskServiceContract {
     if (input.estimatedMinutes !== undefined) values.estimated_minutes = input.estimatedMinutes;
     if (input.priority !== undefined) values.priority = input.priority;
     if (input.dueDate !== undefined) values.due_date = input.dueDate;
+    if (input.reminderAt !== undefined) values.reminder_at = input.reminderAt;
     if (input.position !== undefined) values.position = input.position;
     return mapTask(await this.store.create(values));
   }
@@ -169,6 +185,7 @@ export class TaskService implements TaskServiceContract {
     if (input.estimatedMinutes !== undefined) values.estimated_minutes = input.estimatedMinutes;
     if (input.priority !== undefined) values.priority = input.priority;
     if (input.dueDate !== undefined) values.due_date = input.dueDate;
+    if (input.reminderAt !== undefined) values.reminder_at = input.reminderAt;
     if (input.position !== undefined) values.position = input.position;
     if (input.planning) {
       Object.assign(values, await planningValues(this.store, input.planning));

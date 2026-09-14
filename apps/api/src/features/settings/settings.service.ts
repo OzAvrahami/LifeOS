@@ -9,9 +9,11 @@ import {
   type UserSettingsRow,
 } from './settings.types.js';
 import { SettingsApiError } from './settings.validation.js';
+import { defaultNotificationPreferences, type NotificationPreferences } from './notification-preferences.js';
 
 function defaults(): UserSettings {
   return {
+    notifications: { ...defaultNotificationPreferences },
     dayEndTime: null,
     dayStartTime: null,
     defaultDailyCapacityMinutes: DEFAULT_DAILY_CAPACITY_MINUTES,
@@ -23,6 +25,13 @@ function defaults(): UserSettings {
 
 function mapSettings(row: UserSettingsRow): UserSettings {
   return {
+    notifications: {
+      enabled: row.notifications_enabled ?? false,
+      taskRemindersEnabled: row.task_reminders_enabled ?? false,
+      weeklyPlanningEnabled: row.weekly_planning_reminder_enabled ?? false,
+      weeklyPlanningWeekday: row.weekly_planning_reminder_weekday ?? null,
+      weeklyPlanningTime: clockTime(row.weekly_planning_reminder_time),
+    },
     dayEndTime: clockTime(row.day_end_time),
     dayStartTime: clockTime(row.day_start_time),
     defaultDailyCapacityMinutes: row.default_daily_capacity_minutes,
@@ -77,6 +86,24 @@ export class SupabaseSettingsService implements SettingsServiceContract {
       }, { onConflict: 'user_id' })
       .select('*')
       .single();
+    if (error) dataError(error);
+    return mapSettings(data as UserSettingsRow);
+  }
+
+  async patchNotifications(prefs: NotificationPreferences, initialTimezone: string) {
+    // Create defaults only if absent. A notification save never overwrites an
+    // existing timezone, Day Window, capacity or configured week start.
+    const created = await this.client.from('user_settings').upsert(
+      { user_id: this.userId, timezone: initialTimezone }, { onConflict: 'user_id', ignoreDuplicates: true },
+    );
+    if (created.error) dataError(created.error);
+    const { data, error } = await this.client.from('user_settings').update({
+      notifications_enabled: prefs.enabled,
+      task_reminders_enabled: prefs.taskRemindersEnabled,
+      weekly_planning_reminder_enabled: prefs.weeklyPlanningEnabled,
+      weekly_planning_reminder_weekday: prefs.weeklyPlanningWeekday,
+      weekly_planning_reminder_time: prefs.weeklyPlanningTime,
+    }).eq('user_id', this.userId).select('*').single();
     if (error) dataError(error);
     return mapSettings(data as UserSettingsRow);
   }

@@ -1,6 +1,6 @@
 {
   "name": "@lifeos/mobile",
-  "version": "0.3.0",
+  "version": "0.4.0",
   "private": true,
   "main": "expo-router/entry",
   "scripts": {
@@ -25,6 +25,7 @@
     "expo-dev-client": "~57.0.13",
     "expo-font": "~57.0.1",
     "expo-linking": "~57.0.6",
+    "expo-notifications": "57.0.12",
     "expo-router": "~57.0.14",
     "expo-splash-screen": "~57.0.7",
     "expo-status-bar": "~57.0.1",
