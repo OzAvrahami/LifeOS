@@ -2,11 +2,17 @@
 
 ## Notifications candidate — Issue #1, 2026-09-22
 
-Active candidate: **LifeOS 0.4.0 (6)**, owner acceptance pending, unpublished. Build **0.4.0 (5)** successfully built/installed on the owner's iPhone 17 Pro Max but failed native launch under Xcode 27/iOS 27 (scene creation / SIGTRAP). It was never accepted. Build 6 preserves the existing local Notifications MVP and corrects native lifecycle compatibility; it is not another feature or semantic-version increase.
+Active candidate: **LifeOS 0.4.0 (7)**, unpublished, not installed or owner-accepted. Build 5 installed but failed native scene startup and was never accepted. Build 6 installed/launched successfully with UIScene support; it was superseded during acceptance after Task reminder discoverability and missing Commitment reminders were identified, **not a failed build**.
 
-The earlier Windows preparation's unavailable-native/rollout gates are historical. This Mac now has verified scene support, native 0.4.0 / 6, preserved signing and synchronized Pods. The signed Xcode 27 Release compiled and installed successfully; device metadata confirms 0.4.0 (6), and the launched process survived at least 63 seconds. Owner visual/notification acceptance is still pending. Read-only remote migration history includes `20260914120000_add_notification_intent.sql`; GitHub reports successful API deployment status for `aba01ce`, and live `/health` returns `service: lifeos-api`, `status: ok`. These checks do not establish production writes, direct Railway active deployment inspection or notification acceptance. No migration/deployment was performed during this correction.
+Build 7 adds shared Task Details entry points and relative Commitment reminders/settings. New forward migration [`20260922120000_add_commitment_reminders.sql`](../supabase/migrations/20260922120000_add_commitment_reminders.sql) follows `20260914120000`: nullable commitment lead 0–1440; category default false and default lead 15 on user settings. Existing IDs, null reminders, RLS and old-client settings are preserved. All 13 disposable local PostgreSQL/Auth/RLS verification groups pass; **no remote application has occurred for the new migration**.
 
-### Xcode 27 scene support on the existing native project
+**Required rollout:** local owner Git checkpoint → `npx supabase migration list --linked` → inspect every pending migration and `npx supabase db push --linked --dry-run` → separately authorized `npx supabase db push --linked` → verify remote history → API push/deployment success → authorized build/install 0.4.0 (7) → physical owner acceptance. These commands are later owner-controlled steps, not operations performed by this preparation. Hold deployment-triggering push until the schema exists. Older build-6 remote history/API health evidence does not establish readiness for this new schema.
+
+Native plist and Debug/Release settings now read **0.4.0 / 7**. Only build metadata changed; Expo scene lifecycle, signing, entitlements and Pods are preserved. A metadata backup was made outside the repository; no regeneration/pod installation was needed. Signed Xcode 27 Release compilation succeeded, but the artifact was not installed/launched. See [current results and device checklist](issue-1-verification.md).
+
+### Historical build-6 scene reconciliation procedure
+
+The following dependency/native reconciliation was performed for build 6; do not repeat it for build 7's metadata-only native change.
 
 [Expo's SDK 57 remediation](https://github.com/expo/expo/issues/46664) requires Expo >=57.0.23, build-properties >=57.0.20, and `ios.enableSceneSupport: true`. This checkout pins those minimums, retains React Native 0.86.2 / Notifications 57.0.12, and uses the normal internal Release path. The online dependency checker still recommends newer patches; see [the exact advisory and native verification](issue-1-verification.md#xcode-27-launch-correction--2026-09-22).
 
@@ -116,7 +122,7 @@ This Mac already has ignored `apps/mobile/ios` files. The installed Expo CLI onl
 - `ios/LifeOS/Info.plist`: `CFBundleShortVersionString = 0.2.1`, `CFBundleVersion = 3`.
 - `ios/LifeOS.xcodeproj/project.pbxproj`: Debug/Release `MARKETING_VERSION = 0.2.1`, `CURRENT_PROJECT_VERSION = 3`.
 
-Signing, team, bundle identifier, icons, entitlements, and other settings were preserved. These generated native files remain ignored; do not force-add them. Those values describe the historical 0.2.1 preparation. The current candidate has since synchronized the same fields to **0.4.0 / 6**. Recheck the actual native project before every build; historical synchronization is not a permanent guarantee. Its existing Expo Constants Pod phase regenerates bundled `app.config` on each build from the mobile project root.
+Signing, team, bundle identifier, icons, entitlements, and other settings were preserved. These generated native files remain ignored; do not force-add them. Those values describe the historical 0.2.1 preparation. The current candidate has since synchronized the same fields to **0.4.0 / 7**. Recheck the actual native project before every build; historical synchronization is not a permanent guarantee. Its existing Expo Constants Pod phase regenerates bundled `app.config` on each build from the mobile project root.
 
 On another existing native checkout, or after changing the app version again, run this targeted synchronization from `apps/mobile` before building. It validates both file shapes before writing and changes only version fields; it does not regenerate native directories or install Pods:
 
@@ -240,4 +246,4 @@ For a target environment that has not received this change, the required rollout
 
 Do not reverse steps 1 and 2. A local Expo Web refresh only loads local frontend code; it does not deploy the local API to Railway or apply the Supabase migration. Until the Railway API response includes both Day Window fields, the updated client shows a non-destructive “server update required” state and does not claim an account save.
 
-Day Window itself adds no native dependency. Under the existing standalone Release delivery path, its JavaScript changes still require building/installing a new app after the database/API prerequisites are live. The historical v0.2.0 and v0.2.1 preparations changed native metadata; the current 0.4.0/build 6 candidate advances it as described above.
+Day Window itself adds no native dependency. Under the existing standalone Release delivery path, its JavaScript changes still require building/installing a new app after the database/API prerequisites are live. The historical v0.2.0 and v0.2.1 preparations changed native metadata; the current 0.4.0/build 7 candidate advances it as described above.

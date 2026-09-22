@@ -17,6 +17,7 @@ export type CommitmentRow = {
   title: string;
   description: string | null;
   date: string;
+  reminder_minutes_before?: number | null;
   start_time: string;
   end_time: string | null;
   life_area: CommitmentLifeArea | null;
@@ -25,6 +26,7 @@ export type CommitmentRow = {
 };
 
 export type Commitment = {
+  reminderMinutesBefore: number | null;
   id: string;
   title: string;
   description: string | null;
@@ -37,12 +39,15 @@ export type Commitment = {
 };
 
 export type CommitmentListFilters = {
+  id?: string;
+  reminders?: boolean;
   date?: string;
   dateFrom?: string;
   dateTo?: string;
 };
 
 export type CreateCommitmentInput = {
+  reminderMinutesBefore?: number | null;
   title: string;
   description: string | null;
   date: string;

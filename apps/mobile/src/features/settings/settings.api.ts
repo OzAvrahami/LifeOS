@@ -1,7 +1,7 @@
 import { apiRequest } from '@/lib/api/client';
 
 import type { PutUserSettingsInput, UserSettings } from './settings.types';
-import type { NotificationPreferences } from '@/features/notifications/notification.types';
+import { defaultNotificationPreferences, type NotificationPreferences } from '@/features/notifications/notification.types';
 
 export async function patchNotificationPreferences(notifications: NotificationPreferences, timezone: string) {
   const response = await apiRequest<{ settings: unknown }>('/settings', { auth: 'required',
@@ -31,7 +31,7 @@ export function normalizeSettings(value: unknown): UserSettings {
   const dayWindowSupported = Object.prototype.hasOwnProperty.call(settings, 'dayStartTime')
     && Object.prototype.hasOwnProperty.call(settings, 'dayEndTime');
   return {
-    ...(settings.notifications ? { notifications: settings.notifications } : {}),
+    ...(settings.notifications ? { notifications: { ...defaultNotificationPreferences, ...settings.notifications } } : {}),
     dayEndTime: dayWindowSupported && typeof settings.dayEndTime === 'string'
       ? settings.dayEndTime.slice(0, 5)
       : null,

@@ -1,3 +1,4 @@
+import type { Commitment } from '@/features/commitments/commitment.types';
 import { useQueryClient } from '@tanstack/react-query';
 import type { NotificationResponse } from 'expo-notifications';
 import { useRootNavigationState, useRouter, type Href } from 'expo-router';
@@ -35,13 +36,15 @@ export function NotificationProvider({ children }: PropsWithChildren) {
         // Capture this session's token, never fetch another account's snapshot
         // through a token getter that can change while a request is in flight.
         const request = createApiClient({ baseUrl: process.env.EXPO_PUBLIC_API_URL, getAccessToken: async () => session?.access_token ?? null });
-        const [settingsResponse, tasksResponse] = await Promise.all([
+        const [settingsResponse, tasksResponse, commitmentsResponse] = await Promise.all([
           request<{ settings: unknown }>('/settings', { auth: 'required' }),
           request<{ tasks: Task[] }>('/tasks?reminders=true', { auth: 'required' }),
+          request<{ commitments: Commitment[] }>('/commitments?reminders=true', { auth: 'required' }),
         ]);
+        if (!Array.isArray(tasksResponse.tasks) || !Array.isArray(commitmentsResponse.commitments)) throw new Error('Incomplete notification snapshot');
         const settings = normalizeSettings(settingsResponse.settings);
         if (!settings.notifications) throw new Error('Notification storage is not available');
-        return { preferences: settings.notifications, tasks: tasksResponse.tasks };
+        return { preferences: settings.notifications, tasks: tasksResponse.tasks, commitments: commitmentsResponse.commitments };
       }).then(async next => {
       if (scope !== activeUser.current || !next) return;
       const currentPermission = await getNotificationPermission();
@@ -62,7 +65,7 @@ export function NotificationProvider({ children }: PropsWithChildren) {
     let queued = false;
     const unsubscribe = queryClient.getQueryCache().subscribe(event => {
       const key = event.query.queryKey;
-      if (event.type !== 'updated' || event.action.type !== 'success' || key[1] !== userId || !['tasks', 'settings'].includes(String(key[0])) || queued) return;
+      if (event.type !== 'updated' || event.action.type !== 'success' || key[1] !== userId || !['tasks', 'settings', 'commitments'].includes(String(key[0])) || queued) return;
       queued = true;
       // Coalesce synchronous cache updates from one persisted mutation.
       void Promise.resolve().then(() => { queued = false; if (!disposed) void reconcile(); });

@@ -5,6 +5,8 @@ export const DEFAULT_DAILY_CAPACITY_MINUTES = 360;
 export const DEFAULT_WEEK_START_DAY = 0;
 
 export type UserSettingsRow = {
+  commitment_reminders_enabled?: boolean;
+  commitment_default_reminder_minutes?: number;
   notifications_enabled?: boolean;
   task_reminders_enabled?: boolean;
   weekly_planning_reminder_enabled?: boolean;

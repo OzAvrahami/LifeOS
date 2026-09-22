@@ -86,7 +86,7 @@ it.each([false, true])('preserves Web text/date/time focus, multiline editing an
     expect(dismiss).not.toHaveBeenCalled();
     await act(() => document.querySelector<HTMLElement>('[aria-label="שמירת התחייבות"]')!.click());
     expect(save).toHaveBeenCalledTimes(1);
-    expect(save).toHaveBeenCalledWith({ title: 'פגישה חדשה', description: 'שורה ראשונה\nשורה שנייה', date: existing.date, startTime: '09:17', endTime: null, lifeArea: 'health' });
+    expect(save).toHaveBeenCalledWith({ reminderMinutesBefore: null, title: 'פגישה חדשה', description: 'שורה ראשונה\nשורה שנייה', date: existing.date, startTime: '09:17', endTime: null, lifeArea: 'health' });
     expect(close).toHaveBeenCalledTimes(1);
     expect(dismiss).not.toHaveBeenCalled();
   } finally {

@@ -1,3 +1,5 @@
+import { ReminderLeadPicker } from './reminder-lead-picker';
+import { validReminderLead } from './commitment-reminder-time';
 import { useQueryClient } from '@tanstack/react-query';
 import { useRef, useState } from 'react';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
@@ -32,7 +34,8 @@ function NotificationSettingsForm({ initial, timezone }: { initial: Notification
   const client = useQueryClient();
   const userId = useTaskQueryScope();
   const notifications = useNotifications();
-  const invalid = prefs.weeklyPlanningEnabled && (prefs.weeklyPlanningWeekday === null || !prefs.weeklyPlanningTime);
+  const invalidWeekly = prefs.weeklyPlanningEnabled && (prefs.weeklyPlanningWeekday === null || !prefs.weeklyPlanningTime);
+  const invalid = invalidWeekly || !validReminderLead(prefs.commitmentDefaultReminderMinutes);
   const labels = { not_requested: 'טרם התבקשה הרשאה', allowed: 'מותר', denied: 'חסום בהגדרות המכשיר', unavailable: 'קבלת התראות מקומיות זמינה ב־iPhone' };
   const save = async () => {
     if (busy.current || invalid) return;
@@ -56,14 +59,20 @@ function NotificationSettingsForm({ initial, timezone }: { initial: Notification
     <SettingsCard>
       <Toggle label="התראות LifeOS" value={prefs.enabled} disabled={saving} onChange={value => setPrefs(p => ({ ...p, enabled: value }))} />
       <Toggle label="תזכורות למשימות" value={prefs.taskRemindersEnabled} disabled={saving} onChange={value => setPrefs(p => ({ ...p, taskRemindersEnabled: value }))} />
+      <Toggle label="תזכורות להתחייבויות" value={prefs.commitmentRemindersEnabled} disabled={saving} onChange={value => setPrefs(p => ({ ...p, commitmentRemindersEnabled: value }))} />
       <Toggle label="תזכורת לתכנון השבוע" value={prefs.weeklyPlanningEnabled} disabled={saving} onChange={value => setPrefs(p => ({ ...p, weeklyPlanningEnabled: value }))} />
     </SettingsCard>
+    {prefs.commitmentRemindersEnabled || !validReminderLead(prefs.commitmentDefaultReminderMinutes) ? <View>
+      <Text style={styles.text}>תזכורת ברירת מחדל להתחייבויות חדשות</Text>
+      <ReminderLeadPicker allowNone={false} disabled={saving} value={prefs.commitmentDefaultReminderMinutes} onChange={value => setPrefs(p => ({ ...p, commitmentDefaultReminderMinutes: value ?? 15 }))} />
+      <Text style={styles.text}>הבחירה אינה משנה התחייבויות קיימות. אפשר לבחור תזכורת אחרת בכל התחייבות.</Text>
+    </View> : null}
     {prefs.weeklyPlanningEnabled ? <View>
       <Text style={styles.text}>יום ושעה לפי השעון המקומי במכשיר</Text>
       {weekdayLabels.map((label, day) => <RadioOption key={day} label={label} selected={prefs.weeklyPlanningWeekday === day} onPress={() => { if (!saving) setPrefs(p => ({ ...p, weeklyPlanningWeekday: day })); }} />)}
       <CommitmentTimeField webMinuteStep={1} accessibilityLabel="שעת תכנון השבוע" placeholder="בחירת שעה" value={prefs.weeklyPlanningTime} onChange={value => { if (!saving) setPrefs(p => ({ ...p, weeklyPlanningTime: value })); }} />
     </View> : null}
-    {invalid ? <Text accessibilityRole="alert" style={styles.text}>צריך לבחור יום ושעה לתזכורת השבועית.</Text> : null}
+    {invalidWeekly ? <Text accessibilityRole="alert" style={styles.text}>צריך לבחור יום ושעה לתזכורת השבועית.</Text> : null}
     {error ? <Text accessibilityRole="alert" style={styles.text}>לא הצלחנו לשמור את ההגדרות. אפשר לנסות שוב.</Text> : null}
     {notifications.error ? <Text accessibilityRole="alert" style={styles.text}>סנכרון ההתראות במכשיר טרם הושלם. ההגדרות בחשבון נשמרות; אפשר לנסות שוב.</Text> : null}
     {Boolean(notifications.result?.deferred) ? <Text style={styles.text}>מגבלת ההתראות במכשיר מאפשרת כעת רק את התזכורות הקרובות. יתר התזכורות ייבדקו בפתיחה הבאה.</Text> : null}

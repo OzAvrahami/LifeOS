@@ -6,12 +6,12 @@ import { TaskDateSelection } from '@/features/tasks/task-date-selection';
 import type { Task, UpdateTaskInput } from '@/features/tasks/task.types';
 import { colors, spacing, typography } from '@/theme/tokens';
 
-import { DayAction, taskEstimateLabel } from './week-day-view';
+import { DayAction, taskEstimateLabel } from '@/features/week/week-day-view';
 import { TaskReminderEditor } from '@/features/notifications/task-reminder-editor';
 import { localDateKey } from '@/features/tasks/task-dates';
 
 // A focused entry to existing title/date/lifecycle operations, not a new description editor.
-export function WeekTaskDetails({ task, onClose, onUpdate, onDelete, backLabel = 'חזרה ליום' }: {
+export function TaskDetails({ task, onClose, onUpdate, onDelete, backLabel = 'חזרה ליום' }: {
   backLabel?: string;
   task: Task; onClose: () => void;
   onUpdate: (input: UpdateTaskInput) => Promise<void>;

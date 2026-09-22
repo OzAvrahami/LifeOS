@@ -1,3 +1,4 @@
+import { TaskDetailsButton } from '@/features/tasks/task-details-button';
 import { Ionicons } from '@expo/vector-icons';
 import { useState } from 'react';
 import { Keyboard, Platform, Pressable, StyleSheet, Text, View } from 'react-native';
@@ -132,12 +133,14 @@ export function WeekDayRow({ children, day, expanded = false, onAddCommitment }:
 }
 
 export function UnscheduledWeekTasks({
+  onDetails,
   defaultDate,
   onSchedule,
   onMoveToToday,
   tasks,
 }: {
   defaultDate: string;
+  onDetails?: (id: string) => void;
   onSchedule: (taskId: string, date: string) => Promise<void> | void;
   onMoveToToday?: (taskId: string) => void;
   tasks: UnscheduledWeekTask[];
@@ -188,6 +191,7 @@ export function UnscheduledWeekTasks({
               </Pressable>
             )}
           </View>
+          <TaskDetailsButton task={task} onOpen={onDetails} />
           {choosingTaskId === task.id ? <TaskDateSelection key={task.id} defaultDate={defaultDate} onPendingChange={setPending}
             onCancel={() => setChoosingTaskId(null)}
             onConfirm={async (date) => { await onSchedule(task.id, date); setChoosingTaskId(null); }} /> : null}

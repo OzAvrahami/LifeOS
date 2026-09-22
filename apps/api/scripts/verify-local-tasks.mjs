@@ -9,6 +9,7 @@ import { fileURLToPath, URL } from 'node:url';
 
 import { createClient } from '@supabase/supabase-js';
 import { verifyWeeklyPlanning } from './verify-weekly-planning.mjs';
+import { verifyCommitmentReminders } from './verify-commitment-reminders.mjs';
 import { verifyNotifications, notificationDefaults } from './verify-notifications.mjs';
 
 const repositoryRoot = fileURLToPath(new URL('../../..', import.meta.url));
@@ -771,6 +772,8 @@ async function main() {
     console.log('PASS Weekly Planning lifecycle, atomic saves/retries, completed edits, compatible focus owners, and caller RLS');
     await verifyNotifications({ apiRequest, tokenA, tokenB, callerA, callerB, anonymous, userA: users[0].id, userB: users[1].id });
     console.log('PASS notification defaults, settings patch/old-client preservation, exact task reminder lifecycle, validation and caller RLS');
+    await verifyCommitmentReminders({ apiRequest, tokenA, tokenB, callerA, callerB, anonymous, userA: users[0].id, userB: users[1].id });
+    console.log('PASS commitment relative reminders, defaults/old-client preservation, 1001-row pagination, constraints and caller/anonymous RLS');
 
     console.log('PASS local stack and real Auth sessions');
     console.log('PASS anonymous table and application RPC privileges are denied');

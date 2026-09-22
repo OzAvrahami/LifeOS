@@ -13,6 +13,8 @@ async function commitmentRequest<T>(path: string, options: RequestInit = {}) {
 
 function queryString(filters: CommitmentListFilters) {
   const parameters = new URLSearchParams();
+  if (filters.id) parameters.set('id', filters.id);
+  if (filters.reminders) parameters.set('reminders', 'true');
   if (filters.date) parameters.set('date', filters.date);
   if (filters.dateFrom) parameters.set('dateFrom', filters.dateFrom);
   if (filters.dateTo) parameters.set('dateTo', filters.dateTo);

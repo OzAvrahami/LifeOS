@@ -1,5 +1,6 @@
+import { TaskDetailScreen } from '@/features/tasks/task-detail-screen';
 import { useState } from 'react';
-import { ScrollView, StyleSheet, View } from 'react-native';
+import { Modal, ScrollView, StyleSheet, View } from 'react-native';
 
 import { MobileShell } from '@/components/mobile-shell';
 import { QuickCaptureSheet } from '@/features/capture/quick-capture-sheet';
@@ -72,6 +73,7 @@ export function InboxScreen({
   const [fixtureTotalCount, setFixtureTotalCount] = useState(
     initialState === 'busy' ? 23 : fixtureItems.length,
   );
+  const [detailsTaskId, setDetailsTaskId] = useState<string | null>(null);
   const [selectedTask, setSelectedTask] = useState<InboxTask | null>(null);
   const [resolvedTaskId, setResolvedTaskId] = useState<string | null>(null);
   const [confirmation, setConfirmation] = useState<string | null>(null);
@@ -321,13 +323,15 @@ export function InboxScreen({
           </ScrollView>
         </View>
       </MobileShell>
+      {serverTasks && detailsTaskId ? <Modal visible animationType="slide" onRequestClose={() => setDetailsTaskId(null)}><TaskDetailScreen id={detailsTaskId} onBack={() => setDetailsTaskId(null)} /></Modal> : null}
       <QuickCaptureSheet defaultDate={defaultDate}
         onClose={() => setCaptureOpen(false)}
         onSave={captureTask}
         visible={captureOpen}
       />
       {selectedTask ? (
-          <InboxItemActionSheet defaultDate={defaultDate}
+          <InboxItemActionSheet
+          onDetails={serverTasks ? () => { setDetailsTaskId(selectedTask.id); setSelectedTask(null); } : undefined} defaultDate={defaultDate}
             reminderAt={inboxQuery.data?.find(task => task.id === selectedTask.id)?.reminderAt}
             onReminder={serverTasks ? async reminderAt => { await updateMutation.mutateAsync({ id: selectedTask.id, input: { reminderAt } }); } : undefined}
           key={selectedTask.id}

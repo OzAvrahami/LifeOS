@@ -37,7 +37,9 @@ export function InboxItemActionSheet({
   task,
   reminderAt,
   onReminder,
+  onDetails,
 }: {
+  onDetails?: () => void;
   reminderAt?: string | null;
   onReminder?: (value: string | null) => Promise<void>;
   defaultDate: string;
@@ -95,6 +97,8 @@ export function InboxItemActionSheet({
           <ScrollView keyboardShouldPersistTaps="handled">
             <View style={styles.handle} />
             {error ? <Text accessibilityRole="alert" style={styles.error}>לא הצלחנו לעדכן. אפשר לנסות שוב.</Text> : null}
+            {onDetails && mode === 'actions' ? <Pressable accessibilityRole="button" onPress={onDetails} style={styles.secondaryButton}><Text style={styles.secondaryText}>פרטי משימה</Text></Pressable> : null}
+            {reminderAt && mode === 'actions' ? <Text style={styles.secondaryText}>תזכורת: {new Date(reminderAt).toLocaleString('he-IL', { hour12: false })}</Text> : null}
             {onReminder && mode === 'actions' ? <Pressable accessibilityRole="button" onPress={() => setMode('reminder')} style={styles.secondaryButton}><Text style={styles.secondaryText}>הזכר לי</Text></Pressable> : null}
             {mode === 'actions' ? (
               <ActionChoices

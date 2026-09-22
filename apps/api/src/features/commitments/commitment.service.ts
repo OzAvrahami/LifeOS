@@ -16,6 +16,7 @@ function normalizedTime(value: string) {
 
 function mapCommitment(row: CommitmentRow): Commitment {
   return {
+    reminderMinutesBefore: row.reminder_minutes_before ?? null,
     createdAt: row.created_at,
     date: row.date,
     description: row.description,
@@ -37,6 +38,7 @@ function dataError(error: PostgrestError): never {
 
 function databaseValues(input: UpdateCommitmentInput) {
   return {
+    ...('reminderMinutesBefore' in input ? { reminder_minutes_before: input.reminderMinutesBefore } : {}),
     ...('date' in input ? { date: input.date } : {}),
     ...('description' in input ? { description: input.description } : {}),
     ...('endTime' in input ? { end_time: input.endTime } : {}),
@@ -53,16 +55,23 @@ export class SupabaseCommitmentService implements CommitmentServiceContract {
   ) {}
 
   async list(filters: CommitmentListFilters) {
-    let query = this.client
-      .from('commitments')
-      .select('*')
-      .eq('user_id', this.userId);
-    if (filters.date) query = query.eq('date', filters.date);
-    if (filters.dateFrom) query = query.gte('date', filters.dateFrom);
-    if (filters.dateTo) query = query.lte('date', filters.dateTo);
-    const { data, error } = await query.order('date').order('start_time');
-    if (error) dataError(error);
-    return ((data ?? []) as CommitmentRow[]).map(mapCommitment);
+    const rows: CommitmentRow[] = [];
+    // Explicit ranges avoid the PostgREST 1,000-row cap. Stable ID tie-breaker
+    // prevents equal date/time records from changing page membership.
+    const pageSize = 500;
+    for (let offset = 0; ; offset += pageSize) {
+      let query = this.client.from('commitments').select('*').eq('user_id', this.userId);
+      if (filters.id) query = query.eq('id', filters.id);
+      if (filters.reminders) query = query.not('reminder_minutes_before', 'is', null);
+      if (filters.date) query = query.eq('date', filters.date);
+      if (filters.dateFrom) query = query.gte('date', filters.dateFrom);
+      if (filters.dateTo) query = query.lte('date', filters.dateTo);
+      const { data, error } = await query.order('date').order('start_time').order('id').range(offset, offset + pageSize - 1);
+      if (error) dataError(error);
+      const page = (data ?? []) as CommitmentRow[];
+      rows.push(...page);
+      if (page.length < pageSize) return rows.map(mapCommitment);
+    }
   }
 
   async create(input: CreateCommitmentInput) {

@@ -28,7 +28,7 @@ const settings = { persisted: true, timezone: 'Asia/Jerusalem', weekStartDay: 0,
 beforeEach(() => {
   jest.clearAllMocks();
   jest.mocked(useAuth).mockReturnValue({ session, isLoading: false, isRecovery: false } as ReturnType<typeof useAuth>);
-  jest.mocked(createApiClient).mockReturnValue(jest.fn(async path => path === '/settings' ? { settings } : { tasks: [] }) as ReturnType<typeof createApiClient>);
+  jest.mocked(createApiClient).mockReturnValue(jest.fn(async path => path === '/settings' ? { settings } : path.startsWith('/commitments') ? { commitments: [] } : { tasks: [] }) as ReturnType<typeof createApiClient>);
   jest.mocked(Expo.getLastNotificationResponseAsync).mockResolvedValue(null);
 });
 
@@ -51,6 +51,8 @@ it('reconciles bootstrap, foreground and persisted task/settings cache changes; 
   await waitFor(() => expect(createApiClient).toHaveBeenCalledTimes(3));
   await act(() => client.setQueryData(['settings', userId], settings));
   await waitFor(() => expect(createApiClient).toHaveBeenCalledTimes(4));
+  await act(() => client.setQueryData(['commitments', userId, 'list'], []));
+  await waitFor(() => expect(createApiClient).toHaveBeenCalledTimes(5));
   jest.mocked(useAuth).mockReturnValue({ session: null, isLoading: false, isRecovery: false } as ReturnType<typeof useAuth>);
   await view.rerender(tree());
   await waitFor(() => expect(reconcile).toHaveBeenLastCalledWith(null, expect.any(Function)));

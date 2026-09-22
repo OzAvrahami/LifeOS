@@ -18,7 +18,7 @@ export class CommitmentApiError extends Error {
 const datePattern = /^\d{4}-\d{2}-\d{2}$/;
 const timePattern = /^(?:[01]\d|2[0-3]):[0-5]\d$/;
 const uuidPattern = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
-const bodyKeys = new Set(['title', 'description', 'date', 'startTime', 'endTime', 'lifeArea']);
+const bodyKeys = new Set(['title', 'description', 'date', 'startTime', 'endTime', 'lifeArea', 'reminderMinutesBefore']);
 
 function invalid(message = 'Invalid Commitment input'): never {
   throw new CommitmentApiError(400, message);
@@ -83,8 +83,13 @@ export function parseCommitmentId(value: unknown) {
 }
 
 export function parseCommitmentFilters(value: Record<string, unknown>): CommitmentListFilters {
-  rejectUnknownKeys(value, new Set(['date', 'dateFrom', 'dateTo']));
+  rejectUnknownKeys(value, new Set(['date', 'dateFrom', 'dateTo', 'id', 'reminders']));
   const filters: CommitmentListFilters = {};
+  if (value.id !== undefined) filters.id = parseCommitmentId(value.id);
+  if (value.reminders !== undefined) {
+    if (value.reminders !== 'true' && value.reminders !== 'false') invalid('Invalid reminders filter');
+    filters.reminders = value.reminders === 'true';
+  }
   if (value.date !== undefined) filters.date = parseCommitmentDate(value.date);
   if (value.dateFrom !== undefined) filters.dateFrom = parseCommitmentDate(value.dateFrom, 'dateFrom');
   if (value.dateTo !== undefined) filters.dateTo = parseCommitmentDate(value.dateTo, 'dateTo');
@@ -110,6 +115,7 @@ export function parseCreateCommitment(value: unknown): CreateCommitmentInput {
     startTime: parseTime(body.startTime, 'startTime'),
     title: parseTitle(body.title),
   };
+  if ('reminderMinutesBefore' in body) input.reminderMinutesBefore = parseReminderLead(body.reminderMinutesBefore);
   validateCommitmentTimeRange(input.startTime, input.endTime);
   return input;
 }
@@ -120,6 +126,7 @@ export function parseUpdateCommitment(value: unknown): UpdateCommitmentInput {
   if (Object.keys(body).length === 0) invalid('At least one Commitment field is required');
 
   const input: UpdateCommitmentInput = {};
+  if ('reminderMinutesBefore' in body) input.reminderMinutesBefore = parseReminderLead(body.reminderMinutesBefore);
   if ('title' in body) input.title = parseTitle(body.title);
   if ('description' in body) input.description = parseDescription(body.description);
   if ('date' in body) input.date = parseCommitmentDate(body.date);
@@ -129,4 +136,10 @@ export function parseUpdateCommitment(value: unknown): UpdateCommitmentInput {
   }
   if ('lifeArea' in body) input.lifeArea = parseLifeArea(body.lifeArea);
   return input;
+}
+
+function parseReminderLead(value: unknown): number | null {
+  if (value === null) return null;
+  if (typeof value !== 'number' || !Number.isInteger(value) || value < 0 || value > 1440) invalid('Invalid reminderMinutesBefore');
+  return value;
 }

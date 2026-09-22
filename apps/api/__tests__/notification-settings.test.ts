@@ -87,3 +87,19 @@ describe('Notification settings', () => {
     await request(app).patch('/settings').set('Authorization', 'Bearer a').send({ notifications: enabled, timezone: 'invalid' }).expect(400);
   });
 });
+
+
+it('validates commitment defaults and preserves them when an older notification client omits new fields', async () => {
+  const { app } = fixture();
+  const prefs = { ...enabled, commitmentRemindersEnabled: true, commitmentDefaultReminderMinutes: 37 };
+  const patch = (notifications: unknown) => request(app).patch('/settings').set('Authorization', 'Bearer a').send({ notifications, timezone: 'UTC' });
+  assert.deepEqual((await patch(prefs).expect(200)).body.settings.notifications, prefs);
+  const old: Partial<typeof prefs> = { ...prefs };
+  delete old.commitmentRemindersEnabled; delete old.commitmentDefaultReminderMinutes;
+  assert.deepEqual((await patch(old).expect(200)).body.settings.notifications, prefs);
+  for (const commitmentDefaultReminderMinutes of [-1, 1441, 1.5, '15', null]) await patch({ ...prefs, commitmentDefaultReminderMinutes }).expect(400);
+  await patch({ ...prefs, commitmentRemindersEnabled: 'true' }).expect(400);
+  for (const commitmentDefaultReminderMinutes of [0, 5, 15, 30, 60, 1440]) {
+    assert.equal((await patch({ ...prefs, commitmentDefaultReminderMinutes }).expect(200)).body.settings.notifications.commitmentDefaultReminderMinutes, commitmentDefaultReminderMinutes);
+  }
+});

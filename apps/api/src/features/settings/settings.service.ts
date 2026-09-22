@@ -9,7 +9,7 @@ import {
   type UserSettingsRow,
 } from './settings.types.js';
 import { SettingsApiError } from './settings.validation.js';
-import { defaultNotificationPreferences, type NotificationPreferences } from './notification-preferences.js';
+import { defaultNotificationPreferences, type NotificationPreferencePatch } from './notification-preferences.js';
 
 function defaults(): UserSettings {
   return {
@@ -26,6 +26,8 @@ function defaults(): UserSettings {
 function mapSettings(row: UserSettingsRow): UserSettings {
   return {
     notifications: {
+      commitmentRemindersEnabled: row.commitment_reminders_enabled ?? false,
+      commitmentDefaultReminderMinutes: row.commitment_default_reminder_minutes ?? 15,
       enabled: row.notifications_enabled ?? false,
       taskRemindersEnabled: row.task_reminders_enabled ?? false,
       weeklyPlanningEnabled: row.weekly_planning_reminder_enabled ?? false,
@@ -90,7 +92,7 @@ export class SupabaseSettingsService implements SettingsServiceContract {
     return mapSettings(data as UserSettingsRow);
   }
 
-  async patchNotifications(prefs: NotificationPreferences, initialTimezone: string) {
+  async patchNotifications(prefs: NotificationPreferencePatch, initialTimezone: string) {
     // Create defaults only if absent. A notification save never overwrites an
     // existing timezone, Day Window, capacity or configured week start.
     const created = await this.client.from('user_settings').upsert(
@@ -98,6 +100,8 @@ export class SupabaseSettingsService implements SettingsServiceContract {
     );
     if (created.error) dataError(created.error);
     const { data, error } = await this.client.from('user_settings').update({
+      ...('commitmentRemindersEnabled' in prefs ? { commitment_reminders_enabled: prefs.commitmentRemindersEnabled } : {}),
+      ...('commitmentDefaultReminderMinutes' in prefs ? { commitment_default_reminder_minutes: prefs.commitmentDefaultReminderMinutes } : {}),
       notifications_enabled: prefs.enabled,
       task_reminders_enabled: prefs.taskRemindersEnabled,
       weekly_planning_reminder_enabled: prefs.weeklyPlanningEnabled,

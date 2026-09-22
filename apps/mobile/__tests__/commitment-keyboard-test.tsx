@@ -154,7 +154,7 @@ describe.each([false, true])('commitment keyboard (editing: %s)', (editing) => {
 });
 
 function expectedInput(editing: boolean) {
-  return { title: existing.title, description: null, date: existing.date, startTime: '09:17', endTime: editing ? '10:25' : null, lifeArea: null };
+  return { reminderMinutesBefore: null, title: existing.title, description: null, date: existing.date, startTime: '09:17', endTime: editing ? '10:25' : null, lifeArea: null };
 }
 
 it('dismisses when requesting deletion but requires the existing confirmation and preserves cancelled edits', async () => {

@@ -1,5 +1,9 @@
+import { ReminderLeadPicker } from '@/features/notifications/reminder-lead-picker';
+import { commitmentReminderInstant, validReminderLead } from '@/features/notifications/commitment-reminder-time';
+import type { NotificationPreferences } from '@/features/notifications/notification.types';
+import { useNotifications } from '@/features/notifications/notification-context';
 import { Ionicons } from '@expo/vector-icons';
-import { useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import {
   Keyboard,
   KeyboardAvoidingView,
@@ -33,6 +37,7 @@ function dismissKeyboard() {
 }
 
 type CommitmentEditorProps = {
+  notificationPreferences?: NotificationPreferences;
   commitment?: Commitment | null;
   initialDate: string;
   onClose: () => void;
@@ -52,6 +57,7 @@ export function CommitmentEditor(props: CommitmentEditorProps) {
 
 function CommitmentEditorSession({
   commitment,
+  notificationPreferences,
   initialDate,
   onClose,
   onDelete,
@@ -59,6 +65,15 @@ function CommitmentEditorSession({
   visible,
 }: CommitmentEditorProps) {
   const insets = useSafeAreaInsets();
+  const notifications = useNotifications();
+  const [now, setNow] = useState(Date.now);
+  useEffect(() => {
+    const timer = setInterval(() => setNow(Date.now()), 1000);
+    return () => clearInterval(timer);
+  }, []);
+  const [reminderMinutesBefore, setReminderMinutesBefore] = useState<number | null>(commitment
+    ? commitment.reminderMinutesBefore ?? null
+    : notificationPreferences?.commitmentRemindersEnabled ? notificationPreferences.commitmentDefaultReminderMinutes : null);
   const [title, setTitle] = useState(commitment?.title ?? '');
   const [description, setDescription] = useState(commitment?.description ?? '');
   const [date, setDate] = useState(commitment?.date ?? initialDate);
@@ -70,6 +85,8 @@ function CommitmentEditorSession({
   const [saving, setSaving] = useState(false);
   const [confirmingDelete, setConfirmingDelete] = useState(false);
   const touchMoved = useRef(false);
+  const reminderInstant = commitmentReminderInstant({ date, startTime: startTime ?? '', reminderMinutesBefore });
+  const invalidLead = reminderMinutesBefore !== null && !validReminderLead(reminderMinutesBefore);
 
   // Observe only direct background taps. Leave scrolling to keyboardDismissMode
   // and preserve child input/wheel gestures, without capturing any responder.
@@ -78,7 +95,7 @@ function CommitmentEditorSession({
   };
 
   const save = async () => {
-    if (saving) return;
+    if (saving || invalidLead) return;
     dismissKeyboard();
     const nextErrors: FieldErrors = {};
     if (!title.trim()) nextErrors.title = 'צריך להוסיף כותרת.';
@@ -96,6 +113,7 @@ function CommitmentEditorSession({
     setErrors({});
     try {
       await onSave({
+        reminderMinutesBefore,
         date,
         description: description.trim() || null,
         endTime,
@@ -103,6 +121,7 @@ function CommitmentEditorSession({
         startTime: startTime!,
         title: title.trim(),
       });
+      if (reminderMinutesBefore !== null && notificationPreferences?.enabled && notificationPreferences.commitmentRemindersEnabled) await notifications.requestPermission();
       onClose();
     } catch {
       setErrors({ general: 'לא הצלחנו לשמור. אפשר לנסות שוב.' });
@@ -182,6 +201,13 @@ function CommitmentEditorSession({
                 <Text style={styles.hint}>שעת הסיום היא רשות — אפשר להשאיר אירוע נקודתי.</Text>
                 {errors.time ? <Text accessibilityRole="alert" style={styles.error}>{errors.time}</Text> : null}
 
+                <Text style={styles.label}>תזכורת</Text>
+                <ReminderLeadPicker value={reminderMinutesBefore} onChange={setReminderMinutesBefore} disabled={saving} />
+                {reminderMinutesBefore !== null && startTime && !invalidLead && (reminderInstant === null || reminderInstant <= now) ? <Text accessibilityRole="alert" style={styles.error}>
+                  {reminderInstant === null ? 'השעה המקומית אינה קיימת בתאריך הזה. התזכורת תישמר אך לא תתוזמן.' : 'זמן התזכורת כבר עבר. הבחירה תישמר, אך לא תישלח התראה במועד אחר.'}
+                </Text> : null}
+                {reminderMinutesBefore !== null && (!notificationPreferences?.enabled || !notificationPreferences.commitmentRemindersEnabled) ? <Text style={styles.hint}>התזכורת תישמר. כדי לקבל אותה צריך להפעיל התראות ותזכורות להתחייבויות בהגדרות.</Text> : null}
+
                 {!detailsOpen ? (
                   <Pressable accessibilityRole="button" onPress={() => { dismissKeyboard(); setDetailsOpen(true); }} style={styles.detailsButton}>
                     <Ionicons color={colors.accent} name="add" size={16} />
@@ -207,7 +233,7 @@ function CommitmentEditorSession({
                 )}
 
                 {errors.general ? <Text accessibilityRole="alert" style={styles.error}>{errors.general}</Text> : null}
-                <Pressable accessibilityLabel="שמירת התחייבות" accessibilityRole="button" accessibilityState={{ busy: saving }} disabled={saving} onPress={() => void save()} style={[styles.saveButton, saving && styles.disabled]}>
+                <Pressable accessibilityLabel="שמירת התחייבות" accessibilityRole="button" accessibilityState={{ busy: saving }} disabled={saving || invalidLead} onPress={() => void save()} style={[styles.saveButton, saving && styles.disabled]}>
                   <Text style={styles.saveText}>{saving ? 'שומר…' : commitment ? 'שמירת שינויים' : 'שמירה'}</Text>
                 </Pressable>
                 {commitment && onDelete ? (

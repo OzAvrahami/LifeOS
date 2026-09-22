@@ -1,6 +1,7 @@
+import { TaskDetailScreen } from '@/features/tasks/task-detail-screen';
 import { Ionicons } from '@expo/vector-icons';
 import { useState } from 'react';
-import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { Modal, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 
 import { MobileShell } from '@/components/mobile-shell';
 import { QuickCaptureSheet, type CaptureDestination } from '@/features/capture/quick-capture-sheet';
@@ -56,6 +57,7 @@ export function TodayScreen({
   onNavigateWeek?: () => void;
   taskSource?: TaskSource;
 }) {
+  const [detailsTaskId, setDetailsTaskId] = useState<string | null>(null);
   const [todayState, setTodayState] = useState<TodayDemoState>(initialState);
   const [captureOpen, setCaptureOpen] = useState(false);
   const [captureInitialDestination, setCaptureInitialDestination] = useState<CaptureDestination>('inbox');
@@ -163,6 +165,7 @@ export function TodayScreen({
     if (activeTodayTask) {
       content = (
         <ActiveState
+          onOpenTask={serverTasks ? setDetailsTaskId : undefined}
           commitment={serverTasks ? presentedCommitments[0] ?? null : undefined}
           laterTasks={openTasks}
           dateLabel={serverTasks ? hebrewDateLabel(undefined, settings.timezone) : undefined}
@@ -178,6 +181,7 @@ export function TodayScreen({
       const nextTask = openTasks[0] ?? null;
       content = (
         <PartiallyCompletedState
+          onOpenTask={serverTasks ? setDetailsTaskId : undefined}
           completedTasks={completedTasks}
           dateLabel={serverTasks ? hebrewDateLabel(undefined, settings.timezone) : undefined}
           nextTask={nextTask}
@@ -197,6 +201,7 @@ export function TodayScreen({
         : tasks.find((task) => task.id === normalTodayFixture.focus.id) ?? tasks[0];
       content = (
         <NormalTodayContent
+          onOpenTask={serverTasks ? setDetailsTaskId : undefined}
           focusTask={focusTask}
           focusedTaskId={serverTasks ? dailyPlanQuery.data?.focusTaskId ?? undefined : undefined}
           dateLabel={serverTasks ? hebrewDateLabel(undefined, settings.timezone) : undefined}
@@ -225,6 +230,7 @@ export function TodayScreen({
       case 'active':
         content = (
           <ActiveState
+          onOpenTask={serverTasks ? setDetailsTaskId : undefined}
             onFinish={() => setTodayState('partially_completed')}
             onStop={() => setTodayState('normal')}
           />
@@ -239,6 +245,7 @@ export function TodayScreen({
       default:
         content = (
           <NormalTodayContent
+          onOpenTask={serverTasks ? setDetailsTaskId : undefined}
             focusTask={normalTodayFixture.focus}
             onAddTask={() => openCapture('today')}
             onStartFocus={() => setTodayState('active')}
@@ -264,6 +271,9 @@ export function TodayScreen({
         />
         {isHydrating ? null : content}
       </MobileShell>
+      {serverTasks && detailsTaskId ? <Modal visible animationType="slide" onRequestClose={() => setDetailsTaskId(null)}>
+        <TaskDetailScreen id={detailsTaskId} onBack={() => setDetailsTaskId(null)} />
+      </Modal> : null}
       <QuickCaptureSheet defaultDate={defaultDate}
         initialDestination={captureInitialDestination}
         key={captureInitialDestination}
@@ -272,7 +282,7 @@ export function TodayScreen({
         visible={captureOpen}
       />
       {serverTasks && commitmentEditorOpen ? (
-        <CommitmentEditor
+        <CommitmentEditor notificationPreferences={settingsQuery.data?.notifications}
           commitment={editingCommitment}
           initialDate={todayDate}
           onClose={() => setCommitmentEditorOpen(false)}
@@ -286,6 +296,7 @@ export function TodayScreen({
 }
 
 function NormalTodayContent({
+  onOpenTask,
   commitments,
   dateLabel,
   focusTask,
@@ -304,6 +315,7 @@ function NormalTodayContent({
   suggestion,
   tasks,
 }: {
+  onOpenTask?: (id: string) => void;
   commitments?: typeof normalTodayFixture.commitments;
   dateLabel?: string;
   focusTask?: TodayTask;
@@ -350,13 +362,14 @@ function NormalTodayContent({
           taskCount={taskCount}
           unknownEstimateCount={serverUnknownEstimateCount ?? today.summary.unknownEstimateCount}
         />
-        {focusTask ? <FocusCard onStart={onStartFocus} task={focusTask} /> : null}
+        {focusTask ? <FocusCard onOpenTask={onOpenTask} onStart={onStartFocus} task={focusTask} /> : null}
 
         {onAddCommitment ? <CommitmentSectionHeader onAdd={onAddCommitment} /> : <SectionLabel>התחייבויות</SectionLabel>}
         <Commitments items={commitments ?? today.commitments} onPress={onEditCommitment} />
 
         <SectionLabel>המשימות שלי</SectionLabel>
         <TaskList
+          onOpenTask={onOpenTask}
           focusedTaskId={focusedTaskId}
           newTaskId={movedTaskId}
           onStartTask={onStartTask}

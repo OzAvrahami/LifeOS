@@ -4,6 +4,7 @@ export function notificationDestination(request: LocalRequest, userId: string | 
   const data = notificationData(request.content.data);
   if (!data || !userId || data.userId !== userId) return null;
   return data.kind === 'weekly' ? { pathname: '/week' as const }
+    : data.kind === 'commitment' ? { pathname: '/commitment' as const, params: { id: data.commitmentId! } }
     : { pathname: '/task' as const, params: { id: data.taskId! } };
 }
 

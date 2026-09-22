@@ -1,3 +1,4 @@
+import { TaskDetailsButton } from '@/features/tasks/task-details-button';
 import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 
 import { colors, radius, spacing, typography } from '@/theme/tokens';
@@ -7,6 +8,7 @@ import { TaskTimeSummary } from './today.components';
 import { TodayTask } from './today.types';
 
 export function ActiveState({
+  onOpenTask,
   commitment,
   dateLabel,
   laterTasks,
@@ -17,6 +19,7 @@ export function ActiveState({
   task,
   unknownEstimateCount,
 }: {
+  onOpenTask?: (id: string) => void;
   commitment?: { time: string; title: string } | null;
   dateLabel?: string;
   laterTasks?: TodayTask[];
@@ -46,6 +49,7 @@ export function ActiveState({
           <Text style={styles.activeLabel}>פעיל עכשיו</Text>
         </View>
         <Text style={styles.title}>{activeTask.title}</Text>
+        <TaskDetailsButton task={activeTask} onOpen={onOpenTask} light />
         <Text style={styles.meta}>
           {activeTask.durationMinutes === null ? 'ללא הערכת זמן' : `הערכה: כ־${activeTask.durationMinutes} דקות`} · עבודה
         </Text>
@@ -62,6 +66,7 @@ export function ActiveState({
       <Text style={styles.sectionLabel}>בהמשך היום</Text>
       <View accessibilityLabel="בהמשך היום" style={styles.taskList}>
         {remainingTasks.map((laterTask, index) => (
+          <View key={laterTask.id}>
           <Pressable
             accessibilityLabel={`התחל משימה: ${laterTask.title}`}
             accessibilityRole="button"
@@ -73,6 +78,8 @@ export function ActiveState({
             <Text style={styles.taskTitle}>{laterTask.title}</Text>
             <Text style={styles.duration}>{laterTask.durationMinutes === null ? 'ללא הערכה' : `${laterTask.durationMinutes} דק׳`}</Text>
           </Pressable>
+          <TaskDetailsButton task={laterTask} onOpen={onOpenTask} />
+          </View>
         ))}
       </View>
 

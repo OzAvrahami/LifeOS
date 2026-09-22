@@ -1,6 +1,7 @@
+import { commitmentReminderInstant } from './commitment-reminder-time';
 import { defaultNotificationPreferences, type DesiredNotification, type NotificationDriver, type NotificationSnapshot, type ReconciliationResult } from './notification.types';
 
-export function desiredNotifications(userId: string, { preferences: p, tasks }: NotificationSnapshot, now: number): DesiredNotification[] {
+export function desiredNotifications(userId: string, { preferences: p, tasks, commitments = [] }: NotificationSnapshot, now: number): DesiredNotification[] {
   if (!p.enabled) return [];
   const desired: DesiredNotification[] = [];
   if (p.weeklyPlanningEnabled && p.weeklyPlanningWeekday !== null && p.weeklyPlanningTime) {
@@ -21,7 +22,21 @@ export function desiredNotifications(userId: string, { preferences: p, tasks }: 
         trigger: { type: 'date', date: new Date(instant) } });
     }
   }
-  return desired;
+  if (p.commitmentRemindersEnabled) {
+    for (const commitment of commitments) {
+      const instant = commitmentReminderInstant(commitment);
+      if (instant === null || instant <= now) continue;
+      desired.push({ identifier: `lifeos:${userId}:commitment:${commitment.id}:${instant}`,
+        content: { title: 'תזכורת להתחייבות', body: commitment.title, data: { owner: 'lifeos', userId, kind: 'commitment', commitmentId: commitment.id } },
+        trigger: { type: 'date', date: new Date(instant) } });
+    }
+  }
+  // Reserve weekly first, then select nearest one-time reminders across kinds.
+  return desired.sort((a, b) => {
+    if (a.trigger.type === 'weekly') return b.trigger.type === 'weekly' ? 0 : -1;
+    if (b.trigger.type === 'weekly') return 1;
+    return a.trigger.date.getTime() - b.trigger.date.getTime() || a.identifier.localeCompare(b.identifier);
+  });
 }
 
 // Only device operations are serialized. Slow/offline account fetches must never
@@ -60,7 +75,7 @@ export class NotificationReconciler {
       if (!current()) return null;
       const desired = desiredNotifications(userId, snapshot, this.now());
       // Reserve room for unrelated requests and the weekly reminder. Remaining
-      // future tasks refill on reconciliation; never pretend overflow is queued.
+      // future one-time reminders refill on reconciliation; never pretend overflow is queued.
       const capacity = Math.max(0, 64 - existing.filter(item => item.content.data?.owner !== 'lifeos').length);
       const selected = desired.slice(0, capacity);
       const byId = new Map(selected.map(item => [item.identifier, item]));
@@ -70,7 +85,7 @@ export class NotificationReconciler {
         if (item.content.data?.owner !== 'lifeos') continue;
         const wanted = byId.get(item.identifier);
         if (wanted && !retained.has(item.identifier) && wanted.content.body === item.content.body && wanted.content.title === item.content.title
-          && item.content.data.userId === userId && item.content.data.kind === wanted.content.data.kind && item.content.data.taskId === wanted.content.data.taskId) {
+          && item.content.data.userId === userId && item.content.data.kind === wanted.content.data.kind && item.content.data.taskId === wanted.content.data.taskId && item.content.data.commitmentId === wanted.content.data.commitmentId) {
           retained.add(item.identifier);
         } else await this.driver.cancel(item.identifier);
       }

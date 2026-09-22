@@ -10,6 +10,7 @@ export const commitmentLifeAreas = [
 export type CommitmentLifeArea = typeof commitmentLifeAreas[number];
 
 export type Commitment = {
+  reminderMinutesBefore?: number | null;
   id: string;
   title: string;
   description: string | null;
@@ -22,12 +23,15 @@ export type Commitment = {
 };
 
 export type CommitmentListFilters = {
+  id?: string;
+  reminders?: boolean;
   date?: string;
   dateFrom?: string;
   dateTo?: string;
 };
 
 export type CreateCommitmentInput = {
+  reminderMinutesBefore?: number | null;
   title: string;
   description?: string | null;
   date: string;

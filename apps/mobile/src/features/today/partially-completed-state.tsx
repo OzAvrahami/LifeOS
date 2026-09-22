@@ -1,3 +1,4 @@
+import { TaskDetailsButton } from '@/features/tasks/task-details-button';
 import { Ionicons } from '@expo/vector-icons';
 import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 
@@ -8,6 +9,7 @@ import { TaskTimeSummary } from './today.components';
 import { TodayTask } from './today.types';
 
 export function PartiallyCompletedState({
+  onOpenTask,
   completedTasks,
   dateLabel,
   nextTask,
@@ -16,6 +18,7 @@ export function PartiallyCompletedState({
   plannedTaskTime,
   unknownEstimateCount,
 }: {
+  onOpenTask?: (id: string) => void;
   completedTasks?: TodayTask[];
   dateLabel?: string;
   nextTask?: TodayTask | null;
@@ -62,6 +65,7 @@ export function PartiallyCompletedState({
         <View accessibilityLabel="הבא בתור" style={styles.nextCard}>
           <Text style={styles.nextLabel}>הבא בתור</Text>
           <Text style={styles.nextTitle}>{visibleNextTask.title}</Text>
+          <TaskDetailsButton task={visibleNextTask} onOpen={onOpenTask} />
           <Text style={styles.nextMeta}>{visibleNextTask.durationMinutes === null ? 'ללא הערכת זמן' : `כ־${visibleNextTask.durationMinutes} דקות`} · בית</Text>
           <Pressable accessibilityRole="button" onPress={onStart} style={styles.startButton}>
             <Text style={styles.startText}>התחלה</Text>
@@ -77,6 +81,7 @@ export function PartiallyCompletedState({
               <View key={task.id} style={[styles.taskRow, index > 0 && styles.divider]}>
                 <View style={styles.checkbox} />
                 <Text style={styles.taskTitle}>{task.title}</Text>
+                <TaskDetailsButton task={task} onOpen={onOpenTask} />
                 <Text style={styles.duration}>{task.durationMinutes === null ? 'ללא הערכה' : `${task.durationMinutes} דק׳`}</Text>
               </View>
             ))}
@@ -95,6 +100,7 @@ export function PartiallyCompletedState({
               <Ionicons color={colors.white} name="checkmark" size={14} />
             </View>
             <Text style={styles.completedTitle}>{task.title}</Text>
+              <TaskDetailsButton task={task} onOpen={onOpenTask} />
             <Text style={styles.completedDuration}>{task.durationMinutes === null ? 'ללא הערכה' : `${task.durationMinutes} דק׳`}</Text>
           </View>
         ))}

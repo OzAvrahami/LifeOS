@@ -47,6 +47,8 @@ class MemoryCommitmentService implements CommitmentServiceContract {
   async list(filters: CommitmentListFilters) {
     return this.database.commitments
       .filter((item) => item.userId === this.userId)
+      .filter((item) => !filters.id || item.id === filters.id)
+      .filter((item) => !filters.reminders || item.reminderMinutesBefore !== null)
       .filter((item) => !filters.date || item.date === filters.date)
       .filter((item) => !filters.dateFrom || item.date >= filters.dateFrom)
       .filter((item) => !filters.dateTo || item.date <= filters.dateTo)
@@ -59,6 +61,7 @@ class MemoryCommitmentService implements CommitmentServiceContract {
     const timestamp = new Date().toISOString();
     const item: OwnedCommitment = {
       ...input,
+      reminderMinutesBefore: input.reminderMinutesBefore ?? null,
       createdAt: timestamp,
       id: uuid(this.database.nextId++),
       updatedAt: timestamp,
@@ -279,5 +282,33 @@ describe('Commitment API', () => {
     assert.match(migration, /commitments_user_date_start_time_idx/i);
     assert.match(migration, /on delete cascade/i);
     assert.doesNotMatch(migration, /service_role/i);
+  });
+});
+
+
+describe('Commitment reminder contract', () => {
+  it('creates presets/custom/null, preserves lead on date/time edits, and clears without requiring end time', async () => {
+    const app = createCommitmentTestApp(database());
+    for (const reminderMinutesBefore of [null, 0, 5, 15, 30, 60, 37, 1440]) {
+      const original = (await authenticated(app).post('/commitments').send({ title: 'Reminder', description: 'Keep', date: '2099-01-02', startTime: '12:37', reminderMinutesBefore }).expect(201)).body.commitment;
+      assert.equal(original.reminderMinutesBefore, reminderMinutesBefore);
+      const moved = (await authenticated(app).patch(`/commitments/${original.id}`).send({ date: '2099-01-03', startTime: '13:30' }).expect(200)).body.commitment;
+      assert.equal(moved.reminderMinutesBefore, reminderMinutesBefore); assert.equal(moved.endTime, null); assert.equal(moved.description, 'Keep');
+      assert.equal((await authenticated(app).patch(`/commitments/${original.id}`).send({ reminderMinutesBefore: null }).expect(200)).body.commitment.reminderMinutesBefore, null);
+    }
+  });
+  it('rejects invalid leads and filters, without permitting cross-user reminder edits', async () => {
+    const app = createCommitmentTestApp(database());
+    const item = (await authenticated(app).post('/commitments').send({ title: 'Legacy', date: '2099-01-02', startTime: '12:37' }).expect(201)).body.commitment;
+    assert.equal(item.reminderMinutesBefore, null);
+    for (const reminderMinutesBefore of [-1, 1441, 1.5, '15', true]) {
+      await authenticated(app).post('/commitments').send({ title: 'Invalid', date: item.date, startTime: item.startTime, reminderMinutesBefore }).expect(400);
+      await authenticated(app).patch(`/commitments/${item.id}`).send({ reminderMinutesBefore }).expect(400);
+    }
+    await authenticated(app).get('/commitments?reminders=maybe').expect(400);
+    await authenticated(app).get('/commitments?id=invalid').expect(400);
+    await authenticated(app, 'token-b').patch(`/commitments/${item.id}`).send({ reminderMinutesBefore: 0 }).expect(404);
+    const filtered = await authenticated(app, 'token-b').get(`/commitments?id=${item.id}&reminders=true`).expect(200);
+    assert.deepEqual(filtered.body.commitments, []);
   });
 });

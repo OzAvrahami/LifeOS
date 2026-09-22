@@ -1,13 +1,14 @@
 import assert from 'node:assert/strict';
 
 export const notificationDefaults = { enabled: false, taskRemindersEnabled: false, weeklyPlanningEnabled: false,
+  commitmentRemindersEnabled: false, commitmentDefaultReminderMinutes: 15,
   weeklyPlanningWeekday: null, weeklyPlanningTime: null };
 
 // Runs only inside the guarded local harness and its disposable user fixtures.
 export async function verifyNotifications({ apiRequest, tokenA, tokenB, callerA, callerB, anonymous, userA, userB }) {
   const before = (await apiRequest('GET', '/settings', tokenA)).settings;
   assert.deepEqual(before.notifications, notificationDefaults);
-  const prefs = { enabled: true, taskRemindersEnabled: true, weeklyPlanningEnabled: true,
+  const prefs = { ...notificationDefaults, enabled: true, taskRemindersEnabled: true, weeklyPlanningEnabled: true,
     weeklyPlanningWeekday: 6, weeklyPlanningTime: '09:17' };
   const patchSettings = (notifications, token = tokenA, status = 200) => apiRequest('PATCH', '/settings', token,
     { notifications, timezone: 'America/New_York' }, status);

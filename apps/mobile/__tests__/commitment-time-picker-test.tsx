@@ -162,7 +162,7 @@ iosTest.each([false, true])('sends exact confirmed times through the real client
   await change(10, 25);
   await press('אישור שעה');
   await press('שמירת התחייבות');
-  const expected = { title: commitment.title, date: commitment.date, startTime: '09:17', endTime: '10:25', description: editing ? commitment.description : null, lifeArea: editing ? 'work' : null };
+  const expected = { reminderMinutesBefore: null, title: commitment.title, date: commitment.date, startTime: '09:17', endTime: '10:25', description: editing ? commitment.description : null, lifeArea: editing ? 'work' : null };
   expect(save).toHaveBeenCalledWith(expected);
   expect(apiRequest).toHaveBeenCalledWith(editing ? '/commitments/existing' : '/commitments', expect.objectContaining({ method: editing ? 'PATCH' : 'POST' }));
   expect(JSON.parse(jest.mocked(apiRequest).mock.calls[0]![1]!.body as string)).toEqual(expected);

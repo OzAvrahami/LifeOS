@@ -77,6 +77,7 @@ function AuthenticatedStack() {
           <Stack.Screen name="settings" />
           <Stack.Screen name="account" />
           <Stack.Screen name="task" />
+          <Stack.Screen name="commitment" />
         </Stack.Protected>
         <Stack.Screen name="auth/callback" />
         <Stack.Protected guard={__DEV__}>

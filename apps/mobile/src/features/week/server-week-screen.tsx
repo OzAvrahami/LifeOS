@@ -21,7 +21,7 @@ import { tasksByPlannedDate } from './week-aggregation';
 import { DayAction, WeekDayCard, WeekDayView } from './week-day-view';
 import { WeekNavigation } from './week-navigation';
 import type { WeekScreenProps } from './week-screen';
-import { WeekTaskDetails } from './week-task-details';
+import { TaskDetails } from '@/features/tasks/task-details';
 import { UnscheduledWeekTasks, WeeklyFocusCard, WeekSectionLabel } from './week.components';
 import { WeeklyFocusEditor } from './weekly-focus-editor';
 import { WeeklyPlanningEntry } from './weekly-planning-entry';
@@ -58,7 +58,7 @@ export function ServerWeekScreen({ onNavigateInbox, onNavigateMore, onNavigateTo
   const commitmentsFor = (date: string) => (commitmentQuery.data ?? [])
     .filter(item => item.date === date)
     .sort((a, b) => a.startTime.localeCompare(b.startTime) || a.createdAt.localeCompare(b.createdAt) || a.id.localeCompare(b.id));
-  const selectedTask = tasks.find(task => task.id === taskId && task.status !== 'cancelled');
+  const selectedTask = [...tasks, ...(weekOnlyQuery.data ?? [])].find(task => task.id === taskId && task.status !== 'cancelled');
   const browseDate = (date: string) => { setAnchorDate(date); setTaskId(null); setOperationError(false); };
   const captureTask = async (title: string, placement: TaskCapturePlacement) => {
     await createTask.mutateAsync({ title, planning: placement.destination === 'day'
@@ -81,7 +81,7 @@ export function ServerWeekScreen({ onNavigateInbox, onNavigateMore, onNavigateTo
     <MobileShell selected="week" onNavigateInbox={onNavigateInbox} onNavigateMore={onNavigateMore} onNavigateToday={onNavigateToday}
       onQuickCapture={() => setCapture({ date: selectedDate, day: false, weekStart })}>
       <ScrollView contentContainerStyle={styles.content} keyboardShouldPersistTaps="handled">
-        {selectedTask ? <WeekTaskDetails key={selectedTask.id} task={selectedTask} onClose={() => setTaskId(null)}
+        {selectedTask ? <TaskDetails backLabel={dayOpen ? 'חזרה ליום' : 'חזרה לשבוע'} key={selectedTask.id} task={selectedTask} onClose={() => setTaskId(null)}
           onUpdate={async input => { await updateTask.mutateAsync({ id: selectedTask.id, input }); }}
           onDelete={async () => { await cancelTask.mutateAsync(selectedTask.id); }} /> : <>
           {dayOpen ? <DayAction label="חזרה לשבוע" onPress={() => setDayOpen(false)} /> : null}
@@ -105,7 +105,7 @@ export function ServerWeekScreen({ onNavigateInbox, onNavigateMore, onNavigateTo
                 onOpen={() => { browseDate(date); setDayOpen(true); }} />)}
             </View> : null}
             <WeekSectionLabel>לתכנן בשבוע המוצג</WeekSectionLabel>
-            {!weekOnlyQuery.isPending && !weekOnlyQuery.isError ? <UnscheduledWeekTasks defaultDate={weekStart}
+            {!weekOnlyQuery.isPending && !weekOnlyQuery.isError ? <UnscheduledWeekTasks onDetails={setTaskId} defaultDate={weekStart}
               tasks={(weekOnlyQuery.data ?? []).filter(t => t.status === 'open' || t.status === 'in_progress').map(toWeekTask)}
               onSchedule={async (id, plannedDate) => { await updateTask.mutateAsync({ id, input: { planning: { type: 'day', plannedDate } } }); }}
               onMoveToToday={async id => {
@@ -120,7 +120,7 @@ export function ServerWeekScreen({ onNavigateInbox, onNavigateMore, onNavigateTo
     {capture ? <QuickCaptureSheet visible initialDestination={capture.day ? 'day' : 'inbox'} defaultDate={capture.date}
       initialPlannedDate={capture.day ? capture.date : undefined} weekLabel="השבוע המוצג"
       onClose={() => setCapture(null)} onSave={captureTask} /> : null}
-    {commitmentEditor ? <CommitmentEditor visible initialDate={commitmentEditor.date} commitment={commitmentEditor.item}
+    {commitmentEditor ? <CommitmentEditor notificationPreferences={settingsQuery.data?.notifications} visible initialDate={commitmentEditor.date} commitment={commitmentEditor.item}
       onClose={() => setCommitmentEditor(null)} onDelete={async id => { await deleteCommitment.mutateAsync(id); }}
       onSave={async input => {
         if (commitmentEditor.item) await updateCommitment.mutateAsync({ id: commitmentEditor.item.id, input });

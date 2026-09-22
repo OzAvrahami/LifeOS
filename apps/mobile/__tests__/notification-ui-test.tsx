@@ -63,7 +63,7 @@ it('saves explicit master/category/weekly weekday and exact time; turning off re
   await press('שעת תכנון השבוע'); await setTime(17);
   expect(settingsApi.patchNotificationPreferences).not.toHaveBeenCalled();
   await press('אישור שעה'); await press('שמירת התראות');
-  const expected = { enabled: true, taskRemindersEnabled: true, weeklyPlanningEnabled: true, weeklyPlanningWeekday: 1, weeklyPlanningTime: '09:17' };
+  const expected = { ...defaultNotificationPreferences, enabled: true, taskRemindersEnabled: true, weeklyPlanningEnabled: true, weeklyPlanningWeekday: 1, weeklyPlanningTime: '09:17' };
   await waitFor(() => expect(settingsApi.patchNotificationPreferences).toHaveBeenCalledWith(expected, 'Asia/Jerusalem'));
   await waitFor(() => expect(reconcile).toHaveBeenCalled());
   expect(requestPermission).toHaveBeenCalledTimes(1);

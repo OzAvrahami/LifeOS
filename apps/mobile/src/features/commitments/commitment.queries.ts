@@ -14,6 +14,8 @@ export const COMMITMENT_STALE_TIME_MS = 30_000;
 
 function normalizedFilters(filters: CommitmentListFilters) {
   return {
+    id: filters.id ?? null,
+    reminders: filters.reminders ?? false,
     date: filters.date ?? null,
     dateFrom: filters.dateFrom ?? null,
     dateTo: filters.dateTo ?? null,
@@ -36,6 +38,7 @@ export function useCommitments(filters: CommitmentListFilters, enabled = true) {
     queryFn: () => listCommitments(filters),
     queryKey: commitmentKeys.list(userId, filters),
     refetchOnWindowFocus: false,
+    refetchOnMount: filters.id ? 'always' : true,
     staleTime: COMMITMENT_STALE_TIME_MS,
   });
 }
@@ -52,6 +55,8 @@ function filtersFromKey(queryKey: QueryKey, userId: string) {
 }
 
 function belongs(commitment: Commitment, filters: NormalizedCommitmentFilters) {
+  if (filters.id && commitment.id !== filters.id) return false;
+  if (filters.reminders && commitment.reminderMinutesBefore == null) return false;
   if (filters.date && commitment.date !== filters.date) return false;
   if (filters.dateFrom && commitment.date < filters.dateFrom) return false;
   if (filters.dateTo && commitment.date > filters.dateTo) return false;

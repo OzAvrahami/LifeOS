@@ -1,3 +1,4 @@
+import { TaskDetailsButton } from '@/features/tasks/task-details-button';
 import { Ionicons } from '@expo/vector-icons';
 import { useRef } from 'react';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
@@ -56,7 +57,7 @@ export function TaskTimeSummary({
   );
 }
 
-export function FocusCard({ task, onStart }: { task: TodayTask; onStart?: () => void }) {
+export function FocusCard({ task, onStart, onOpenTask }: { task: TodayTask; onStart?: () => void; onOpenTask?: (id: string) => void }) {
   return (
     <View accessibilityLabel="עכשיו" style={styles.focusCard}>
       <View style={styles.focusLabelRow}>
@@ -64,6 +65,7 @@ export function FocusCard({ task, onStart }: { task: TodayTask; onStart?: () => 
         <Text style={styles.focusLabel}>עכשיו</Text>
       </View>
       <Text style={styles.focusTitle}>{task.title}</Text>
+      <TaskDetailsButton task={task} onOpen={onOpenTask} />
       <Text style={styles.focusMeta}>{task.durationMinutes === null ? 'ללא הערכת זמן' : `כ־${task.durationMinutes} דקות`} · עבודה</Text>
       <Pressable accessibilityRole="button" onPress={onStart} style={styles.startButton}>
         <Text style={styles.startButtonText}>התחלה</Text>
@@ -113,12 +115,14 @@ export function Commitments({ items, onPress }: { items: Commitment[]; onPress?:
 }
 
 export function TaskList({
+  onOpenTask,
   focusedTaskId,
   newTaskId,
   onStartTask,
   onToggleFocus,
   tasks,
 }: {
+  onOpenTask?: (id: string) => void;
   focusedTaskId?: string;
   newTaskId?: string;
   onStartTask?: (taskId: string) => void;
@@ -129,6 +133,7 @@ export function TaskList({
   return (
     <View accessibilityLabel="המשימות שלי" style={styles.taskList}>
       {tasks.map((task, index) => (
+        <View key={task.id}>
         <Pressable
           accessibilityLabel={`התחל משימה: ${task.title}`}
           accessibilityHint={onToggleFocus ? 'לחיצה ארוכה בוחרת או מסירה מיקוד יומי' : undefined}
@@ -161,6 +166,8 @@ export function TaskList({
             </>
           )}
         </Pressable>
+        <TaskDetailsButton task={task} onOpen={onOpenTask} />
+        </View>
       ))}
     </View>
   );
