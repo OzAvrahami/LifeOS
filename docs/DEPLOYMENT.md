@@ -1,14 +1,14 @@
 # LifeOS Deployment
 
-## Notifications candidate — Issue #1, 2026-09-22
+## Notifications release acceptance — Issue #1, 2026-09-22
 
-Active candidate: **LifeOS 0.4.0 (7)**, unpublished, not installed or owner-accepted. Build 5 installed but failed native scene startup and was never accepted. Build 6 installed/launched successfully with UIScene support; it was superseded during acceptance after Task reminder discoverability and missing Commitment reminders were identified, **not a failed build**.
+**LifeOS 0.4.0 (7) is installed and owner-accepted for release**, on iPhone 17 Pro Max, 2026-09-22. The owner reports successful launch, usable normal UI and that the implementation appears to work correctly. No claim is made that every physical notification scenario was individually executed. #1 is Closed / Completed / Done / P2 — Medium. #26/#27 are non-blocking future UX improvements, both Backlog / P2.
 
-Build 7 adds shared Task Details entry points and relative Commitment reminders/settings. New forward migration [`20260922120000_add_commitment_reminders.sql`](../supabase/migrations/20260922120000_add_commitment_reminders.sql) follows `20260914120000`: nullable commitment lead 0–1440; category default false and default lead 15 on user settings. Existing IDs, null reminders, RLS and old-client settings are preserved. All 13 disposable local PostgreSQL/Auth/RLS verification groups pass; **no remote application has occurred for the new migration**.
+**Production rollout is complete:** the owner confirms [`20260922120000_add_commitment_reminders.sql`](../supabase/migrations/20260922120000_add_commitment_reminders.sql) was applied and remote history reconciled to `20260922120000 | 20260922120000`. GitHub commit context `LifeOS - @lifeos/api` reports **success** for `c99ef3f402687befc37d252d246634dae5ede27a`, updated `2026-09-22T10:39:33Z`. No new schema operation, direct Railway active-deployment inspection or production write test was performed during finalization. The normal schema-before-API ordering remains mandatory for future changes, not a pending rollout for this accepted build.
 
-**Required rollout:** local owner Git checkpoint → `npx supabase migration list --linked` → inspect every pending migration and `npx supabase db push --linked --dry-run` → separately authorized `npx supabase db push --linked` → verify remote history → API push/deployment success → authorized build/install 0.4.0 (7) → physical owner acceptance. These commands are later owner-controlled steps, not operations performed by this preparation. Hold deployment-triggering push until the schema exists. Older build-6 remote history/API health evidence does not establish readiness for this new schema.
+Build 5 failed native launch and was never accepted. Build 6 fixed UIScene startup and was superseded before product acceptance, not failed. Build 7 is the final accepted binary; native plist/Debug/Release preparation and earlier Xcode 27 compilation evidence remain in [the issue record](issue-1-verification.md). Do not rebuild, reinstall or increase the version/build for this documentation checkpoint.
 
-Native plist and Debug/Release settings now read **0.4.0 / 7**. Only build metadata changed; Expo scene lifecycle, signing, entitlements and Pods are preserved. A metadata backup was made outside the repository; no regeneration/pod installation was needed. Signed Xcode 27 Release compilation succeeded, but the artifact was not installed/launched. See [current results and device checklist](issue-1-verification.md).
+**Publication prepared / not yet published.** Latest GitHub Release remains v0.3.0. The intended v0.4.0 annotated tag must later target the final owner-approved documentation commit, not an invented future SHA or earlier implementation commit. No App Store/TestFlight publication. See [0.4.0 release verification](release-0.4.0-verification.md).
 
 ### Historical build-6 scene reconciliation procedure
 
@@ -27,7 +27,7 @@ Inspect generated changes against the backup. Info.plist must name `EXExpoAppSce
 
 Run normal `pod install` from `apps/mobile/ios`. Here stale local podspec locks required the targeted command `pod update Expo ExpoModulesCore ExpoModulesWorklets ExpoFileSystem ExpoFont ExpoAsset EXConstants --no-repo-update`; it installed 110 pods, retaining ExpoNotifications 57.0.12 and React-Core 0.86.2. Validate lock/manifest equality and iOS autolinking before Release compilation. Keep all native files ignored. Do not restore the old AppDelegate/Info.plist over the scene fix.
 
-See [Issue #1 verification](issue-1-verification.md) for the build/launch outcome and pending physical checklist. Accepted/published 0.3.0 history below remains accurate.
+See [Issue #1 verification](issue-1-verification.md) for the accepted build/launch outcome and the historical, not individually attested physical checklist. Accepted/published 0.3.0 history below remains accurate.
 
 **Historical 0.2.1 acceptance:** LifeOS 0.2.1/build 3 was installed and **owner-accepted through the standalone internal iPhone delivery path** for #11/#12/#13. On 2026-09-08, after manually committing/pushing preparation `2aa6bc4a246a06efc31a6c7753b1ad9f51b8a102`, the owner built/installed, confirmed the displayed version/build, and replied "מאשר הכל" — "I approve everything." Standalone cellular opening/data loading without Mac/Metro and tested commitment/task save/app-reopen persistence were approved. See [the acceptance record](release-0.2.1-verification.md) for the precise scope and prior automated evidence.
 
@@ -122,7 +122,7 @@ This Mac already has ignored `apps/mobile/ios` files. The installed Expo CLI onl
 - `ios/LifeOS/Info.plist`: `CFBundleShortVersionString = 0.2.1`, `CFBundleVersion = 3`.
 - `ios/LifeOS.xcodeproj/project.pbxproj`: Debug/Release `MARKETING_VERSION = 0.2.1`, `CURRENT_PROJECT_VERSION = 3`.
 
-Signing, team, bundle identifier, icons, entitlements, and other settings were preserved. These generated native files remain ignored; do not force-add them. Those values describe the historical 0.2.1 preparation. The current candidate has since synchronized the same fields to **0.4.0 / 7**. Recheck the actual native project before every build; historical synchronization is not a permanent guarantee. Its existing Expo Constants Pod phase regenerates bundled `app.config` on each build from the mobile project root.
+Signing, team, bundle identifier, icons, entitlements, and other settings were preserved. These generated native files remain ignored; do not force-add them. Those values describe the historical 0.2.1 preparation. The accepted 0.4.0 build has since synchronized the same fields to **0.4.0 / 7**. Recheck the actual native project before every build; historical synchronization is not a permanent guarantee. Its existing Expo Constants Pod phase regenerates bundled `app.config` on each build from the mobile project root.
 
 On another existing native checkout, or after changing the app version again, run this targeted synchronization from `apps/mobile` before building. It validates both file shapes before writing and changes only version fields; it does not regenerate native directories or install Pods:
 
@@ -246,4 +246,4 @@ For a target environment that has not received this change, the required rollout
 
 Do not reverse steps 1 and 2. A local Expo Web refresh only loads local frontend code; it does not deploy the local API to Railway or apply the Supabase migration. Until the Railway API response includes both Day Window fields, the updated client shows a non-destructive “server update required” state and does not claim an account save.
 
-Day Window itself adds no native dependency. Under the existing standalone Release delivery path, its JavaScript changes still require building/installing a new app after the database/API prerequisites are live. The historical v0.2.0 and v0.2.1 preparations changed native metadata; the current 0.4.0/build 7 candidate advances it as described above.
+Day Window itself adds no native dependency. Under the existing standalone Release delivery path, its JavaScript changes still require building/installing a new app after the database/API prerequisites are live. The historical v0.2.0 and v0.2.1 preparations changed native metadata; the accepted 0.4.0/build 7 advances it as described above.

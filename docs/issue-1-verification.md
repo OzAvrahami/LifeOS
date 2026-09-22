@@ -1,14 +1,20 @@
 # Issue #1 — Notifications MVP verification
 
-## Current candidate — 2026-09-22
+## Current owner acceptance — 2026-09-22
 
-**LifeOS 0.4.0 (7)** is prepared, compiled, and **not installed or owner-accepted**. #1 remains **Open / Verify / P2 — Medium**. Clean starting `main` was `5d93b92` (Xcode 27 correction), one local commit ahead of fetched `origin/main` at `aba01ce`; that checkpoint is preserved. This extends #1, not another issue. Published Latest and last accepted binary remain **v0.3.0 / 0.3.0 (4)**.
+**LifeOS 0.4.0 (7) is the final owner-accepted build for v0.4.0.** #1 is **Closed / Completed / Done / P2 — Medium**. Source `c99ef3f402687befc37d252d246634dae5ede27a` is pushed; acceptance finalization began from clean `main` equal to fetched `origin/main`. [Final acceptance comment](https://github.com/OzAvrahami/LifeOS/issues/1#issuecomment-5775271352) and Project readback confirm completion. Publication is **prepared / not yet published**; Latest remains v0.3.0. See [release verification](release-0.4.0-verification.md).
+
+**Owner-reported physical evidence:** on 2026-09-22 the owner installed build 7 on an iPhone 17 Pro Max, confirmed successful launch and usable normal visible UI, stated that the implementation appears to work correctly, and explicitly approved v0.4.0 for release. Codex did not independently observe this acceptance or extract an installed-binary source SHA. Individual permission, delivery, background/cold-start, tap, timezone/DST and other checklist scenarios are not all individually attested. The earlier automated/native results remain separate evidence; the release decision does not turn them into physical test results.
+
+**Completed production rollout:** the owner confirms `20260922120000_add_commitment_reminders.sql` was applied to production and remote history reconciled to `20260922120000 | 20260922120000`. Authenticated GitHub readback for exact API source `c99ef3f402687befc37d252d246634dae5ede27a` reports `LifeOS - @lifeos/api = success`, updated **2026-09-22T10:39:33Z** ([commit status](https://github.com/OzAvrahami/LifeOS/commit/c99ef3f402687befc37d252d246634dae5ede27a)). This is owner-reported schema evidence plus GitHub deployment evidence, not a new remote SQL/RLS test or direct Railway active-provider inspection.
+
+**Non-blocking follow-ups:** [#26](https://github.com/OzAvrahami/LifeOS/issues/26) makes category toggles explicit/intuitive; [#27](https://github.com/OzAvrahami/LifeOS/issues/27) reduces clutter with contextual category details. Both are Open / Backlog / P2 — Medium, excluded from v0.4.0 implementation scope and accepted by the owner as non-blocking. No further implementation is included here.
 
 ### Physical findings and candidate history
 
 - **Build 5:** built/installed, failed native launch (scene creation / SIGTRAP); never accepted.
 - **Build 6:** built/installed, successfully survived native startup with the supported UIScene fix. This was a valid startup-compatible candidate, **not a failed build**. During owner acceptance, Task reminder discovery was too indirect and Commitments lacked reminders. It was superseded before final product acceptance, not accepted.
-- **Build 7:** incorporates both findings below. Same Notifications MVP / Minor candidate 0.4.0; a changed binary must not reuse build 6. Compilation is not installation, notification delivery, or owner acceptance.
+- **Build 7:** final owner-accepted **LifeOS 0.4.0 (7)** on 2026-09-22. Installation, launch, usable UI and release approval are owner-reported as scoped above; compilation remains separate evidence.
 
 ### Implemented product changes
 
@@ -31,9 +37,9 @@ New forward migration: [`20260922120000_add_commitment_reminders.sql`](../supaba
 
 No IDs, RLS policies, grants, history or existing reminder intent are rewritten. Old clients can omit new fields; old notification preference patches preserve new values. The server never applies account defaults to commitment creation. API create/read/update/clear validates integer range. `GET /commitments?id=...` supports routing; `?reminders=true` pages in batches of 500 with stable date/start/ID ordering, including datasets above 1,000 rows. No opaque Expo identifier is persisted.
 
-### Current automated and native verification
+### Prior build-7 automated and native verification
 
-| Command/check | New result for build 7 |
+| Command/check | Prior implementation result for build 7 |
 | --- | --- |
 | Focused mobile notification/footer/entry-point command below | **8 suites / 57 passed**, no skips/failures |
 | `npm run test --workspace @lifeos/mobile` | **47 suites / 310 passed / 1 existing Android-only skip**, no failures |
@@ -52,19 +58,17 @@ npm run test --workspace @lifeos/mobile -- --runTestsByPath __tests__/notificati
 NODE_ENV=production xcodebuild -workspace LifeOS.xcworkspace -scheme LifeOS -configuration Release -destination 'generic/platform=iOS' -derivedDataPath /tmp/lifeos7-release build
 ```
 
-The existing local stack was started and pending migrations applied **locally only**, without database reset. The harness creates/cleans disposable Auth users. No remote migration, production data access/mutation, API deployment or new physical-device verification occurred. Mocked notification/DST tests establish calculations and boundary behavior, not actual iOS delivery. Earlier online Expo patch advisories below remain separate; dependency versions were deliberately unchanged and the online dependency check was not repeated for this feature extension.
+**Historical implementation-stage evidence:** the existing local stack was started and pending migrations applied **locally only**, without database reset. The harness creates/cleans disposable Auth users. No remote migration, production data access/mutation, API deployment or new physical-device verification occurred. Mocked notification/DST tests establish calculations and boundary behavior, not actual iOS delivery. Earlier online Expo patch advisories below remain separate; dependency versions were deliberately unchanged and the online dependency check was not repeated for this feature extension.
 
-### Native preservation and rollout gate
+### Native preservation and completed rollout
 
 Expo **57.0.23**, build-properties **57.0.20**, Notifications **57.0.12**, React Native **0.86.2** and all dependency resolutions are unchanged. `ios.enableSceneSupport=true`, generated `EXExpoAppSceneDelegate` / factory-provider setup, signing, entitlements and Pods are preserved. No prebuild, pod installation or regeneration was needed. Native metadata was backed up outside the repository before changing only plist `CFBundleVersion` and both `CURRENT_PROJECT_VERSION` values **6 → 7**; semantic values remain **0.4.0**. Native/environment files remain ignored and environment contents unchanged.
 
-[Current GitHub handoff](https://github.com/OzAvrahami/LifeOS/issues/1#issuecomment-5774740359) read back as Open / Verify / P2 — Medium; original issue metadata and all Project items are unchanged. Local link/anchor validation and `git diff --check` pass; environment hashes and native backup comparisons confirm preservation.
+The [implementation handoff](https://github.com/OzAvrahami/LifeOS/issues/1#issuecomment-5774740359) records the earlier Open / Verify state. Its then-pending commit/push/schema/install/acceptance gates were subsequently completed by the owner; current acceptance and production evidence are above. The final documentation checkpoint prepares publication only and does not change runtime code, native files or the accepted binary.
 
-**Production stop:** migration `20260922120000` has not been applied remotely. Prior build-6 rollout evidence concerns the older schema/API only. After owner review: local Git checkpoint → inspect all pending remote migrations → dry run → explicitly authorized schema application → remote history verification → API push/deployment success → authorized build/install **0.4.0 (7)** → owner acceptance. Do not install the new candidate against the older API/schema. No publication is authorized.
+### Historical build-7 implementation review inventory
 
-### Build-7 review inventory
-
-All paths below belong to this extension. The old Week Task Details file moves to the shared Tasks feature; Git currently shows its unstaged deletion and new destination separately. No files are staged. Ignored native build-number changes are separate from this tracked/new-file inventory.
+The following inventory describes the pre-commit build-7 implementation snapshot, now committed/pushed as `c99ef3f`. All paths below belonged to that extension. The old Week Task Details file moved to the shared Tasks feature; Git then showed its unstaged deletion and new destination separately. No files were staged at that implementation snapshot. Ignored native build-number changes are separate from this tracked/new-file inventory.
 
 ```text
 CHANGELOG.md
@@ -163,7 +167,7 @@ Release compilation ran from `apps/mobile/ios`:
 NODE_ENV=production xcodebuild -workspace LifeOS.xcworkspace -scheme LifeOS -configuration Release -destination 'generic/platform=iOS' -derivedDataPath /tmp/lifeos1-scene-release build
 ```
 
-The signed artifact at `/tmp/lifeos1-scene-release/Build/Products/Release-iphoneos/LifeOS.app` was installed with `xcrun devicectl device install app --device <connected-device> <artifact>`, then launched with `xcrun devicectl device process launch --device <connected-device> il.co.ozavrahami.lifeos`. Filtered device process and installed-app readbacks confirmed continued process existence and version/build. This independently observed startup survival does **not** establish visible UI quality, standalone disconnected operation, actual notification delivery or owner acceptance. No visual device inspection, user-data mutation or notification acceptance scenario was performed. At that checkpoint, owner notification acceptance remained pending. Build 6 was subsequently superseded; the current checklist applies to build 7 after rollout.
+The signed artifact at `/tmp/lifeos1-scene-release/Build/Products/Release-iphoneos/LifeOS.app` was installed with `xcrun devicectl device install app --device <connected-device> <artifact>`, then launched with `xcrun devicectl device process launch --device <connected-device> il.co.ozavrahami.lifeos`. Filtered device process and installed-app readbacks confirmed continued process existence and version/build. This independently observed startup survival does **not** establish visible UI quality, standalone disconnected operation, actual notification delivery or owner acceptance. No visual device inspection, user-data mutation or notification acceptance scenario was performed. At that checkpoint, owner notification acceptance remained pending. Build 6 was subsequently superseded by build 7, which is now owner-accepted as recorded above.
 
 No API/schema code changed, so the previously passing 12-group disposable database run below was not repeated. Dependency installation also reported 21 npm audit findings (15 moderate, 6 high); no broad audit-fix operation was performed. Passing software checks are not physical notification acceptance.
 
@@ -267,17 +271,17 @@ The config check also used process-only `NODE_ENV=production` and `EXPO_NO_DOTEN
 | Field | Value |
 | --- | --- |
 | SemVer impact | Minor: same Notifications MVP candidate, expanded within #1 |
-| Candidate version | LifeOS 0.4.0 |
-| Candidate iOS build | **7**; supersedes startup-compatible but unaccepted build 6 |
+| Candidate / accepted version | LifeOS 0.4.0 |
+| Accepted iOS build | **7**; supersedes startup-compatible but unaccepted build 6 |
 | Version prepared | Yes: root/API/mobile/lock semantic 0.4.0 retained; app.json build 7 |
 | Native version synchronized | Yes: ignored plist and Debug/Release **0.4.0 / 7**, scene/signing/Pods preserved |
-| Physical build installed | **Pending for build 7**; build 5 failed launch; build 6 launched successfully but was superseded |
-| Owner accepted exact build | **Pending; no 0.4.0 candidate has been owner-accepted** |
-| Included issues | #1 Notifications MVP; `aba01ce` + preserved `5d93b92` scene checkpoint + this extension |
+| Physical build installed | **Yes — owner-reported**, iPhone 17 Pro Max, 2026-09-22 |
+| Owner accepted exact build | **Yes — LifeOS 0.4.0 (7)**, owner release approval on 2026-09-22 with the evidence limits above |
+| Included issues | #1 Notifications MVP through `c99ef3f`; includes `aba01ce` and `5d93b92`. #26/#27 deferred. |
 
-## Owner acceptance — pending
+## Historical physical checklist — individual execution not fully attested
 
-Only after the new migration/API rollout, use disposable records in an approved account on **LifeOS 0.4.0 (7)**:
+The checklist below is retained from preparation. Unchecked items mean no specific per-scenario manual result was reported; they are **not current release blockers** after the owner explicitly accepted build 7 for release. Do not mechanically check them or ask to repeat them as a prerequisite to this documentation finalization. Actual accepted evidence is recorded at the top.
 
 - [ ] Confirm visible 0.4.0 (7), normal authenticated standalone launch, no unsolicited prompt; verify allowed/not-requested/denied guidance, contextual permission and iOS Settings/resume.
 - [ ] Today, Week/day, week-only and Inbox Task actions reach the shared details / **הזכר לי**. Set 09:17, edit/cancel/clear/save/reopen; preserve title/planned date/deadline/status/start/completion. Quick Capture remains lightweight.
@@ -287,7 +291,7 @@ Only after the new migration/API rollout, use disposable records in an approved 
 - [ ] Disable/re-enable master and each category without losing intent. Repeat saves/foreground/restart, recover offline/denied permission, and verify no duplicates. Task complete/cancel/reopen retains existing rules.
 - [ ] Weekly weekday/exact-time changes and Week routing work without a plan. Change device timezone and inspect recalculated local Commitment schedules; separately check DST-sensitive cases and Task instant semantics. Check Hebrew RTL, keyboard, touch and scrolling.
 - [ ] Logout/account switch removes prior-account LifeOS pending/delivered requests while unrelated requests remain. Capacity overflow lists deferred reminders and prioritizes nearest Task/Commitment times together; each device reconciles independently.
-- [ ] Record exact installed build and explicit owner approval. Compilation/mocks/exports do not complete acceptance or authorize Done/closure.
+- [x] Record exact installed build and explicit owner approval: **0.4.0 (7)** on **2026-09-22**, owner-reported. This does not attest every preceding scenario.
 
 ## Rollout and manual Git checkpoint — historical, 2026-09-14
 

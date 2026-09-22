@@ -6,12 +6,23 @@ LifeOS follows Semantic Versioning for development and release tags.
 
 ## [Unreleased]
 
+## [0.4.0] — 2026-09-22
+
+**Owner-accepted internal iPhone build: LifeOS 0.4.0 (7). Publication prepared, not yet published.** The date records owner acceptance, not a GitHub publication date. Latest published remains v0.3.0; this is not App Store/TestFlight distribution. See [release verification](docs/release-0.4.0-verification.md).
+
 ### Added
 
-- Notifications MVP (#1): contextual iOS permission, account-scoped master/Task/Commitment/Weekly settings, exact-minute Task reminders, relative Commitment reminders and one recurring Weekly Planning reminder. Today, Week/day, week-only Tasks and Inbox reach shared Task Details / **הזכר לי**; Quick Capture stays lightweight.
-- Commitment reminders support none, at start, 5/15/30/60 minutes or custom 0–1440. Category defaults off, new-item lead defaults to 15 only when enabled; existing commitments retain no reminder. Date/start changes recompute the local reminder, past times warn without substitution, and clearing/deletion cancels. Taps reuse the existing editor. One reconciler prioritizes Task and Commitment fire times together, preserves Weekly capacity, account isolation and stored intent when disabled.
-- New forward migration `20260922120000` extends commitments/settings without changing ownership or old-client behavior; disposable PostgreSQL/Auth/RLS verification passes. Production migration/API rollout and physical notification acceptance remain pending. Summaries, smart suggestions, missed-task intelligence and remote push remain deferred.
-- Active unpublished candidate: **LifeOS 0.4.0 (7)**. Build 5 failed native launch and was never accepted. Build 6 fixed Xcode 27 startup, installed/launched successfully, and was superseded during acceptance after the two product gaps above; it was not a failed build and was not accepted. Build 7 preserves Expo 57.0.23 / build-properties 57.0.20 / Notifications 57.0.12 and UIScene support. Software checks and Xcode Release compilation pass; build 7 has not been installed or accepted. See [Issue #1 verification](docs/issue-1-verification.md).
+- Notifications MVP (#1): contextual iOS permission management and account-scoped settings for Task, Commitment and Weekly Planning reminders.
+- Explicit, exact-minute Task reminders, with shared Task Details / **הזכר לי** access from Today, Week/day, week-only Tasks and Inbox. Quick Capture stays lightweight.
+- Relative Commitment reminders: none, at start, presets or a custom 0–1440-minute lead. The category defaults off; enabled interactive creation uses the configured default (initially 15 minutes). Existing commitments receive no automatic reminder. Moving date/start recomputes the reminder; past times warn without substituting another time.
+- One recurring Weekly Planning reminder at the chosen weekday/local time. Central local reconciliation handles changes, cancellations, capacity, retries and account/logout cleanup while preserving stored intent and unrelated notifications.
+- Notification taps open the existing Task/Commitment experience or Week; stale/missing records are handled safely.
+
+### Fixed
+
+- Xcode 27 / iOS 27 native launch compatibility through Expo's supported UIScene lifecycle, retaining local notification functionality.
+
+Production schema rollout is owner-confirmed and GitHub reports API deployment success for `c99ef3f`. The owner reports successful installation/launch, usable visible UI and that the implementation appears to work correctly, and explicitly approves release. This does not attest every physical permission/delivery/background/cold-start/tap/timezone/DST scenario individually. #26 and #27 are non-blocking future notification-settings UX improvements, not implemented in v0.4.0.
 
 ## [0.3.0] — 2026-09-13
 
