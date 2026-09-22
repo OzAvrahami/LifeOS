@@ -8,7 +8,7 @@ LifeOS follows Semantic Versioning for development and release tags.
 
 ## [0.4.0] — 2026-09-22
 
-**Owner-accepted internal iPhone build: LifeOS 0.4.0 (7). Publication prepared, not yet published.** The date records owner acceptance, not a GitHub publication date. Latest published remains v0.3.0; this is not App Store/TestFlight distribution. See [release verification](docs/release-0.4.0-verification.md).
+**Owner-accepted internal iPhone build: LifeOS 0.4.0 (7).** [LifeOS v0.4.0 — Notifications](https://github.com/OzAvrahami/LifeOS/releases/tag/v0.4.0) is **published and Latest**, non-draft and non-prerelease, published **2026-09-22T11:04:34Z**. The final annotated tag resolves to `ce7e66fb620f046b60fcd2bbe468fad09ac5c96b` and must not be moved or recreated. Post-publication documentation does not change this release source. This is not App Store/TestFlight distribution. See [release verification](docs/release-0.4.0-verification.md).
 
 ### Added
 
@@ -26,7 +26,7 @@ Production schema rollout is owner-confirmed and GitHub reports API deployment s
 
 ## [0.3.0] — 2026-09-13
 
-Installed internal build **0.3.0 / iOS build 4** is **owner-accepted on 2026-09-13** for combined #3/#4 physical-iPhone verification. Both issues are Closed / Completed / Done. This is owner-reported acceptance, separate from previous automated verification. [LifeOS v0.3.0 — Weekly planning and week navigation](https://github.com/OzAvrahami/LifeOS/releases/tag/v0.3.0) was published **2026-09-13T19:24:14Z**, non-draft, non-prerelease and **Latest**, superseding v0.2.1. Its annotated tag resolves to `cefd84a6d8e21c631bc666d49d20ac91ccce2657`. Internal iPhone build remains **0.3.0 (4)**; no App Store/TestFlight publication occurred. See [acceptance and preparation evidence](docs/release-0.3.0-verification.md).
+Installed internal build **0.3.0 / iOS build 4** is **owner-accepted on 2026-09-13** for combined #3/#4 physical-iPhone verification. Both issues are Closed / Completed / Done. This is owner-reported acceptance, separate from previous automated verification. [LifeOS v0.3.0 — Weekly planning and week navigation](https://github.com/OzAvrahami/LifeOS/releases/tag/v0.3.0) was published **2026-09-13T19:24:14Z**, non-draft, non-prerelease and **Latest at publication**, superseding v0.2.1; v0.4.0 superseded it as Latest on 2026-09-22. Its annotated tag resolves to `cefd84a6d8e21c631bc666d49d20ac91ccce2657`. Internal iPhone build remains **0.3.0 (4)**; no App Store/TestFlight publication occurred. See [acceptance and preparation evidence](docs/release-0.3.0-verification.md).
 
 ### Added
 

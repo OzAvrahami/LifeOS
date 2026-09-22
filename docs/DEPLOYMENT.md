@@ -8,7 +8,7 @@
 
 Build 5 failed native launch and was never accepted. Build 6 fixed UIScene startup and was superseded before product acceptance, not failed. Build 7 is the final accepted binary; native plist/Debug/Release preparation and earlier Xcode 27 compilation evidence remain in [the issue record](issue-1-verification.md). Do not rebuild, reinstall or increase the version/build for this documentation checkpoint.
 
-**Publication prepared / not yet published.** Latest GitHub Release remains v0.3.0. The intended v0.4.0 annotated tag must later target the final owner-approved documentation commit, not an invented future SHA or earlier implementation commit. No App Store/TestFlight publication. See [0.4.0 release verification](release-0.4.0-verification.md).
+[LifeOS v0.4.0 — Notifications](https://github.com/OzAvrahami/LifeOS/releases/tag/v0.4.0) is **published and Latest**, non-draft and non-prerelease, published **2026-09-22T11:04:34Z**. The final annotated tag resolves to `ce7e66fb620f046b60fcd2bbe468fad09ac5c96b` and must not be moved or recreated. Accepted internal binary remains **LifeOS 0.4.0 (7)**; later documentation commits do not alter its release source. No publication action remains. No App Store/TestFlight publication. See [0.4.0 release verification](release-0.4.0-verification.md).
 
 ### Historical build-6 scene reconciliation procedure
 
@@ -39,7 +39,7 @@ The preparation, acceptance-documentation (`1712389`), and final publication-doc
 
 **Installed and owner-accepted on 2026-09-13.** The owner confirmed the remaining #3/#4 physical-iPhone scenarios were satisfactory and the installed app visibly reports 0.3.0 (4), from preparation baseline `e1a3470`. Both issues are Closed / Completed / Done / P1 — High. Acceptance is owner-reported; Codex did not observe the device or extract its source SHA. Production migration `20260913120000` and candidate Railway API deployment were already verified before the test, per the owner's handoff; this finalization performs no production mutations or rebuild.
 
-[LifeOS v0.3.0 — Weekly planning and week navigation](https://github.com/OzAvrahami/LifeOS/releases/tag/v0.3.0) is **published and Latest** as of **2026-09-13T19:24:14Z**, non-draft and non-prerelease. Annotated tag target: `cefd84a6d8e21c631bc666d49d20ac91ccce2657`, the final owner-acceptance checkpoint. Later documentation commits do not move this tag. No publication action remains and no App Store/TestFlight release occurred. See [current acceptance](release-0.3.0-verification.md). The [Mobile Version / Build Policy](DEVELOPMENT_WORKFLOW.md#mobile-version--build-policy) still applies to any future new binary; do not bump/rebuild accepted 0.3.0 (4) to record approval.
+[LifeOS v0.3.0 — Weekly planning and week navigation](https://github.com/OzAvrahami/LifeOS/releases/tag/v0.3.0) was **published as Latest** at **2026-09-13T19:24:14Z**, subsequently superseded by v0.4.0 on 2026-09-22, non-draft and non-prerelease. Annotated tag target: `cefd84a6d8e21c631bc666d49d20ac91ccce2657`, the final owner-acceptance checkpoint. Later documentation commits do not move this tag. No publication action remains and no App Store/TestFlight release occurred. See [current acceptance](release-0.3.0-verification.md). The [Mobile Version / Build Policy](DEVELOPMENT_WORKFLOW.md#mobile-version--build-policy) still applies to any future new binary; do not bump/rebuild accepted 0.3.0 (4) to record approval.
 
 ## Weekly Planning lifecycle rollout — Issue #3, 2026-09-13
 

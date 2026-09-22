@@ -1,17 +1,17 @@
 # LifeOS Implementation Status
 
 - **Last updated:** 2026-09-22
-- **#1 handoff status:** Closed / Completed / Done / P2 — Medium. **LifeOS 0.4.0 (7)** is owner-accepted for release on 2026-09-22; production schema/API rollout is complete. Publication is prepared, not yet published. See [current verification](issue-1-verification.md).
+- **#1 handoff status:** Closed / Completed / Done / P2 — Medium. **LifeOS 0.4.0 (7)** is owner-accepted for release on 2026-09-22; production schema/API rollout is complete. v0.4.0 is published and Latest. See [current verification](issue-1-verification.md).
 - **Accepted internal build:** LifeOS **0.4.0 (7)** on iPhone 17 Pro Max, owner-reported installation, launch, usable normal UI and release approval on **2026-09-22**. Includes #1. See [release verification](release-0.4.0-verification.md).
-- **Current work item:** v0.4.0 acceptance/publication documentation only; no implementation is selected. #26 explicit category toggles and #27 contextual category details are non-blocking Open / Backlog / P2 follow-ups, not part of v0.4.0.
+- **Current work item:** v0.4.0 post-publication documentation only; no implementation is selected. #26 explicit category toggles and #27 contextual category details are non-blocking Open / Backlog / P2 follow-ups, not part of v0.4.0.
 - **Project status:** #3 and #4 are Closed / Completed / Done / P1 — High, read back after the owner accepted 0.3.0 (4). #7/#8/#10 and #11/#12/#13 remain Closed / Completed / Done. Priorities, unrelated states, labels, assignees, milestones and membership are preserved.
-- **Latest published release:** [LifeOS v0.3.0 — Weekly planning and week navigation](https://github.com/OzAvrahami/LifeOS/releases/tag/v0.3.0), published **2026-09-13T19:24:14Z**, non-draft and non-prerelease. Annotated tag target: `cefd84a6d8e21c631bc666d49d20ac91ccce2657`, the accepted #3/#4 checkpoint. v0.2.1 is historical; post-publication docs do not move the tag.
+- **Latest published release:** [LifeOS v0.4.0 — Notifications](https://github.com/OzAvrahami/LifeOS/releases/tag/v0.4.0) is **published and Latest**, non-draft and non-prerelease, published **2026-09-22T11:04:34Z**. The final annotated tag resolves to `ce7e66fb620f046b60fcd2bbe468fad09ac5c96b` and must not be moved or recreated. Accepted internal binary remains **0.4.0 (7)**; later documentation commits are separate from the tagged acceptance checkpoint.
 - **Last owner-accepted internal version:** **0.4.0/build 7**, source baseline `c99ef3f402687befc37d252d246634dae5ede27a`. No installed-binary SHA was extracted. Build 5 failed launch; build 6 fixed startup but was superseded, not failed or accepted. Earlier 0.3.0 and 0.2.1 acceptances remain separate historical evidence.
 - **Acceptance:** The owner states 0.4.0 (7) appears to work correctly and explicitly approves release. This does not attest every individual permission/delivery/background/cold-start/tap/timezone/DST scenario. Prior automated/native evidence supports internal behavior separately; no new instrumented production or full accessibility audit is claimed.
 - **API evidence:** Owner-confirmed production application/history reconciliation of `20260922120000` (`20260922120000 | 20260922120000`). GitHub reports `LifeOS - @lifeos/api = success` for exact source `c99ef3f`, updated `2026-09-22T10:39:33Z`; no independent active-provider inspection was performed.
-- **Current phase:** Phase 9 ongoing usage continues. Prior 0.2.1/0.3.0 publication milestones are complete; 0.4.0 (7) internal acceptance is complete and GitHub publication is prepared, not yet performed.
+- **Current phase:** Phase 9 ongoing usage continues. 0.4.0 (7) internal acceptance and v0.4.0 publication are complete, alongside the historical 0.2.1/0.3.0 milestones.
 - **Phase 8 status:** Historical standalone verification remains recorded for 2026-08-20; current 0.2.1 owner evidence is separately dated 2026-09-08.
-- **Next action:** Owner review and manual acceptance-documentation Git checkpoint, followed by separate manual v0.4.0 tag/publication. No schema/API/device rollout remains pending for this accepted build.
+- **Next action:** No v0.4.0 publication, schema/API or device rollout remains. #26/#27 remain future non-blocking UX work; no new implementation is selected.
 
 This document is the current source of truth for implementation status. “Verified” means supported by tracked code plus a repeatable repository check; it does not imply remote or real-device verification unless stated.
 
@@ -67,7 +67,7 @@ The owner previously accepted isolated preview/demo behavior and now reports acc
 | Cross-screen synchronization | ✅ Verified in automation, remotely, and on device | TanStack Query user-scoped caches | Cache membership/request-audit tests | Targeted cache updates prevent copies and request multipliers; remote and real-device Core Flow remained consistent. |
 | Automated tests | ✅ #3 software and local integration checks passed | N/A | Prior #3 runs: 40 Mobile suites, 258 passed / 1 existing Android exclusion; 8 API suites, 77 passed; separate Android regression 3 passed | Independent local harness rerun passed all 11 PostgreSQL/Auth/RLS groups on 2026-09-13. Full suites were not rerun for the documentation follow-up. See [exact commands and evidence boundaries](issue-3-verification.md#automated-evidence). |
 | Real-device verification | ✅ Historical verification + owner-accepted 0.2.1 flows | Remote authenticated persistence observed on device | Real-iPhone development and Release-build smokes | The installed Release build operated over cellular with Metro, the local API, and the Mac unavailable. It remains development-signed and is not a TestFlight or App Store release. |
-| Notifications MVP (#1) | Owner-accepted 0.4.0 (7); publication prepared | Production schema rollout confirmed by owner; GitHub API status success | Prior: 47 mobile suites (310 passed, 1 existing skip); 86 API tests; 13 local DB/RLS groups | #1 completed. Owner reports install/launch/usable UI and approves release; individual notification scenarios are not all attested. #26/#27 remain non-blocking follow-ups. See [#1](issue-1-verification.md). |
+| Notifications MVP (#1) | Owner-accepted 0.4.0 (7); v0.4.0 published | Production schema rollout confirmed by owner; GitHub API status success | Prior: 47 mobile suites (310 passed, 1 existing skip); 86 API tests; 13 local DB/RLS groups | #1 completed. Owner reports install/launch/usable UI and approves release; individual notification scenarios are not all attested. #26/#27 remain non-blocking follow-ups. See [#1](issue-1-verification.md). |
 | Life Areas and broader product modules | ⏸️ Deferred | None | None | Life Areas UI remains disabled; recurring task schedules, external calendars, AI, projects, habits, and billing are outside the current gate. |
 
 ## Evidence by subsystem
@@ -124,13 +124,17 @@ The owner previously accepted isolated preview/demo behavior and now reports acc
 ## Current Critical Path
 
 1. #3 and #4 are complete on owner-accepted 0.3.0 (4); acceptance checkpoint `cefd84a` is the fixed published v0.3.0 tag source.
-2. v0.3.0 publication is complete. Preserve the fixed tag, accepted behavior and unrelated backlog; no further implementation or build is selected.
+2. v0.4.0 publication is complete at fixed tag source `ce7e66fb620f046b60fcd2bbe468fad09ac5c96b`. Preserve published tags, accepted behavior and unrelated backlog; no further implementation or build is selected.
 
 ## Current release gate
 
-### v0.3.0/build 4
+### v0.4.0/build 7
 
-**Status: PUBLISHED ON GITHUB; INSTALLED AND OWNER-ACCEPTED.** #3 and #4 are Closed/Completed/Done after owner-reported physical acceptance on 2026-09-13. Production prerequisites were confirmed before the test. v0.3.0 is Latest, published 2026-09-13 at 19:24:14 UTC, non-draft and non-prerelease. Its annotated tag remains at `cefd84a6d8e21c631bc666d49d20ac91ccce2657`; later documentation commits are separate. See [the acceptance record](release-0.3.0-verification.md).
+**Status: PUBLISHED ON GITHUB; INSTALLED AND OWNER-ACCEPTED.** [LifeOS v0.4.0 — Notifications](https://github.com/OzAvrahami/LifeOS/releases/tag/v0.4.0) is **published and Latest**, non-draft and non-prerelease, published **2026-09-22T11:04:34Z**. The final annotated tag resolves to `ce7e66fb620f046b60fcd2bbe468fad09ac5c96b` and must not be moved or recreated. Accepted internal binary remains **0.4.0 (7)**. #1 is complete; #26/#27 are future non-blocking UX work. No App Store/TestFlight publication. See [publication evidence](release-0.4.0-verification.md).
+
+### v0.3.0/build 4 — historical
+
+**Status: PUBLISHED ON GITHUB; INSTALLED AND OWNER-ACCEPTED.** #3 and #4 are Closed/Completed/Done after owner-reported physical acceptance on 2026-09-13. Production prerequisites were confirmed before the test. v0.3.0 was published as Latest on 2026-09-13 at 19:24:14 UTC, superseded by v0.4.0 on 2026-09-22, non-draft and non-prerelease. Its annotated tag remains at `cefd84a6d8e21c631bc666d49d20ac91ccce2657`; later documentation commits are separate. See [the acceptance record](release-0.3.0-verification.md).
 
 ### v0.2.1/build 3
 
@@ -156,7 +160,7 @@ The owner previously accepted isolated preview/demo behavior and now reports acc
 
 ## Next Action
 
-**Next gate:** Owner review/manual documentation checkpoint and separate v0.4.0 publication. No new implementation is selected; #26/#27 remain Backlog and unrelated backlog/dispositions are unchanged.
+**Next gate:** None for v0.4.0; acceptance and publication are complete. #26/#27 remain future non-blocking Backlog work; unrelated backlog/dispositions are unchanged.
 
 ## v0.2.0 preparation validation — 2026-09-06
 
