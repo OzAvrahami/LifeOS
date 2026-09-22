@@ -1,6 +1,53 @@
 # Issue #1 — Notifications MVP verification
 
-## Scope and baseline
+## Xcode 27 launch correction — 2026-09-22
+
+Current candidate: **LifeOS 0.4.0 (6)**. Issue #1 remains **Open / Verify / P2 — Medium**; notification acceptance is pending. Source baseline: `aba01cefa4997843cd8fa687a4792971c1d946fc`, clean `main` equal to `origin/main` after the authorized fetch. The compatibility changes are uncommitted. [Current GitHub handoff](https://github.com/OzAvrahami/LifeOS/issues/1#issuecomment-5773875628) was read back with Open / Verify / P2, original labels/assignees/milestone/membership and all other Project items unchanged.
+
+**Failed physical candidate — owner-reported:** 0.4.0 (5) built and installed successfully on an iPhone 17 Pro Max using Xcode 27, but terminated immediately at launch. The reported console sequence was process startup, UNUserNotificationCenter initialization, SpringBoard scene-creation failure, then native SIGTRAP before normal React/Expo UI startup. Build 5 failed launch acceptance and was **never owner-accepted**. Build 6 identifies a changed binary; the repository policy forbids reusing build 5. The last accepted binary remains 0.3.0 (4).
+
+The evidence matches [Expo's Xcode 27 / iOS 27 UIScene issue](https://github.com/expo/expo/issues/46664). UIKit requires the scene lifecycle with the new SDK; the previous native project had no scene manifest and created its window from AppDelegate. Notification-center initialization is not itself evidence of a Notifications defect. Older SDK/OS combinations and JavaScript tests/exports do not exercise this new native requirement; the upstream failure also occurs on iOS 27 simulators, so simulator success on another environment cannot establish physical compatibility.
+
+### Supported dependency and native changes
+
+- Installed the minimum documented SDK 57 fix through Expo tooling: `expo` **57.0.14 → 57.0.23**, added `expo-build-properties` **57.0.20**, and enabled `ios.enableSceneSupport`. React **19.2.3**, React Native **0.86.2**, Notifications **57.0.12**, product version **0.4.0**, bundle identifier and existing explicit plugins are retained. The lockfile includes required Expo tooling/transitive resolutions, including ExpoModulesCore **57.0.18**, asset **57.0.18**, constants **57.0.19**, file-system **57.0.7**, font **57.0.4** and autolinking **57.0.13**; it is not a claim that every old transitive resolution stayed fixed. No SDK 58 or unrelated direct dependency upgrade.
+- Complete native backup: `/tmp/lifeos-ios-before-scene-support-dwd1lc5w/ios`. The first prebuild invocation used this CLI's default regeneration; the entire original project was restored from that backup before rerunning the supported **`--no-clean`** path. The discarded generated attempt is separately retained under `/tmp/lifeos1-scene-initial-generated-ios`.
+- Reconciliation ran **from `apps/mobile`**, with `CI=1 npx --no-install expo prebuild --platform ios --no-clean --no-install --skip-dependency-update react,react-native`. Generated Info.plist now declares `UIApplicationSceneManifest` / `EXExpoAppSceneDelegate`; AppDelegate conforms to `ExpoReactNativeFactoryProvider` and no longer creates/starts the legacy window. No custom SceneDelegate was written.
+- Readback verifies plist **0.4.0 / 6** and both Debug/Release `MARKETING_VERSION=0.4.0`, `CURRENT_PROJECT_VERSION=6`. Original signing team, automatic signing, bundle ID, provisioning settings, schemes, icons and permissions are preserved. Expo build-properties added its standard precompiled-module/privacy/static-link properties.
+- Expo's implicit notifications prebuild plugin added `aps-environment` even without an explicit plugin entry. The original entitlements were restored exactly after checking that this was the only semantic difference. Local notifications need no APNs entitlement, custom sounds or remote background mode. Future prebuilds must repeat this entitlement review; do not restore the old AppDelegate/Info.plist over the scene fix.
+- Initial `pod install` exposed stale local podspec locks. Targeted `pod update Expo ExpoModulesCore ExpoModulesWorklets ExpoFileSystem ExpoFont ExpoAsset EXConstants --no-repo-update` succeeded: **110 pods / 111 Podfile dependencies**. Podfile.lock equals Pods/Manifest.lock. ExpoNotifications **57.0.12** and React-Core **0.86.2** remain linked; iOS autolinking reports no duplicates. Native files stay ignored.
+
+### Current verification
+
+| Check | Result on this Mac |
+| --- | --- |
+| `npm run test --workspace @lifeos/mobile -- --runTestsByPath __tests__/notifications-test.ts __tests__/notification-provider-test.tsx __tests__/notification-ui-test.tsx __tests__/notification-web-test.tsx __tests__/app-version-footer-test.tsx` | **5 suites / 36 tests passed**, no skips/failures |
+| `npm run test --workspace @lifeos/mobile` | **44 suites / 289 passed / 1 existing Android-only skip**, no failures |
+| `npm run test --workspace @lifeos/api` | **10 suites / 83 passed**, no skips/failures |
+| `npm run typecheck`; `npm run lint` | API/mobile passed |
+| Production Expo config evaluation | **0.4.0 (6)**, scene opt-in and all prior explicit plugins retained |
+| `npx --no-install expo-modules-autolinking verify --platform ios` and `resolve --platform ios --json` (mobile directory) | Passed; one ExpoNotifications 57.0.12 module, no duplicates |
+| `npx --no-install expo export --platform ios --output-dir /tmp/lifeos1-scene-ios-export` (mobile directory, production / dotenv disabled / process-only placeholder API and public Supabase values) | Passed: one Hermes bundle; no environment files changed |
+| `CI=1 npx --no-install expo install --check` (mobile directory) | **Advisory failure**: recommends Expo 57.0.24, build-properties 57.0.21, dev-client 57.0.19, linking 57.0.10, notifications 57.0.20, router 57.0.22, splash-screen 57.0.9, React Native 0.86.3, eslint-config-expo 57.0.2, jest-expo 57.0.5. No exclusions hide it; minimum supported scene patch retained to limit scope. |
+| `git diff --check`; modified-document local links/anchors; version/environment preservation checks | Passed; 40 local links checked, zero missing paths/anchors; product versions unchanged, environment hashes unchanged |
+| Xcode 27.0 (27A266a), iPhoneOS 27.0 signed Release | **BUILD SUCCEEDED**; built plist 0.4.0 / 6, scene manifest/classes, production API bundle and code signature verified; no APNs entitlement |
+| Physical install / launch with `xcrun devicectl` | **Passed installation and launch** on the connected physical iPhone running iOS 27.0; installed metadata reads 0.4.0 / 6. Same LifeOS process (PID 19850) observed at 22 and 63 seconds after launch. |
+
+Release compilation ran from `apps/mobile/ios`:
+
+```bash
+NODE_ENV=production xcodebuild -workspace LifeOS.xcworkspace -scheme LifeOS -configuration Release -destination 'generic/platform=iOS' -derivedDataPath /tmp/lifeos1-scene-release build
+```
+
+The signed artifact at `/tmp/lifeos1-scene-release/Build/Products/Release-iphoneos/LifeOS.app` was installed with `xcrun devicectl device install app --device <connected-device> <artifact>`, then launched with `xcrun devicectl device process launch --device <connected-device> il.co.ozavrahami.lifeos`. Filtered device process and installed-app readbacks confirmed continued process existence and version/build. This independently observed startup survival does **not** establish visible UI quality, standalone disconnected operation, actual notification delivery or owner acceptance. No visual device inspection, user-data mutation or notification acceptance scenario was performed. The owner must still verify the checklist below on build 6.
+
+No API/schema code changed, so the previously passing 12-group disposable database run below was not repeated. Dependency installation also reported 21 npm audit findings (15 moderate, 6 high); no broad audit-fix operation was performed. Passing software checks are not physical notification acceptance.
+
+**Read-only rollout evidence, 2026-09-22:** linked remote migration history includes `20260914120000`; GitHub's `LifeOS - @lifeos/api` status for `aba01cefa4997843cd8fa687a4792971c1d946fc` is success (updated 2026-09-14T20:45:07Z). Live GET `/health` returned the actual contract `{ "service": "lifeos-api", "status": "ok" }`. This is migration history plus historical GitHub deployment status/live health, not direct Railway active-deployment inspection or proof of writes/RLS/notification delivery. No migration was applied or production data mutated here. Production native configuration matches the documented Railway HTTPS endpoint, public Supabase configuration is present, and Release routes use normal server/authentication behavior. No preview or local API override is selected.
+
+The sections explicitly labelled historical below preserve the original Windows implementation evidence. Their then-pending native/rollout statements do not override this correction.
+
+## Scope and baseline — historical implementation, 2026-09-14
 
 Issue: [#1 — Feature: Notifications MVP](https://github.com/OzAvrahami/LifeOS/issues/1). Implementation date: 2026-09-14. Baseline: `main`, `7313672dfd64ebb5884655ae9d881757b9a57d3d` (`docs(release): record v0.3.0 publication`), equal to `origin/main` after the explicitly authorized fetch. The worktree was clean. Existing ignored API/mobile environment files were inventoried and preserved. No implementation of another issue is included.
 
@@ -44,7 +91,7 @@ Task notification content contains a generic Hebrew title and the real Task titl
 
 Reminder intent/preferences are account state. Each signed-in iPhone reconciles independently. There is no remote delivery or cancellation on a device that has not synced a change. iOS can deliver already scheduled requests while LifeOS is closed; force-closing does not run new reconciliation. Offline edits elsewhere, logout on another device and device capacity cannot be solved by this local-only MVP. System Focus/permission settings may affect presentation. Physical timezone/DST and closed-app delivery checks remain pending.
 
-## Native dependency and preparation
+## Native dependency and preparation — historical, 2026-09-14
 
 Added **`expo-notifications` 57.0.12**, pinned to the version in installed Expo 57.0.14's bundled compatibility manifest; added transitive `expo-application` 57.0.3 and `badgin` 1.2.3. All pre-existing locked dependency versions/resolutions are preserved. The initially selected 57.0.18 required duplicate native `expo-constants`; that intermediate installation was replaced. Final iOS autolinking verification reports no duplicates.
 
@@ -52,7 +99,7 @@ No notification config plugin was added: the installed plugin adds an APNs entit
 
 **Native preparation limitation:** this Windows checkout has no `apps/mobile/ios`, CocoaPods or Xcode. The documented Mac checkout is not accessible in this session. No ignored iOS file was changed or fabricated; native version synchronization and Pods validation remain explicit external gates. This record is not an instruction to build/install before those gates and schema/API rollout are complete.
 
-## Automated verification
+## Automated verification — historical, 2026-09-14
 
 All commands below exited 0 unless explicitly identified as an advisory failure. Run from the repository root unless a different directory is specified. Mocks and exports establish software behavior, not real notification delivery or physical wheel layout.
 
@@ -95,20 +142,20 @@ The config check also used process-only `NODE_ENV=production` and `EXPO_NO_DOTEN
 
 | Field | Value |
 | --- | --- |
-| SemVer impact | Minor: explicit user-facing notifications capability |
+| SemVer impact | Minor: existing Notifications MVP candidate; this correction does not add another feature |
 | Candidate version | LifeOS 0.4.0 |
-| Candidate iOS build | 5; previous accepted binary is 0.3.0 (4), no later candidate found in accessible evidence |
-| Version prepared | Yes, 2026-09-14: root/API/mobile manifests, exactly four lockfile product version values, app.json version/build; production config/footer/export verified |
-| Native version synchronized | Pending: existing ignored Mac iOS project unavailable here |
-| Physical build installed | Pending; build/install explicitly prohibited in this task |
-| Owner accepted exact build | Pending |
-| Included issues | #1 first slice, uncommitted work on baseline `7313672dfd64ebb5884655ae9d881757b9a57d3d` |
+| Candidate iOS build | **6**; changed binary supersedes failed physical build 5 |
+| Version prepared | Yes: semantic 0.4.0 retained in root/API/mobile/lock; app.json build 6 |
+| Native version synchronized | Yes, 2026-09-22: ignored plist and Debug/Release 0.4.0 / 6; supported scene generation and Pods verified |
+| Physical build installed | **Yes**, 0.4.0 (6), installed by Codex on the connected iOS 27 iPhone on 2026-09-22; device metadata read back. Build 5 was installed but failed native launch. |
+| Owner accepted exact build | **Pending; neither build 5 nor build 6 is owner-accepted** |
+| Included issues | #1 Notifications MVP at `aba01ce`, plus the uncommitted Xcode 27 compatibility correction |
 
-**Candidate: LifeOS 0.4.0 (5); not installed/accepted.** Published release and last accepted binary remain v0.3.0 / 0.3.0 (4).
+Published release and last accepted binary remain v0.3.0 / 0.3.0 (4). No 0.4.0 publication is claimed.
 
 ## Owner acceptance — pending
 
-- [ ] On a later authorized 0.4.0 (5) iPhone candidate, verify normal authenticated launch without an unsolicited prompt; inspect all Settings permission states, contextual request, denied guidance, iOS Settings and resume reconciliation.
+- [ ] On the 0.4.0 (6) iPhone candidate, first confirm it remains open past native startup; then, verify normal authenticated launch without an unsolicited prompt; inspect all Settings permission states, contextual request, denied guidance, iOS Settings and resume reconciliation.
 - [ ] Use an isolated test account to set 09:10, 09:25 and 09:17 reminders; edit, cancel draft, clear, save/reopen, preserve title/date/deadline and verify narrow-screen Hebrew RTL/safe areas.
 - [ ] Verify actual foreground, background and closed-app delivery; tap to the real Task. Complete/cancel/clear/reschedule and confirm old pending reminders disappear. Test a missing task and an already-completed task safely.
 - [ ] Disable/re-enable master/tasks/weekly without erasing intent; verify one future request after repeated saves/restarts/resume and safe blocked/offline recovery.
@@ -116,7 +163,7 @@ The config check also used process-only `NODE_ENV=production` and `EXPO_NO_DOTEN
 - [ ] Switch accounts/logout and verify previous-account pending/delivered LifeOS notifications disappear; unrelated notifications remain. Confirm independent multi-device semantics.
 - [ ] Record exact installed version/build and owner acceptance; only then consider Done/closing. No device acceptance box is complete from mocks, jsdom or export.
 
-## Rollout and manual Git checkpoint
+## Rollout and manual Git checkpoint — historical, 2026-09-14
 
 Final GitHub readback: **Open / Verify / P2 — Medium**, existing item `PVTI_lAHOAgE74M4BhLsqzg3oDwc`; feature/mobile labels, empty assignees, no milestone and membership preserved. [Verified handoff comment](https://github.com/OzAvrahami/LifeOS/issues/1#issuecomment-5664472014). The issue body reflects the approved first slice and truthful Release / Build gate; physical acceptance remains unchecked. Verify is justified by completed software/automated scope with the explicit external gates documented above, not native or production acceptance.
 
@@ -124,7 +171,7 @@ After review, the owner controls staging and a local commit. **Hold the deployme
 
 Complete native version/Pods preparation on the existing Mac project and validate preserved settings before any separately authorized iPhone build. No staging, commit, push, remote migration, deployment, native build/install, tag, release publication or issue closure occurred. Suggested future manual commit: `feat(notifications): add explicit local task and weekly reminders`.
 
-## Git review inventory
+## Git review inventory — historical, 2026-09-14
 
 Final source HEAD remains `7313672dfd64ebb5884655ae9d881757b9a57d3d` on `main`, equal to the fetched `origin/main`. No staged changes. All listed modifications belong to #1; there was no pre-existing owner work. Existing ignored environment files were not edited; native iOS files are absent. This is ready for local owner review/commit, with push/build held for the documented external gates.
 

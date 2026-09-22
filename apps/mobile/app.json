@@ -10,7 +10,7 @@
     "ios": {
       "supportsTablet": false,
       "bundleIdentifier": "il.co.ozavrahami.lifeos",
-      "buildNumber": "5"
+      "buildNumber": "6"
     },
     "android": {
       "package": "com.lifeos.mobile",
@@ -21,7 +21,15 @@
       "expo-font",
       "expo-asset",
       "expo-splash-screen",
-      "@react-native-community/datetimepicker"
+      "@react-native-community/datetimepicker",
+      [
+        "expo-build-properties",
+        {
+          "ios": {
+            "enableSceneSupport": true
+          }
+        }
+      ]
     ],
     "experiments": {
       "typedRoutes": true,

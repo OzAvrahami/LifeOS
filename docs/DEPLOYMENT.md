@@ -1,14 +1,27 @@
 # LifeOS Deployment
 
-## Notifications candidate — Issue #1, 2026-09-14
+## Notifications candidate — Issue #1, 2026-09-22
 
-Candidate target: **LifeOS 0.4.0 (5)**, not installed/accepted/published. The first slice adds local iOS notification delivery with persisted account settings and Task reminder intent. Migration `20260914120000_add_notification_intent.sql` extends existing `tasks`/`user_settings`, preserving RLS and old-client defaults. The disposable local gate passed, including exact timestamps, clear/history behavior, settings patch preservation, invalid values, user isolation and 1,001 reminder rows across pagination.
+Active candidate: **LifeOS 0.4.0 (6)**, owner acceptance pending, unpublished. Build **0.4.0 (5)** successfully built/installed on the owner's iPhone 17 Pro Max but failed native launch under Xcode 27/iOS 27 (scene creation / SIGTRAP). It was never accepted. Build 6 preserves the existing local Notifications MVP and corrects native lifecycle compatibility; it is not another feature or semantic-version increase.
 
-**Hold deployment-triggering push until schema readiness is verified.** After the owner's local Git checkpoint, inspect all linked pending migrations and the remote dry run; apply only with explicit authorization, verify remote history, then authorize API push/deployment and verify the compatible API. No remote migration or deployment occurred here. An old API cannot persist notification settings; the client shows that limitation rather than pretending local state is authoritative.
+The earlier Windows preparation's unavailable-native/rollout gates are historical. This Mac now has verified scene support, native 0.4.0 / 6, preserved signing and synchronized Pods. The signed Xcode 27 Release compiled and installed successfully; device metadata confirms 0.4.0 (6), and the launched process survived at least 63 seconds. Owner visual/notification acceptance is still pending. Read-only remote migration history includes `20260914120000_add_notification_intent.sql`; GitHub reports successful API deployment status for `aba01ce`, and live `/health` returns `service: lifeos-api`, `status: ok`. These checks do not establish production writes, direct Railway active deployment inspection or notification acceptance. No migration/deployment was performed during this correction.
 
-The final added dependency is Expo-compatible `expo-notifications` **57.0.12** (plus `expo-application`/`badgin`), with existing locked resolutions preserved and no duplicate iOS native modules in autolinking verification. There is no APNs entitlement/plugin, push registration or remote infrastructure. A JS reload alone cannot add this native module to the accepted 0.3.0 binary: the existing Mac iOS project needs normal CocoaPods synchronization and a later separately authorized new binary. **Do not build/install yet.** This Windows checkout lacks the ignored `apps/mobile/ios` project, CocoaPods and Xcode; ignored native version fields and Pods remain pending, and no project was regenerated. Synchronize the established 0.4.0 / 5 plist/pbxproj fields and preserve signing/bundle settings on that Mac before any authorized build.
+### Xcode 27 scene support on the existing native project
 
-See [Issue #1 verification](issue-1-verification.md) for exact automated evidence, permission/device semantics, release gate and pending physical checklist. Published/accepted 0.3.0 history below remains accurate.
+[Expo's SDK 57 remediation](https://github.com/expo/expo/issues/46664) requires Expo >=57.0.23, build-properties >=57.0.20, and `ios.enableSceneSupport: true`. This checkout pins those minimums, retains React Native 0.86.2 / Notifications 57.0.12, and uses the normal internal Release path. The online dependency checker still recommends newer patches; see [the exact advisory and native verification](issue-1-verification.md#xcode-27-launch-correction--2026-09-22).
+
+Before native reconciliation, back up the entire ignored iOS directory outside the repository and snapshot signing, entitlements, schemes and version fields. The current backup is `/tmp/lifeos-ios-before-scene-support-dwd1lc5w/ios`. **Run prebuild from `apps/mobile`, never repository root, and use explicit `--no-clean`**: this CLI regenerates by default. The initial default attempt was replaced by restoring the complete backup before the preserving run.
+
+```bash
+cd /Users/ozavrahami/code/lifeOS/apps/mobile
+CI=1 npx --no-install expo prebuild --platform ios --no-clean --no-install --skip-dependency-update react,react-native
+```
+
+Inspect generated changes against the backup. Info.plist must name `EXExpoAppSceneDelegate`; AppDelegate must adopt `ExpoReactNativeFactoryProvider` and relinquish legacy window startup. Retain generated scene changes, synchronize all four version/build fields, and preserve signing. Expo's implicit notifications plugin may add `aps-environment` despite no explicit plugin entry: this local-only app must retain its original entitlements. In this reconciliation, the added APNs key was the only entitlement difference and the exact original entitlement file was restored. Do not enable remote background notification mode or add push infrastructure.
+
+Run normal `pod install` from `apps/mobile/ios`. Here stale local podspec locks required the targeted command `pod update Expo ExpoModulesCore ExpoModulesWorklets ExpoFileSystem ExpoFont ExpoAsset EXConstants --no-repo-update`; it installed 110 pods, retaining ExpoNotifications 57.0.12 and React-Core 0.86.2. Validate lock/manifest equality and iOS autolinking before Release compilation. Keep all native files ignored. Do not restore the old AppDelegate/Info.plist over the scene fix.
+
+See [Issue #1 verification](issue-1-verification.md) for the build/launch outcome and pending physical checklist. Accepted/published 0.3.0 history below remains accurate.
 
 **Historical 0.2.1 acceptance:** LifeOS 0.2.1/build 3 was installed and **owner-accepted through the standalone internal iPhone delivery path** for #11/#12/#13. On 2026-09-08, after manually committing/pushing preparation `2aa6bc4a246a06efc31a6c7753b1ad9f51b8a102`, the owner built/installed, confirmed the displayed version/build, and replied "מאשר הכל" — "I approve everything." Standalone cellular opening/data loading without Mac/Metro and tested commitment/task save/app-reopen persistence were approved. See [the acceptance record](release-0.2.1-verification.md) for the precise scope and prior automated evidence.
 
@@ -16,7 +29,7 @@ This is owner-reported acceptance, not independent device observation, binary-SH
 
 The preparation, acceptance-documentation (`1712389`), and final publication-documentation checkpoints are complete. [LifeOS v0.2.1 — Planning fixes](https://github.com/OzAvrahami/LifeOS/releases/tag/v0.2.1) was published on 2026-09-08 at 09:19:03 UTC as Latest, non-draft, non-prerelease; v0.3.0 superseded it as Latest on 2026-09-13. Its annotated tag resolves to `93fde4306132f2301f5e2b02c3c374f5c203a1cd`. Later documentation changes do not alter this release source. See [the publication record](release-0.2.1-verification.md#current-publication-and-workflow--2026-09-08). No further build or binary attachment was required for that workflow reconciliation. The later #3/#4 implementations were subsequently owner-accepted on 0.3.0 (4), as recorded below; 0.2.1 remains separate historical acceptance evidence.
 
-## Current internal build — LifeOS 0.3.0 (4)
+## Last owner-accepted internal build — LifeOS 0.3.0 (4)
 
 **Installed and owner-accepted on 2026-09-13.** The owner confirmed the remaining #3/#4 physical-iPhone scenarios were satisfactory and the installed app visibly reports 0.3.0 (4), from preparation baseline `e1a3470`. Both issues are Closed / Completed / Done / P1 — High. Acceptance is owner-reported; Codex did not observe the device or extract its source SHA. Production migration `20260913120000` and candidate Railway API deployment were already verified before the test, per the owner's handoff; this finalization performs no production mutations or rebuild.
 
@@ -103,7 +116,7 @@ This Mac already has ignored `apps/mobile/ios` files. The installed Expo CLI onl
 - `ios/LifeOS/Info.plist`: `CFBundleShortVersionString = 0.2.1`, `CFBundleVersion = 3`.
 - `ios/LifeOS.xcodeproj/project.pbxproj`: Debug/Release `MARKETING_VERSION = 0.2.1`, `CURRENT_PROJECT_VERSION = 3`.
 
-Signing, team, bundle identifier, icons, entitlements, and other settings were preserved. These generated native files remain ignored; do not force-add them. Those values describe the historical 0.2.1 preparation. The current candidate has since synchronized the same fields to **0.3.0 / 4**. Recheck the actual native project before every build; historical synchronization is not a permanent guarantee. Its existing Expo Constants Pod phase regenerates bundled `app.config` on each build from the mobile project root.
+Signing, team, bundle identifier, icons, entitlements, and other settings were preserved. These generated native files remain ignored; do not force-add them. Those values describe the historical 0.2.1 preparation. The current candidate has since synchronized the same fields to **0.4.0 / 6**. Recheck the actual native project before every build; historical synchronization is not a permanent guarantee. Its existing Expo Constants Pod phase regenerates bundled `app.config` on each build from the mobile project root.
 
 On another existing native checkout, or after changing the app version again, run this targeted synchronization from `apps/mobile` before building. It validates both file shapes before writing and changes only version fields; it does not regenerate native directories or install Pods:
 
@@ -227,4 +240,4 @@ For a target environment that has not received this change, the required rollout
 
 Do not reverse steps 1 and 2. A local Expo Web refresh only loads local frontend code; it does not deploy the local API to Railway or apply the Supabase migration. Until the Railway API response includes both Day Window fields, the updated client shows a non-destructive “server update required” state and does not claim an account save.
 
-Day Window itself adds no native dependency. Under the existing standalone Release delivery path, its JavaScript changes still require building/installing a new app after the database/API prerequisites are live. The historical v0.2.0 and v0.2.1 preparations changed native metadata; the current 0.3.0/build 4 candidate advances it as described above.
+Day Window itself adds no native dependency. Under the existing standalone Release delivery path, its JavaScript changes still require building/installing a new app after the database/API prerequisites are live. The historical v0.2.0 and v0.2.1 preparations changed native metadata; the current 0.4.0/build 6 candidate advances it as described above.

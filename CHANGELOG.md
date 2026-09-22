@@ -9,8 +9,8 @@ LifeOS follows Semantic Versioning for development and release tags.
 ### Added
 
 - Notifications MVP (#1): contextual iOS permission management, account-scoped master/task/weekly Settings, explicit exact-minute Task reminders, and one local wall-clock Weekly Planning reminder. Reminder intent persists independently of planned/due dates; device reconciliation handles changes, completion, clearing, retries and account switching without accumulating duplicates.
-- Notification taps reuse Task details or Week. Quick Capture stays lightweight. Summaries, missed-task intelligence, smart suggestions and remote push remain deferred. Forward migration `20260914120000` passed disposable local API/PostgreSQL/RLS checks; remote rollout and physical-iPhone acceptance remain pending.
-- Tracked candidate metadata prepared for **LifeOS 0.4.0 (5)**; production Expo config and iOS JavaScript export passed. Not installed, accepted or published. Native preparation on the existing Mac iOS project remains pending. See [Issue #1 verification](docs/issue-1-verification.md).
+- Notification taps reuse Task details or Week. Quick Capture stays lightweight. Summaries, missed-task intelligence, smart suggestions and remote push remain deferred. Forward migration `20260914120000` passed disposable local API/PostgreSQL/RLS checks; remote migration history and API deployment/health evidence were subsequently checked; physical notification acceptance remains pending.
+- Active unpublished candidate: **LifeOS 0.4.0 (6)**. Build 5 installed successfully but failed physical launch with native SIGTRAP / scene creation failure; it was never accepted. Build 6 enables the supported Xcode 27 UIScene lifecycle with Expo 57.0.23 and build-properties 57.0.20, preserving Notifications MVP. Native scene/version/Pods preparation and signed Xcode 27 compilation pass; build 6 installed/launched and survived startup on the connected iOS 27 device. Owner acceptance remains pending. See [Issue #1 verification](docs/issue-1-verification.md).
 
 ## [0.3.0] — 2026-09-13
 
