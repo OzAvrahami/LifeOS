@@ -2,9 +2,15 @@
 
 ## Current handoff — 2026-09-23
 
-**#2: Open / Verify / P1 — High**, read back after full software verification. Owner acceptance of the prepared **0.4.1 (8)** iPhone candidate remains pending. The prerequisite [#9 decision](issue-9-decision.md) retains optional normal/important Task importance without new priority UI. Full Daily Planning remains #5.
+**#2: Closed / Completed / Done / P1 — High**, read back after scoped owner acceptance of **LifeOS 0.4.1 (8)**. The prerequisite [#9 decision](issue-9-decision.md) retains optional normal/important Task importance without new priority UI. Full Daily Planning remains #5.
 
-Baseline: clean main at `ce113fbc14142056b042eedba503863cdee17929`, matching the local origin/main reference and read-only remote main lookup. Both issue bodies and all comments were read before implementation (neither had comments at baseline). #9 was handled first: Backlog → In Progress → Verify for decision review. #2 began Ready → In Progress. No unrelated owner changes were present. After verification, #2 moved In Progress → Verify; #9 remains Open / Verify / P2 — Medium. Readback confirmed original issue metadata, Project membership and unrelated recorded items/fields were preserved. See the [#2 handoff comment](https://github.com/OzAvrahami/LifeOS/issues/2#issuecomment-5793133860) and [#9 decision comment](https://github.com/OzAvrahami/LifeOS/issues/9#issuecomment-5792951985).
+Baseline: clean main at `ce113fbc14142056b042eedba503863cdee17929`, matching the local origin/main reference and read-only remote main lookup. Both issue bodies and all comments were read before implementation (neither had comments at baseline). #9 was handled first: Backlog → In Progress → Verify for decision review. #2 began Ready → In Progress. No unrelated owner changes were present. At the implementation handoff, #2 moved In Progress → Verify and #9 remained Open / Verify / P2 — Medium. Both have since completed their required gates, as recorded below. Readback confirmed original issue metadata, Project membership and unrelated recorded items/fields were preserved. See the [#2 handoff comment](https://github.com/OzAvrahami/LifeOS/issues/2#issuecomment-5793133860) and [#9 decision comment](https://github.com/OzAvrahami/LifeOS/issues/9#issuecomment-5792951985).
+
+## Owner-reported acceptance — 2026-09-23
+
+The owner reports that the prepared iPhone **build 8 was successfully installed wirelessly**. After receiving the physical acceptance checklist, the owner reported **“נראה טוב” (“Looks good”)** and instructed that this be recorded as acceptance of the reviewed behavior. Accepted internal binary: **LifeOS 0.4.1 (8)**. Source checkpoint `3fb6695a094ad6e3682bd069a823e5087a16dfe4` is verified on local and remote main and contains the #2 implementation, approved #9 decision and preparation.
+
+This is scoped owner-reported acceptance, not independent device observation or an assertion that every individual checklist scenario was executed/attested. No binary source SHA was extracted. Automated evidence below supports internal invariants separately. Individual persistence/restart/cancel/layout scenarios were not separately itemized by the owner; no new live-database/history/RLS or full accessibility audit is claimed. No concrete mandatory issue gate remains; publication is separate. [Closure comment](https://github.com/OzAvrahami/LifeOS/issues/2#issuecomment-5793681466).
 
 ## Acceptance criteria and implementation evidence
 
@@ -18,7 +24,7 @@ Baseline: clean main at `ce113fbc14142056b042eedba503863cdee17929`, matching the
 | Clear next action | Week Focus card previously only offered Focus editing; preview Today plus was decorative | Each surfaced Week Focus offers **יצירת משימה חדשה**; planning step 3 can return to the same Week to use it; step 4 retains its Week return action. Preview Today uses the existing capture flow. Actions are offered without pretending to detect matching Tasks |
 | Stale/orphaned values reviewed | Existing FK, ownership/RLS, replacement and selected-week query paths | Source/fixture review below; no production record audit or cleanup performed |
 | No imaginary priority system | normal/important exists in schema/API; no current shared Task Details toggle | No new levels/control. Misleading preview “important task from this week” removed; priority is never inferred from Focus |
-| Hebrew / RTL | Existing Hebrew editors, RTL typography and selected-week navigation | Source/context copy and touch targets retain RTL styles; automated render/interaction checks below. Physical layout/touch/keyboard acceptance remains pending |
+| Hebrew / RTL | Existing Hebrew editors, RTL typography and selected-week navigation | Source/context copy and touch targets retain RTL styles; automated render/interaction checks below. Reviewed behavior is owner-accepted; no separate attestation of each layout/touch/keyboard case or full accessibility audit |
 | Reusable model | DailyPlan selects an actual Task; reminders use explicit intent | Documented independent concepts. No #5 implementation or notification behavior change |
 
 Relevant code: `week.components.tsx`, `server-week-screen.tsx`, `weekly-planning-session.tsx`, `week-planning-flow.tsx`, `today-screen.tsx`, `today.components.tsx`, and `quick-capture-sheet.tsx` under `apps/mobile/src/features/`. Existing task creation, cache synchronization, details and lifecycle APIs are reused unchanged. Quick Capture gains only optional explanatory context, not new metadata fields. A user may deliberately choose Today, a date or the displayed week; Inbox remains the default for Focus-originated capture.
@@ -63,15 +69,15 @@ Locally prepared on 2026-09-23 after owner authorization; see [version evidence 
 | Candidate iOS build | 8; greater than all inspected built/prepared candidates (maximum 7) |
 | Version prepared | Yes; canonical manifests/app config and only four lockfile version values updated |
 | Native version synchronized | Yes; Info.plist and Debug/Release version fields verified as 0.4.1 / 8; unrelated native settings preserved |
-| Physical build installed | No binary containing these changes has been installed by this task |
-| Owner accepted exact build | Pending; prior 0.4.0 (7) acceptance does not cover this work |
-| Included issues | #2 software correction + accepted #9 decision; baseline `ce113fb` |
+| Physical build installed | Yes; owner reports successful wireless installation of prepared 0.4.1 (8) |
+| Owner accepted exact build | Yes, scoped owner report on 2026-09-23: “נראה טוב” (“Looks good”); not individual checklist attestations |
+| Included issues | #2 software correction + accepted #9 decision; checkpoint `3fb6695a094ad6e3682bd069a823e5087a16dfe4` |
 
-Local preparation and the applicable [pre-device checks](DEVELOPMENT_WORKFLOW.md#mandatory-pre-device-gate) are recorded in the candidate record. Owner Git checkpoint and separate build/install authorization remain; no installation command was executed. Device connection/trust/provisioning must be confirmed when that later step is authorized.
+Local preparation and the applicable [pre-device checks](DEVELOPMENT_WORKFLOW.md#mandatory-pre-device-gate) are recorded in the candidate record. The owner Git checkpoint is complete and the owner reports successful wireless installation. No build/install was performed by the assistant during this documentation finalization.
 
-## Eventual owner acceptance checklist
+## Supplied owner acceptance checklist
 
-For the eventual authorized installation of **LifeOS 0.4.1 (8)**, first verify the displayed version/build. No physical acceptance is claimed by preparation.
+**Historical checklist supplied before the owner response.** The owner subsequently accepted the reviewed behavior of **LifeOS 0.4.1 (8)** as recorded above. The items below retain the original review scope; they are not individually marked passed and are not a request to repeat acceptance.
 
 1. In a selected week, review/edit/save up to three Focus directions. They remain distinct from day Tasks and do not change Task totals or appear automatically in Today/Inbox. Browse another week and return; saved Focus values remain scoped correctly.
 2. Use **יצירת משימה חדשה** on a Focus. Verify blank title, independent-Task explanation and Inbox default. Cancel once (no Task); then explicitly save a disposable action and find the normal Task in Inbox. The Focus stays unchanged.
@@ -79,4 +85,4 @@ For the eventual authorized installation of **LifeOS 0.4.1 (8)**, first verify t
 4. Today explains the planned-date list and a deliberately selected daily Task; no preview Focus suggestion appears after app restart/login. Reopen the saved Task/Focus to confirm persistence.
 5. Check Hebrew RTL wrapping, readable source labels, create/cancel/save touch targets and keyboard/scroll behavior on the physical iPhone. This is scoped UI acceptance, not a full accessibility audit.
 
-The owner approved #9 semantics on 2026-09-23; its Git checkpoint remains before closure. A future optional importance control is excluded. #2 stays Verify until the exact new binary is accepted; prior 0.4.0 (7) acceptance does not cover it.
+The owner approved #9 semantics on 2026-09-23; its Git checkpoint is now verified and #9 is complete. A future optional importance control and #5 remain excluded. #2 closure rests on its new scoped 0.4.1 (8) acceptance and prior software evidence, not the older 0.4.0 (7) acceptance.

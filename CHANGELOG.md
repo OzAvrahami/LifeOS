@@ -6,9 +6,9 @@ LifeOS follows Semantic Versioning for development and release tags.
 
 ## [Unreleased]
 
-## [0.4.1] — Verification candidate / unreleased
+## [0.4.1] — Owner accepted / publication pending
 
-**Candidate: LifeOS 0.4.1 (8)**, locally prepared 2026-09-23 for #2 and the owner-approved #9 decision. Not built, installed, physically accepted or published. Published Latest and last accepted internal binary remain v0.4.0 / 0.4.0 (7). See [candidate verification](docs/release-0.4.1-verification.md).
+**Accepted internal build: LifeOS 0.4.1 (8)**. On 2026-09-23 the owner reports successful wireless iPhone installation and, after receiving the physical checklist, “נראה טוב” (“Looks good”). This accepts the reviewed behavior without attesting every checklist scenario individually. #2 and #9 are complete; GitHub publication is prepared but has not occurred. Latest published remains v0.4.0. No App Store/TestFlight publication. See [release verification](docs/release-0.4.1-verification.md).
 
 ### Fixed
 
