@@ -17,10 +17,24 @@ describe('<TodayScreen />', () => {
     expect(screen.getByLabelText('עכשיו')).toBeTruthy();
     expect(screen.getByLabelText('התחייבויות')).toBeTruthy();
     expect(screen.getByLabelText('המשימות שלי')).toBeTruthy();
-    expect(screen.getByLabelText('אפשר להוסיף להיום')).toBeTruthy();
-    expect(screen.getByText('משימה חשובה מהשבוע · להכין הצעת מחיר')).toBeTruthy();
+    expect(screen.getByLabelText('מיקוד שבועי לדוגמה')).toBeTruthy();
+    expect(screen.getByText('מתוך המיקוד השבועי · תצוגת פיתוח')).toBeTruthy();
     expect(screen.getByText('זמן משימות מתוכנן: שעה ו־45 דקות')).toBeTruthy();
     expect(screen.queryByText(/\d+:\d+ \/ \d+:\d+|פנוי|מאוזן|עמוס מדי/)).toBeNull();
+  });
+
+  it('explains the daily Task selection and opens ordinary unscheduled capture from the preview Focus', async () => {
+    const user = userEvent.setup();
+    await render(<TestProviders><TodayScreen /></TestProviders>);
+    expect(screen.getByText('משימה שנבחרה למיקוד היומי')).toBeTruthy();
+    expect(screen.getByText('משימות שתוכננו לתאריך של היום.')).toBeTruthy();
+    await user.press(within(screen.getByLabelText('מיקוד שבועי לדוגמה')).getByText('יצירת משימה חדשה'));
+    const sheet = within(screen.getByLabelText('חלונית הוספה מהירה'));
+    expect(sheet.getByLabelText('כותרת').props.value).toBe('');
+    expect(sheet.getByText('Inbox').parent?.props.accessibilityState).toEqual({ selected: true });
+    await user.press(screen.getByLabelText('סגור הוספה מהירה'));
+    expect(screen.queryByLabelText('חלונית הוספה מהירה')).toBeNull();
+    expect(screen.getByLabelText('מיקוד שבועי לדוגמה')).toBeTruthy();
   });
 
   it('renders the approved navigation with Today selected', async () => {

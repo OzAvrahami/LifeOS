@@ -64,6 +64,7 @@ export function FocusCard({ task, onStart, onOpenTask }: { task: TodayTask; onSt
         <View style={styles.focusDot} />
         <Text style={styles.focusLabel}>עכשיו</Text>
       </View>
+      <Text style={styles.focusMeta}>משימה שנבחרה למיקוד היומי</Text>
       <Text style={styles.focusTitle}>{task.title}</Text>
       <TaskDetailsButton task={task} onOpen={onOpenTask} />
       <Text style={styles.focusMeta}>{task.durationMinutes === null ? 'ללא הערכת זמן' : `כ־${task.durationMinutes} דקות`} · עבודה</Text>
@@ -173,12 +174,16 @@ export function TaskList({
   );
 }
 
-export function TodaySuggestion({ title }: { title: string }) {
+export function TodaySuggestion({ title, onCreateTask }: { title: string; onCreateTask: () => void }) {
   return (
-    <View accessibilityLabel="אפשר להוסיף להיום" style={styles.suggestion}>
-      <Text style={styles.suggestionText}>{title}</Text>
-      <View style={styles.suggestionButton}>
-        <Ionicons color={colors.accent} name="add" size={20} />
+    <View accessibilityLabel="מיקוד שבועי לדוגמה" style={styles.suggestion}>
+      <View style={styles.suggestionContent}>
+        <Text style={styles.suggestionText}>מתוך המיקוד השבועי · תצוגת פיתוח</Text>
+        <Text style={styles.suggestionText}>{title}</Text>
+        <Text style={styles.suggestionText}>כיוון לשבוע, לא משימה. אפשר ליצור פעולה עצמאית.</Text>
+        <Pressable accessibilityRole="button" onPress={onCreateTask} style={styles.suggestionAction}>
+          <Text style={styles.suggestionText}>יצירת משימה חדשה</Text>
+        </Pressable>
       </View>
     </View>
   );
@@ -371,18 +376,12 @@ const styles = StyleSheet.create({
   },
   suggestionText: {
     color: '#5A574D',
-    flex: 1,
     fontFamily: typography.family.regular,
     fontSize: typography.size.meta,
     textAlign: 'right',
     writingDirection: 'rtl',
   },
-  suggestionButton: {
-    alignItems: 'center',
-    backgroundColor: colors.surface,
-    borderRadius: radius.round,
-    height: 28,
-    justifyContent: 'center',
-    width: 28,
-  },
+  suggestionContent: { flex: 1 },
+  suggestionAction: { minHeight: 44, justifyContent: 'center' },
+
 });

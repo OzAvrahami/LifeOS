@@ -29,6 +29,7 @@ const destinations: { id: CaptureDestination; label: string; ltr?: boolean }[] =
 ];
 
 type CaptureProps = {
+  focusTitle?: string;
   initialDestination?: CaptureDestination;
   initialPlannedDate?: string;
   weekLabel?: string;
@@ -43,6 +44,7 @@ export function QuickCaptureSheet(props: CaptureProps) {
 }
 
 function CaptureSession({
+  focusTitle,
   initialDestination = 'inbox',
   initialPlannedDate,
   weekLabel = 'השבוע',
@@ -111,6 +113,7 @@ function CaptureSession({
           <ScrollView keyboardShouldPersistTaps="handled" keyboardDismissMode={Platform.OS === 'ios' ? 'interactive' : Platform.OS === 'android' ? 'on-drag' : 'none'}>
             <View style={styles.handle} />
             <Text style={styles.heading}>מה צריך לזכור?</Text>
+            {focusTitle ? <Text style={styles.destinationLabel}>בהשראת המיקוד: {focusTitle}. זו משימה עצמאית; המיקוד לא ישתנה.</Text> : null}
             <TextInput
               accessibilityLabel="כותרת"
               autoFocus

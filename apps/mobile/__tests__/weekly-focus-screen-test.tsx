@@ -1,4 +1,4 @@
-import { act, render, screen, userEvent, waitFor } from '@testing-library/react-native';
+import { act, render, screen, userEvent, waitFor, within } from '@testing-library/react-native';
 import { notifyManager } from '@tanstack/react-query';
 
 import * as commitmentApi from '@/features/commitments/commitment.api';
@@ -243,5 +243,81 @@ describe('Week persisted Weekly Focus editor', () => {
     await waitFor(() => expect(replaceWeeklyFocusesMock).toHaveBeenCalledTimes(2));
     expect(await screen.findByText('טיוטה לניסיון חוזר')).toBeTruthy();
     expect(screen.queryByLabelText('עורך מיקודים לשבוע')).toBeNull();
+  });
+});
+
+
+describe('Focus to independent Task capture', () => {
+  beforeEach(() => {
+    getWeeklyFocusesMock.mockResolvedValue([focus('direction', 'לקדם את ההצעה', 0)]);
+    createTaskMock.mockImplementation(async input => ({
+      id: 'captured-task', title: input.title, status: 'open', priority: 'normal',
+      description: null, estimatedMinutes: null, dueDate: null, plannedDate: null,
+      weekPlanId: null, position: 0, completedAt: null,
+      createdAt: '2026-09-23T08:00:00Z', updatedAt: '2026-09-23T08:00:00Z',
+    }));
+  });
+
+  it('keeps a Focus out of Task totals and creates nothing when capture is cancelled', async () => {
+    const user = userEvent.setup();
+    await renderServerWeek();
+    await user.press(await screen.findByLabelText('יצירת משימה בהשראת המיקוד: לקדם את ההצעה'));
+    expect(screen.getAllByText('0 משימות · 0:00 זמן משימות מתוכנן')).toHaveLength(7);
+    expect(screen.getByLabelText('כותרת').props.value).toBe('');
+    expect(screen.getByText(/זו משימה עצמאית; המיקוד לא ישתנה/)).toBeTruthy();
+    await user.type(screen.getByLabelText('כותרת'), 'טיוטה בלבד');
+    await user.press(screen.getByLabelText('סגור הוספה מהירה'));
+    expect(createTaskMock).not.toHaveBeenCalled();
+    expect(replaceWeeklyFocusesMock).not.toHaveBeenCalled();
+    expect(screen.getByText('לקדם את ההצעה')).toBeTruthy();
+  });
+
+  it('saves only the entered Task into Inbox without inferred priority, dates or a Focus link', async () => {
+    const user = userEvent.setup();
+    await renderServerWeek();
+    await user.press(await screen.findByLabelText('יצירת משימה בהשראת המיקוד: לקדם את ההצעה'));
+    const sheet = within(screen.getByLabelText('חלונית הוספה מהירה'));
+    expect(sheet.getByText('Inbox').parent?.props.accessibilityState).toEqual({ selected: true });
+    await user.type(sheet.getByLabelText('כותרת'), 'להתקשר ללקוח');
+    await user.press(sheet.getByText('שמירה'));
+    await waitFor(() => expect(screen.queryByLabelText('חלונית הוספה מהירה')).toBeNull());
+    expect(createTaskMock).toHaveBeenCalledTimes(1);
+    expect(createTaskMock.mock.calls[0][0]).toEqual({ title: 'להתקשר ללקוח', planning: { type: 'inbox' } });
+    expect(replaceWeeklyFocusesMock).not.toHaveBeenCalled();
+    expect(screen.getByText('לקדם את ההצעה')).toBeTruthy();
+    expect(screen.getAllByText('0 משימות · 0:00 זמן משימות מתוכנן')).toHaveLength(7);
+  });
+
+  it('uses the displayed future week only when the user explicitly chooses week placement', async () => {
+    const user = userEvent.setup();
+    await renderServerWeek();
+    await screen.findByText('לקדם את ההצעה');
+    const initialWeek = getWeeklyFocusesMock.mock.calls[0][0];
+    await user.press(screen.getByLabelText('שבוע הבא'));
+    await waitFor(() => expect(getWeeklyFocusesMock.mock.calls.at(-1)?.[0]).not.toBe(initialWeek));
+    const selectedWeek = getWeeklyFocusesMock.mock.calls.at(-1)![0];
+    await user.press(await screen.findByLabelText('יצירת משימה בהשראת המיקוד: לקדם את ההצעה'));
+    await user.type(screen.getByLabelText('כותרת'), 'פעולה בשבוע הנבחר');
+    await user.press(screen.getByText('השבוע המוצג'));
+    await user.press(screen.getByText('שמירה'));
+    await waitFor(() => expect(createTaskMock).toHaveBeenCalled());
+    expect(createTaskMock.mock.calls[0][0]).toEqual({ title: 'פעולה בשבוע הנבחר', planning: { type: 'week', weekStart: selectedWeek } });
+    expect(replaceWeeklyFocusesMock).not.toHaveBeenCalled();
+  });
+
+  it('retains the Task draft for retry without modifying the Focus after a failed create', async () => {
+    const user = userEvent.setup();
+    createTaskMock.mockRejectedValueOnce(new Error('offline'));
+    await renderServerWeek();
+    await user.press(await screen.findByLabelText('יצירת משימה בהשראת המיקוד: לקדם את ההצעה'));
+    await user.type(screen.getByLabelText('כותרת'), 'פעולה לניסיון חוזר');
+    await user.press(screen.getByText('שמירה'));
+    expect(await screen.findByText('לא הצלחנו לשמור. אפשר לנסות שוב.')).toBeTruthy();
+    expect(screen.getByLabelText('כותרת').props.value).toBe('פעולה לניסיון חוזר');
+    expect(replaceWeeklyFocusesMock).not.toHaveBeenCalled();
+    await user.press(screen.getByText('שמירה'));
+    await waitFor(() => expect(screen.queryByLabelText('חלונית הוספה מהירה')).toBeNull());
+    expect(createTaskMock).toHaveBeenCalledTimes(2);
+    expect(createTaskMock.mock.calls[0][0]).toEqual(createTaskMock.mock.calls[1][0]);
   });
 });

@@ -276,6 +276,34 @@ describe('persistent server Task experience', () => {
     });
   });
 
+  it('keeps explicitly captured work a normal Task even when its title matches a Focus', async () => {
+    const user = userEvent.setup();
+    const title = 'להכין הצעה';
+    const originalFocus = { createdAt: new Date().toISOString(), id: 'focus-1', position: 0,
+      title, updatedAt: new Date().toISOString(), weekPlanId: 'week-plan-1' };
+    focuses = [originalFocus];
+    await renderFlow('week');
+    await user.press(await screen.findByLabelText(`יצירת משימה בהשראת המיקוד: ${title}`));
+    await user.type(screen.getByLabelText('כותרת'), title);
+    await user.press(screen.getByText('שמירה'));
+    await waitFor(() => expect(tasks).toHaveLength(1));
+    const stableId = tasks[0].id;
+    expect(tasks[0]).toMatchObject({ priority: 'normal', status: 'open', plannedDate: null, weekPlanId: null });
+    await user.press(within(screen.getByLabelText('ניווט ראשי')).getByText('Inbox'));
+    await user.press(await screen.findByLabelText(`פתח פעולות עבור ${title}`));
+    await user.press(within(screen.getByLabelText('מה צריך לקרות עם זה')).getByText('היום'));
+    await waitFor(() => expect(tasks[0].plannedDate).toBe(localDateKey()));
+    expect(await screen.findByLabelText('אישור מעבר מ-Inbox להיום')).toBeTruthy();
+    await user.press(await screen.findByLabelText(`התחל משימה: ${title}`));
+    await user.press(await screen.findByText('סיום'));
+    await waitFor(() => expect(tasks[0].status).toBe('completed'));
+    expect(tasks).toHaveLength(1);
+    expect(tasks[0].id).toBe(stableId);
+    expect(focuses).toEqual([originalFocus]);
+    expect(screen.queryByLabelText('מיקוד שבועי לדוגמה')).toBeNull();
+    expect(screen.queryByText('מתוך המיקוד השבועי · תצוגת פיתוח')).toBeNull();
+  });
+
   it('moves one stable Task through Capture → Inbox → Week → Today → Active → Done', async () => {
     const user = userEvent.setup();
     const title = 'משימת API מלאה';

@@ -30,6 +30,7 @@ export function WeekScreen(props: WeekScreenProps) {
 function PreviewWeekScreen({ initialState = 'normal', onNavigateInbox, onNavigateMore, onNavigateToday }: WeekScreenProps) {
   const [weekState, setWeekState] = useState(initialState);
   const [planningInitialStep, setPlanningInitialStep] = useState(initialState === 'planning' ? 2 : 0);
+  const [captureFocusTitle, setCaptureFocusTitle] = useState<string>();
   const [captureOpen, setCaptureOpen] = useState(false);
   const demo = useDemoTasks();
   const { captureTask, defaultDate } = useTaskCapture('preview');
@@ -37,12 +38,12 @@ function PreviewWeekScreen({ initialState = 'normal', onNavigateInbox, onNavigat
   return (
     <>
       <MobileShell onNavigateInbox={onNavigateInbox} onNavigateMore={onNavigateMore} onNavigateToday={onNavigateToday}
-        onQuickCapture={() => setCaptureOpen(true)} selected="week">
+        onQuickCapture={() => { setCaptureFocusTitle(undefined); setCaptureOpen(true); }} selected="week">
         {weekState === 'unplanned' ? <UnplannedWeek onPlan={() => { setPlanningInitialStep(0); setWeekState('planning'); }} />
           : weekState === 'overloaded' ? <OverloadedWeek /> : (
             <ScrollView contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
               <WeekHeader />
-              <WeeklyFocusCard focuses={weeklyFocuses} onEdit={() => { setPlanningInitialStep(2); setWeekState('planning'); }} />
+              <WeeklyFocusCard onCreateTask={focus => { setCaptureFocusTitle(focus.title); setCaptureOpen(true); }} focuses={weeklyFocuses} onEdit={() => { setPlanningInitialStep(2); setWeekState('planning'); }} />
               <WeekSectionLabel>השבוע שלך</WeekSectionLabel>
               <View accessibilityLabel="סקירת שבעת ימי השבוע" style={styles.days}>
                 {normalWeekDays.map(day => <WeekDayRow day={day} key={day.id} />)}
@@ -55,7 +56,7 @@ function PreviewWeekScreen({ initialState = 'normal', onNavigateInbox, onNavigat
             </ScrollView>
           )}
       </MobileShell>
-      <QuickCaptureSheet defaultDate={defaultDate} onClose={() => setCaptureOpen(false)} onSave={captureTask} visible={captureOpen} />
+      <QuickCaptureSheet focusTitle={captureFocusTitle} defaultDate={defaultDate} onClose={() => setCaptureOpen(false)} onSave={captureTask} visible={captureOpen} />
     </>
   );
 }

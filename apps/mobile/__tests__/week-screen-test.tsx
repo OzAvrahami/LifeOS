@@ -106,6 +106,23 @@ describe('<WeekScreen />', () => {
     expect(screen.getByText('להכין הצעת מחיר')).toBeTruthy();
   });
 
+  it('reviews only selected preview Focus directions without pretending to assign them to days', async () => {
+    const user = userEvent.setup();
+    await renderWeek('planning');
+    const selected = screen.getAllByRole('checkbox').filter(item => item.props.accessibilityState.checked);
+    await user.press(selected[0]);
+    await user.type(screen.getByLabelText('מיקוד חדש'), 'כיוון חדש לבדיקה');
+    await user.press(screen.getByLabelText('הוסף מיקוד'));
+    await user.press(screen.getByLabelText('כיוון חדש לבדיקה'));
+    await user.press(screen.getByText('המשך'));
+    expect(screen.getByText('סקירת המיקודים לשבוע')).toBeTruthy();
+    expect(screen.getByText('כיוון חדש לבדיקה')).toBeTruthy();
+    expect(screen.queryByText(selected[0].props.accessibilityLabel)).toBeNull();
+    expect(screen.queryByText('מתי נכון לעשות כל דבר?')).toBeNull();
+    expect(screen.queryByText('שלישי')).toBeNull();
+    expect(screen.getByText(/בחירת מיקוד לא יוצרת משימה ולא משבצת עבודה/)).toBeTruthy();
+  });
+
   it('marks Week selected and invokes Today navigation', async () => {
     const onNavigateToday = jest.fn();
     const user = userEvent.setup();

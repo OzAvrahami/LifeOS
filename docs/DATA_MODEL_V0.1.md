@@ -1,5 +1,7 @@
 # LifeOS — Data Model v0.1
 
+> Current clarification (2026-09-23): [Task importance decision (#9)](issue-9-decision.md) defines the existing optional normal/important flag separately from Weekly Focus, daily selection, scheduling and deadlines. No additional priority levels or automatic Focus-to-Task conversion. Daily Planning remains #5. This clarification takes precedence over broader future possibilities in this historical v0.1 specification.
+
 ## מטרת המסמך
 
 המסמך מגדיר את מודל הנתונים הראשוני של LifeOS עבור גרסה 0.1.

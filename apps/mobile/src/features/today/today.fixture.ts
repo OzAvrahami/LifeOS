@@ -24,7 +24,7 @@ export const normalTodayFixture: TodayFixture = {
     { id: 'supplier', title: 'להתקשר לספק', durationMinutes: 15, lifeArea: 'work' },
     { id: 'home', title: 'לסדר משהו בבית', durationMinutes: 30, lifeArea: 'home' },
   ],
-  suggestion: 'משימה חשובה מהשבוע · להכין הצעת מחיר',
+  suggestion: 'להכין הצעת מחיר',
 };
 
 export const unplannedTodayFixture = {

@@ -217,6 +217,7 @@ export function TodayScreen({
           serverTaskCount={serverTasks ? sourceTasks.length : undefined}
           serverPlannedTaskTime={serverTaskTime ? formatTaskMinutesHebrew(serverTaskTime.knownMinutes) : undefined}
           serverUnknownEstimateCount={serverTaskTime?.unknownEstimateCount}
+          onCreateFocusTask={() => openCapture('inbox')}
           suggestion={serverTasks ? undefined : normalTodayFixture.suggestion}
           tasks={tasks}
         />
@@ -249,6 +250,7 @@ export function TodayScreen({
             focusTask={normalTodayFixture.focus}
             onAddTask={() => openCapture('today')}
             onStartFocus={() => setTodayState('active')}
+            onCreateFocusTask={() => openCapture('inbox')}
             suggestion={normalTodayFixture.suggestion}
             tasks={normalTodayFixture.tasks}
           />
@@ -304,6 +306,7 @@ function NormalTodayContent({
   movedTaskId,
   onAddCommitment,
   onAddTask,
+  onCreateFocusTask,
   onEditCommitment,
   onStartFocus,
   onStartTask,
@@ -323,6 +326,7 @@ function NormalTodayContent({
   movedTaskId?: string;
   onAddCommitment?: () => void;
   onAddTask: () => void;
+  onCreateFocusTask?: () => void;
   onEditCommitment?: (id: string) => void;
   onStartFocus: () => void;
   onStartTask?: (taskId: string) => void;
@@ -368,6 +372,7 @@ function NormalTodayContent({
         <Commitments items={commitments ?? today.commitments} onPress={onEditCommitment} />
 
         <SectionLabel>המשימות שלי</SectionLabel>
+        <Text style={styles.taskSource}>משימות שתוכננו לתאריך של היום.</Text>
         <TaskList
           onOpenTask={onOpenTask}
           focusedTaskId={focusedTaskId}
@@ -385,10 +390,10 @@ function NormalTodayContent({
           <Text style={styles.addTaskText}>+ הוסף משימה</Text>
         </Pressable>
 
-        {suggestion ? (
+        {suggestion && onCreateFocusTask ? (
           <>
-            <SectionLabel>אפשר להוסיף להיום</SectionLabel>
-            <TodaySuggestion title={suggestion} />
+            <SectionLabel>מיקוד שבועי לדוגמה</SectionLabel>
+            <TodaySuggestion onCreateTask={onCreateFocusTask} title={suggestion} />
           </>
         ) : null}
       </ScrollView>
@@ -397,6 +402,7 @@ function NormalTodayContent({
 }
 
 const styles = StyleSheet.create({
+  taskSource: { color: colors.textMuted, fontFamily: typography.family.regular, textAlign: 'right', writingDirection: 'rtl' },
   normalContainer: { flex: 1 },
   content: {
     paddingBottom: spacing.xl,

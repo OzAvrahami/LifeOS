@@ -67,6 +67,8 @@ export function WeeklyPlanningSession({ weekStart, onClose }: { weekStart: strin
             {shownStep !== 3 ? <WeeklyPlanningReview weekStart={weekStart} step={shownStep} onReady={setReviewReady} /> : null}
             {shownStep >= 3 ? <View style={styles.card}>
               <Text style={styles.heading}>מיקודים לשבוע · לא משימות</Text>
+              <Text style={styles.text}>כיוונים ותוצאות לשבוע. כדי להתקדם במיקוד, אפשר ליצור משימה עצמאית במסך השבוע.</Text>
+              {shownStep === 3 ? <DayAction label="חזרה לשבוע ליצירת משימה" disabled={save.isPending} onPress={close} /> : null}
               {query.data.focuses.length ? query.data.focuses.map(f => <Text key={f.id} style={styles.text}>{f.title}</Text>)
                 : <Text style={styles.text}>לא נבחרו מיקודים. אפשר להמשיך גם ללא מיקודים.</Text>}
               {shownStep === 3 || completed ? <DayAction label={completed ? 'עריכת התכנון' : 'בחירת מיקודים'}

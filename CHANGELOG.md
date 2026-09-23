@@ -6,6 +6,20 @@ LifeOS follows Semantic Versioning for development and release tags.
 
 ## [Unreleased]
 
+## [0.4.1] — Verification candidate / unreleased
+
+**Candidate: LifeOS 0.4.1 (8)**, locally prepared 2026-09-23 for #2 and the owner-approved #9 decision. Not built, installed, physically accepted or published. Published Latest and last accepted internal binary remain v0.4.0 / 0.4.0 (7). See [candidate verification](docs/release-0.4.1-verification.md).
+
+### Fixed
+
+- Clarify Tasks versus Weekly Focus (#2): selected-week Focus directions have explicit source labels and an action that opens ordinary independent Task capture. Nothing is created or scheduled until the user saves; Inbox is the default. Today identifies real planned Tasks/daily selection; preview Focus copy no longer implies importance or fictional scheduling.
+
+### Product decision
+
+- Retain the optional normal/important Task flag (#9), separate from Weekly Focus, daily selection, scheduling, deadlines and reminders. Quick Capture stays lightweight; no new priority UI or levels. See [the decision](docs/issue-9-decision.md) and [#2 verification](docs/issue-2-verification.md).
+
+Patch classification corrects existing semantics and capture access without a new data model or planning workflow. No priority-management UI, #5 Daily Planning, API or schema change is included. Published v0.4.0 remains unchanged.
+
 ## [0.4.0] — 2026-09-22
 
 **Owner-accepted internal iPhone build: LifeOS 0.4.0 (7).** [LifeOS v0.4.0 — Notifications](https://github.com/OzAvrahami/LifeOS/releases/tag/v0.4.0) is **published and Latest**, non-draft and non-prerelease, published **2026-09-22T11:04:34Z**. The final annotated tag resolves to `ce7e66fb620f046b60fcd2bbe468fad09ac5c96b` and must not be moved or recreated. Post-publication documentation does not change this release source. This is not App Store/TestFlight distribution. See [release verification](docs/release-0.4.0-verification.md).

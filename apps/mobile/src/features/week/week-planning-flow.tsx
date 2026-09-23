@@ -10,8 +10,8 @@ import { planningCarryover, unplannedWeekCommitments, weeklyFocuses } from './we
 const steps = [
   { title: 'מה נשאר מהשבוע הקודם?', subtitle: 'בחר מה עדיין נכון לקחת איתך לשבוע החדש.' },
   { title: 'מה כבר קבוע השבוע?', subtitle: 'עוברים לרגע על ההתחייבויות שכבר נמצאות ביומן.' },
-  { title: 'מה חשוב שיקרה השבוע?', subtitle: 'בחר עד שלושה מיקודים. אפשר גם לכתוב חדש.' },
-  { title: 'מתי נכון לעשות כל דבר?', subtitle: 'בחר יום מתאים לדברים החשובים — בלי למלא כל שעה.' },
+  { title: 'מה חשוב שיקרה השבוע?', subtitle: 'בחר עד שלושה כיוונים או תוצאות לשבוע, לא משימות.' },
+  { title: 'סקירת המיקודים לשבוע', subtitle: 'בחירת מיקוד לא יוצרת משימה ולא משבצת עבודה. אפשר ליצור משימה עצמאית במסך השבוע.' },
 ] as const;
 
 const maxFocusMessage = 'אפשר לבחור עד 3 מיקודים. כדי לבחור מיקוד נוסף, בטל קודם אחד מהמיקודים שנבחרו.';
@@ -21,7 +21,7 @@ function normalizedFocusTitle(title: string) {
   return title.trim().replace(/\s+/g, ' ').toLocaleLowerCase('he-IL');
 }
 
-/** Canonical fixture-only preview. Normal authenticated editing uses WeeklyFocusEditor. */
+/** Canonical fixture-only preview. Normal authenticated planning uses WeeklyPlanningSession. */
 export function WeekPlanningFlow({
   initialStep = 0,
   onDone,
@@ -112,7 +112,7 @@ export function WeekPlanningFlow({
               selected={selectedFocuses}
             />
           ) : null}
-          {step === 3 ? <ScheduleStep /> : null}
+          {step === 3 ? <FocusReviewStep focuses={focusCandidates.filter(focus => selectedFocuses.includes(focus.id))} /> : null}
         </ScrollView>
 
         <View style={styles.footer}>
@@ -160,7 +160,6 @@ function FocusStep({ focuses, message, newFocus, onAddFocus, onChangeNewFocus, o
           <SelectableRow selected={selected.includes(focus.id)} title={focus.title} />
         </Pressable>
       ))}
-      <SelectableRow selected={false} title="נשאר משבוע שעבר · להכין הצעת מחיר" />
       <View style={styles.newFocusRow}>
         <Pressable accessibilityLabel="הוסף מיקוד" accessibilityRole="button" onPress={onAddFocus} style={styles.addFocusButton}>
           <Text style={styles.plus}>+</Text>
@@ -172,16 +171,11 @@ function FocusStep({ focuses, message, newFocus, onAddFocus, onChangeNewFocus, o
   );
 }
 
-function ScheduleStep() {
-  const scheduledFocuses = weeklyFocuses.slice(0, 3);
+function FocusReviewStep({ focuses }: { focuses: { id: string; title: string }[] }) {
   return (
     <View style={styles.options}>
-      {scheduledFocuses.map((focus, index) => (
-        <View key={focus.id} style={styles.scheduleRow}>
-          <Text style={styles.optionTitle}>{focus.title}</Text>
-          <View style={styles.dayChoice}><Text style={styles.dayChoiceText}>{['שלישי', 'חמישי', 'שישי'][index]}</Text></View>
-        </View>
-      ))}
+      {focuses.map(focus => <Text key={focus.id} style={styles.optionTitle}>{focus.title}</Text>)}
+      {!focuses.length ? <Text style={styles.optionTitle}>לא נבחרו מיקודים לשבוע הזה.</Text> : null}
     </View>
   );
 }
@@ -224,9 +218,6 @@ const styles = StyleSheet.create({
   plus: { color: colors.accent, fontFamily: typography.family.regular, fontSize: 20 },
   newFocusInput: { color: colors.text, flex: 1, fontFamily: typography.family.regular, fontSize: typography.size.button, writingDirection: 'rtl' },
   focusSelectionMessage: { color: colors.textSubtle, fontFamily: typography.family.regular, fontSize: typography.size.meta, textAlign: 'right', writingDirection: 'rtl' },
-  scheduleRow: { alignItems: 'center', backgroundColor: colors.surface, borderRadius: radius.md, flexDirection: 'row-reverse', gap: spacing.sm, minHeight: 58, padding: 14 },
-  dayChoice: { backgroundColor: colors.accentWeak, borderRadius: radius.sm, paddingHorizontal: spacing.sm, paddingVertical: spacing.xs },
-  dayChoiceText: { color: colors.accent, fontFamily: typography.family.bold, fontSize: typography.size.label, writingDirection: 'rtl' },
   footer: { gap: spacing.xs, paddingBottom: spacing.sm },
   continueButton: { alignItems: 'center', backgroundColor: colors.accent, borderRadius: 15, height: 52, justifyContent: 'center' },
   continueText: { color: colors.white, fontFamily: typography.family.bold, fontSize: typography.size.button, writingDirection: 'rtl' },

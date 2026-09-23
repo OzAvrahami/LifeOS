@@ -1,9 +1,9 @@
 # LifeOS Implementation Status
 
-- **Last updated:** 2026-09-22
+- **Last updated:** 2026-09-23
 - **#1 handoff status:** Closed / Completed / Done / P2 — Medium. **LifeOS 0.4.0 (7)** is owner-accepted for release on 2026-09-22; production schema/API rollout is complete. v0.4.0 is published and Latest. See [current verification](issue-1-verification.md).
 - **Accepted internal build:** LifeOS **0.4.0 (7)** on iPhone 17 Pro Max, owner-reported installation, launch, usable normal UI and release approval on **2026-09-22**. Includes #1. See [release verification](release-0.4.0-verification.md).
-- **Current work item:** v0.4.0 post-publication documentation only; no implementation is selected. #26 explicit category toggles and #27 contextual category details are non-blocking Open / Backlog / P2 follow-ups, not part of v0.4.0.
+- **Current work items:** #9 importance decision was owner-approved on 2026-09-23 and remains Open / Verify / P2 — Medium pending its owner Git checkpoint; #2 Task/Weekly Focus clarification is Open / Verify / P1 — High after software implementation and automated verification; candidate 0.4.1 (8) is locally prepared, with physical acceptance pending. See [#9 decision](issue-9-decision.md) and [#2 handoff](issue-2-verification.md). #26 explicit category toggles and #27 contextual category details are non-blocking Open / Backlog / P2 follow-ups, not part of v0.4.0.
 - **Project status:** #3 and #4 are Closed / Completed / Done / P1 — High, read back after the owner accepted 0.3.0 (4). #7/#8/#10 and #11/#12/#13 remain Closed / Completed / Done. Priorities, unrelated states, labels, assignees, milestones and membership are preserved.
 - **Latest published release:** [LifeOS v0.4.0 — Notifications](https://github.com/OzAvrahami/LifeOS/releases/tag/v0.4.0) is **published and Latest**, non-draft and non-prerelease, published **2026-09-22T11:04:34Z**. The final annotated tag resolves to `ce7e66fb620f046b60fcd2bbe468fad09ac5c96b` and must not be moved or recreated. Accepted internal binary remains **0.4.0 (7)**; later documentation commits are separate from the tagged acceptance checkpoint.
 - **Last owner-accepted internal version:** **0.4.0/build 7**, source baseline `c99ef3f402687befc37d252d246634dae5ede27a`. No installed-binary SHA was extracted. Build 5 failed launch; build 6 fixed startup but was superseded, not failed or accepted. Earlier 0.3.0 and 0.2.1 acceptances remain separate historical evidence.
@@ -11,7 +11,7 @@
 - **API evidence:** Owner-confirmed production application/history reconciliation of `20260922120000` (`20260922120000 | 20260922120000`). GitHub reports `LifeOS - @lifeos/api = success` for exact source `c99ef3f`, updated `2026-09-22T10:39:33Z`; no independent active-provider inspection was performed.
 - **Current phase:** Phase 9 ongoing usage continues. 0.4.0 (7) internal acceptance and v0.4.0 publication are complete, alongside the historical 0.2.1/0.3.0 milestones.
 - **Phase 8 status:** Historical standalone verification remains recorded for 2026-08-20; current 0.2.1 owner evidence is separately dated 2026-09-08.
-- **Next action:** No v0.4.0 publication, schema/API or device rollout remains. #26/#27 remain future non-blocking UX work; no new implementation is selected.
+- **Next action:** Review the prepared [0.4.1 (8) checkpoint](release-0.4.1-verification.md), then complete owner Git and separately authorized build/install gates before #2 physical acceptance. #9 approval is product-decision acceptance only. No v0.4.0 rollout remains; #26/#27 remain future work.
 
 This document is the current source of truth for implementation status. “Verified” means supported by tracked code plus a repeatable repository check; it does not imply remote or real-device verification unless stated.
 

@@ -34,10 +34,12 @@ export function WeekHeader({ dateRange = weekDateRange, showLabel = true }: { da
 export function WeeklyFocusCard({
   focuses,
   onEdit,
+  onCreateTask,
   state = 'ready',
 }: {
   focuses: WeeklyFocus[];
   onEdit?: () => void;
+  onCreateTask?: (focus: WeeklyFocus) => void;
   state?: 'error' | 'loading' | 'ready';
 }) {
   const actionLabel = focuses.length === 0 ? 'הוסף מיקודים' : 'עריכת מיקודים';
@@ -51,6 +53,7 @@ export function WeeklyFocusCard({
           </Pressable>
         ) : null}
       </View>
+      <Text style={styles.focusState}>נבחרו לתכנון השבועי · כיוונים ותוצאות, לא משימות לביצוע.</Text>
       {state === 'loading' ? <Text style={styles.focusState}>טוען מיקודים…</Text> : null}
       {state === 'error' ? <Text style={styles.focusState}>לא הצלחנו לטעון את המיקודים.</Text> : null}
       {state === 'ready' && focuses.length === 0 ? (
@@ -59,9 +62,15 @@ export function WeeklyFocusCard({
       {state === 'ready' && focuses.length > 0 ? (
         <View style={styles.focusList}>
           {focuses.map((focus, index) => (
-            <View key={focus.id} style={styles.focusRow}>
-              <View style={styles.focusNumber}><Text style={styles.focusNumberText}>{index + 1}</Text></View>
-              <Text style={styles.focusTitle}>{focus.title}</Text>
+            <View key={focus.id}>
+              <View style={styles.focusRow}>
+                <View style={styles.focusNumber}><Text style={styles.focusNumberText}>{index + 1}</Text></View>
+                <Text style={styles.focusTitle}>{focus.title}</Text>
+              </View>
+              {onCreateTask ? <Pressable accessibilityRole="button" accessibilityLabel={`יצירת משימה בהשראת המיקוד: ${focus.title}`}
+                onPress={() => onCreateTask(focus)} style={styles.focusTaskAction}>
+                <Text style={styles.edit}>יצירת משימה חדשה</Text>
+              </Pressable> : null}
             </View>
           ))}
         </View>
@@ -240,6 +249,7 @@ const styles = StyleSheet.create({
   focusLabel: { color: colors.accent, fontFamily: typography.family.extraBold, fontSize: typography.size.label, letterSpacing: 0.5, writingDirection: 'rtl' },
   edit: { color: colors.accent, fontFamily: typography.family.bold, fontSize: typography.size.label, writingDirection: 'rtl' },
   focusState: { color: colors.textMuted, fontFamily: typography.family.regular, fontSize: typography.size.meta, textAlign: 'right', writingDirection: 'rtl' },
+  focusTaskAction: { minHeight: 44, justifyContent: 'center', alignItems: 'flex-end' },
   focusList: { gap: 7 },
   focusRow: { alignItems: 'center', flexDirection: 'row-reverse', gap: 11 },
   focusNumber: { alignItems: 'center', backgroundColor: colors.accent, borderRadius: 7, height: 24, justifyContent: 'center', width: 24 },

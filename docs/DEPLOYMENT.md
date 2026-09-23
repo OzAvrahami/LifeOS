@@ -1,12 +1,16 @@
 # LifeOS Deployment
 
+## Current local candidate — 0.4.1 (8), 2026-09-23
+
+Locally prepared for #2 Task/Weekly Focus clarification and the accepted #9 product decision. Canonical tracked versions and existing ignored native plist/Debug/Release fields are synchronized to **0.4.1 / 8**. No dependency resolution, schema or API implementation change; existing production rollout remains applicable. Latest published and last accepted internal build remain **v0.4.0 / 0.4.0 (7)**. See [candidate evidence, checks and remaining gates](release-0.4.1-verification.md). Owner Git checkpoint and separate build/install authorization precede #2 physical acceptance. No build, migration, deployment or publication is performed by this preparation.
+
 ## Notifications release acceptance — Issue #1, 2026-09-22
 
 **LifeOS 0.4.0 (7) is installed and owner-accepted for release**, on iPhone 17 Pro Max, 2026-09-22. The owner reports successful launch, usable normal UI and that the implementation appears to work correctly. No claim is made that every physical notification scenario was individually executed. #1 is Closed / Completed / Done / P2 — Medium. #26/#27 are non-blocking future UX improvements, both Backlog / P2.
 
 **Production rollout is complete:** the owner confirms [`20260922120000_add_commitment_reminders.sql`](../supabase/migrations/20260922120000_add_commitment_reminders.sql) was applied and remote history reconciled to `20260922120000 | 20260922120000`. GitHub commit context `LifeOS - @lifeos/api` reports **success** for `c99ef3f402687befc37d252d246634dae5ede27a`, updated `2026-09-22T10:39:33Z`. No new schema operation, direct Railway active-deployment inspection or production write test was performed during finalization. The normal schema-before-API ordering remains mandatory for future changes, not a pending rollout for this accepted build.
 
-Build 5 failed native launch and was never accepted. Build 6 fixed UIScene startup and was superseded before product acceptance, not failed. Build 7 is the final accepted binary; native plist/Debug/Release preparation and earlier Xcode 27 compilation evidence remain in [the issue record](issue-1-verification.md). Do not rebuild, reinstall or increase the version/build for this documentation checkpoint.
+Build 5 failed native launch and was never accepted. Build 6 fixed UIScene startup and was superseded before product acceptance, not failed. Build 7 is the final accepted binary; native plist/Debug/Release preparation and earlier Xcode 27 compilation evidence remain in [the issue record](issue-1-verification.md). The historical v0.4.0 publication checkpoint required no rebuild or version increase; the separately authorized 0.4.1 preparation is recorded above.
 
 [LifeOS v0.4.0 — Notifications](https://github.com/OzAvrahami/LifeOS/releases/tag/v0.4.0) is **published and Latest**, non-draft and non-prerelease, published **2026-09-22T11:04:34Z**. The final annotated tag resolves to `ce7e66fb620f046b60fcd2bbe468fad09ac5c96b` and must not be moved or recreated. Accepted internal binary remains **LifeOS 0.4.0 (7)**; later documentation commits do not alter its release source. No publication action remains. No App Store/TestFlight publication. See [0.4.0 release verification](release-0.4.0-verification.md).
 
@@ -102,7 +106,7 @@ Mobile also needs its existing public Supabase configuration. Environment values
 
 ## Standalone iPhone Release build — reference for future authorized updates
 
-Run Expo commands from `apps/mobile`, where this monorepo's Expo configuration lives. On the prepared Mac, connect and unlock the registered iPhone, with Developer Mode enabled and the existing Apple development team available in Xcode. The owner reports completing this delivery path after the preparation commit for 0.2.1/build 3. For a future separately authorized update, first complete the mandatory [pre-device gate](DEVELOPMENT_WORKFLOW.md#mandatory-pre-device-gate): review SemVer/build and last accepted binary, synchronize native metadata, verify schema/API and Release environment/signing prerequisites, and complete the owner Git checkpoint. **Do not run the following command during 0.3.0 (4) preparation.** Only after those gates and owner build authorization, build/install with:
+Run Expo commands from `apps/mobile`, where this monorepo's Expo configuration lives. On the prepared Mac, connect and unlock the registered iPhone, with Developer Mode enabled and the existing Apple development team available in Xcode. The owner reports completing this delivery path after the preparation commit for 0.2.1/build 3. For a future separately authorized update, first complete the mandatory [pre-device gate](DEVELOPMENT_WORKFLOW.md#mandatory-pre-device-gate): review SemVer/build and last accepted binary, synchronize native metadata, verify schema/API and Release environment/signing prerequisites, and complete the owner Git checkpoint. **Do not run the following command during a preparation-only task, including current 0.4.1 (8) preparation.** Only after those gates and owner build authorization, build/install with:
 
 ```bash
 cd /Users/ozavrahami/code/lifeOS/apps/mobile
@@ -122,7 +126,7 @@ This Mac already has ignored `apps/mobile/ios` files. The installed Expo CLI onl
 - `ios/LifeOS/Info.plist`: `CFBundleShortVersionString = 0.2.1`, `CFBundleVersion = 3`.
 - `ios/LifeOS.xcodeproj/project.pbxproj`: Debug/Release `MARKETING_VERSION = 0.2.1`, `CURRENT_PROJECT_VERSION = 3`.
 
-Signing, team, bundle identifier, icons, entitlements, and other settings were preserved. These generated native files remain ignored; do not force-add them. Those values describe the historical 0.2.1 preparation. The accepted 0.4.0 build has since synchronized the same fields to **0.4.0 / 7**. Recheck the actual native project before every build; historical synchronization is not a permanent guarantee. Its existing Expo Constants Pod phase regenerates bundled `app.config` on each build from the mobile project root.
+Signing, team, bundle identifier, icons, entitlements, and other settings were preserved. These generated native files remain ignored; do not force-add them. Those values describe the historical 0.2.1 preparation. The accepted 0.4.0 build used **0.4.0 / 7**; current local candidate preparation has synchronized those fields to **0.4.1 / 8**. Recheck the actual native project before every build; historical synchronization is not a permanent guarantee. Its existing Expo Constants Pod phase regenerates bundled `app.config` on each build from the mobile project root.
 
 On another existing native checkout, or after changing the app version again, run this targeted synchronization from `apps/mobile` before building. It validates both file shapes before writing and changes only version fields; it does not regenerate native directories or install Pods:
 

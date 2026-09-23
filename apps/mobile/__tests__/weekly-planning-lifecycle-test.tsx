@@ -231,3 +231,16 @@ it('recovers a committed start whose response was lost from authoritative server
   await press('המשך תכנון'); await screen.findByText('שלב 1 מתוך 4');
   expect(api.saveWeeklyPlan).toHaveBeenCalledTimes(1); expect(stored.size).toBe(1);
 });
+
+
+it('returns from Focus review to the same selected week without creating Tasks or changing saved progress', async () => {
+  stored.set(future, { ...planAt(3, 'in_progress', future), focuses: [makeFocus('Future direction', future)] });
+  await mount(); await press('שבוע הבא'); await press('המשך תכנון');
+  expect(session().getByText('מיקודים לשבוע · לא משימות')).toBeTruthy();
+  expect(session().getByText('Future direction')).toBeTruthy();
+  await press('חזרה לשבוע ליצירת משימה');
+  await screen.findByLabelText('יצירת משימה בהשראת המיקוד: Future direction');
+  expect(stored.get(future)?.weekPlan).toMatchObject({ resumeStep: 3, status: 'in_progress' });
+  expect(api.getWeeklyFocuses).toHaveBeenLastCalledWith(future);
+  expect(taskApi.createTask).not.toHaveBeenCalled();
+});

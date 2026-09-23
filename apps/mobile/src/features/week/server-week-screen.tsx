@@ -48,7 +48,7 @@ export function ServerWeekScreen({ onNavigateInbox, onNavigateMore, onNavigateTo
   const updateCommitment = useUpdateCommitment();
   const deleteCommitment = useDeleteCommitment();
   const [focusEditor, setFocusEditor] = useState<{ weekStart: string; focuses: WeeklyFocus[] } | null>(null);
-  const [capture, setCapture] = useState<{ date: string; day: boolean; weekStart: string } | null>(null);
+  const [capture, setCapture] = useState<{ date: string; day: boolean; weekStart: string; focusTitle?: string } | null>(null);
   const [commitmentEditor, setCommitmentEditor] = useState<{ date: string; item?: Commitment } | null>(null);
   const [taskId, setTaskId] = useState<string | null>(null);
   const [operationError, setOperationError] = useState(false);
@@ -98,6 +98,7 @@ export function ServerWeekScreen({ onNavigateInbox, onNavigateMore, onNavigateTo
             onAddCommitment={() => setCommitmentEditor({ date: selectedDate })} /> : null) : <>
             <WeeklyPlanningEntry key={weekStart} weekStart={weekStart} enabled={settingsQuery.isSuccess} />
             <WeeklyFocusCard focuses={focusQuery.data ?? []} state={focusQuery.isPending ? 'loading' : focusQuery.isError ? 'error' : 'ready'}
+              onCreateTask={focusQuery.isSuccess && settingsQuery.isSuccess ? focus => setCapture({ date: selectedDate, day: false, weekStart, focusTitle: focus.title }) : undefined}
               onEdit={focusQuery.isSuccess ? () => setFocusEditor({ weekStart, focuses: focusQuery.data.map(f => ({ ...f })) }) : undefined} />
             {!loading && !error ? <View accessibilityLabel="סקירת שבעת ימי השבוע" style={styles.days}>
               {dateKeys.map(date => <WeekDayCard key={date} date={date} weekday={weekdayLabels[weekdayForDateKey(date)]!} today={date === today}
@@ -117,7 +118,7 @@ export function ServerWeekScreen({ onNavigateInbox, onNavigateMore, onNavigateTo
         </>}
       </ScrollView>
     </MobileShell>
-    {capture ? <QuickCaptureSheet visible initialDestination={capture.day ? 'day' : 'inbox'} defaultDate={capture.date}
+    {capture ? <QuickCaptureSheet focusTitle={capture.focusTitle} visible initialDestination={capture.day ? 'day' : 'inbox'} defaultDate={capture.date}
       initialPlannedDate={capture.day ? capture.date : undefined} weekLabel="השבוע המוצג"
       onClose={() => setCapture(null)} onSave={captureTask} /> : null}
     {commitmentEditor ? <CommitmentEditor notificationPreferences={settingsQuery.data?.notifications} visible initialDate={commitmentEditor.date} commitment={commitmentEditor.item}
