@@ -6,9 +6,44 @@ The owner reports successful wireless installation of prepared build 8 and, afte
 
 Version/native preparation and prior validation remain recorded in [the release verification record](release-0.4.1-verification.md). [v0.4.1](https://github.com/OzAvrahami/LifeOS/releases/tag/v0.4.1) is published and Latest, non-draft and non-prerelease, at **2026-09-23T11:49:34Z** (rechecked 2026-10-07). Its annotated tag resolves to `994138608ebb75713ca594f30ad3f5fa94f172d5`; do not move it. That release required no new schema. Publication and #2/#9 acceptance are complete.
 
-## Issue #5 local work — 2026-10-07
+## Issue #5 rollout and prepared candidate — 2026-10-07
 
-Daily Planning now requires forward migration `20261007120000_add_daily_planning_lifecycle.sql`. Local implementation and real disposable Auth/RLS verification are recorded in [the #5 handoff](issue-5-verification.md). This work is not deployed, installed or owner-accepted. Keep the first checkpoint **local commit only**. Next inspect all linked remote pending migrations and the dry run; obtain explicit authorization before schema application, verify remote history, then intentionally push/deploy the API and verify source/health. Only then prepare an authorized mobile candidate. Provisional minor version 0.5.0; no version/build changes have been made. The installed 0.4.1 client retains its legacy routes and data during rollout.
+**Candidate: LifeOS 0.5.0 (9); not built, installed or accepted.** The implementation checkpoint
+`439d9dc3f9bdc07550d716e0faeb7d6a0bc0c5ee` is committed and pushed to main. The Mac's
+initial clean main already matched it; an authorized `git fetch --no-tags origin main`
+confirmed 0 ahead / 0 behind without a branch switch or fast-forward.
+
+The owner confirms applying `20261007120000_add_daily_planning_lifecycle.sql` to the LifeOS
+Supabase project `vcizpdzqbctjksnivnzt`; the subsequent migration list showed all **10**
+local/remote entries aligned. A catalog-cache timeout warning was emitted, but application
+exited successfully and migration history included the new migration. These are owner-reported
+schema facts, not a new remote catalog inspection. Do not reapply the migration for mobile preparation.
+
+Independently re-read on this Mac: GitHub context **LifeOS - @lifeos/api** reports **success**
+for that exact commit at **2026-10-07T06:49:31Z**. A fresh public `GET /health` returned HTTP 200
+and `{"service":"lifeos-api","status":"ok"}`. This is GitHub deployment evidence plus public
+health, **not** direct Railway active-deployment inspection or authenticated write verification.
+
+The canonical manifests/lockfile and Expo configuration now use 0.5.0 / iOS build 9. Existing
+ignored Info.plist and Debug/Release project metadata were synchronized using the targeted
+procedure below; signing, entitlements, bundle ID, UIScene support and unrelated settings are
+preserved. Installed-device metadata independently reads **0.4.1 (8)**; known physical Release,
+Simulator and Debug artifacts top out at build 8. No higher relevant candidate/archive was found.
+See [the current pre-device checks and scoped acceptance](issue-5-verification.md#mac-candidate-preparation--2026-10-07).
+
+The production-mode mobile endpoint matches the documented Railway service and public Supabase
+configuration points to the intended HTTPS project (key value withheld). Release selects ordinary
+authenticated routes, not development previews; no launch or authenticated write was performed.
+The existing workspace/scheme, matching Pod locks, configured Node executable and Apple Development
+identity are available. **The cached build-8 profile expired 2026-09-29T08:37:48Z**; the later
+explicitly authorized native build must renew provisioning and verify device trust/signature.
+No provisioning change was made during preparation. This is a future build gate, not proof that
+build 9 is signed or installable yet.
+
+Next: owner reviews and commits the prepared metadata/documentation, then explicitly authorizes
+native build/install. A separate push may trigger Railway deployment; no push was performed here.
+Keep #5 Open / Verify until the new exact binary passes physical acceptance. No tag, Release,
+App Store or TestFlight publication is included.
 
 ## Notifications release acceptance — Issue #1, 2026-09-22
 

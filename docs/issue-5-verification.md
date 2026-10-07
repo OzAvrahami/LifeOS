@@ -1,8 +1,103 @@
 # Issue #5 — Daily Planning verification
 
-## Local handoff — 2026-10-07
+## Mac candidate preparation — 2026-10-07
 
-[Issue #5](https://github.com/OzAvrahami/LifeOS/issues/5) is implemented locally against `994138608ebb75713ca594f30ad3f5fa94f172d5` on main. No staging, commit, push, remote migration, deployment, native build/install, version change, tag or Release operation has been performed. Schema/API rollout and owner acceptance on a new iPhone binary remain pending; 0.4.1 (8) cannot accept this implementation.
+**Candidate: LifeOS 0.5.0 (9); not built, installed or accepted.** #5 remains **Open / Verify /
+P1 — High**, with physical acceptance pending. This checkpoint prepares metadata and current
+records only; runtime source, tests, migration and dependency resolutions are unchanged.
+
+### Completed implementation and rollout checkpoint
+
+- Implementation **439d9dc3f9bdc07550d716e0faeb7d6a0bc0c5ee** was committed/pushed by the owner.
+  This Mac began on clean main at that exact SHA. Authorized `git fetch --no-tags origin main`
+  confirmed origin/main and HEAD match (0 ahead / 0 behind); no fast-forward, reset or branch
+  switch was necessary. The historical Windows local-only checkpoint below is complete.
+- **Owner-reported schema evidence:** migration
+  `20261007120000_add_daily_planning_lifecycle.sql` was applied to LifeOS Supabase project
+  `vcizpdzqbctjksnivnzt`; the subsequent migration list showed all **10** local/remote migrations
+  aligned. The command emitted a catalog-cache timeout warning but exited successfully, and
+  migration history confirmed the new migration. This preparation did not query/reapply remote
+  migrations or claim independent catalog verification.
+- **Independently re-read on the Mac:** GitHub commit status **LifeOS - @lifeos/api** is success
+  for that exact implementation SHA at **2026-10-07T06:49:31Z**. A fresh public health GET
+  returned HTTP 200 and `{"service":"lifeos-api","status":"ok"}`. This is recorded deployment
+  plus public health evidence, not direct inspection of Railway's active deployment, a
+  commit-specific health response, authenticated writes, or production RLS verification.
+
+### Build-number inventory and native preservation
+
+The owner identifies **0.4.1 (8)** as the last accepted binary. Read-only `devicectl device info
+apps --bundle-id il.co.ozavrahami.lifeos` independently found installed **0.4.1 (8)**, without
+launching or replacing it. Existing app.json and ignored native Info.plist/Debug/Release metadata
+also read 0.4.1 / 8 before preparation.
+
+Inspected `apps/mobile/ios`, LifeOS Xcode DerivedData products, Xcode Archives and relevant
+LifeOS temporary artifacts. Known cached products under
+`~/Library/Developer/Xcode/DerivedData/LifeOS-heuqkzhdehxkbwbworgfquxenphg/Build/Products/`:
+
+| Artifact | Version/build |
+| --- | --- |
+| Release-iphoneos/LifeOS.app | 0.4.1 (8) |
+| Release-iphonesimulator/LifeOS.app | 0.4.0 (5) |
+| Debug-iphoneos/LifeOS.app | 0.1.0 (1) |
+
+No higher relevant prepared/built candidate or archive was found. Therefore **9** is the next
+unused build supported by available evidence; cached products alone were not treated as
+installed evidence. Local metadata backups/inventory and JS export are outside Git at
+`/var/folders/7y/m8g0drvs6v91ldyccz3cx9d00000gn/T/lifeos-issue5-candidate-_pot7lm_/`.
+
+Prepared 0.5.0 in root/API/mobile package manifests and exactly four lockfile values (root
+version and packages root/API/mobile versions), plus Expo version/build 0.5.0 / "9". Parsed
+comparisons verify no dependency/resolution changes. The documented targeted synchronization
+changed only Info.plist version/build and Debug/Release MARKETING_VERSION/CURRENT_PROJECT_VERSION.
+Parsed native comparisons confirm every other property preserved. All **24** other snapshotted
+native/environment files are unchanged, including signing, provisioning configuration,
+entitlements, AppDelegate/UIScene support and environment configuration. Native files remain
+ignored; no prebuild, regeneration, Pod installation/update or force-add occurred.
+
+### Pre-device checks on this Mac
+
+| Check / command | Result |
+| --- | --- |
+| `npm run typecheck` | API and mobile passed |
+| `npm run lint` | API and mobile passed |
+| `npm run test --workspace @lifeos/mobile -- --runTestsByPath __tests__/app-version-footer-test.tsx __tests__/auth-infrastructure-test.tsx --silent` | **2 suites / 14 passed / 0 failed / 0 skipped** |
+| `CI=1 NODE_ENV=production EXPO_NO_DOTENV=1 npx --no-install expo export --platform ios --output-dir <private-temporary-directory>/ios-export` from apps/mobile | Passed, **1489 modules / one Hermes bundle**; process-only synthetic public configuration placeholders; no native build, device execution or acceptance |
+| Effective Expo config and shared Settings/More footer | 0.5.0 / 9, expected bundle ID and scene support; footer retains binary-derived build and honest development/Web/missing-build fallbacks |
+| Production-mode public configuration check | Documented Railway HTTPS endpoint matches; Supabase HTTPS project matches vcizpdzqbctjksnivnzt; public key present, value not disclosed; no local/LAN override selected |
+| Release auth route inspection | Ordinary session-gated product; preview/auth-dev routes require `__DEV__`; no authenticated launch/write performed |
+| `xcodebuild -list -workspace apps/mobile/ios/LifeOS.xcworkspace` | Existing workspace and LifeOS scheme available; listing only, no compilation |
+| Toolchain | Node 26.3.0 / npm 11.16.0 / Xcode 27.0 (27A266a) / CocoaPods 1.17.0; configured native Node executable exists |
+| Native dependencies/signing | Podfile.lock equals Pods/Manifest.lock; existing automatic Personal Team and Apple Development identity available; bundle ID il.co.ozavrahami.lifeos retained |
+| Native plist/project validation and comparison | Passed, only six authorized version/build values changed |
+| JSON version-field/dependency preservation, environment/native hashes, UTF-8, local Markdown links, `git diff --check` | Passed; 10 changed tracked files decode as UTF-8; 58 local links/anchors valid |
+
+The npm upgrade notice is informational; no dependency update was performed. Reused still-valid
+implementation evidence from the committed source: API **13 suites / 96 passed**, mobile
+**48 suites / 334 passed / 1 pre-existing Android-only exclusion**, complementary Android
+**2 suites / 11 passed / 9 iOS-only exclusions**, and the complete real disposable DB/Auth/RLS
+harness including its final Daily Planning rerun. These were not repeated or relabelled as new
+Mac test runs because runtime source/tests and dependency resolutions are unchanged.
+
+### Remaining gates and next owner checkpoint
+
+**Preparation is ready for the owner Git checkpoint; build 9 is not yet a signed artifact.**
+The cached build-8 provisioning profile expired **2026-09-29T08:37:48Z**. The later authorized
+native build must renew provisioning under the existing Personal Team and verify signing/device
+trust. This step did not renew profiles or prove future installability. Do not uninstall or
+re-pair the existing app merely to prepare the candidate.
+
+After reviewing the tracked metadata/documentation and ignored native diff, the owner commits
+those tracked files. A subsequent push is a separate owner action and may trigger Railway;
+required schema is already owner-confirmed. Native build/install and the physical checklist
+below follow that checkpoint under separate authorization. Record the resulting source and exact
+installed **0.5.0 (9)** before acceptance. No new build, install, migration, deployment, tag,
+Release publication or Issue closure occurred here. GitHub metadata is unchanged.
+
+
+## Historical implementation handoff — 2026-10-07
+
+**Historical pre-commit snapshot, superseded by the completed checkpoint and preparation above.** [Issue #5](https://github.com/OzAvrahami/LifeOS/issues/5) was implemented locally against `994138608ebb75713ca594f30ad3f5fa94f172d5` on main. No staging, commit, push, remote migration, deployment, native build/install, version change, tag or Release operation has been performed. Schema/API rollout and owner acceptance on a new iPhone binary remain pending; 0.4.1 (8) cannot accept this implementation.
 
 The initial clean checkout was `aba01ce`, six commits behind. Before implementation the owner advanced it to the verified baseline; the later fetch/fast-forward authorization required no further branch/history operation. At the checkpoint, HEAD and the local origin/main reference remain `9941386` (0 ahead / 0 behind). Existing ignored environment/native/cache files were preserved. `npm ci` restored the exact lockfile dependencies after the baseline changed; manifests and lockfile are unchanged.
 
@@ -29,17 +124,17 @@ Automated evidence establishes software behavior, not physical acceptance. `UI` 
 | --- | --- | --- |
 | 1. Obvious Today entry | State-dependent entry in normal, active and partially completed Today; UI tests | iPhone discoverability |
 | 2. No state shows Plan today | Null/legacy-only state starts; loading/error are distinct; UI + DB | Physical smoke |
-| 3. Start correct date | Explicit account/date RPC, unique owner/date and stable identity; UI + DB | Remote rollout |
+| 3. Start correct date | Explicit account/date RPC, unique owner/date and stable identity; UI + DB | Authenticated iPhone/API verification |
 | 4. Scheduled Tasks visible | Review of date-planned Tasks; separate Today category; UI | Physical layout |
 | 5. Unfinished review | Prior selected/overdue work, explicit select/defer/Inbox/complete; UI + DB | Physical interaction |
 | 6. Weekly Focus context | Correct week query, direction copy and independent blank capture; UI | Physical copy/layout |
-| 7. Intentional selection | Ordered IDs independent of Task fields; DB compares full Task before/after | Remote rollout |
+| 7. Intentional selection | Ordered IDs independent of Task fields; DB compares full Task before/after | Authenticated iPhone/API verification |
 | 8. Capture without leaving | Existing Quick Capture modal, Save/cancel and stable creation retry; UI + DB | Keyboard/modal iPhone check |
 | 9. Leaving preserves progress | Per-action server save, remount with fresh provider and fresh Auth reads; UI + DB | Real app restart |
 | 10. Continue planning | In-progress entry and saved step; UI | Physical smoke |
 | 11. Restore selections | Server state after remount, no inferred dated membership; UI + DB | Real app restart |
 | 12. Previous steps accessible | Persisted back navigation; UI | Physical navigation |
-| 13. Final completion | Only explicit step-3 confirmation; duplicate complete retains timestamp; UI + DB | Remote rollout |
+| 13. Final completion | Only explicit step-3 confirmation; duplicate complete retains timestamp; UI + DB | Authenticated iPhone/API verification |
 | 14. Completed visible | Completed Today entry; deliberately empty plan supported; UI + DB | Physical smoke |
 | 15. Review completed plan | GET/review performs no start/reset write; UI + DB | Physical smoke |
 | 16. Edit without duplicate | Explicit edit retains ID/selections/last confirmation, requires reconfirmation; UI + DB | Physical smoke |
@@ -89,16 +184,20 @@ Initial failures were resolved: a transient missing `tsc` while `npm ci` was rep
 
 | Field | Value |
 | --- | --- |
-| SemVer impact | **Minor, provisional**: substantial new backwards-compatible Daily Planning workflow |
-| Candidate version | **0.5.0 provisional**, not prepared/published |
-| Candidate iOS build | **TBD**, must exceed last accepted build 8 and every relevant known candidate; at least 9 only if build-host/artifact inventory confirms no higher candidate |
-| Version prepared | **Pending / not authorized in this step**; canonical tracked sources remain 0.4.1 / 8 and dependencies unchanged |
-| Native version synchronized | **Pending** on the build Mac; Windows checkout has no installable native acceptance artifact. Preserve ignored native/environment files. |
-| Physical build installed | **Pending**; 0.4.1 (8) is the earlier owner-accepted binary |
-| Owner accepted exact build | **Pending**; keep #5 open |
-| Included issues | #5 and necessary integration, based on `9941386` including completed #2/#9 |
+| SemVer impact | **Minor**: substantial backwards-compatible Daily Planning workflow |
+| Candidate version | **0.5.0**, internal candidate, unpublished |
+| Candidate iOS build | **9**; installed metadata, native source and relevant artifacts top out at 8; no higher candidate/archive found |
+| Version prepared | **Yes, 2026-10-07 on the Mac**: Expo and three first-party manifests synchronized; exactly four lockfile version fields updated, resolutions preserved |
+| Native version synchronized | **Yes**: existing ignored Info.plist and Debug/Release project fields read back 0.5.0 / 9; unrelated native/environment state preserved |
+| Physical build installed | **Pending**; independently read installed 0.4.1 (8), not evidence for #5 |
+| Owner accepted exact build | **Pending**; keep #5 Open / Verify |
+| Included issues | #5 on implementation `439d9dc3f9bdc07550d716e0faeb7d6a0bc0c5ee`, retaining previously accepted features including #2/#9 |
 
-Before any build/install instruction, recheck versions, accepted binary and build-host artifacts; choose a fresh build, obtain preparation authorization, synchronize only canonical tracked/native fields, verify version/footer/config and production prerequisites, and record the exact candidate. This handoff does not ask the owner to build/install now.
+**Candidate: LifeOS 0.5.0 (9); not built, installed or accepted.** Release impact Yes / Minor.
+CHANGELOG is updated under Unreleased; product/native version preparation is complete locally.
+No tag or Release is published, and physical acceptance remains mandatory. The next owner Git
+checkpoint covers metadata/documentation only; no runtime/test/dependency-resolution changes
+were made. Future native build/install requires separate authorization and renewed provisioning.
 
 ## iPhone acceptance checklist — after rollout and pre-device gate
 
@@ -111,9 +210,9 @@ Before any build/install instruction, recheck versions, accepted binary and buil
 
 Record owner approval against that exact new binary and this scope. Only then may #5 become Done/closed. No older binary, mock, export or local test substitutes for this gate.
 
-## Owner local Git checkpoint
+## Historical local Git checkpoint — completed as 439d9dc
 
-**Ready for owner review and local commit**: full software scope and required local automated gates pass; no local blocker remains. Final Git readback is main at `994138608ebb75713ca594f30ad3f5fa94f172d5`, matching the local origin/main reference (0 ahead / 0 behind). The 37 changed files below are unstaged (25 modified tracked files and 12 new files); no owner changes were overwritten. **Local commit only; do not add a push to this checkpoint.** The next concrete rollout step after the owner commit is linked remote migration inspection and dry run, following [Deployment](DEPLOYMENT.md) and [the canonical order](DEVELOPMENT_WORKFLOW.md#database--api-rollout); schema application requires separate explicit authorization.
+**Historical instructions, already completed by the owner; do not repeat this staging/commit or the rollout commands below.** Implementation was committed and pushed as `439d9dc3f9bdc07550d716e0faeb7d6a0bc0c5ee`; subsequent schema/deployment evidence is recorded above. At the original handoff, **ready for owner review and local commit** meant full software scope and required local automated gates pass; no local blocker remains. Final Git readback is main at `994138608ebb75713ca594f30ad3f5fa94f172d5`, matching the local origin/main reference (0 ahead / 0 behind). The 37 changed files below are unstaged (25 modified tracked files and 12 new files); no owner changes were overwritten. **Local commit only; do not add a push to this checkpoint.** The next concrete rollout step after the owner commit is linked remote migration inspection and dry run, following [Deployment](DEPLOYMENT.md) and [the canonical order](DEVELOPMENT_WORKFLOW.md#database--api-rollout); schema application requires separate explicit authorization.
 
 ```powershell
 Set-Location D:\code\LifeOS

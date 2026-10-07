@@ -8,7 +8,7 @@ LifeOS follows Semantic Versioning for development and release tags.
 
 - Daily Planning (#5): state-dependent Today entry, three short saved steps, intentional ordered Task selections, independent capture, review/confirmation and explicit completed-plan editing. Selections do not change scheduling, importance, deadlines or reminders; unfinished work requires a deliberate choice. Day Window remains context, not capacity.
 - Add caller/date-scoped lifecycle persistence with revision conflicts and retry identities. Preserve legacy Daily Focus/capacity writes and installed 0.4.1 compatibility. Forward migration `20261007120000` is required before API rollout.
-- Local implementation/verification only; no deployment or mobile acceptance. Provisional minor candidate **0.5.0**, build TBD above 8 and relevant known candidates; versions remain 0.4.1 (8). See [#5 verification and rollout gates](docs/issue-5-verification.md).
+- Prepared internal iPhone acceptance candidate **0.5.0 (9)** on 2026-10-07 for #5, a backwards-compatible minor workflow addition. Implementation checkpoint `439d9dc3f9bdc07550d716e0faeb7d6a0bc0c5ee` is on main; the owner confirms the required migration and all 10 remote history entries aligned. GitHub reports API deployment success for that exact source and public health passes. This is not direct active-Railway or authenticated-write verification. Canonical/native metadata is synchronized; candidate is **not built, installed, accepted or published**. See [#5 verification and rollout gates](docs/issue-5-verification.md).
 
 ## [0.4.1] — 2026-09-23
 
