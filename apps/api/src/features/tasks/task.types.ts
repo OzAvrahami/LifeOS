@@ -91,7 +91,7 @@ export type TaskServiceFactory = (client: SupabaseClient, userId: string) => Tas
 
 export type TaskServiceContract = {
   cancel(id: string): Promise<Task>;
-  create(input: CreateTaskInput): Promise<Task>;
+  create(input: CreateTaskInput, creationId?: string): Promise<Task>;
   list(filters: TaskListFilters): Promise<Task[]>;
   update(id: string, input: UpdateTaskInput): Promise<Task>;
 };

@@ -112,6 +112,8 @@ export function synchronizeTaskCaches(
   task: Task,
   { activeHandoff = false, ensurePlanning }: TaskCacheSyncOptions = {},
 ) {
+  // Every Task mutation can change a selected Task without changing membership.
+  void queryClient.invalidateQueries({ queryKey: ['daily-planning', userId] });
   const queries = queryClient.getQueryCache().findAll({ queryKey: taskKeys.user(userId) });
 
   for (const query of queries) {

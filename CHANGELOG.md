@@ -6,9 +6,13 @@ LifeOS follows Semantic Versioning for development and release tags.
 
 ## [Unreleased]
 
-## [0.4.1] — Owner accepted / publication pending
+- Daily Planning (#5): state-dependent Today entry, three short saved steps, intentional ordered Task selections, independent capture, review/confirmation and explicit completed-plan editing. Selections do not change scheduling, importance, deadlines or reminders; unfinished work requires a deliberate choice. Day Window remains context, not capacity.
+- Add caller/date-scoped lifecycle persistence with revision conflicts and retry identities. Preserve legacy Daily Focus/capacity writes and installed 0.4.1 compatibility. Forward migration `20261007120000` is required before API rollout.
+- Local implementation/verification only; no deployment or mobile acceptance. Provisional minor candidate **0.5.0**, build TBD above 8 and relevant known candidates; versions remain 0.4.1 (8). See [#5 verification and rollout gates](docs/issue-5-verification.md).
 
-**Accepted internal build: LifeOS 0.4.1 (8)**. On 2026-09-23 the owner reports successful wireless iPhone installation and, after receiving the physical checklist, “נראה טוב” (“Looks good”). This accepts the reviewed behavior without attesting every checklist scenario individually. #2 and #9 are complete; GitHub publication is prepared but has not occurred. Latest published remains v0.4.0. No App Store/TestFlight publication. See [release verification](docs/release-0.4.1-verification.md).
+## [0.4.1] — 2026-09-23
+
+**Accepted internal build: LifeOS 0.4.1 (8)**. On 2026-09-23 the owner reports successful wireless iPhone installation and, after receiving the physical checklist, “נראה טוב” (“Looks good”). This accepts the reviewed behavior without attesting every checklist scenario individually. #2 and #9 are complete. [v0.4.1](https://github.com/OzAvrahami/LifeOS/releases/tag/v0.4.1) was published **2026-09-23T11:49:34Z**, non-draft, non-prerelease and Latest (rechecked 2026-10-07). Its annotated tag resolves to `994138608ebb75713ca594f30ad3f5fa94f172d5`; preserve this published target. No App Store/TestFlight publication. See [release verification](docs/release-0.4.1-verification.md).
 
 ### Fixed
 
@@ -22,7 +26,7 @@ Patch classification corrects existing semantics and capture access without a ne
 
 ## [0.4.0] — 2026-09-22
 
-**Owner-accepted internal iPhone build: LifeOS 0.4.0 (7).** [LifeOS v0.4.0 — Notifications](https://github.com/OzAvrahami/LifeOS/releases/tag/v0.4.0) is **published and Latest**, non-draft and non-prerelease, published **2026-09-22T11:04:34Z**. The final annotated tag resolves to `ce7e66fb620f046b60fcd2bbe468fad09ac5c96b` and must not be moved or recreated. Post-publication documentation does not change this release source. This is not App Store/TestFlight distribution. See [release verification](docs/release-0.4.0-verification.md).
+**Owner-accepted internal iPhone build: LifeOS 0.4.0 (7).** [LifeOS v0.4.0 — Notifications](https://github.com/OzAvrahami/LifeOS/releases/tag/v0.4.0) was **published as Latest** on **2026-09-22T11:04:34Z**, non-draft and non-prerelease; v0.4.1 superseded it on 2026-09-23. The final annotated tag resolves to `ce7e66fb620f046b60fcd2bbe468fad09ac5c96b` and must not be moved or recreated. Post-publication documentation does not change this release source. This is not App Store/TestFlight distribution. See [release verification](docs/release-0.4.0-verification.md).
 
 ### Added
 

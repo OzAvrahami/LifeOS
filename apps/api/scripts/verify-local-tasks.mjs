@@ -9,6 +9,7 @@ import { fileURLToPath, URL } from 'node:url';
 
 import { createClient } from '@supabase/supabase-js';
 import { verifyWeeklyPlanning } from './verify-weekly-planning.mjs';
+import { verifyDailyPlanning } from './verify-daily-planning.mjs';
 import { verifyCommitmentReminders } from './verify-commitment-reminders.mjs';
 import { verifyNotifications, notificationDefaults } from './verify-notifications.mjs';
 
@@ -71,12 +72,13 @@ async function waitForApi(processHandle) {
   throw new Error('Local API did not become ready');
 }
 
-async function apiRequest(method, path, token, body, expectedStatus = 200) {
+async function apiRequest(method, path, token, body, expectedStatus = 200, extraHeaders = {}) {
   const response = await globalThis.fetch(`${apiBaseUrl}${path}`, {
     body: body === undefined ? undefined : JSON.stringify(body),
     headers: {
       Authorization: `Bearer ${token}`,
       ...(body === undefined ? {} : { 'Content-Type': 'application/json' }),
+      ...extraHeaders,
     },
     method,
   });
@@ -184,6 +186,14 @@ async function main() {
     const callerA = quietClient(supabaseUrl, publishableKey, tokenA);
     const callerB = quietClient(supabaseUrl, publishableKey, tokenB);
     const anonymous = quietClient(supabaseUrl, publishableKey);
+
+    if (process.argv.includes('--daily')) {
+      await verifyDailyPlanning({ apiRequest, tokenA, tokenB, callerA, callerB, anonymous,
+        freshTokenA: async () => (await signIn(supabaseUrl, publishableKey, users[0].email, password)).access_token,
+      });
+      console.log('PASS Daily Planning lifecycle, selections, retries/concurrency, legacy compatibility, task changes and caller/anonymous RLS');
+      return;
+    }
 
     for (const table of [
       'tasks',
@@ -766,6 +776,10 @@ async function main() {
     assert.ok(anonymousCommitmentDelete.error, 'Anonymous Commitment delete unexpectedly succeeded');
     assert.ok(anonymousSettingsUpdate.error, 'Anonymous Settings update unexpectedly succeeded');
 
+    await verifyDailyPlanning({ apiRequest, tokenA, tokenB, callerA, callerB, anonymous,
+      freshTokenA: async () => (await signIn(supabaseUrl, publishableKey, users[0].email, password)).access_token,
+    });
+    console.log('PASS Daily Planning lifecycle, selections, retries/concurrency, legacy compatibility, task changes and caller/anonymous RLS');
     await verifyWeeklyPlanning({ apiRequest, tokenA, tokenB, callerA, callerB, anonymous,
       freshTokenA: async () => (await signIn(supabaseUrl, publishableKey, users[0].email, password)).access_token,
     });

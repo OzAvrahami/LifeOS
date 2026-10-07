@@ -1,4 +1,5 @@
 import { TaskDetailsButton } from '@/features/tasks/task-details-button';
+import type { ReactNode } from 'react';
 import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 
 import { colors, radius, spacing, typography } from '@/theme/tokens';
@@ -8,6 +9,7 @@ import { TaskTimeSummary } from './today.components';
 import { TodayTask } from './today.types';
 
 export function ActiveState({
+  planningContent,
   onOpenTask,
   commitment,
   dateLabel,
@@ -19,6 +21,7 @@ export function ActiveState({
   task,
   unknownEstimateCount,
 }: {
+  planningContent?: ReactNode;
   onOpenTask?: (id: string) => void;
   commitment?: { time: string; title: string } | null;
   dateLabel?: string;
@@ -36,6 +39,7 @@ export function ActiveState({
 
   return (
     <ScrollView contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
+      {planningContent}
       <Text style={styles.date}>{dateLabel ?? today.dateLabel}</Text>
       <Text style={styles.summary}>משימה אחת פעילה עכשיו</Text>
       <TaskTimeSummary
@@ -63,7 +67,7 @@ export function ActiveState({
         </View>
       </View>
 
-      <Text style={styles.sectionLabel}>בהמשך היום</Text>
+      <Text style={styles.sectionLabel}>{planningContent ? 'משימות מתוארכות נוספות להיום' : 'בהמשך היום'}</Text>
       <View accessibilityLabel="בהמשך היום" style={styles.taskList}>
         {remainingTasks.map((laterTask, index) => (
           <View key={laterTask.id}>

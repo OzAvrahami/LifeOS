@@ -12,7 +12,7 @@ Authenticated GitHub readback confirms completed publication. These post-publica
 | Published timestamp | `2026-09-22T11:04:34Z` |
 | Draft / prerelease | false / false |
 | Final annotated tag target | `ce7e66fb620f046b60fcd2bbe468fad09ac5c96b` |
-| Latest published GitHub Release | **v0.4.0**, superseding v0.3.0 |
+| Latest at publication | **v0.4.0**, superseding v0.3.0; superseded by v0.4.1 on 2026-09-23 |
 | Source before final acceptance-documentation commit | `c99ef3f402687befc37d252d246634dae5ede27a` — `feat(notifications): add commitment reminders and task details access` |
 | Included issue | [#1 Notifications MVP](https://github.com/OzAvrahami/LifeOS/issues/1): Closed / Completed / Done / P2 — Medium |
 | Accepted device/date | Owner's iPhone 17 Pro Max; **2026-09-22** |

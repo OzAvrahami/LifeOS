@@ -1,4 +1,5 @@
 import { TaskDetailsButton } from '@/features/tasks/task-details-button';
+import type { ReactNode } from 'react';
 import { Ionicons } from '@expo/vector-icons';
 import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 
@@ -9,6 +10,7 @@ import { TaskTimeSummary } from './today.components';
 import { TodayTask } from './today.types';
 
 export function PartiallyCompletedState({
+  planningContent,
   onOpenTask,
   completedTasks,
   dateLabel,
@@ -18,6 +20,7 @@ export function PartiallyCompletedState({
   plannedTaskTime,
   unknownEstimateCount,
 }: {
+  planningContent?: ReactNode;
   onOpenTask?: (id: string) => void;
   completedTasks?: TodayTask[];
   dateLabel?: string;
@@ -39,7 +42,9 @@ export function PartiallyCompletedState({
 
   return (
     <ScrollView contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
+      {planningContent}
       <Text style={styles.date}>{dateLabel ?? today.dateLabel}</Text>
+      {planningContent ? <Text style={styles.progressNote}>ההתקדמות כאן מתייחסת למשימות מתוארכות שאינן בבחירה למעלה.</Text> : null}
       <View accessibilityLabel="התקדמות היום" style={styles.progressRow}>
         <View style={styles.dots}>
           {visibleCompletedTasks.map((task) => <View key={task.id} style={styles.doneDot} />)}
@@ -51,7 +56,7 @@ export function PartiallyCompletedState({
       </View>
       <Text style={styles.progressNote}>
         {remainingCount === 0
-          ? 'כל המשימות המתוכננות הושלמו.'
+          ? planningContent ? 'כל המשימות המתוארכות הנוספות הושלמו.' : 'כל המשימות המתוכננות הושלמו.'
           : remainingCount === 1
             ? 'נשארה משימה אחת מתוכננת להיום.'
             : `נשארו ${remainingCount} משימות מתוכננות להיום.`}

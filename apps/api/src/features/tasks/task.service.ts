@@ -12,7 +12,7 @@ import {
 } from './task.types.js';
 import { TaskApiError } from './task.validation.js';
 
-function mapTask(row: TaskRow): Task {
+export function mapTask(row: TaskRow): Task {
   return {
     completedAt: row.completed_at,
     createdAt: row.created_at,
@@ -108,6 +108,17 @@ export class SupabaseTaskStore implements TaskStore {
       .insert({ ...values, user_id: this.userId })
       .select('*')
       .single();
+    if (error?.code === '23505' && typeof values.id === 'string') {
+      // The caller-chosen creation UUID is the stable Task identity. A lost response
+      // can be retried without a second insert or resetting later Task edits.
+      const existing = (await this.list({ id: values.id }))[0];
+      if (existing && Object.entries(values).every(([key, value]) => {
+        const saved = existing[key as keyof TaskRow];
+        return key === 'reminder_at' && typeof value === 'string' && typeof saved === 'string'
+          ? Date.parse(saved) === Date.parse(value) : saved === value;
+      })) return existing;
+      throw new TaskApiError(409, 'Task creation changed; reload before retrying');
+    }
     if (error) dataError(error);
     return data as TaskRow;
   }
@@ -162,8 +173,9 @@ export class TaskService implements TaskServiceContract {
     return (await this.store.list(filters)).map(mapTask);
   }
 
-  async create(input: CreateTaskInput) {
+  async create(input: CreateTaskInput, creationId?: string) {
     const values: Record<string, unknown> = {
+      ...(creationId ? { id: creationId } : {}),
       ...(await planningValues(this.store, input.planning)),
       title: input.title,
     };

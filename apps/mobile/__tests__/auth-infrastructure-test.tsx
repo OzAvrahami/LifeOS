@@ -5,7 +5,8 @@ import { Pressable, Text } from 'react-native';
 
 import { isAuthDevRouteAvailable } from '@/features/auth/auth-dev-availability';
 import { AuthProvider, useAuth } from '@/features/auth/auth-provider';
-import { createApiClient } from '@/lib/api/client';
+import { apiRequest, createApiClient } from '@/lib/api/client';
+import { supabase } from '@/lib/supabase/client';
 
 jest.mock('@/lib/supabase/client', () => ({
   supabase: { auth: { getSession: jest.fn() } },
@@ -23,6 +24,21 @@ const testSession = {
   token_type: 'bearer',
   user: testUser,
 } as Session;
+
+it('rejects a planning request if the active credential belongs to a different account', async () => {
+  jest.mocked(supabase.auth.getSession).mockResolvedValue({ data: { session: testSession }, error: null });
+  await expect(apiRequest('/daily-plans/2026-10-07/planning', { auth: 'required', expectedUserId: 'different-user', method: 'PUT' }))
+    .rejects.toMatchObject({ status: 401, message: 'Account changed' });
+});
+
+it('passes the expected account to credential resolution without sending internal options to fetch', async () => {
+  const fetchImplementation = jest.fn().mockResolvedValue({ ok: true, json: async () => ({ plan: null }) });
+  const getAccessToken = jest.fn().mockResolvedValue('synthetic');
+  const client = createApiClient({ baseUrl: 'https://api.example.test', fetchImplementation, getAccessToken });
+  await client('/daily-plans/2026-10-07/planning', { auth: 'required', expectedUserId: 'account-A' });
+  expect(getAccessToken).toHaveBeenCalledWith('account-A');
+  expect(fetchImplementation.mock.calls[0]?.[1]).not.toHaveProperty('expectedUserId');
+});
 
 type AuthListener = (event: AuthChangeEvent, session: Session | null) => void;
 

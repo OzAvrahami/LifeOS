@@ -1,7 +1,12 @@
 import { TaskDetailScreen } from '@/features/tasks/task-detail-screen';
 import { Ionicons } from '@expo/vector-icons';
-import { useState } from 'react';
-import { Modal, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { type ReactNode, useEffect, useState } from 'react';
+import { AppState, Modal, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { DailyPlanningSession, type DailySessionContext } from '@/features/planning/daily-planning-session';
+import { DailyPlanningEntry, DailySelectedTasks } from '@/features/planning/daily-planning-view';
+import { useDailyPlanning, useDailyPlanningTasks } from '@/features/planning/daily-planning.queries';
+import { dailyMembership } from '@/features/planning/daily-planning-model';
+import { useTaskQueryScope } from '@/features/tasks/task-query-scope';
 
 import { MobileShell } from '@/components/mobile-shell';
 import { QuickCaptureSheet, type CaptureDestination } from '@/features/capture/quick-capture-sheet';
@@ -58,6 +63,16 @@ export function TodayScreen({
   taskSource?: TaskSource;
 }) {
   const [detailsTaskId, setDetailsTaskId] = useState<string | null>(null);
+  const userId = useTaskQueryScope();
+  const [planningSession, setPlanningSession] = useState<DailySessionContext | null>(null);
+  if (planningSession && planningSession.userId !== userId) setPlanningSession(null);
+  const [, tick] = useState(0);
+  useEffect(() => {
+    const refresh = () => tick(value => value + 1);
+    const timer = setInterval(refresh, 30_000);
+    const subscription = AppState.addEventListener('change', state => { if (state === 'active') refresh(); });
+    return () => { clearInterval(timer); subscription.remove(); };
+  }, []);
   const [todayState, setTodayState] = useState<TodayDemoState>(initialState);
   const [captureOpen, setCaptureOpen] = useState(false);
   const [captureInitialDestination, setCaptureInitialDestination] = useState<CaptureDestination>('inbox');
@@ -67,6 +82,10 @@ export function TodayScreen({
   const serverTasks = taskSource === 'server';
   const { effective: settings, query: settingsQuery } = useEffectiveSettings(serverTasks);
   const todayDate = localDateKey(undefined, settings.timezone);
+  const dailyPlanning = useDailyPlanning(todayDate, serverTasks);
+  const selectedTaskQuery = useDailyPlanningTasks(todayDate, serverTasks && !!dailyPlanning.query.data && dailyPlanning.query.data.status !== 'not_started');
+  const selectionReady = !!selectedTaskQuery.data && !!dailyPlanning.query.data;
+  const membership = dailyMembership(todayDate, selectionReady ? dailyPlanning.query.data!.selectedTaskIds : [], selectedTaskQuery.data ?? []);
   const todayQuery = useTasks({ plannedDate: todayDate }, serverTasks);
   const commitmentQuery = useCommitments({ date: todayDate }, serverTasks);
   const dailyPlanQuery = useDailyPlan(todayDate, serverTasks);
@@ -84,7 +103,7 @@ export function TodayScreen({
     || dailyPlanQuery.isPending
     || settingsQuery.isPending
   );
-  const sourceTasks = serverTasks ? (todayQuery.data ?? []) : demo.todayTasks;
+  const sourceTasks = serverTasks ? (todayQuery.data ?? []).filter(task => !selectionReady || !dailyPlanning.query.data!.selectedTaskIds.includes(task.id)) : demo.todayTasks;
   const activeTask = sourceTasks.find((task) => task.status === 'in_progress');
   const openTodayTasks = sourceTasks.filter((task) => task.status === 'open');
   const completedTodayTasks = sourceTasks.filter((task) => task.status === 'completed');
@@ -96,7 +115,8 @@ export function TodayScreen({
     title: commitment.title,
   }));
   const serverTaskTime = serverTasks
-    ? summarizePlannedTaskTime(todayQuery.data ?? [])
+    ? selectionReady ? { knownMinutes: membership.knownMinutes, unknownEstimateCount: membership.unknownCount }
+      : summarizePlannedTaskTime(todayQuery.data ?? [])
     : null;
 
   const openCapture = (destination: CaptureDestination) => {
@@ -156,6 +176,27 @@ export function TodayScreen({
   };
 
   let content;
+  const planningContent = serverTasks ? <View style={{ gap: spacing.md }}>
+    <DailyPlanningEntry key={`${userId}:${todayDate}`} date={todayDate} onOpen={() => setPlanningSession({
+      date: todayDate, userId, timezone: settings.timezone, weekStartDay: settings.weekStartDay,
+      dayStartTime: settings.dayStartTime, dayEndTime: settings.dayEndTime,
+    })} />
+    {selectionReady ? <>
+      <Text style={styles.taskSource}>הסיכום כולל משימות שנבחרו או תוארכו ליום הזה, ללא ספירה כפולה. הזמן לפי משימות פעילות בלבד.</Text>
+      <DailySelectedTasks plan={dailyPlanning.query.data} tasks={selectedTaskQuery.data!} onTask={setDetailsTaskId}
+        pending={updateMutation.isPending} onStatus={(id, status) => { void updateStatus(id, status); }} />
+    </> : null}
+    {selectedTaskQuery.isError ? <>
+      <Text accessibilityRole="alert" style={styles.taskSource}>לא הצלחנו לרענן את המשימות שנבחרו.</Text>
+      <Pressable accessibilityRole="button" accessibilityLabel="רענון המשימות שנבחרו" onPress={() => { void selectedTaskQuery.refetch(); }}>
+        <Text style={styles.taskSource}>נסה שוב</Text>
+      </Pressable>
+    </> : null}
+    {activeTask || completedTodayTasks.length ? <>
+      <CommitmentSectionHeader onAdd={openNewCommitment} />
+      <Commitments items={presentedCommitments} onPress={openExistingCommitment} />
+    </> : null}
+  </View> : undefined;
 
   if (integrated) {
     const activeTodayTask = activeTask ? toPresentedTodayTask(activeTask) : undefined;
@@ -165,8 +206,9 @@ export function TodayScreen({
     if (activeTodayTask) {
       content = (
         <ActiveState
+          planningContent={planningContent}
           onOpenTask={serverTasks ? setDetailsTaskId : undefined}
-          commitment={serverTasks ? presentedCommitments[0] ?? null : undefined}
+          commitment={serverTasks ? null : undefined}
           laterTasks={openTasks}
           dateLabel={serverTasks ? hebrewDateLabel(undefined, settings.timezone) : undefined}
           onFinish={() => void updateStatus(activeTodayTask.id, 'completed')}
@@ -181,6 +223,7 @@ export function TodayScreen({
       const nextTask = openTasks[0] ?? null;
       content = (
         <PartiallyCompletedState
+          planningContent={planningContent}
           onOpenTask={serverTasks ? setDetailsTaskId : undefined}
           completedTasks={completedTasks}
           dateLabel={serverTasks ? hebrewDateLabel(undefined, settings.timezone) : undefined}
@@ -201,6 +244,7 @@ export function TodayScreen({
         : tasks.find((task) => task.id === normalTodayFixture.focus.id) ?? tasks[0];
       content = (
         <NormalTodayContent
+          planningContent={planningContent}
           onOpenTask={serverTasks ? setDetailsTaskId : undefined}
           focusTask={focusTask}
           focusedTaskId={serverTasks ? dailyPlanQuery.data?.focusTaskId ?? undefined : undefined}
@@ -214,7 +258,7 @@ export function TodayScreen({
           onAddTask={() => openCapture('today')}
           onEditCommitment={serverTasks ? openExistingCommitment : undefined}
           serverCommitmentCount={serverTasks ? serverCommitments.length : undefined}
-          serverTaskCount={serverTasks ? sourceTasks.length : undefined}
+          serverTaskCount={serverTasks ? selectionReady ? membership.union.length : sourceTasks.length : undefined}
           serverPlannedTaskTime={serverTaskTime ? formatTaskMinutesHebrew(serverTaskTime.knownMinutes) : undefined}
           serverUnknownEstimateCount={serverTaskTime?.unknownEstimateCount}
           onCreateFocusTask={() => openCapture('inbox')}
@@ -273,6 +317,8 @@ export function TodayScreen({
         />
         {isHydrating ? null : content}
       </MobileShell>
+      {serverTasks && planningSession?.userId === userId ? <DailyPlanningSession key={`${userId}:${planningSession.date}`}
+        context={planningSession} onClose={() => setPlanningSession(null)} /> : null}
       {serverTasks && detailsTaskId ? <Modal visible animationType="slide" onRequestClose={() => setDetailsTaskId(null)}>
         <TaskDetailScreen id={detailsTaskId} onBack={() => setDetailsTaskId(null)} />
       </Modal> : null}
@@ -298,6 +344,7 @@ export function TodayScreen({
 }
 
 function NormalTodayContent({
+  planningContent,
   onOpenTask,
   commitments,
   dateLabel,
@@ -318,6 +365,7 @@ function NormalTodayContent({
   suggestion,
   tasks,
 }: {
+  planningContent?: ReactNode;
   onOpenTask?: (id: string) => void;
   commitments?: typeof normalTodayFixture.commitments;
   dateLabel?: string;
@@ -366,13 +414,14 @@ function NormalTodayContent({
           taskCount={taskCount}
           unknownEstimateCount={serverUnknownEstimateCount ?? today.summary.unknownEstimateCount}
         />
+        {planningContent}
         {focusTask ? <FocusCard onOpenTask={onOpenTask} onStart={onStartFocus} task={focusTask} /> : null}
 
         {onAddCommitment ? <CommitmentSectionHeader onAdd={onAddCommitment} /> : <SectionLabel>התחייבויות</SectionLabel>}
         <Commitments items={commitments ?? today.commitments} onPress={onEditCommitment} />
 
         <SectionLabel>המשימות שלי</SectionLabel>
-        <Text style={styles.taskSource}>משימות שתוכננו לתאריך של היום.</Text>
+        <Text style={styles.taskSource}>{planningContent ? 'משימות שתוכננו לתאריך של היום ולא מופיעות בבחירה למעלה.' : 'משימות שתוכננו לתאריך של היום.'}</Text>
         <TaskList
           onOpenTask={onOpenTask}
           focusedTaskId={focusedTaskId}

@@ -78,4 +78,11 @@ describe('LifeOS API', () => {
       true,
     );
   });
+
+  it('allows retry-safe capture preflight from an existing allowed origin without broadening origins', async () => {
+    const response = await request(app).options('/tasks').set('Origin', 'http://localhost:8081')
+      .set('Access-Control-Request-Method', 'POST').set('Access-Control-Request-Headers', 'content-type,idempotency-key').expect(204);
+    assert.match(response.headers['access-control-allow-headers'] ?? '', /Idempotency-Key/);
+    await request(app).options('/tasks').set('Origin', 'https://unapproved.example.test').expect(403);
+  });
 });

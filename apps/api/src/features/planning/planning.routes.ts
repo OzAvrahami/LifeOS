@@ -2,6 +2,7 @@ import type { NextFunction, Request, RequestHandler, Response } from 'express';
 import { Router } from 'express';
 
 import { requireAuth } from '../../middleware/auth.middleware.js';
+import { DailyPlanningService, parseDailyPlanning } from './daily-planning.js';
 import { createPlanningService } from './planning.service.js';
 import type { PlanningServiceFactory } from './planning.types.js';
 import {
@@ -15,8 +16,23 @@ import {
 export function createPlanningRouter(
   authMiddleware: RequestHandler = requireAuth,
   serviceFactory: PlanningServiceFactory = createPlanningService,
+  dailyFactory: (client: Parameters<PlanningServiceFactory>[0], userId: string) => Pick<DailyPlanningService, 'get' | 'save' | 'tasks'>
+    = (client, userId) => new DailyPlanningService(client, userId),
 ) {
   const router = Router();
+
+  router.get('/daily-plans/:date/planning', authMiddleware, async (request, response) => {
+    const service = dailyFactory(request.auth.supabase, request.auth.user.id);
+    response.json({ plan: await service.get(parsePlanningDate(request.params.date, 'date')) });
+  });
+  router.put('/daily-plans/:date/planning', authMiddleware, async (request, response) => {
+    const service = dailyFactory(request.auth.supabase, request.auth.user.id);
+    response.json({ plan: await service.save(parsePlanningDate(request.params.date, 'date'), parseDailyPlanning(request.body)) });
+  });
+  router.get('/daily-plans/:date/tasks', authMiddleware, async (request, response) => {
+    const service = dailyFactory(request.auth.supabase, request.auth.user.id);
+    response.json({ tasks: await service.tasks(parsePlanningDate(request.params.date, 'date')) });
+  });
 
   router.get('/week-plans/:weekStart', authMiddleware, async (request, response) => {
     const service = serviceFactory(request.auth.supabase, request.auth.user.id);

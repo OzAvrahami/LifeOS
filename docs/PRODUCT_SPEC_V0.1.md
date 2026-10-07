@@ -1,6 +1,6 @@
 # LifeOS — הגדרת גרסה 0.1
 
-> Current clarification (2026-09-23): [Task importance decision (#9)](issue-9-decision.md) defines the existing optional normal/important flag separately from Weekly Focus, daily selection, scheduling and deadlines. No additional priority levels or automatic Focus-to-Task conversion. Daily Planning remains #5. This clarification takes precedence over broader future possibilities in this historical v0.1 specification.
+> Current clarification (2026-10-07): [Task importance decision (#9)](issue-9-decision.md) defines optional normal/important separately from Weekly Focus, daily selection, scheduling, deadlines and reminders. No importance controls were added to Quick Capture. [Daily Planning #5](issue-5-verification.md) is implemented locally as three short saved steps with intentional selections, ordinary capture, confirmation and explicit editing; rollout and iPhone acceptance remain pending. There is no automatic selection, Focus association, rollover or scheduling. Day Window is context, not capacity. These decisions take precedence over future possibilities in this historical v0.1 specification.
 
 ## מטרת הגרסה הראשונה
 

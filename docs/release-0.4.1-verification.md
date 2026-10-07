@@ -1,6 +1,10 @@
 # LifeOS 0.4.1 (8) — release verification
 
-## Current state — 2026-09-23
+## Current publication — 2026-10-07 readback
+
+[LifeOS v0.4.1](https://github.com/OzAvrahami/LifeOS/releases/tag/v0.4.1) is published and Latest, non-draft and non-prerelease, published **2026-09-23T11:49:34Z**. Annotated tag object `695363d7bafcb24e1141d4a361ebc5ea3c111537` resolves to `994138608ebb75713ca594f30ad3f5fa94f172d5`, also the verified main baseline for #5. Preserve the tag and historical acceptance below. Last owner-accepted binary remains **0.4.1 (8)**; it does not contain #5. No publication action remains for v0.4.1. No App Store/TestFlight distribution is implied.
+
+## Historical pre-publication state — 2026-09-23
 
 **Owner-accepted internal build / publication prepared, not yet published.** Scope: #2 Task/Weekly Focus clarification and #9's approved product decision. Both issues are Closed / Completed / Done, preserving #2 P1 and #9 P2. Latest published remains **v0.4.0**; last accepted internal binary is now **0.4.1 (8)**.
 
@@ -80,7 +84,7 @@ GitHub's `LifeOS - @lifeos/api` status is **success** for `ce113fbc14142056b042e
 
 Selected Xcode: `/Applications/Xcode.app/Contents/Developer`, **27.0 (27A266a)**. Existing workspace lists scheme LifeOS. One valid Apple Development signing identity is available, without exporting credentials. Pods lock equals manifest; ExpoNotifications remains in the workspace. Node **26.3.0**, npm **11.16.0**, CocoaPods **1.17.0**; `.xcode.env.local` points to an existing executable reporting Node 26.3.0. Installed Expo CLI help supports the established device/Release options. Tool presence does not establish current device trust, Developer Mode or provisioning validity.
 
-## Publication preparation and documentation checkpoint
+## Historical publication preparation and documentation checkpoint
 
 Proposed title: **LifeOS v0.4.1 — Tasks and Weekly Focus**. Copy-ready notes are prepared in `/tmp/lifeos-v0.4.1-release-notes.md`, based on CHANGELOG; no binary attachment is required. The owner will review/commit the final documentation before selecting the exact final tag target. No future commit SHA or publication date is invented.
 

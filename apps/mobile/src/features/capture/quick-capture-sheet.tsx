@@ -29,6 +29,7 @@ const destinations: { id: CaptureDestination; label: string; ltr?: boolean }[] =
 ];
 
 type CaptureProps = {
+  lockDraftOnSaveAttempt?: boolean;
   focusTitle?: string;
   initialDestination?: CaptureDestination;
   initialPlannedDate?: string;
@@ -44,6 +45,7 @@ export function QuickCaptureSheet(props: CaptureProps) {
 }
 
 function CaptureSession({
+  lockDraftOnSaveAttempt = false,
   focusTitle,
   initialDestination = 'inbox',
   initialPlannedDate,
@@ -61,6 +63,8 @@ function CaptureSession({
   const busy = useRef(false);
   const [error, setError] = useState(false);
   const [saving, setSaving] = useState(false);
+  const [attempted, setAttempted] = useState(false);
+  const fieldsLocked = saving || (lockDraftOnSaveAttempt && attempted);
 
   const close = () => {
     if (busy.current) return;
@@ -77,6 +81,7 @@ function CaptureSession({
     const nextTitle = title.trim();
     if (!nextTitle || busy.current || choosingDay || (destination === 'day' && !isPlanningDate(plannedDate))) return;
     busy.current = true;
+    setAttempted(true);
     setError(false);
     setSaving(true);
     try {
@@ -117,7 +122,7 @@ function CaptureSession({
             <TextInput
               accessibilityLabel="כותרת"
               autoFocus
-              editable={!saving}
+              editable={!fieldsLocked}
               enterKeyHint="done"
               onChangeText={setTitle}
               onSubmitEditing={() => void save()}
@@ -130,6 +135,7 @@ function CaptureSession({
             />
 
             {error ? <Text accessibilityRole="alert" style={styles.error}>לא הצלחנו לשמור. אפשר לנסות שוב.</Text> : null}
+            {error && lockDraftOnSaveAttempt ? <Text style={styles.error}>ניסיון חוזר משתמש באותה בקשה כדי למנוע כפילות. לשינוי פרטים, סגור ובדוק תחילה אם המשימה כבר נשמרה.</Text> : null}
 
             <Text style={styles.destinationLabel}>לאן זה הולך?</Text>
             <View style={styles.destinations}>
@@ -140,7 +146,7 @@ function CaptureSession({
                     accessibilityRole="button"
                     accessibilityState={{ selected }}
                     key={item.id}
-                    disabled={saving || undefined}
+                    disabled={fieldsLocked || undefined}
                     onPress={() => {
                       if (Platform.OS !== 'web') Keyboard.dismiss();
                       if (item.id === 'day') setChoosingDay(true);

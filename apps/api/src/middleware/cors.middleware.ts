@@ -43,7 +43,7 @@ export function localDevelopmentCors(request: Request, response: Response, next:
 
   response.vary('Origin');
   response.setHeader('Access-Control-Allow-Origin', origin);
-  response.setHeader('Access-Control-Allow-Headers', 'Accept, Authorization, Content-Type');
+  response.setHeader('Access-Control-Allow-Headers', 'Accept, Authorization, Content-Type, Idempotency-Key');
   response.setHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, PATCH, DELETE, OPTIONS');
 
   if (request.method === 'OPTIONS') {

@@ -4,7 +4,11 @@
 
 The owner reports successful wireless installation of prepared build 8 and, after receiving the physical checklist, **“נראה טוב” (“Looks good”)**. This is scoped owner acceptance of the reviewed #2 behavior, not independent observation or individual scenario attestations. #2 and #9 are Closed / Completed / Done; #9 decision approval and its Git checkpoint are complete. Checkpoint `3fb6695a094ad6e3682bd069a823e5087a16dfe4` is verified on local and remote main with implementation, approved decision and 0.4.1 (8) preparation. GitHub API deployment context is success for that checkpoint (`2026-09-23T10:51:45Z`); no active-provider inspection is implied.
 
-Version/native preparation and prior validation remain recorded in [the release verification record](release-0.4.1-verification.md). No schema/API implementation change or new migration is required. Latest published remains **v0.4.0**; 0.4.1 publication is prepared, not completed. The eventual tag must point to the final approved documentation commit. This documentation finalization performs no build/install, runtime/native/version edit, deployment or publication.
+Version/native preparation and prior validation remain recorded in [the release verification record](release-0.4.1-verification.md). [v0.4.1](https://github.com/OzAvrahami/LifeOS/releases/tag/v0.4.1) is published and Latest, non-draft and non-prerelease, at **2026-09-23T11:49:34Z** (rechecked 2026-10-07). Its annotated tag resolves to `994138608ebb75713ca594f30ad3f5fa94f172d5`; do not move it. That release required no new schema. Publication and #2/#9 acceptance are complete.
+
+## Issue #5 local work — 2026-10-07
+
+Daily Planning now requires forward migration `20261007120000_add_daily_planning_lifecycle.sql`. Local implementation and real disposable Auth/RLS verification are recorded in [the #5 handoff](issue-5-verification.md). This work is not deployed, installed or owner-accepted. Keep the first checkpoint **local commit only**. Next inspect all linked remote pending migrations and the dry run; obtain explicit authorization before schema application, verify remote history, then intentionally push/deploy the API and verify source/health. Only then prepare an authorized mobile candidate. Provisional minor version 0.5.0; no version/build changes have been made. The installed 0.4.1 client retains its legacy routes and data during rollout.
 
 ## Notifications release acceptance — Issue #1, 2026-09-22
 
@@ -14,7 +18,7 @@ Version/native preparation and prior validation remain recorded in [the release 
 
 Build 5 failed native launch and was never accepted. Build 6 fixed UIScene startup and was superseded before product acceptance, not failed. Build 7 is the final accepted binary; native plist/Debug/Release preparation and earlier Xcode 27 compilation evidence remain in [the issue record](issue-1-verification.md). The historical v0.4.0 publication checkpoint required no rebuild or version increase; the separately authorized 0.4.1 preparation is recorded above.
 
-[LifeOS v0.4.0 — Notifications](https://github.com/OzAvrahami/LifeOS/releases/tag/v0.4.0) is **published and Latest**, non-draft and non-prerelease, published **2026-09-22T11:04:34Z**. The final annotated tag resolves to `ce7e66fb620f046b60fcd2bbe468fad09ac5c96b` and must not be moved or recreated. Accepted internal binary remains **LifeOS 0.4.0 (7)**; later documentation commits do not alter its release source. No publication action remains. No App Store/TestFlight publication. See [0.4.0 release verification](release-0.4.0-verification.md).
+[LifeOS v0.4.0 — Notifications](https://github.com/OzAvrahami/LifeOS/releases/tag/v0.4.0) was **published as Latest** on **2026-09-22T11:04:34Z**, non-draft and non-prerelease; v0.4.1 superseded it on 2026-09-23. The final annotated tag resolves to `ce7e66fb620f046b60fcd2bbe468fad09ac5c96b` and must not be moved or recreated. Accepted internal binary remains **LifeOS 0.4.0 (7)**; later documentation commits do not alter its release source. No publication action remains. No App Store/TestFlight publication. See [0.4.0 release verification](release-0.4.0-verification.md).
 
 ### Historical build-6 scene reconciliation procedure
 

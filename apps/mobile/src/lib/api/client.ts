@@ -4,12 +4,13 @@ export type ApiAuthMode = 'none' | 'optional' | 'required';
 
 export type ApiRequestOptions = RequestInit & {
   auth?: ApiAuthMode;
+  expectedUserId?: string;
 };
 
 type ApiClientDependencies = {
   baseUrl: string | undefined;
   fetchImplementation?: typeof fetch;
-  getAccessToken: () => Promise<string | null>;
+  getAccessToken: (expectedUserId?: string) => Promise<string | null>;
 };
 
 export class ApiError extends Error {
@@ -37,8 +38,8 @@ export function createApiClient({
       throw new Error('EXPO_PUBLIC_API_URL is not configured');
     }
 
-    const { auth = 'optional', headers: suppliedHeaders, ...requestOptions } = options;
-    const accessToken = auth === 'none' ? null : await getAccessToken();
+    const { auth = 'optional', expectedUserId, headers: suppliedHeaders, ...requestOptions } = options;
+    const accessToken = auth === 'none' ? null : await getAccessToken(expectedUserId);
 
     if (auth === 'required' && !accessToken) {
       throw new ApiError('Authentication is required', 401);
@@ -67,10 +68,11 @@ export function createApiClient({
 
 export const apiRequest = createApiClient({
   baseUrl: process.env.EXPO_PUBLIC_API_URL,
-  getAccessToken: async () => {
+  getAccessToken: async (expectedUserId) => {
     const {
       data: { session },
     } = await supabase.auth.getSession();
+    if (expectedUserId && session?.user.id !== expectedUserId) throw new ApiError('Account changed', 401);
     return session?.access_token ?? null;
   },
 });

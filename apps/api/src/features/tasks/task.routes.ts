@@ -26,7 +26,8 @@ export function createTaskRouter(
 
   router.post('/', async (request, response) => {
     const service = serviceFactory(request.auth.supabase, request.auth.user.id);
-    const task = await service.create(parseCreateTask(request.body));
+    const creationId = request.get('Idempotency-Key');
+    const task = await service.create(parseCreateTask(request.body), creationId === undefined ? undefined : parseTaskId(creationId));
     response.status(201).json({ task });
   });
 

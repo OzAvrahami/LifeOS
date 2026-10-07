@@ -1,6 +1,6 @@
 # LifeOS — Data Model v0.1
 
-> Current clarification (2026-09-23): [Task importance decision (#9)](issue-9-decision.md) defines the existing optional normal/important flag separately from Weekly Focus, daily selection, scheduling and deadlines. No additional priority levels or automatic Focus-to-Task conversion. Daily Planning remains #5. This clarification takes precedence over broader future possibilities in this historical v0.1 specification.
+> Current clarification (2026-10-07): [Task importance decision (#9)](issue-9-decision.md) defines optional normal/important independently of Weekly Focus, daily selection, scheduling, deadlines and reminders. No additional priority levels or automatic Focus conversion. [Daily Planning #5](issue-5-verification.md) extends the existing DailyPlan locally as documented in section 16; rollout remains pending. These decisions take precedence over future possibilities in this historical v0.1 specification.
 
 ## מטרת המסמך
 
@@ -596,6 +596,23 @@ updated_at
 ---
 
 # 16. DailyPlan
+
+## Current local extension — issue #5, 2026-10-07
+
+Forward migration `20261007120000_add_daily_planning_lifecycle.sql` extends the same unique `(user_id, date)` row; no backfill infers selections from `planned_date` or legacy `focus_task_id`. Existing rows remain `not_started`. Rollout is pending; see [verification and compatibility](issue-5-verification.md).
+
+| Field | Meaning |
+| --- | --- |
+| `planning_status` | `not_started`, `in_progress`, `completed` |
+| `planning_step` | 0 before start; 1–3 for saved navigation/progress; 3 when completed |
+| `planning_completed_at` | Last explicit confirmation; retained while deliberately editing |
+| `selected_task_ids` | Ordered, unique caller-owned Task IDs, maximum 500; independent of placement and legacy focus |
+| `planning_revision` | Monotonic revision of lifecycle/selection changes for optimistic concurrency |
+| `planning_operation_id`, `planning_operation` | Last command identity/payload for safe duplicate retry |
+
+The caller-scoped atomic RPC serializes account/date operations and returns conflicts for stale revisions. An explicit edit preserves plan ID and selections. Newly selected Tasks must be active and owned by the caller; already selected Tasks may later complete, move, cancel or disappear without silently removing the selection. The UI identifies these states and permits explicit removal. Array storage deliberately keeps the small ordered selection and lifecycle in one transaction; it is not a Task-to-Focus relationship or a new schedule.
+
+Legacy fields remain independent. Clearing both legacy fields deletes only a legacy-only row; a database guard retains started/completed planning state even when a pre-upgrade API issues DELETE. Legacy upserts leave lifecycle/selection columns untouched. Day Window and legacy capacity inheritance semantics remain unchanged. No automatic daily row or rollover is created.
 
 מסך Today מכיל מידע ששייך ליום עצמו ולא למשימה מסוימת.
 
