@@ -1,12 +1,40 @@
 # LifeOS Deployment
 
-## Current accepted internal build — 0.4.1 (8), 2026-09-23
+## Current acceptance / publication handoff — 2026-10-08
+
+**LifeOS 0.5.0 (9) is owner-accepted**, from build checkpoint `6407ae8856ee8289e8183aaeaf6661b680d32267` on local/remote main. After the previously verified wireless installation, signature, version and launch, the owner said **“נראה טוב” (“Looks good”)** during product review. This is scoped owner acceptance, not independent review observation or proof of each individual checklist scenario. #5 is **Closed / Completed / Done / P1 — High**. Existing schema/API evidence is retained below; no new production operation or binary is needed for documentation finalization.
+
+[v0.4.1](https://github.com/OzAvrahami/LifeOS/releases/tag/v0.4.1) remains Latest (re-read 2026-10-08). **v0.5.0 is not published**. See [acceptance, evidence boundaries and release handoff](issue-5-verification.md#current-acceptance-and-release-handoff--2026-10-08). The eventual tag must target the final owner-approved documentation commit, whose SHA is not known yet. No App Store/TestFlight publication is implied.
+
+## Historical accepted internal build — 0.4.1 (8), 2026-09-23
 
 The owner reports successful wireless installation of prepared build 8 and, after receiving the physical checklist, **“נראה טוב” (“Looks good”)**. This is scoped owner acceptance of the reviewed #2 behavior, not independent observation or individual scenario attestations. #2 and #9 are Closed / Completed / Done; #9 decision approval and its Git checkpoint are complete. Checkpoint `3fb6695a094ad6e3682bd069a823e5087a16dfe4` is verified on local and remote main with implementation, approved decision and 0.4.1 (8) preparation. GitHub API deployment context is success for that checkpoint (`2026-09-23T10:51:45Z`); no active-provider inspection is implied.
 
 Version/native preparation and prior validation remain recorded in [the release verification record](release-0.4.1-verification.md). [v0.4.1](https://github.com/OzAvrahami/LifeOS/releases/tag/v0.4.1) is published and Latest, non-draft and non-prerelease, at **2026-09-23T11:49:34Z** (rechecked 2026-10-07). Its annotated tag resolves to `994138608ebb75713ca594f30ad3f5fa94f172d5`; do not move it. That release required no new schema. Publication and #2/#9 acceptance are complete.
 
+## Issue #5 installed internal candidate — 2026-10-07
+
+**Historical installation snapshot: LifeOS 0.5.0 (9), source 6407ae8856ee8289e8183aaeaf6661b680d32267; owner acceptance was pending on 2026-10-07.**
+The owner completed the preparation commit/push. GitHub context success for that SHA was re-read
+at 2026-10-07T09:16:33Z; the owner reports subsequent public health HTTP 200 / service OK.
+Required schema/history remains owner-confirmed. No new API deployment or migration was performed.
+
+The authorized Release build renewed the existing Personal Team provisioning after the first
+Expo CLI attempt omitted renewal permission and failed with Xcode exit 65. Explicit
+`xcodebuild -allowProvisioningUpdates` on the same workspace/scheme succeeded. Signature,
+profile/device inclusion, 0.5.0 / 9 artifact and embedded Expo metadata, production endpoints
+and UIScene support were verified. Profile expires **2026-10-14T09:20:58Z**.
+
+Wireless in-place installation on the paired iPhone 17 Pro Max / iOS 27.0.1 succeeded. Installed
+metadata independently reads 0.5.0 (9). Private before/after data exports preserve all nine
+retained files; only the system splash snapshot was replaced. Existing app identity, signing
+team, entitlements and native settings remain unchanged; no uninstall or native regeneration.
+The initial ordinary launch was denied because the phone was locked. After owner unlock,
+launch succeeded and the owner confirmed normal UI. This was startup confirmation only; the later 2026-10-08 product acceptance is recorded above. See [preserved native evidence and supplied checklist](issue-5-verification.md#native-installation--2026-10-07). At installation #5 was Open / Verify; it is now complete.
+
 ## Issue #5 rollout and prepared candidate — 2026-10-07
+
+**Historical preparation snapshot, superseded by the completed installation checkpoint above.**
 
 **Candidate: LifeOS 0.5.0 (9); not built, installed or accepted.** The implementation checkpoint
 `439d9dc3f9bdc07550d716e0faeb7d6a0bc0c5ee` is committed and pushed to main. The Mac's

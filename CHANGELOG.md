@@ -6,9 +6,19 @@ LifeOS follows Semantic Versioning for development and release tags.
 
 ## [Unreleased]
 
-- Daily Planning (#5): state-dependent Today entry, three short saved steps, intentional ordered Task selections, independent capture, review/confirmation and explicit completed-plan editing. Selections do not change scheduling, importance, deadlines or reminders; unfinished work requires a deliberate choice. Day Window remains context, not capacity.
-- Add caller/date-scoped lifecycle persistence with revision conflicts and retry identities. Preserve legacy Daily Focus/capacity writes and installed 0.4.1 compatibility. Forward migration `20261007120000` is required before API rollout.
-- Prepared internal iPhone acceptance candidate **0.5.0 (9)** on 2026-10-07 for #5, a backwards-compatible minor workflow addition. Implementation checkpoint `439d9dc3f9bdc07550d716e0faeb7d6a0bc0c5ee` is on main; the owner confirms the required migration and all 10 remote history entries aligned. GitHub reports API deployment success for that exact source and public health passes. This is not direct active-Railway or authenticated-write verification. Canonical/native metadata is synchronized; candidate is **not built, installed, accepted or published**. See [#5 verification and rollout gates](docs/issue-5-verification.md).
+## [0.5.0] — Owner accepted / publication pending
+
+**Accepted internal iPhone build: LifeOS 0.5.0 (9)**, built from `6407ae8856ee8289e8183aaeaf6661b680d32267`. Wireless installation, signing, installed-version readback and launch were verified on 2026-10-07. After product review, the owner said **“נראה טוב” (“Looks good”)** on **2026-10-08**. This is scoped owner acceptance, not independent observation of the review or individual checklist attestations. #5 is complete; v0.5.0 is not yet published and Latest remains v0.4.1. Internal delivery only, not App Store/TestFlight.
+
+### Added
+
+- Daily Planning from Today: start, continue saved progress, review a confirmed plan and deliberately edit it through three short steps.
+- Choose and order real Tasks independently of their scheduled date, importance, deadline or reminder. Review scheduled Tasks, Commitments and unfinished work; explicitly select, defer, return to Inbox or complete work without automatic carryover.
+- Create an ordinary Task within planning, including when inspired by Weekly Focus. Focus remains context; capture neither creates a relationship nor automatically selects the new Task.
+- Clear selected-versus-dated Today categories, known-duration totals with missing estimates disclosed, and Day Window context without an arbitrary capacity denominator.
+- Caller/date-scoped saved state, progress and ordered selections, with stable plan identity, safe retries and revision-conflict handling. Preserve legacy Daily Focus/capacity writes and older-client compatibility.
+
+The owner confirms migration `20261007120000` and all 10 remote history entries aligned; prior GitHub deployment/public-health evidence and native checks are retained in [#5 verification](docs/issue-5-verification.md). No new active-provider inspection or production write/RLS test is implied. The final release tag must follow the owner's approved documentation commit; no publication date or future SHA is invented.
 
 ## [0.4.1] — 2026-09-23
 

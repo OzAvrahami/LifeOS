@@ -1,6 +1,81 @@
 # Issue #5 — Daily Planning verification
 
+## Current acceptance and release handoff — 2026-10-08
+
+**Accepted internal binary: LifeOS 0.5.0 (9). #5 is Closed / Completed / Project Done / P1 — High**, read back after [the acceptance record](https://github.com/OzAvrahami/LifeOS/issues/5#issuecomment-6053032997). After the wireless installation and product review, the owner reported **“נראה טוב” (“Looks good”)**. This is scoped owner-reported acceptance of the reviewed Daily Planning behavior. The assistant did not independently observe that product review, and this statement does not attest that each checklist item was individually tested.
+
+The prior 2026-10-07 signature, installation, installed-version and launch checks remain distinct evidence below. Build source **6407ae8856ee8289e8183aaeaf6661b680d32267** matches local and remote main; implementation `439d9dc3f9bdc07550d716e0faeb7d6a0bc0c5ee` is its ancestor. This is the recorded build checkout, not a SHA extracted from the binary. Source/tests/dependency resolutions are unchanged; existing automated/DB/native results are reused as prior results, not rerun or relabelled as new checks.
+
+No concrete mandatory #5 blocker remains. Individual retry/restart, midnight/timezone/account-change scenarios and comprehensive accessibility were not separately attested by the owner; internal invariants rely on the existing automated/real disposable DB evidence. No new production-data/RLS/history audit or direct active-Railway inspection is claimed. No unrelated issue is accepted or started.
+
+**Publication: prepared, not published.** Latest GitHub Release remains **v0.4.1** (re-read 2026-10-08); no v0.5.0 tag or Release was returned. Proposed title: **LifeOS v0.5.0 — Daily Planning**. Copy-ready notes: `/tmp/lifeos-v0.5.0-release-notes.md`, based on CHANGELOG. This is the existing internal iPhone delivery path, not App Store/TestFlight distribution.
+
+The owner will review and commit/push the final documentation manually. The eventual annotated release tag must target **that final approved documentation commit**; its SHA is not known yet. Do not tag the earlier build checkpoint in place of the final documentation. This finalization preserves the five pre-existing installation-document updates and ignored native/environment files; it performs no commit, push, build, install, migration, deployment, tag or Release operation. Documentation links/anchors, unchanged 0.5.0 (9) version sources and `git diff --check` are the applicable final checks.
+
+## Native installation — 2026-10-07
+
+**Historical installation snapshot: LifeOS 0.5.0 (9) installed; owner acceptance was pending on 2026-10-07.** #5 was Open / Verify / P1 at this stage; the later acceptance is recorded above.
+The owner committed/pushed preparation as **6407ae8856ee8289e8183aaeaf6661b680d32267**.
+This build started from clean main at that SHA, matching the local origin/main reference.
+Runtime source, tests and dependency resolutions are unchanged from the verified implementation;
+no unchanged broad suite was repeated. Earlier preparation checks below remain applicable.
+
+GitHub's Railway context was independently re-read as success for this preparation commit at
+**2026-10-07T09:16:33Z**. The owner reports subsequent HTTP 200 public health with
+`{"service":"lifeos-api","status":"ok"}`. Schema rollout/history evidence remains as recorded
+below; no migration or direct active-Railway/authenticated-write inspection occurred here.
+
+### Native build, signing and installation evidence
+
+- Device: **Oz’s iPhone**, iPhone 17 Pro Max, **iOS 27.0.1 (24A446)**. CoreDevice reports the
+  existing paired **localNetwork** connection, connected tunnel, Developer Mode enabled and
+  development services available. No cable, new pairing or developer-account change required.
+- Initial authorized Expo Release attempt used the existing native project, `--no-install`
+  (skip dependency installation) and `--no-bundler` (no development server). It stopped before
+  installation: Xcode exit 65, missing provisioning profile. The installed Expo CLI omitted
+  `-allowProvisioningUpdates` when reusing the configured team. No dependency/native setting
+  was changed to work around this.
+- Rebuilt the **same Release workspace/scheme** with `xcodebuild -allowProvisioningUpdates`,
+  production environment loaded by the existing `@expo/env`, existing signing team and Node,
+  and no prebuild/Pods regeneration. **BUILD SUCCEEDED**, exit 0, no compiler errors. Existing
+  native dependency/SDK deprecation/module and script-dependency warnings were emitted; these
+  are not claimed fixed. Full logs are private outside Git.
+- Renewed development profile created **2026-10-07T09:20:58Z**, expires
+  **2026-10-14T09:20:58Z**, includes the intended device and existing Personal Team.
+  Signed entitlements match build 8 exactly; bundle ID **il.co.ozavrahami.lifeos** and UIScene
+  manifest are preserved. `codesign --verify --deep --strict` and plist validation passed.
+- Artifact Info.plist and embedded Expo configuration both report **0.5.0 (9)**. The bundled
+  JavaScript contains the intended production Railway/Supabase endpoints, with no synthetic
+  export placeholders. This is a new standalone Release binary, not a development refresh.
+- Installed with `devicectl device install app` over the existing app through the paired
+  wireless connection (the same device transport used by Expo's wireless fallback), exit 0.
+  Independent installed-app readback reports **0.5.0 / 9**. No uninstall/reset/container
+  replacement command was used.
+- iOS changed the data-container path during update. Private before/after exports prove all
+  **nine retained files byte-identical**, zero changed retained files; only a system SplashBoard
+  snapshot filename/content was replaced. Group containers and signed Keychain identity are
+  unchanged. No private data/credentials are included in this record.
+
+Artifact: `~/Library/Developer/Xcode/DerivedData/LifeOS-heuqkzhdehxkbwbworgfquxenphg/Build/Products/Release-iphoneos/LifeOS.app`.
+Private logs, signing readback and data-preservation evidence:
+`~/Library/Application Support/LifeOS-verification/issue5-build9-20261007T091904Z/`.
+The recorded source is the clean build checkout, not a source SHA extracted from the binary.
+
+### Launch and then-pending owner gate
+
+The first ordinary `devicectl device process launch` attempt was rejected by SpringBoard
+because **the iPhone was locked** (FBSOpenApplicationErrorDomain error 7), not an observed app
+crash. After the owner unlocked it, the ordinary launch succeeded (exit 0, process 11103).
+The owner explicitly confirmed **“yes normal”** when asked whether normal Today/sign-in UI
+appeared rather than a blank/error screen. This is scoped startup confirmation, not #5 product
+acceptance or an instrumented authenticated-write test. No reinstall was needed.
+
+At the end of installation, product acceptance was still pending and the scoped iPhone checklist below was supplied. No commit, push, API deployment, migration, version increment, tag, Release publication or issue closure was performed during that installation-documentation step. The owner subsequently accepted the reviewed behavior on 2026-10-08; do not treat this historical gate as still pending.
+
+
 ## Mac candidate preparation — 2026-10-07
+
+**Historical preparation snapshot; the owner completed its Git checkpoint as 6407ae8 and the native installation is recorded above.**
 
 **Candidate: LifeOS 0.5.0 (9); not built, installed or accepted.** #5 remains **Open / Verify /
 P1 — High**, with physical acceptance pending. This checkpoint prepares metadata and current
@@ -118,9 +193,9 @@ Relevant source: [session](../apps/mobile/src/features/planning/daily-planning-s
 
 ## Acceptance coverage
 
-Automated evidence establishes software behavior, not physical acceptance. `UI` below means [Daily Planning component/integration tests](../apps/mobile/__tests__/daily-planning-test.tsx); `DB` means the real [disposable database/Auth/RLS scenarios](../apps/api/scripts/verify-daily-planning.mjs), run by the guarded local harness. The original issue's 21 criteria map as follows:
+**Historical pre-acceptance coverage matrix.** The third column records the originally proposed device checks; it is not a current blocker list or a set of individual manual passes. The later scoped owner acceptance is recorded above. Automated evidence establishes software behavior, not independent physical acceptance. `UI` below means [Daily Planning component/integration tests](../apps/mobile/__tests__/daily-planning-test.tsx); `DB` means the real [disposable database/Auth/RLS scenarios](../apps/api/scripts/verify-daily-planning.mjs), run by the guarded local harness. The original issue's 21 criteria map as follows:
 
-| Criterion | Implementation / local evidence | Remaining gate |
+| Criterion | Implementation / local evidence | Original device review suggestion |
 | --- | --- | --- |
 | 1. Obvious Today entry | State-dependent entry in normal, active and partially completed Today; UI tests | iPhone discoverability |
 | 2. No state shows Plan today | Null/legacy-only state starts; loading/error are distinct; UI + DB | Physical smoke |
@@ -185,21 +260,19 @@ Initial failures were resolved: a transient missing `tsc` while `npm ci` was rep
 | Field | Value |
 | --- | --- |
 | SemVer impact | **Minor**: substantial backwards-compatible Daily Planning workflow |
-| Candidate version | **0.5.0**, internal candidate, unpublished |
-| Candidate iOS build | **9**; installed metadata, native source and relevant artifacts top out at 8; no higher candidate/archive found |
+| Candidate version | **0.5.0**, owner-accepted internal build, GitHub publication pending |
+| Candidate iOS build | **9**; at preparation the prior installed/native/artifact maximum was 8; build 9 was subsequently installed and accepted |
 | Version prepared | **Yes, 2026-10-07 on the Mac**: Expo and three first-party manifests synchronized; exactly four lockfile version fields updated, resolutions preserved |
 | Native version synchronized | **Yes**: existing ignored Info.plist and Debug/Release project fields read back 0.5.0 / 9; unrelated native/environment state preserved |
-| Physical build installed | **Pending**; independently read installed 0.4.1 (8), not evidence for #5 |
-| Owner accepted exact build | **Pending**; keep #5 Open / Verify |
+| Physical build installed | **Yes, 2026-10-07**: wireless in-place installation and independent readback of **0.5.0 (9)** from clean source `6407ae8856ee8289e8183aaeaf6661b680d32267`; ordinary launch succeeded and owner confirmed normal UI |
+| Owner accepted exact build | **Yes, 2026-10-08**, scoped owner statement “נראה טוב” (“Looks good”) after wireless installation/product review; not individual checklist attestations |
 | Included issues | #5 on implementation `439d9dc3f9bdc07550d716e0faeb7d6a0bc0c5ee`, retaining previously accepted features including #2/#9 |
 
-**Candidate: LifeOS 0.5.0 (9); not built, installed or accepted.** Release impact Yes / Minor.
-CHANGELOG is updated under Unreleased; product/native version preparation is complete locally.
-No tag or Release is published, and physical acceptance remains mandatory. The next owner Git
-checkpoint covers metadata/documentation only; no runtime/test/dependency-resolution changes
-were made. Future native build/install requires separate authorization and renewed provisioning.
+**Accepted internal build: LifeOS 0.5.0 (9).** Release impact Yes / Minor. Preparation was committed/pushed as `6407ae8`; authorized provisioning/build/install and subsequent scoped owner acceptance are complete. CHANGELOG prepares the unpublished 0.5.0 release. No further issue acceptance gate is identified. The next owner Git checkpoint covers installation/acceptance and release documentation only; version/build and runtime remain unchanged.
 
 ## iPhone acceptance checklist — after rollout and pre-device gate
+
+**Historical supplied checklist, retained as review scope.** The owner has since accepted the reviewed behavior of 0.5.0 (9). These items are not individually marked passed or requested again; the owner did not separately enumerate results for each scenario.
 
 1. Record the exact new installed version/build/source. Ordinary authenticated Today shows Plan today, Continue planning or Review appropriately; Hebrew/RTL labels, scrolling and touch targets remain readable.
 2. Review scheduled Tasks, all Commitments and unfinished work. Select an Inbox Task and a dated Task; check distinct categories, unique totals and missing estimates. Scheduling/importance/deadline/reminder must be unchanged.
@@ -208,7 +281,7 @@ were made. Future native build/install requires separate authorization and renew
 5. Confirm, review without restart, deliberately edit the same plan, remove/reorder selections and reconfirm. Change/complete/cancel a selected Task elsewhere and refresh; retained selection and updated state should be understandable.
 6. Check configured-timezone midnight and a timezone change while planning, foreground refresh, another date and another account. No data should move between dates/accounts. Day Window remains context, never an eight-hour capacity claim.
 
-Record owner approval against that exact new binary and this scope. Only then may #5 become Done/closed. No older binary, mock, export or local test substitutes for this gate.
+Owner approval is now recorded against this exact new binary and the reviewed behavior; #5 is Done/closed. This rests on the scoped owner response and prior software evidence, not an older binary, mock or export substituted for physical acceptance.
 
 ## Historical local Git checkpoint — completed as 439d9dc
 
