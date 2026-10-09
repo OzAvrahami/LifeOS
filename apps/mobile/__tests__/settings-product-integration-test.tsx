@@ -243,7 +243,7 @@ it('does not move Tasks or DailyPlans or change Task time when the Day Window ch
   });
 
   expect(screen.getByText('זמן משימות מתוכנן: 5 שעות')).toBeTruthy();
-  expect(taskApi.listTasks).toHaveBeenCalledWith({ plannedDate: today });
+  expect(taskApi.listTasks).toHaveBeenCalledWith({ plannedDate: today }, userId);
   expect(client.getQueryData(planningKeys.dailyPlan(userId, today))).toBe(plan);
   expect(task).toEqual(expect.objectContaining({ estimatedMinutes: 300, plannedDate: today, status: 'open' }));
   expect(planningApi.putDailyPlan).not.toHaveBeenCalled();
@@ -300,10 +300,10 @@ describe('configured Week start with a controlled calendar date', () => {
     const view = await render(<Providers client={client}><WeekScreen taskSource="server" /></Providers>);
     try {
       await waitFor(() => {
-        expect(taskApi.listTasks).toHaveBeenCalledWith({ plannedDateFrom: '2026-09-06', plannedDateTo: '2026-09-12' });
-        expect(taskApi.listTasks).toHaveBeenCalledWith({ weekStart: '2026-09-06' });
-        expect(commitmentApi.listCommitments).toHaveBeenCalledWith({ dateFrom: '2026-09-06', dateTo: '2026-09-12' });
-        expect(planningApi.getWeeklyFocuses).toHaveBeenCalledWith('2026-09-06');
+        expect(taskApi.listTasks).toHaveBeenCalledWith({ plannedDateFrom: '2026-09-06', plannedDateTo: '2026-09-12' }, userId);
+        expect(taskApi.listTasks).toHaveBeenCalledWith({ weekStart: '2026-09-06' }, userId);
+        expect(commitmentApi.listCommitments).toHaveBeenCalledWith({ dateFrom: '2026-09-06', dateTo: '2026-09-12' }, userId);
+        expect(planningApi.getWeeklyFocuses).toHaveBeenCalledWith('2026-09-06', userId);
         expect(client.getQueryData(planningKeys.weeklyFocuses(userId, '2026-09-06'))).toEqual(sundayFocuses);
       });
       assertRows([['ראשון', 6], ['שני', 7], ['שלישי', 8], ['רביעי', 9], ['חמישי', 10], ['שישי', 11], ['שבת', 12]]);
@@ -313,10 +313,10 @@ describe('configured Week start with a controlled calendar date', () => {
         client.setQueryData(settingsKeys.user(userId), { ...sundaySettings, weekStartDay: 1 });
       });
       await waitFor(() => {
-        expect(taskApi.listTasks).toHaveBeenCalledWith({ plannedDateFrom: '2026-09-07', plannedDateTo: '2026-09-13' });
-        expect(taskApi.listTasks).toHaveBeenCalledWith({ weekStart: '2026-09-07' });
-        expect(commitmentApi.listCommitments).toHaveBeenCalledWith({ dateFrom: '2026-09-07', dateTo: '2026-09-13' });
-        expect(planningApi.getWeeklyFocuses).toHaveBeenCalledWith('2026-09-07');
+        expect(taskApi.listTasks).toHaveBeenCalledWith({ plannedDateFrom: '2026-09-07', plannedDateTo: '2026-09-13' }, userId);
+        expect(taskApi.listTasks).toHaveBeenCalledWith({ weekStart: '2026-09-07' }, userId);
+        expect(commitmentApi.listCommitments).toHaveBeenCalledWith({ dateFrom: '2026-09-07', dateTo: '2026-09-13' }, userId);
+        expect(planningApi.getWeeklyFocuses).toHaveBeenCalledWith('2026-09-07', userId);
         expect(client.getQueryData(planningKeys.weeklyFocuses(userId, '2026-09-07'))).toEqual([]);
       });
       assertRows([['שני', 7], ['שלישי', 8], ['רביעי', 9], ['חמישי', 10], ['שישי', 11], ['שבת', 12], ['ראשון', 13]]);

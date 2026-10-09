@@ -30,7 +30,7 @@ export function useTasks(filters: TaskListFilters, enabled = true) {
   const userId = useTaskQueryScope();
   return useQuery({
     enabled,
-    queryFn: () => listTasks(filters),
+    queryFn: () => listTasks(filters, userId),
     queryKey: taskKeys.list(userId, filters),
     refetchOnWindowFocus: false,
     staleTime: TASK_STALE_TIME_MS,
@@ -114,6 +114,8 @@ export function synchronizeTaskCaches(
 ) {
   // Every Task mutation can change a selected Task without changing membership.
   void queryClient.invalidateQueries({ queryKey: ['daily-planning', userId] });
+  void queryClient.invalidateQueries({ queryKey: ['daily-flow', userId] });
+  void queryClient.invalidateQueries({ queryKey: ['week-days', userId] });
   const queries = queryClient.getQueryCache().findAll({ queryKey: taskKeys.user(userId) });
 
   for (const query of queries) {
@@ -145,7 +147,7 @@ export function useCreateTask() {
   const queryClient = useQueryClient();
   const userId = useTaskQueryScope();
   return useMutation({
-    mutationFn: createTask,
+    mutationFn: (input: Parameters<typeof createTask>[0]) => createTask(input, userId),
     onSuccess: (task, input) => synchronizeTaskCaches(queryClient, userId, task, {
       ensurePlanning: input.planning ?? { type: 'inbox' },
     }),
@@ -156,7 +158,7 @@ export function useUpdateTask() {
   const queryClient = useQueryClient();
   const userId = useTaskQueryScope();
   return useMutation({
-    mutationFn: updateTask,
+    mutationFn: (input: Parameters<typeof updateTask>[0]) => updateTask(input, userId),
     onSuccess: (task, variables) => synchronizeTaskCaches(queryClient, userId, task, {
       activeHandoff: variables.input.status === 'in_progress',
       ensurePlanning: variables.input.planning,
@@ -168,7 +170,7 @@ export function useCancelTask() {
   const queryClient = useQueryClient();
   const userId = useTaskQueryScope();
   return useMutation({
-    mutationFn: cancelTask,
+    mutationFn: (input: Parameters<typeof cancelTask>[0]) => cancelTask(input, userId),
     onSuccess: (task) => synchronizeTaskCaches(queryClient, userId, task),
   });
 }

@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useRef, useState } from 'react';
 import { View } from 'react-native';
 
 import { authErrorMessage } from './auth-errors';
@@ -33,11 +33,14 @@ export function ForgotPasswordScreen({
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string>();
 
+  const submitting = useRef(false);
   const submit = async () => {
+    if (submitting.current) return;
     if (!isValidEmail(email)) {
       setError('כתובת מייל לא תקינה');
       return;
     }
+    submitting.current = true;
     setIsLoading(true);
     setError(undefined);
     try {
@@ -46,6 +49,7 @@ export function ForgotPasswordScreen({
     } catch (caughtError) {
       setError(authErrorMessage(caughtError, 'reset'));
     } finally {
+      submitting.current = false;
       setIsLoading(false);
     }
   };
@@ -56,6 +60,7 @@ export function ForgotPasswordScreen({
         <AuthStateView
           actions={
             <>
+              {error ? <AuthFormError message={error} /> : null}
               <AuthSecondaryButton disabled={isLoading} onPress={submit} title={isLoading ? 'שולח…' : 'שליחה מחדש'} />
               <AuthLink onPress={onSignIn} title="חזרה להתחברות" />
             </>

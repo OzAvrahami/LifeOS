@@ -10,6 +10,7 @@ import { fileURLToPath, URL } from 'node:url';
 import { createClient } from '@supabase/supabase-js';
 import { verifyWeeklyPlanning } from './verify-weekly-planning.mjs';
 import { verifyDailyPlanning } from './verify-daily-planning.mjs';
+import { verifyDailyFlow } from './verify-daily-flow.mjs';
 import { verifyCommitmentReminders } from './verify-commitment-reminders.mjs';
 import { verifyNotifications, notificationDefaults } from './verify-notifications.mjs';
 
@@ -23,14 +24,9 @@ const apiBaseUrl = `http://127.0.0.1:${apiPort}`;
 const uuidPattern = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
 
 function parseLocalStatus() {
-  const executable = process.platform === 'win32' ? process.env.ComSpec : 'npx';
-  if (!executable) throw new Error('Windows command processor was not available');
-  const args = process.platform === 'win32'
-    ? ['/d', '/s', '/c', 'npx.cmd supabase status --output json']
-    : ['supabase', 'status', '--output', 'json'];
   const raw = execFileSync(
-    executable,
-    args,
+    process.execPath,
+    [resolve(repositoryRoot, 'node_modules/supabase/dist/supabase.js'), 'status', '--output', 'json'],
     { cwd: supabaseWorkdir, encoding: 'utf8' },
   );
   const firstBrace = raw.indexOf('{');
@@ -59,10 +55,10 @@ function quietClient(url, key, accessToken) {
 }
 
 async function waitForApi(processHandle) {
-  for (let attempt = 0; attempt < 50; attempt += 1) {
+  for (let attempt = 0; attempt < 150; attempt += 1) {
     if (processHandle.exitCode !== null) throw new Error('Local API exited before becoming ready');
     try {
-      const response = await globalThis.fetch(`${apiBaseUrl}/health`);
+      const response = await globalThis.fetch(`${apiBaseUrl}/health`, { signal: globalThis.AbortSignal.timeout(1_000) });
       if (response.ok) return;
     } catch {
       // The server is still starting.
@@ -171,7 +167,7 @@ async function main() {
           SUPABASE_PUBLISHABLE_KEY: publishableKey,
           SUPABASE_URL: supabaseUrl,
         },
-        stdio: ['ignore', 'ignore', 'ignore'],
+        stdio: process.env.LIFEOS_INTEGRATION_DEBUG === '1' ? ['ignore', 'inherit', 'inherit'] : ['ignore', 'ignore', 'ignore'],
       },
     );
     await waitForApi(apiProcess);
@@ -186,6 +182,13 @@ async function main() {
     const callerA = quietClient(supabaseUrl, publishableKey, tokenA);
     const callerB = quietClient(supabaseUrl, publishableKey, tokenB);
     const anonymous = quietClient(supabaseUrl, publishableKey);
+
+    if (process.argv.includes('--daily-flow')) {
+      await verifyDailyFlow({ apiRequest, tokenA, tokenB, callerA, callerB, anonymous,
+        freshTokenA: async () => (await signIn(supabaseUrl, publishableKey, users[0].email, password)).access_token });
+      console.log('PASS V2 proposals, approval/edit/empty/retry, missed days, weekly consistency, history, stale/concurrent edits and RLS');
+      return;
+    }
 
     if (process.argv.includes('--daily')) {
       await verifyDailyPlanning({ apiRequest, tokenA, tokenB, callerA, callerB, anonymous,
@@ -789,6 +792,9 @@ async function main() {
     await verifyCommitmentReminders({ apiRequest, tokenA, tokenB, callerA, callerB, anonymous, userA: users[0].id, userB: users[1].id });
     console.log('PASS commitment relative reminders, defaults/old-client preservation, 1001-row pagination, constraints and caller/anonymous RLS');
 
+    await verifyDailyFlow({ apiRequest, tokenA, tokenB, callerA, callerB, anonymous,
+      freshTokenA: async () => (await signIn(supabaseUrl, publishableKey, users[0].email, password)).access_token });
+    console.log('PASS V2 proposals, approval/edit/empty/retry, missed days, weekly consistency, history, stale/concurrent edits and RLS');
     console.log('PASS local stack and real Auth sessions');
     console.log('PASS anonymous table and application RPC privileges are denied');
     console.log('PASS caller-scoped Task and WeekPlan RLS isolation');

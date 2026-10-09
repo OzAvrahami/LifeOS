@@ -10,7 +10,7 @@ import { TaskSource } from './task.types';
 export function useTaskCapture(source: TaskSource) {
   const demo = useDemoTasks();
   const createMutation = useCreateTask();
-  const { effective: settings } = useEffectiveSettings(source === 'server');
+  const { effective: settings, query: settingsQuery } = useEffectiveSettings(source === 'server');
 
   const captureTask = async (title: string, placement: TaskCapturePlacement) => {
     const { destination } = placement;
@@ -19,6 +19,7 @@ export function useTaskCapture(source: TaskSource) {
       demo.captureTask(title, placement);
       return;
     }
+    if ((destination === 'today' || destination === 'week') && !settingsQuery.data) throw new Error('Account calendar settings are not loaded');
     await createMutation.mutateAsync({
       title,
       ...(destination === 'day'

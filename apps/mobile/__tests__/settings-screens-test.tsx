@@ -145,8 +145,8 @@ describe('More and Settings screens', () => {
     await user.press(screen.getByLabelText('הגדרות'));
     await user.press(screen.getByLabelText('חשבון'));
     await user.press(screen.getByText('היום'));
-    await user.press(screen.getByText('שבוע'));
-    await user.press(screen.getByText('Inbox'));
+    await user.press(screen.getByText('השבוע'));
+    await user.press(screen.getByText('משימות'));
     expect(onSettings).toHaveBeenCalledTimes(1);
     expect(onAccount).toHaveBeenCalledTimes(1);
     expect(onToday).toHaveBeenCalledTimes(1);

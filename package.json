@@ -7,6 +7,7 @@
   ],
   "scripts": {
     "mobile": "npm run start --workspace @lifeos/mobile",
+    "web": "npm run web --workspace @lifeos/mobile --",
     "api": "npm run dev --workspace @lifeos/api",
     "typecheck": "npm run typecheck --workspaces --if-present",
     "lint": "npm run lint --workspaces --if-present",

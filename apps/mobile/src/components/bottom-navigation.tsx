@@ -1,27 +1,28 @@
 import { Ionicons } from '@expo/vector-icons';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { router } from 'expo-router';
+import { useTheme } from '@/theme/theme-provider';
 
 import { colors, spacing, typography } from '@/theme/tokens';
 
 type NavigationItem = {
-  id: 'today' | 'week' | 'capture' | 'inbox' | 'more';
+  id: 'today' | 'week' | 'capture' | 'inbox' | 'calendar';
   label: string;
   icon: keyof typeof Ionicons.glyphMap;
   ltr?: boolean;
 };
 
 const navigationItems: NavigationItem[] = [
-  { id: 'today', label: 'היום', icon: 'radio-button-on-outline' },
-  { id: 'week', label: 'שבוע', icon: 'calendar-clear-outline' },
+  { id: 'today', label: 'היום', icon: 'sunny-outline' },
+  { id: 'week', label: 'השבוע', icon: 'calendar-clear-outline' },
   { id: 'capture', label: '', icon: 'add' },
-  { id: 'inbox', label: 'Inbox', icon: 'file-tray-outline', ltr: true },
-  { id: 'more', label: 'עוד', icon: 'ellipsis-horizontal' },
+  { id: 'inbox', label: 'משימות', icon: 'list-outline' },
+  { id: 'calendar', label: 'יומן', icon: 'calendar-outline' },
 ];
 
 export function BottomNavigation({
   onNavigateInbox,
-  onNavigateMore,
   onNavigateToday,
   onNavigateWeek,
   onQuickCapture,
@@ -32,17 +33,18 @@ export function BottomNavigation({
   onNavigateToday?: () => void;
   onNavigateWeek?: () => void;
   onQuickCapture?: () => void;
-  selected: 'today' | 'week' | 'inbox' | 'more';
+  selected: 'today' | 'week' | 'inbox' | 'more' | 'calendar';
 }) {
   const insets = useSafeAreaInsets();
+  const { colors: theme } = useTheme();
 
   return (
     <View
       accessibilityLabel="ניווט ראשי"
-      style={[styles.container, { height: 62 + insets.bottom, paddingBottom: insets.bottom }]}
+      style={[styles.container, { backgroundColor: theme.surface, borderTopColor: theme.border, minHeight: 70 + insets.bottom, paddingBottom: insets.bottom }]}
     >
       <View style={styles.items}>
-        {navigationItems.map((item, index) =>
+        {navigationItems.map((item) =>
           item.id === 'capture' ? (
             <Pressable
               accessibilityLabel="הוספה מהירה"
@@ -51,8 +53,8 @@ export function BottomNavigation({
               onPress={onQuickCapture}
               style={styles.captureSlot}
             >
-              <View style={styles.captureButton}>
-                <Ionicons color={colors.white} name="add" size={30} />
+              <View style={[styles.captureButton, { backgroundColor: theme.accent }]}>
+                <Ionicons color={theme.onAccent} name="add" size={30} />
               </View>
             </Pressable>
           ) : (
@@ -62,19 +64,19 @@ export function BottomNavigation({
               key={item.label}
               onPress={
                 item.id === 'today'
-                  ? onNavigateToday
+                  ? onNavigateToday ?? (() => router.navigate('/'))
                   : item.id === 'week'
-                    ? onNavigateWeek
+                    ? onNavigateWeek ?? (() => router.navigate('/week'))
                     : item.id === 'inbox'
-                      ? onNavigateInbox
-                      : item.id === 'more'
-                        ? onNavigateMore
+                      ? onNavigateInbox ?? (() => router.navigate('/inbox'))
+                      : item.id === 'calendar'
+                        ? () => router.navigate('/calendar')
                         : undefined
               }
               style={styles.navigationItem}
             >
               <Ionicons
-                color={item.id === selected ? colors.accent : '#A8A296'}
+                color={item.id === selected ? theme.accent : theme.textMuted}
                 name={item.icon}
                 size={24}
               />
@@ -83,6 +85,7 @@ export function BottomNavigation({
                   styles.navigationLabel,
                   item.id === selected && styles.navigationLabelSelected,
                   item.ltr && styles.ltrLabel,
+                  { color: item.id === selected ? theme.accent : theme.textMuted },
                 ]}
               >
                 {item.label}
@@ -104,7 +107,7 @@ const styles = StyleSheet.create({
   items: {
     alignItems: 'flex-start',
     flexDirection: 'row-reverse',
-    height: 62,
+    minHeight: 62,
     justifyContent: 'space-around',
     paddingHorizontal: spacing.md,
     paddingTop: 10,
@@ -122,15 +125,10 @@ const styles = StyleSheet.create({
   captureButton: {
     alignItems: 'center',
     backgroundColor: colors.accent,
-    borderRadius: 27,
-    elevation: 5,
-    height: 54,
+    borderRadius: 15,
+    height: 48,
     justifyContent: 'center',
-    marginTop: -20,
-    shadowColor: colors.accent,
-    shadowOffset: { height: 8, width: 0 },
-    shadowOpacity: 0.34,
-    shadowRadius: 9,
-    width: 54,
+    marginTop: -4,
+    width: 48,
   },
 });

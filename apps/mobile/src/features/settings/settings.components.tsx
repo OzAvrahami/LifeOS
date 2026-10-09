@@ -3,9 +3,12 @@ import type { PropsWithChildren, ReactNode } from 'react';
 import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 
-import { colors, radius, spacing, typography } from '@/theme/tokens';
+import { radius, spacing, typography } from '@/theme/tokens';
+import { useTheme, type Palette } from '@/theme/theme-provider';
 
 export function SettingsBackHeader({ onBack, title }: { onBack: () => void; title: string }) {
+  const { colors } = useTheme();
+  const styles = createStyles(colors);
   return (
     <View style={styles.header}>
       <Pressable
@@ -27,6 +30,8 @@ export function SettingsPage({
   onBack,
   title,
 }: PropsWithChildren<{ footer?: ReactNode; onBack: () => void; title: string }>) {
+  const { colors } = useTheme();
+  const styles = createStyles(colors);
   return (
     <SafeAreaView edges={['top', 'bottom']} style={styles.safeArea}>
       <ScrollView
@@ -43,10 +48,14 @@ export function SettingsPage({
 }
 
 export function SettingsSectionLabel({ children }: PropsWithChildren) {
+  const { colors } = useTheme();
+  const styles = createStyles(colors);
   return <Text style={styles.sectionLabel}>{children}</Text>;
 }
 
 export function SettingsCard({ children }: PropsWithChildren) {
+  const { colors } = useTheme();
+  const styles = createStyles(colors);
   return <View style={styles.card}>{children}</View>;
 }
 
@@ -61,6 +70,8 @@ export function SettingsRow({
   onPress: () => void;
   value: string;
 }) {
+  const { colors } = useTheme();
+  const styles = createStyles(colors);
   return (
     <Pressable
       accessibilityLabel={`${label}: ${value}`}
@@ -86,6 +97,8 @@ export function RadioOption({
   onPress: () => void;
   selected: boolean;
 }) {
+  const { colors } = useTheme();
+  const styles = createStyles(colors);
   return (
     <Pressable
       accessibilityLabel={label}
@@ -95,7 +108,7 @@ export function RadioOption({
       style={[styles.radioOption, selected && styles.radioOptionSelected]}
     >
       <View style={[styles.radioCircle, selected && styles.radioCircleSelected]}>
-        {selected ? <Ionicons color={colors.white} name="checkmark" size={14} /> : null}
+        {selected ? <Ionicons color={colors.onAccent} name="checkmark" size={14} /> : null}
       </View>
       <Text style={[styles.radioLabel, selected && styles.radioLabelSelected]}>{label}</Text>
       {selected && current ? <Text style={styles.currentBadge}>נוכחי</Text> : null}
@@ -120,6 +133,8 @@ export function SettingsChoiceSheet({
   title: string;
 }>) {
   const insets = useSafeAreaInsets();
+  const { colors } = useTheme();
+  const styles = createStyles(colors);
   return (
     <SafeAreaView edges={['top']} style={styles.choiceRoot}>
       <View style={styles.choiceBackground}>
@@ -156,9 +171,9 @@ export function SettingsChoiceSheet({
   );
 }
 
-const styles = StyleSheet.create({
+const createStyles = (colors: Palette) => StyleSheet.create({
   safeArea: { backgroundColor: colors.background, flex: 1 },
-  pageContent: { flexGrow: 1, paddingBottom: spacing.xl, paddingHorizontal: 30, paddingTop: spacing.sm },
+  pageContent: { flexGrow: 1, maxWidth: 640, width: '100%', alignSelf: 'center', paddingBottom: spacing.xl, paddingHorizontal: 30, paddingTop: spacing.sm },
   header: { alignItems: 'center', flexDirection: 'row-reverse', gap: 14 },
   backButton: { alignItems: 'center', backgroundColor: colors.surface, borderColor: colors.border, borderRadius: 20, borderWidth: 1, height: 40, justifyContent: 'center', width: 40 },
   headerTitle: { color: colors.text, fontFamily: typography.family.extraBold, fontSize: typography.size.title, writingDirection: 'rtl' },
@@ -190,6 +205,6 @@ const styles = StyleSheet.create({
   currentBadge: { backgroundColor: colors.surface, borderRadius: radius.round, color: colors.accent, fontFamily: typography.family.bold, fontSize: 12, paddingHorizontal: 9, paddingVertical: 3 },
   error: { color: colors.warningText, fontFamily: typography.family.semibold, fontSize: typography.size.label, marginTop: spacing.sm, textAlign: 'right' },
   saveButton: { alignItems: 'center', backgroundColor: colors.accent, borderRadius: 15, height: 52, justifyContent: 'center', marginTop: spacing.lg },
-  saveText: { color: colors.white, fontFamily: typography.family.extraBold, fontSize: 17 },
+  saveText: { color: colors.onAccent, fontFamily: typography.family.extraBold, fontSize: 17 },
   disabled: { opacity: 0.6 },
 });

@@ -16,10 +16,13 @@ export type SignUpCredentials = SignInCredentials & {
 };
 
 export type AuthContextValue = {
-  beginRecovery: () => void;
+  beginRecovery: (session?: Session) => Promise<void>;
   clearRecovery: () => void;
   isLoading: boolean;
   isRecovery: boolean;
+  isAuthenticating: boolean;
+  sessionExpired: boolean;
+  finishAuthentication: () => void;
   requestPasswordReset: (email: string, redirectTo: string) => Promise<void>;
   resendVerification: (email: string, emailRedirectTo: string) => Promise<void>;
   session: Session | null;

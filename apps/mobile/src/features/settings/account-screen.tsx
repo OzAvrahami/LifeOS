@@ -5,13 +5,21 @@ import { Modal, Pressable, StyleSheet, Text, View } from 'react-native';
 
 import { useAuth } from '@/features/auth/auth-provider';
 import { clearUserQueryCache } from '@/features/auth/session-query-cache';
-import { colors, radius, spacing, typography } from '@/theme/tokens';
+import { radius, spacing, typography } from '@/theme/tokens';
+import { useTheme, type Palette } from '@/theme/theme-provider';
+import { V2Button, V2Text } from '@/components/v2';
+import { createAuthCallbackUrl } from '@/features/auth/auth-navigation';
+import { authErrorMessage } from '@/features/auth/auth-errors';
 
 import { authDisplayName } from './more-screen';
 import { SettingsCard, SettingsPage, SettingsSectionLabel } from './settings.components';
 
 export function AccountScreen({ onBack, onSignedOut }: { onBack: () => void; onSignedOut: () => void }) {
-  const { signOut, user } = useAuth();
+  const { colors } = useTheme();
+  const styles = createStyles(colors);
+  const { signOut, requestPasswordReset, user } = useAuth();
+  const [resetPending, setResetPending] = useState(false);
+  const [resetSent, setResetSent] = useState(false);
   const queryClient = useQueryClient();
   const [confirming, setConfirming] = useState(false);
   const [signingOut, setSigningOut] = useState(false);
@@ -58,7 +66,16 @@ export function AccountScreen({ onBack, onSignedOut }: { onBack: () => void; onS
             <Text selectable style={[styles.detailValue, styles.email]}>{user?.email ?? '—'}</Text>
           </View>
         </SettingsCard>
-        <Text style={styles.hint}>החשבון מנוהל דרך הכניסה שלך.</Text>
+        <Text style={styles.hint}>החשבון שלך נפרד מההרשאות ליומנים חיצוניים.</Text>
+        <SettingsSectionLabel>סיסמה</SettingsSectionLabel>
+        <V2Button secondary busy={resetPending} disabled={!user?.email || resetSent} title="שליחת קישור לאיפוס סיסמה" onPress={async () => {
+          if (resetPending || !user?.email) return;
+          setResetPending(true); setError(null);
+          try { await requestPasswordReset(user.email, createAuthCallbackUrl('recovery')); setResetSent(true); }
+          catch (caught) { setError(authErrorMessage(caught, 'reset')); }
+          finally { setResetPending(false); }
+        }} />
+        {resetSent ? <V2Text accessibilityRole="alert" muted>אם הכתובת קיימת אצלנו, נשלח קישור לאיפוס. כדאי לבדוק גם בתיקיית הספאם.</V2Text> : null}
       </SettingsPage>
       <Modal animationType="fade" onRequestClose={() => setConfirming(false)} transparent visible={confirming}>
         <View style={styles.modalRoot}>
@@ -80,7 +97,7 @@ export function AccountScreen({ onBack, onSignedOut }: { onBack: () => void; onS
   );
 }
 
-const styles = StyleSheet.create({
+const createStyles = (colors: Palette) => StyleSheet.create({
   detailRow: { alignItems: 'center', flexDirection: 'row-reverse', gap: spacing.sm, minHeight: 56 },
   detailDivider: { borderBottomColor: colors.divider, borderBottomWidth: StyleSheet.hairlineWidth },
   detailLabel: { color: colors.textSubtle, fontFamily: typography.family.semibold, fontSize: typography.size.meta, width: 56 },

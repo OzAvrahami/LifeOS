@@ -3,6 +3,8 @@ import { useState } from 'react';
 import { Modal, ScrollView, StyleSheet, View } from 'react-native';
 
 import { MobileShell } from '@/components/mobile-shell';
+import { V2Button } from '@/components/v2';
+import { PlanTaskLibrary } from '@/features/planning/plan-task-library';
 import { QuickCaptureSheet } from '@/features/capture/quick-capture-sheet';
 import { useEffectiveSettings } from '@/features/settings/settings.queries';
 import { useDemoTasks } from '@/features/tasks/demo-task-provider';
@@ -79,6 +81,7 @@ export function InboxScreen({
   const [confirmation, setConfirmation] = useState<string | null>(null);
   const [operationError, setOperationError] = useState(false);
   const [captureOpen, setCaptureOpen] = useState(false);
+  const [libraryOpen, setLibraryOpen] = useState(false);
   const sharedItems: InboxTask[] = serverTasks
     ? (inboxQuery.data ?? []).map((task) => toInboxTask(task, undefined, settings.timezone))
     : inboxTasks.map((task) => ({
@@ -308,6 +311,7 @@ export function InboxScreen({
               onProcess={() => setScreenState('processing')}
             />
             <InboxCapture onAdd={addTask} />
+            {serverTasks ? <V2Button secondary title="כל המשימות · כולל תאריכים קודמים" onPress={() => setLibraryOpen(true)} /> : null}
             <TaskQueryNotice
               error={serverTasks && (inboxQuery.isError || settingsQuery.isError || operationError)}
               loading={isLoading || (serverTasks && settingsQuery.isPending)}
@@ -324,6 +328,7 @@ export function InboxScreen({
         </View>
       </MobileShell>
       {serverTasks && detailsTaskId ? <Modal visible animationType="slide" onRequestClose={() => setDetailsTaskId(null)}><TaskDetailScreen id={detailsTaskId} onBack={() => setDetailsTaskId(null)} /></Modal> : null}
+      {serverTasks && libraryOpen ? <PlanTaskLibrary date={todayDate} onClose={() => setLibraryOpen(false)} /> : null}
       <QuickCaptureSheet defaultDate={defaultDate}
         onClose={() => setCaptureOpen(false)}
         onSave={captureTask}

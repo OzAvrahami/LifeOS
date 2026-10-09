@@ -273,7 +273,7 @@ describe('persistent server Task experience', () => {
     expect(listTasksMock).toHaveBeenCalledWith({
       plannedDateFrom: firstDate,
       plannedDateTo: addDaysToDateKey(firstDate, 6),
-    });
+    }, 'current-session');
   });
 
   it('keeps explicitly captured work a normal Task even when its title matches a Focus', async () => {
@@ -289,7 +289,7 @@ describe('persistent server Task experience', () => {
     await waitFor(() => expect(tasks).toHaveLength(1));
     const stableId = tasks[0].id;
     expect(tasks[0]).toMatchObject({ priority: 'normal', status: 'open', plannedDate: null, weekPlanId: null });
-    await user.press(within(screen.getByLabelText('ניווט ראשי')).getByText('Inbox'));
+    await user.press(within(screen.getByLabelText('ניווט ראשי')).getByText('משימות'));
     await user.press(await screen.findByLabelText(`פתח פעולות עבור ${title}`));
     await user.press(within(screen.getByLabelText('מה צריך לקרות עם זה')).getByText('היום'));
     await waitFor(() => expect(tasks[0].plannedDate).toBe(localDateKey()));
@@ -314,7 +314,7 @@ describe('persistent server Task experience', () => {
     expect(tasks).toHaveLength(1);
     expect(tasks[0]).toEqual(expect.objectContaining({ plannedDate: null, status: 'open', weekPlanId: null }));
 
-    await user.press(within(screen.getByLabelText('ניווט ראשי')).getByText('Inbox'));
+    await user.press(within(screen.getByLabelText('ניווט ראשי')).getByText('משימות'));
     expect(await screen.findByText(title)).toBeTruthy();
     await user.press(screen.getByLabelText(`פתח פעולות עבור ${title}`));
     await user.press(within(screen.getByLabelText('מה צריך לקרות עם זה')).getByText('השבוע'));
@@ -323,7 +323,7 @@ describe('persistent server Task experience', () => {
     expect(tasks[0].id).toBe(stableId);
 
     await user.press(screen.getByLabelText('סגור פעולות Inbox'));
-    await user.press(within(screen.getByLabelText('ניווט ראשי')).getByText('שבוע'));
+    await user.press(within(screen.getByLabelText('ניווט ראשי')).getByText('השבוע'));
     expect(await screen.findByText(title)).toBeTruthy();
     await user.press(screen.getByLabelText(`בחר יום עבור ${title}`));
     await user.press(screen.getByLabelText(`שבץ להיום: ${title}`));
@@ -363,7 +363,7 @@ describe('persistent server Task experience', () => {
     });
     expect(tasks.filter((task) => task.status === 'in_progress')).toHaveLength(1);
 
-    await user.press(within(screen.getByLabelText('ניווט ראשי')).getByText('שבוע'));
+    await user.press(within(screen.getByLabelText('ניווט ראשי')).getByText('השבוע'));
     expect(await screen.findByText('ישירה לשבוע')).toBeTruthy();
   });
 
@@ -402,7 +402,7 @@ describe('persistent server Task experience', () => {
     });
     expect(tasks).toHaveLength(1);
 
-    await user.press(within(screen.getByLabelText('ניווט ראשי')).getByText('שבוע'));
+    await user.press(within(screen.getByLabelText('ניווט ראשי')).getByText('השבוע'));
     expect(await screen.findByText('1 משימה · 0:00 זמן משימות מתוכנן')).toBeTruthy();
   });
 
@@ -433,7 +433,7 @@ describe('persistent server Task experience', () => {
     expect(updateTaskMock).toHaveBeenCalledTimes(1);
     expect(await screen.findByText('רביעית שהוסתרה')).toBeTruthy();
 
-    await user.press(within(screen.getByLabelText('ניווט ראשי')).getByText('שבוע'));
+    await user.press(within(screen.getByLabelText('ניווט ראשי')).getByText('השבוע'));
     section = await screen.findByLabelText('לתכנן השבוע');
     expect(within(section).queryByText('רביעית שהוסתרה')).toBeNull();
     expect(within(section).getAllByLabelText(/^בחר יום עבור /)).toHaveLength(2);
@@ -457,7 +457,7 @@ describe('persistent server Task experience', () => {
       plannedDate: localDateKey(),
     }));
 
-    await user.press(within(screen.getByLabelText('ניווט ראשי')).getByText('Inbox'));
+    await user.press(within(screen.getByLabelText('ניווט ראשי')).getByText('משימות'));
     await user.press(screen.getByLabelText(`פתח פעולות עבור ${cancelled.title}`));
     await user.press(within(screen.getByLabelText('מה צריך לקרות עם זה')).getByText('מחיקה'));
     await waitFor(() => expect(tasks.find((task) => task.id === cancelled.id)?.status).toBe('cancelled'));
@@ -526,7 +526,7 @@ it('uses the calendar in Inbox processing and Week scheduling without recreating
   expect(updateTaskMock).not.toHaveBeenCalled();
   await fireEvent.press(screen.getByText('השבוע'));
   await waitFor(() => expect(screen.queryByLabelText('מיון מהיר')).toBeNull());
-  await fireEvent.press(within(screen.getByLabelText('ניווט ראשי')).getByText('שבוע'));
+  await fireEvent.press(within(screen.getByLabelText('ניווט ראשי')).getByText('השבוע'));
   await fireEvent.press(await screen.findByLabelText('בחר יום עבור processing calendar'));
   await fireEvent(screen.getByLabelText('תאריך לתכנון'), 'valueChange', {}, new Date(2028, 1, 29, 12));
   await fireEvent.press(screen.getByLabelText('אישור תאריך'));

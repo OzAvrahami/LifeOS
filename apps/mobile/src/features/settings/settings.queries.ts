@@ -17,7 +17,7 @@ export function useSettings(enabled = true) {
   const userId = useTaskQueryScope();
   return useQuery({
     enabled,
-    queryFn: getSettings,
+    queryFn: () => getSettings(userId),
     queryKey: settingsKeys.user(userId),
     refetchOnWindowFocus: false,
     staleTime: SETTINGS_STALE_TIME_MS,
@@ -33,7 +33,7 @@ export function usePutSettings() {
   const queryClient = useQueryClient();
   const userId = useTaskQueryScope();
   return useMutation({
-    mutationFn: putSettings,
+    mutationFn: (input: Parameters<typeof putSettings>[0]) => putSettings(input, userId),
     onSuccess: (settings) => {
       queryClient.setQueryData<UserSettings>(settingsKeys.user(userId), settings);
     },

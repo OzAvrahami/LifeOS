@@ -6,7 +6,8 @@ import { MobileShell } from '@/components/mobile-shell';
 import { useAuth } from '@/features/auth/auth-provider';
 import { QuickCaptureSheet } from '@/features/capture/quick-capture-sheet';
 import { useTaskCapture } from '@/features/tasks/use-task-capture';
-import { colors, radius, spacing, typography } from '@/theme/tokens';
+import { radius, spacing, typography } from '@/theme/tokens';
+import { useTheme, type Palette } from '@/theme/theme-provider';
 
 import { AppVersionFooter } from './app-version-footer';
 
@@ -32,6 +33,8 @@ export function MoreScreen({
   const { user } = useAuth();
   const [captureOpen, setCaptureOpen] = useState(false);
   const { captureTask, defaultDate } = useTaskCapture('server');
+  const { colors } = useTheme();
+  const styles = createStyles(colors);
   return (
     <>
       <MobileShell
@@ -55,7 +58,6 @@ export function MoreScreen({
             <MoreRow icon="person-outline" label="חשבון" onPress={onNavigateAccount} subtitle={authDisplayName(user?.user_metadata)} />
           </View>
           <View style={styles.footer}>
-            <Text style={styles.brand}>LifeOS</Text>
             <AppVersionFooter />
           </View>
         </ScrollView>
@@ -66,6 +68,8 @@ export function MoreScreen({
 }
 
 function MoreRow({ disabled, icon, label, onPress, subtitle }: { disabled?: boolean; icon: keyof typeof Ionicons.glyphMap; label: string; onPress?: () => void; subtitle: string }) {
+  const { colors } = useTheme();
+  const styles = createStyles(colors);
   return (
     <Pressable accessibilityLabel={label} accessibilityRole={disabled ? undefined : 'button'} disabled={disabled} onPress={onPress} style={styles.row}>
       <View style={styles.icon}><Ionicons color={colors.textMuted} name={icon} size={21} /></View>
@@ -78,19 +82,19 @@ function MoreRow({ disabled, icon, label, onPress, subtitle }: { disabled?: bool
   );
 }
 
-const styles = StyleSheet.create({
+const createStyles = (colors: Palette) => StyleSheet.create({
   content: { flexGrow: 1, paddingBottom: spacing.xl, paddingHorizontal: 22, paddingTop: spacing.sm },
   title: { color: colors.text, fontFamily: typography.family.extraBold, fontSize: 30, textAlign: 'right' },
   subtitle: { color: colors.textSubtle, fontFamily: typography.family.regular, fontSize: typography.size.body, lineHeight: 22, marginTop: spacing.xs, textAlign: 'right', writingDirection: 'rtl' },
   section: { color: colors.textSubtle, fontFamily: typography.family.extraBold, fontSize: typography.size.label, letterSpacing: 0.4, marginBottom: spacing.xs, marginTop: 28, textAlign: 'right' },
   card: { backgroundColor: colors.surface, borderRadius: radius.xl, paddingHorizontal: spacing.md },
   row: { alignItems: 'center', flexDirection: 'row-reverse', gap: 14, minHeight: 70 },
-  icon: { alignItems: 'center', backgroundColor: '#EFEAE0', borderRadius: spacing.sm, height: 40, justifyContent: 'center', width: 40 },
+  icon: { alignItems: 'center', backgroundColor: colors.surfaceMuted, borderRadius: spacing.sm, height: 40, justifyContent: 'center', width: 40 },
   rowCopy: { flex: 1 },
   rowTitle: { color: colors.textSoft, fontFamily: typography.family.semibold, fontSize: typography.size.button, textAlign: 'right' },
   rowSubtitle: { color: colors.textFaint, fontFamily: typography.family.regular, fontSize: typography.size.label, marginTop: 2, textAlign: 'right' },
   divider: { backgroundColor: colors.divider, height: StyleSheet.hairlineWidth, marginLeft: 0, marginRight: 54 },
-  soon: { backgroundColor: '#EFEAE0', borderRadius: radius.round, color: '#A8A296', fontFamily: typography.family.bold, fontSize: 12, paddingHorizontal: 10, paddingVertical: 4 },
+  soon: { backgroundColor: colors.surfaceMuted, borderRadius: radius.round, color: '#A8A296', fontFamily: typography.family.bold, fontSize: 12, paddingHorizontal: 10, paddingVertical: 4 },
   footer: { gap: spacing.xxs, marginTop: 34 },
   brand: { color: '#B0AA9E', fontFamily: typography.family.regular, fontSize: typography.size.label, textAlign: 'center', writingDirection: 'ltr' },
 });

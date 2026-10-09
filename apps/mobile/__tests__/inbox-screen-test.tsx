@@ -132,10 +132,10 @@ describe('<InboxScreen />', () => {
     await renderInbox('normal', { onNavigateToday, onNavigateWeek });
 
     const navigation = screen.getByLabelText('ניווט ראשי');
-    expect(within(navigation).getByText('Inbox').parent?.props.accessibilityState).toEqual({ selected: true });
+    expect(within(navigation).getByText('משימות').parent?.props.accessibilityState).toEqual({ selected: true });
 
     await user.press(within(navigation).getByText('היום'));
-    await user.press(within(navigation).getByText('שבוע'));
+    await user.press(within(navigation).getByText('השבוע'));
 
     expect(onNavigateToday).toHaveBeenCalledTimes(1);
     expect(onNavigateWeek).toHaveBeenCalledTimes(1);

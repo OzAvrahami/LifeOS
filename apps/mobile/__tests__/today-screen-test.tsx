@@ -46,9 +46,9 @@ describe('<TodayScreen />', () => {
 
     const navigation = screen.getByLabelText('ניווט ראשי');
     expect(within(navigation).getByText('היום')).toBeTruthy();
-    expect(within(navigation).getByText('שבוע')).toBeTruthy();
-    expect(within(navigation).getByText('Inbox')).toBeTruthy();
-    expect(within(navigation).getByText('עוד')).toBeTruthy();
+    expect(within(navigation).getByText('השבוע')).toBeTruthy();
+    expect(within(navigation).getByText('משימות')).toBeTruthy();
+    expect(within(navigation).getByText('יומן')).toBeTruthy();
     expect(within(navigation).getByLabelText('הוספה מהירה')).toBeTruthy();
     expect(within(navigation).getByText('היום').parent?.props.accessibilityState).toEqual({ selected: true });
   });
@@ -62,7 +62,7 @@ describe('<TodayScreen />', () => {
       </TestProviders>,
     );
 
-    await user.press(within(screen.getByLabelText('ניווט ראשי')).getByText('Inbox'));
+    await user.press(within(screen.getByLabelText('ניווט ראשי')).getByText('משימות'));
     expect(onNavigateInbox).toHaveBeenCalledTimes(1);
   });
 

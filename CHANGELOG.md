@@ -6,6 +6,13 @@ LifeOS follows Semantic Versioning for development and release tags.
 
 ## [Unreleased]
 
+- V2 daily proposals and next-day continuation (#32): deterministic bounded suggestions with real reasons/origin dates, separate persisted drafts and approved selections, explicit edits, optional summaries and retry/conflict protection. Unselected work stays discoverable; tasks and calendar events retain their identities.
+- Share approved daily membership/order with Week and support per-day approval from Week (#33 contract only). Explicit single-task placement updates current/future V2 memberships while retaining past references. Forward-only database migration and API rollout are required; production/provider, visual and physical acceptance remain pending. See [daily-flow evidence](docs/issue-32-verification.md).
+
+- V2 milestone 1 local implementation (#29/#30): shared native light/dark/system appearance, navigation with Calendar retained, and Today backed by existing tasks, plans and commitments.
+- Refresh account access, verification/onboarding, password recovery and Account actions. Add native secure-session migration and account-bound requests/editors. Existing accounts and server data are retained.
+- Verification and rollout remain pending: rendered reference comparison, hosted authentication/email/app-link behavior and a future owner-authorized physical candidate. No version/build preparation or acceptance is implied. See [milestone evidence](docs/v2-milestone-1-verification.md).
+
 ## [0.5.0] — Owner accepted / publication pending
 
 **Accepted internal iPhone build: LifeOS 0.5.0 (9)**, built from `6407ae8856ee8289e8183aaeaf6661b680d32267`. Wireless installation, signing, installed-version readback and launch were verified on 2026-10-07. After product review, the owner said **“נראה טוב” (“Looks good”)** on **2026-10-08**. This is scoped owner acceptance, not independent observation of the review or individual checklist attestations. #5 is complete; v0.5.0 is not yet published and Latest remains v0.4.1. Internal delivery only, not App Store/TestFlight.

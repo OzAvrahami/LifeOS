@@ -35,7 +35,7 @@ export function useCommitments(filters: CommitmentListFilters, enabled = true) {
   const userId = useTaskQueryScope();
   return useQuery({
     enabled,
-    queryFn: () => listCommitments(filters),
+    queryFn: () => listCommitments(filters, userId),
     queryKey: commitmentKeys.list(userId, filters),
     refetchOnWindowFocus: false,
     refetchOnMount: filters.id ? 'always' : true,
@@ -96,7 +96,7 @@ export function useCreateCommitment() {
   const queryClient = useQueryClient();
   const userId = useTaskQueryScope();
   return useMutation({
-    mutationFn: createCommitment,
+    mutationFn: (input: Parameters<typeof createCommitment>[0]) => createCommitment(input, userId),
     onSuccess: (commitment) => synchronizeCommitmentCaches(
       queryClient,
       userId,
@@ -110,7 +110,7 @@ export function useUpdateCommitment() {
   const queryClient = useQueryClient();
   const userId = useTaskQueryScope();
   return useMutation({
-    mutationFn: updateCommitment,
+    mutationFn: (input: Parameters<typeof updateCommitment>[0]) => updateCommitment(input, userId),
     onSuccess: (commitment) => synchronizeCommitmentCaches(
       queryClient,
       userId,
@@ -124,7 +124,7 @@ export function useDeleteCommitment() {
   const queryClient = useQueryClient();
   const userId = useTaskQueryScope();
   return useMutation({
-    mutationFn: deleteCommitment,
+    mutationFn: (input: Parameters<typeof deleteCommitment>[0]) => deleteCommitment(input, userId),
     onSuccess: (commitment) => synchronizeCommitmentCaches(
       queryClient,
       userId,

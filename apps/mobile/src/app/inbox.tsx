@@ -1,3 +1,4 @@
+import { useTaskQueryScope } from '@/features/tasks/task-query-scope';
 import { Href, useLocalSearchParams, useRouter } from 'expo-router';
 
 import { InboxScreen } from '@/features/inbox/inbox-screen';
@@ -5,6 +6,7 @@ import { isInboxDemoState } from '@/features/inbox/inbox.types';
 
 export default function InboxRoute() {
   const router = useRouter();
+  const scope = useTaskQueryScope();
   const { preview, state } = useLocalSearchParams<{
     preview?: string | string[];
     state?: string | string[];
@@ -17,7 +19,7 @@ export default function InboxRoute() {
   return (
     <InboxScreen
       initialState={previewState}
-      key={previewState}
+      key={`${scope}:${previewState}`}
       onMoveToToday={(task) =>
         router.replace({
           params: { inboxTaskId: task.id },

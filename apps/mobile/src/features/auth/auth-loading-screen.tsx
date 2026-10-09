@@ -1,9 +1,11 @@
 import { ActivityIndicator, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
-import { colors, typography } from '@/theme/tokens';
+import { typography } from '@/theme/tokens';
+import { useTheme } from '@/theme/theme-provider';
 
 export function AuthLoadingScreen({ label = 'טוען…' }: { label?: string }) {
+  const { colors } = useTheme();
   return (
     <SafeAreaView style={{ backgroundColor: colors.background, flex: 1 }}>
       <View style={{ alignItems: 'center', flex: 1, gap: 16, justifyContent: 'center' }}>

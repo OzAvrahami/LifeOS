@@ -34,10 +34,12 @@ export function authErrorMessage(error: unknown, context: 'sign-in' | 'sign-up' 
     return 'כבר קיים חשבון עם כתובת המייל הזו.';
   }
   if (code.includes('weak_password') || message.includes('password should be')) {
-    return 'הסיסמה צריכה לכלול לפחות 8 תווים.';
+    return 'הסיסמה אינה עומדת בדרישות האבטחה של החשבון. כדאי לבחור סיסמה ארוכה וייחודית יותר.';
   }
   if (
     code.includes('otp_expired') ||
+    code === 'session_not_found' ||
+    code === 'refresh_token_not_found' ||
     code.includes('flow_state') ||
     message.includes('expired') ||
     message.includes('invalid token')

@@ -28,7 +28,7 @@ export function useDailyPlan(date: string, enabled = true) {
   const userId = useTaskQueryScope();
   return useQuery({
     enabled,
-    queryFn: () => getDailyPlan(date),
+    queryFn: () => getDailyPlan(date, userId),
     queryKey: planningKeys.dailyPlan(userId, date),
     refetchOnWindowFocus: false,
     staleTime: PLANNING_STALE_TIME_MS,
@@ -39,7 +39,7 @@ export function usePutDailyPlan() {
   const queryClient = useQueryClient();
   const userId = useTaskQueryScope();
   return useMutation({
-    mutationFn: putDailyPlan,
+    mutationFn: (input: Parameters<typeof putDailyPlan>[0]) => putDailyPlan(input, userId),
     onSuccess: (dailyPlan, variables) => {
       queryClient.setQueryData<DailyPlan | null>(
         planningKeys.dailyPlan(userId, variables.date),
@@ -53,7 +53,7 @@ export function useWeeklyFocuses(weekStart: string, enabled = true) {
   const userId = useTaskQueryScope();
   return useQuery({
     enabled,
-    queryFn: () => getWeeklyFocuses(weekStart),
+    queryFn: () => getWeeklyFocuses(weekStart, userId),
     queryKey: planningKeys.weeklyFocuses(userId, weekStart),
     refetchOnWindowFocus: false,
     staleTime: PLANNING_STALE_TIME_MS,
@@ -64,7 +64,7 @@ export function useReplaceWeeklyFocuses() {
   const queryClient = useQueryClient();
   const userId = useTaskQueryScope();
   return useMutation({
-    mutationFn: replaceWeeklyFocuses,
+    mutationFn: (input: Parameters<typeof replaceWeeklyFocuses>[0]) => replaceWeeklyFocuses(input, userId),
     onSuccess: (focuses, variables) => {
       void queryClient.invalidateQueries({ queryKey: planningKeys.weeklyPlan(userId, variables.weekStart), exact: true });
       queryClient.setQueryData<WeeklyFocus[]>(
@@ -79,7 +79,7 @@ export function useWeeklyPlan(weekStart: string, enabled = true) {
   const userId = useTaskQueryScope();
   return useQuery({
     enabled, queryKey: planningKeys.weeklyPlan(userId, weekStart),
-    queryFn: () => getWeeklyPlan(weekStart),
+    queryFn: () => getWeeklyPlan(weekStart, userId),
     staleTime: PLANNING_STALE_TIME_MS, refetchOnWindowFocus: false,
   });
 }
@@ -88,7 +88,7 @@ export function useSaveWeeklyPlan() {
   const userId = useTaskQueryScope();
   const client = useQueryClient();
   return useMutation({
-    mutationFn: saveWeeklyPlan,
+    mutationFn: (input: Parameters<typeof saveWeeklyPlan>[0]) => saveWeeklyPlan(input, userId),
     onSuccess: async (state, { weekStart }) => {
       const planKey = planningKeys.weeklyPlan(userId, weekStart);
       const focusKey = planningKeys.weeklyFocuses(userId, weekStart);

@@ -77,6 +77,10 @@ export async function verifyDailyPlanning({ apiRequest, tokenA, tokenB, callerA,
   assert.equal(cleared.focusTaskId, null); assert.equal(cleared.availableMinutes, null);
   await apiRequest('PATCH', `/tasks/${inbox.id}`, tokenA, { status: 'completed' });
   await apiRequest('PATCH', `/tasks/${dated.id}`, tokenA, { planning: { type: 'inbox' } });
+  // V2 shared membership: an explicit placement change updates a current/future
+  // approved day even when it originated in the old client. Refresh its revision.
+  plan = await get();
+  assert.deepEqual(plan.selectedTaskIds, [inbox.id]);
   const edited = await put(command('edit', plan.revision));
   assert.equal(edited.id, plan.id); assert.equal(edited.resumeStep, 2);
   assert.equal(edited.completedAt, plan.completedAt); assert.deepEqual(edited.selectedTaskIds, plan.selectedTaskIds);
@@ -84,7 +88,7 @@ export async function verifyDailyPlanning({ apiRequest, tokenA, tokenB, callerA,
   await apiRequest('DELETE', `/tasks/${dated.id}`, tokenA);
   const candidates = (await apiRequest('GET', `${path}/tasks`, tokenA)).tasks;
   assert.equal(candidates.find(t => t.id === inbox.id).status, 'completed');
-  assert.equal(candidates.find(t => t.id === dated.id).status, 'cancelled');
+  assert.equal(candidates.some(t => t.id === dated.id), false);
   assert.equal(candidates.some(t => t.id === foreign.id), false);
   plan = await put(command('save', plan.revision, { step: 3, selectedTaskIds: [] }));
   plan = await put(command('complete', plan.revision));

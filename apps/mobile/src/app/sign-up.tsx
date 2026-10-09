@@ -11,7 +11,7 @@ export default function SignUpRoute() {
   return (
     <SignUpScreen
       initialState={previewState}
-      onAuthenticated={() => router.replace('/')}
+      onAuthenticated={() => router.replace('/auth/confirmed' as Href)}
       onBack={() => router.replace('/welcome' as Href)}
       onSignIn={() => router.replace('/sign-in' as Href)}
       onVerificationRequired={(email) => router.replace({ pathname: '/verify-email', params: { email } } as unknown as Href)}

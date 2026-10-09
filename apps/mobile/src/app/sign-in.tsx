@@ -2,6 +2,7 @@ import { Href, useLocalSearchParams, useRouter } from 'expo-router';
 
 import { SignInScreen } from '@/features/auth/sign-in-screen';
 import { AuthFormPreviewState } from '@/features/auth/auth.types';
+import { consumeAuthDestination } from '@/features/auth/auth-destination';
 
 export default function SignInRoute() {
   const router = useRouter();
@@ -11,10 +12,11 @@ export default function SignInRoute() {
   return (
     <SignInScreen
       initialState={previewState}
-      onAuthenticated={() => router.replace('/')}
+      onAuthenticated={() => router.replace(consumeAuthDestination() as Href)}
       onBack={() => router.replace('/welcome' as Href)}
       onForgotPassword={() => router.push('/forgot-password' as Href)}
       onSignUp={() => router.replace('/sign-up' as Href)}
+      onVerificationRequired={email => router.replace({ pathname: '/verify-email', params: { email } })}
     />
   );
 }

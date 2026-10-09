@@ -77,7 +77,7 @@ it('does not present lifecycle errors as not started and retries only the select
   await mount(); await screen.findByLabelText('נסה שוב טעינת תכנון');
   expect(entry().queryByText('תכנן את השבוע')).toBeNull();
   await press('נסה שוב טעינת תכנון'); await screen.findByLabelText('תכנן את השבוע');
-  expect(api.getWeeklyPlan).toHaveBeenLastCalledWith(current);
+  expect(api.getWeeklyPlan).toHaveBeenLastCalledWith(current, 'current-session');
 });
 
 it('saves progress and focuses, survives a new provider, resumes at step 3 and supports Back', async () => {
@@ -197,13 +197,13 @@ it('reviews real prior-week Tasks, selected-week commitments and final dated wor
   await waitFor(() => expect(screen.getByLabelText('שמירה והמשך').props.accessibilityState.disabled).toBe(false));
   expect(session().getByText('Prior real Task · 0:20 משוער · 2026-09-16')).toBeTruthy();
   expect(session().queryByText(/Historical Task/)).toBeNull();
-  expect(taskApi.listTasks).toHaveBeenCalledWith({ plannedDateFrom: current, plannedDateTo: '2026-09-20' });
+  expect(taskApi.listTasks).toHaveBeenCalledWith({ plannedDateFrom: current, plannedDateTo: '2026-09-20' }, 'current-session');
   await press('שמירה והמשך'); await screen.findByText('שלב 2 מתוך 4');
   await waitFor(() => expect(screen.getByLabelText('שמירה והמשך').props.accessibilityState.disabled).toBe(false));
   expect(session().getAllByText(/real commitment/).map(t => t.props.children.join(''))).toEqual([
     'Early real commitment · 2026-09-23 · 09:17–10:00', 'Later real commitment · 2026-09-23 · 14:00 · ללא שעת סיום',
   ]);
-  expect(commitmentApi.listCommitments).toHaveBeenCalledWith({ dateFrom: future, dateTo: '2026-09-27' });
+  expect(commitmentApi.listCommitments).toHaveBeenCalledWith({ dateFrom: future, dateTo: '2026-09-27' }, 'current-session');
   await press('שמירה והמשך'); await screen.findByText('שלב 3 מתוך 4');
   await press('שמירה והמשך'); await screen.findByText('שלב 4 מתוך 4');
   await waitFor(() => expect(screen.getByLabelText('סיום תכנון').props.accessibilityState.disabled).toBe(false));
@@ -241,6 +241,6 @@ it('returns from Focus review to the same selected week without creating Tasks o
   await press('חזרה לשבוע ליצירת משימה');
   await screen.findByLabelText('יצירת משימה בהשראת המיקוד: Future direction');
   expect(stored.get(future)?.weekPlan).toMatchObject({ resumeStep: 3, status: 'in_progress' });
-  expect(api.getWeeklyFocuses).toHaveBeenLastCalledWith(future);
+  expect(api.getWeeklyFocuses).toHaveBeenLastCalledWith(future, 'current-session');
   expect(taskApi.createTask).not.toHaveBeenCalled();
 });

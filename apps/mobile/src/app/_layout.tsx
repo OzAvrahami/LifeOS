@@ -1,4 +1,6 @@
-import { Stack, useGlobalSearchParams } from 'expo-router';
+import { Stack, useGlobalSearchParams, usePathname, useRouter } from 'expo-router';
+import { useEffect } from 'react';
+import { rememberAuthDestination } from '@/features/auth/auth-destination';
 import { StatusBar } from 'expo-status-bar';
 import {
   Assistant_400Regular,
@@ -17,6 +19,7 @@ import { DemoTaskProvider } from '@/features/tasks/demo-task-provider';
 import { TaskQueryScopeProvider } from '@/features/tasks/task-query-scope';
 import { QueryProvider } from '@/lib/query/query-provider';
 import { NotificationProvider } from '@/features/notifications/notification-provider';
+import { ThemeProvider, useTheme } from '@/theme/theme-provider';
 
 export default function RootLayout() {
   const [fontsLoaded] = useFonts({
@@ -32,7 +35,7 @@ export default function RootLayout() {
   }
 
   return (
-    <QueryProvider>
+    <ThemeProvider><QueryProvider>
       <AuthProvider>
         <NotificationProvider>
           <SessionQueryCacheBoundary>
@@ -40,12 +43,22 @@ export default function RootLayout() {
           </SessionQueryCacheBoundary>
         </NotificationProvider>
       </AuthProvider>
-    </QueryProvider>
+    </QueryProvider></ThemeProvider>
   );
 }
 
 function AuthenticatedStack() {
-  const { isLoading, isRecovery, session } = useAuth();
+  const { mode, colors } = useTheme();
+  const { isLoading, isRecovery, isAuthenticating, session, sessionExpired } = useAuth();
+  const pathname = usePathname();
+  const router = useRouter();
+  const parameters = useGlobalSearchParams();
+  useEffect(() => {
+    if (isLoading || (!session && sessionExpired)) rememberAuthDestination(pathname, parameters.id);
+  }, [isLoading, pathname, parameters.id, session, sessionExpired]);
+  useEffect(() => {
+    if (!isLoading && isRecovery && (pathname === '/' || pathname === '/welcome')) router.replace('/reset-password');
+  }, [isLoading, isRecovery, pathname, router]);
   const { preview, state } = useGlobalSearchParams<{ preview?: string; state?: string }>();
   const developmentPreview = __DEV__ && (preview === '1' || Boolean(state));
   const gate = getAuthGateState({
@@ -60,8 +73,8 @@ function AuthenticatedStack() {
   return (
     <TaskQueryScopeProvider userId={session?.user.id}>
       <DemoTaskProvider>
-        <Stack screenOptions={{ headerShown: false }}>
-        <Stack.Protected guard={gate.publicAuthAvailable}>
+        <Stack screenOptions={{ headerShown: false, contentStyle: { backgroundColor: colors.background } }}>
+        <Stack.Protected guard={gate.publicAuthAvailable || isAuthenticating}>
           <Stack.Screen name="welcome" />
           <Stack.Screen name="sign-in" />
           <Stack.Screen name="sign-up" />
@@ -78,13 +91,16 @@ function AuthenticatedStack() {
           <Stack.Screen name="account" />
           <Stack.Screen name="task" />
           <Stack.Screen name="commitment" />
+          <Stack.Screen name="calendar" />
+          <Stack.Screen name="auth/confirmed" />
         </Stack.Protected>
         <Stack.Screen name="auth/callback" />
+        <Stack.Screen name="auth/invalid" />
         <Stack.Protected guard={__DEV__}>
           <Stack.Screen name="auth-dev" />
         </Stack.Protected>
         </Stack>
-        <StatusBar style="dark" />
+        <StatusBar style={mode === 'dark' ? 'light' : 'dark'} />
       </DemoTaskProvider>
     </TaskQueryScopeProvider>
   );

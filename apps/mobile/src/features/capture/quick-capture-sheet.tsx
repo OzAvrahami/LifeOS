@@ -13,7 +13,8 @@ import {
 } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
-import { colors, radius, spacing, typography } from '@/theme/tokens';
+import { radius, spacing, typography } from '@/theme/tokens';
+import { useTheme, type Palette } from '@/theme/theme-provider';
 
 import type { CaptureDestination, TaskCapturePlacement } from '@/features/tasks/task-capture.types';
 import { TaskDateSelection } from '@/features/tasks/task-date-selection';
@@ -55,6 +56,8 @@ function CaptureSession({
   onSave,
   visible,
 }: CaptureProps) {
+  const { colors } = useTheme();
+  const styles = createStyles(colors);
   const insets = useSafeAreaInsets();
   const [title, setTitle] = useState('');
   const [destination, setDestination] = useState<CaptureDestination>(initialDestination);
@@ -190,22 +193,22 @@ function CaptureSession({
   );
 }
 
-const styles = StyleSheet.create({
+const createStyles = (colors: Palette) => StyleSheet.create({
   overlay: { flex: 1, justifyContent: 'flex-end' },
   backdrop: { backgroundColor: colors.overlay, bottom: 0, left: 0, position: 'absolute', right: 0, top: 0 },
   sheet: { backgroundColor: colors.surface, borderTopLeftRadius: 28, borderTopRightRadius: 28, maxHeight: '82%', paddingHorizontal: 22, paddingTop: 14 },
   handle: { alignSelf: 'center', backgroundColor: '#DED8CB', borderRadius: radius.round, height: 5, width: 38 },
   heading: { color: colors.text, fontFamily: typography.family.extraBold, fontSize: 19, marginTop: spacing.lg, textAlign: 'right', writingDirection: 'rtl' },
-  input: { backgroundColor: colors.completedSurface, borderRadius: 15, color: colors.text, fontFamily: typography.family.regular, fontSize: 17, marginTop: spacing.sm, minHeight: 54, paddingHorizontal: spacing.md, paddingVertical: 15, writingDirection: 'rtl' },
+  input: { backgroundColor: colors.surfaceMuted, borderRadius: 15, color: colors.text, fontFamily: typography.family.regular, fontSize: 17, marginTop: spacing.sm, minHeight: 54, paddingHorizontal: spacing.md, paddingVertical: 15, writingDirection: 'rtl' },
   error: { color: colors.warningText, fontFamily: typography.family.semibold, fontSize: typography.size.label, marginTop: spacing.xs, textAlign: 'right', writingDirection: 'rtl' },
   destinationLabel: { color: colors.textSubtle, fontFamily: typography.family.bold, fontSize: typography.size.label, marginTop: spacing.lg, textAlign: 'right', writingDirection: 'rtl' },
   destinations: { flexDirection: 'row-reverse', flexWrap: 'wrap', gap: spacing.xs, marginTop: spacing.xs },
   destination: { alignItems: 'center', backgroundColor: colors.surfaceMuted, borderRadius: radius.round, minHeight: 40, justifyContent: 'center', paddingHorizontal: 15 },
   destinationSelected: { backgroundColor: colors.accent },
   destinationText: { color: colors.textMuted, fontFamily: typography.family.bold, fontSize: typography.size.meta, writingDirection: 'rtl' },
-  destinationTextSelected: { color: colors.white },
+  destinationTextSelected: { color: colors.onAccent },
   ltr: { writingDirection: 'ltr' },
   saveButton: { alignItems: 'center', backgroundColor: colors.accent, borderRadius: radius.md, height: 52, justifyContent: 'center', marginTop: spacing.lg },
   saveButtonDisabled: { opacity: 0.48 },
-  saveText: { color: colors.white, fontFamily: typography.family.bold, fontSize: typography.size.button },
+  saveText: { color: colors.onAccent, fontFamily: typography.family.bold, fontSize: typography.size.button },
 });

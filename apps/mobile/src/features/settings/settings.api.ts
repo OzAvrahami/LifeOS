@@ -11,14 +11,15 @@ export async function patchNotificationPreferences(notifications: NotificationPr
   return settings;
 }
 
-export async function getSettings() {
-  const response = await apiRequest<{ settings: unknown }>('/settings', { auth: 'required' });
+export async function getSettings(expectedUserId?: string) {
+  const response = await apiRequest<{ settings: unknown }>('/settings', { auth: 'required', ...(expectedUserId ? { expectedUserId } : {}) });
   return normalizeSettings(response.settings);
 }
 
-export async function putSettings(input: PutUserSettingsInput) {
+export async function putSettings(input: PutUserSettingsInput, expectedUserId?: string) {
   const response = await apiRequest<{ settings: unknown }>('/settings', {
     auth: 'required',
+    ...(expectedUserId ? { expectedUserId } : {}),
     body: JSON.stringify(input),
     headers: { 'Content-Type': 'application/json' },
     method: 'PUT',

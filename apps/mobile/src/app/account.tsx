@@ -1,8 +1,10 @@
+import { useTaskQueryScope } from '@/features/tasks/task-query-scope';
 import { useRouter } from 'expo-router';
 
 import { AccountScreen } from '@/features/settings/account-screen';
 
 export default function AccountRoute() {
   const router = useRouter();
-  return <AccountScreen onBack={() => router.back()} onSignedOut={() => router.replace('/welcome')} />;
+  const scope = useTaskQueryScope();
+  return <AccountScreen key={scope} onBack={() => router.back()} onSignedOut={() => router.replace('/welcome')} />;
 }

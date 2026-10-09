@@ -174,7 +174,7 @@ it('refreshes the correct lifecycle after a standalone Focus edit without resett
   </>; }
   await render(<Providers queryClient={client}><Harness /></Providers>);
   await fireEvent.press(screen.getByLabelText('clear focuses'));
-  await waitFor(() => expect(planningApi.getWeeklyPlan).toHaveBeenCalledWith(weekStart));
+  await waitFor(() => expect(planningApi.getWeeklyPlan).toHaveBeenCalledWith(weekStart, userId));
   expect(await screen.findByText('completed')).toBeTruthy();
   expect(client.getQueryData(planningKeys.weeklyPlan(userId, weekStart))).toEqual(completedState);
 });

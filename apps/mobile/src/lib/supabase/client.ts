@@ -1,8 +1,8 @@
 import 'react-native-url-polyfill/auto';
 
-import AsyncStorage from '@react-native-async-storage/async-storage';
 import { createClient, processLock } from '@supabase/supabase-js';
 import { Platform } from 'react-native';
+import { nativeSessionStorage } from './session-storage';
 
 function requirePublicEnvironmentValue(name: string, value: string | undefined) {
   if (!value?.trim()) {
@@ -23,7 +23,7 @@ const supabasePublishableKey = requirePublicEnvironmentValue(
 
 export const supabase = createClient(supabaseUrl, supabasePublishableKey, {
   auth: {
-    ...(Platform.OS === 'web' ? {} : { storage: AsyncStorage }),
+    ...(Platform.OS === 'web' ? {} : { storage: nativeSessionStorage }),
     autoRefreshToken: true,
     detectSessionInUrl: false,
     lock: processLock,

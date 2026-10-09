@@ -5,6 +5,7 @@
   "main": "expo-router/entry",
   "scripts": {
     "start": "expo start --dev-client",
+    "web": "expo start --web --localhost",
     "android": "expo run:android",
     "ios": "expo run:ios",
     "lint": "expo lint",
@@ -28,6 +29,7 @@
     "expo-linking": "~57.0.6",
     "expo-notifications": "57.0.12",
     "expo-router": "~57.0.14",
+    "expo-secure-store": "~57.0.4",
     "expo-splash-screen": "~57.0.7",
     "expo-status-bar": "~57.0.1",
     "react": "19.2.3",

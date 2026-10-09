@@ -7,8 +7,8 @@ import type {
   UpdateCommitmentInput,
 } from './commitment.types';
 
-async function commitmentRequest<T>(path: string, options: RequestInit = {}) {
-  return apiRequest<T>(path, { ...options, auth: 'required' });
+async function commitmentRequest<T>(path: string, options: RequestInit = {}, expectedUserId?: string) {
+  return apiRequest<T>(path, { ...options, auth: 'required', ...(expectedUserId ? { expectedUserId } : {}) });
 }
 
 function queryString(filters: CommitmentListFilters) {
@@ -22,38 +22,38 @@ function queryString(filters: CommitmentListFilters) {
   return query ? `?${query}` : '';
 }
 
-export async function listCommitments(filters: CommitmentListFilters = {}) {
+export async function listCommitments(filters: CommitmentListFilters = {}, expectedUserId?: string) {
   const response = await commitmentRequest<{ commitments: Commitment[] }>(
-    `/commitments${queryString(filters)}`,
+    `/commitments${queryString(filters)}`, {}, expectedUserId,
   );
   return response.commitments;
 }
 
-export async function createCommitment(input: CreateCommitmentInput) {
+export async function createCommitment(input: CreateCommitmentInput, expectedUserId?: string) {
   const response = await commitmentRequest<{ commitment: Commitment }>('/commitments', {
     body: JSON.stringify(input),
     headers: { 'Content-Type': 'application/json' },
     method: 'POST',
-  });
+  }, expectedUserId);
   return response.commitment;
 }
 
-export async function updateCommitment({ id, input }: { id: string; input: UpdateCommitmentInput }) {
+export async function updateCommitment({ id, input }: { id: string; input: UpdateCommitmentInput }, expectedUserId?: string) {
   const response = await commitmentRequest<{ commitment: Commitment }>(
     `/commitments/${encodeURIComponent(id)}`,
     {
       body: JSON.stringify(input),
       headers: { 'Content-Type': 'application/json' },
       method: 'PATCH',
-    },
+    }, expectedUserId,
   );
   return response.commitment;
 }
 
-export async function deleteCommitment(id: string) {
+export async function deleteCommitment(id: string, expectedUserId?: string) {
   const response = await commitmentRequest<{ commitment: Commitment }>(
     `/commitments/${encodeURIComponent(id)}`,
-    { method: 'DELETE' },
+    { method: 'DELETE' }, expectedUserId,
   );
   return response.commitment;
 }

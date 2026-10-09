@@ -1,9 +1,11 @@
 import { Text } from 'react-native';
 
 import { TaskQueryNotice } from '@/features/tasks/task-query-notice';
-import { colors, spacing, typography } from '@/theme/tokens';
+import { spacing, typography } from '@/theme/tokens';
+import { useTheme, type Palette } from '@/theme/theme-provider';
 
 import { AppVersionFooter } from './app-version-footer';
+import { AppearanceSetting } from './appearance-setting';
 import { SettingsCard, SettingsPage, SettingsRow, SettingsSectionLabel } from './settings.components';
 import { useEffectiveSettings } from './settings.queries';
 import { dayWindowValue, timezoneOffsetLabel } from './settings-time';
@@ -22,12 +24,15 @@ export function SettingsScreen({
   onTimezone: () => void;
   onWeekStart: () => void;
 }) {
+  const { colors } = useTheme();
+  const styles = createStyles(colors);
   const { effective, query } = useEffectiveSettings();
   const timezoneLabel = timezoneOptions.find((item) => item.timezone === effective.timezone)?.label
     ?? effective.timezone;
   return (
     <SettingsPage footer={<AppVersionFooter />} onBack={onBack} title="הגדרות">
       <TaskQueryNotice error={query.isError} loading={query.isPending} onRetry={() => void query.refetch()} />
+      <AppearanceSetting />
       <SettingsSectionLabel>היום שלי</SettingsSectionLabel>
       <SettingsCard>
         <SettingsRow
@@ -64,7 +69,7 @@ export function SettingsScreen({
   );
 }
 
-const styles = {
+const createStyles = (colors: Palette) => ({
   hint: {
     color: colors.textFaint,
     fontFamily: typography.family.regular,
@@ -75,4 +80,4 @@ const styles = {
     textAlign: 'right' as const,
     writingDirection: 'rtl' as const,
   },
-};
+});

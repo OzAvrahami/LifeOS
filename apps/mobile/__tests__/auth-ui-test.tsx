@@ -14,6 +14,9 @@ import { SignInScreen } from '@/features/auth/sign-in-screen';
 import { SignUpScreen } from '@/features/auth/sign-up-screen';
 import { VerifyEmailScreen } from '@/features/auth/verify-email-screen';
 import { WelcomeScreen } from '@/features/auth/welcome-screen';
+import { saveRecoverySession } from '@/features/auth/recovery-state';
+jest.mock('@/lib/supabase/session-storage', () => ({ recoveryStorage: require('@react-native-async-storage/async-storage') }));
+beforeEach(async () => { await saveRecoverySession(null); });
 
 jest.mock('@/lib/supabase/client', () => ({
   supabase: { auth: { getSession: jest.fn() } },
@@ -46,7 +49,10 @@ function createAuthClient({ session = null }: { session?: Session | null } = {})
     resend: jest.fn().mockResolvedValue({ data: {}, error: null }),
     resetPasswordForEmail: jest.fn().mockResolvedValue({ data: {}, error: null }),
     setSession: jest.fn(),
-    signInWithPassword: jest.fn().mockResolvedValue({ data: { session: testSession, user: testUser }, error: null }),
+    signInWithPassword: jest.fn().mockImplementation(async () => {
+      listener?.('SIGNED_IN', testSession);
+      return { data: { session: testSession, user: testUser }, error: null };
+    }),
     signOut: jest.fn().mockImplementation(async () => {
       listener?.('SIGNED_OUT', null);
       return { error: null };
@@ -92,8 +98,9 @@ function CallbackFlowHarness({
   client: SupabaseClient;
   url: string;
 }) {
-  const [destination, setDestination] = useState<'callback' | 'reset-password' | 'sign-in'>('callback');
+  const [destination, setDestination] = useState<'callback' | 'reset-password' | 'sign-in' | 'confirmed'>('callback');
 
+  if (destination === 'confirmed') return <Text>Confirmed destination</Text>;
   if (destination === 'sign-in') return <Text>Sign In destination</Text>;
   if (destination === 'reset-password') return <Text>Reset Password destination</Text>;
 
@@ -101,7 +108,7 @@ function CallbackFlowHarness({
     <AuthCallbackScreen
       clearSensitiveParameters={clearSensitiveParameters}
       client={client}
-      onConfirmed={() => setDestination('sign-in')}
+      onConfirmed={() => setDestination('confirmed')}
       onExpired={() => setDestination('sign-in')}
       onRecovery={() => setDestination('reset-password')}
       resolveUrl={async () => url}
@@ -167,12 +174,25 @@ describe('production Auth UI', () => {
     expect(screen.getByText('אימייל או סיסמה שגויים')).toBeTruthy();
   });
 
+  it.each([false, true])('preserves provider login during transport failure but rejects identity mismatch: %s', async mismatch => {
+    const user = userEvent.setup();
+    const mock = createAuthClient();
+    const onAuthenticated = jest.fn();
+    const verifyIdentity = jest.fn().mockRejectedValue(new Error(mismatch ? 'Authenticated identity mismatch' : 'Network request failed'));
+    await renderAuth(<SignInScreen onAuthenticated={onAuthenticated} onBack={jest.fn()} onForgotPassword={jest.fn()} onSignUp={jest.fn()} verifyIdentity={verifyIdentity} />, mock);
+    await user.type(screen.getByLabelText('אימייל'), 'person@example.com');
+    await user.type(screen.getByLabelText('סיסמה'), 'password1');
+    await user.press(screen.getByRole('button', { name: 'התחברות' }));
+    expect(onAuthenticated).toHaveBeenCalledTimes(mismatch ? 0 : 1);
+    expect(mock.auth.signOut).toHaveBeenCalledTimes(mismatch ? 1 : 0);
+  });
+
   it('validates Sign Up fields and password confirmation', async () => {
     const user = userEvent.setup();
     const { mock } = await renderAuth(
       <SignUpScreen onAuthenticated={jest.fn()} onBack={jest.fn()} onSignIn={jest.fn()} onVerificationRequired={jest.fn()} />,
     );
-    await user.type(screen.getByLabelText('שם'), 'עוז');
+    await user.type(screen.getByLabelText('שם (לא חובה)'), 'עוז');
     await user.type(screen.getByLabelText('אימייל'), 'person@example.com');
     await user.type(screen.getByLabelText('סיסמה'), 'password1');
     await user.type(screen.getByLabelText('אימות סיסמה'), 'password2');
@@ -187,7 +207,7 @@ describe('production Auth UI', () => {
     const { mock } = await renderAuth(
       <SignUpScreen onAuthenticated={jest.fn()} onBack={jest.fn()} onSignIn={jest.fn()} onVerificationRequired={onVerificationRequired} />,
     );
-    await user.type(screen.getByLabelText('שם'), 'עוז');
+    await user.type(screen.getByLabelText('שם (לא חובה)'), 'עוז');
     await user.type(screen.getByLabelText('אימייל'), 'person@example.com');
     await user.type(screen.getByLabelText('סיסמה'), 'password1');
     await user.type(screen.getByLabelText('אימות סיסמה'), 'password1');
@@ -200,14 +220,17 @@ describe('production Auth UI', () => {
   it('accepts an immediate signup session and verifies the Node API', async () => {
     const user = userEvent.setup();
     const mock = createAuthClient();
-    mock.auth.signUp.mockResolvedValueOnce({ data: { session: testSession, user: testUser }, error: null });
+    mock.auth.signUp.mockImplementationOnce(async () => {
+      mock.emit('SIGNED_IN', testSession);
+      return { data: { session: testSession, user: testUser }, error: null };
+    });
     const verifyIdentity = jest.fn().mockResolvedValue({ id: testUser.id });
     const onAuthenticated = jest.fn();
     await renderAuth(
       <SignUpScreen onAuthenticated={onAuthenticated} onBack={jest.fn()} onSignIn={jest.fn()} onVerificationRequired={jest.fn()} verifyIdentity={verifyIdentity} />,
       mock,
     );
-    await user.type(screen.getByLabelText('שם'), 'עוז');
+    await user.type(screen.getByLabelText('שם (לא חובה)'), 'עוז');
     await user.type(screen.getByLabelText('אימייל'), 'person@example.com');
     await user.type(screen.getByLabelText('סיסמה'), 'password1');
     await user.type(screen.getByLabelText('אימות סיסמה'), 'password1');
@@ -279,7 +302,19 @@ describe('production Auth UI', () => {
 });
 
 describe('Auth callbacks and gate', () => {
-  it('completes the real Web signup fragment callback, clears it, signs out, and reaches Sign In', async () => {
+  it('waits for the authenticated route guard before leaving a successful callback', async () => {
+    const mock = createAuthClient();
+    const confirmed = jest.fn();
+    mock.auth.setSession.mockResolvedValueOnce({ data: { session: testSession, user: testUser }, error: null });
+    await renderAuth(<AuthCallbackScreen client={mock.client} clearSensitiveParameters={jest.fn()} onConfirmed={confirmed} onExpired={jest.fn()} onRecovery={jest.fn()}
+      resolveUrl={async () => 'lifeos://auth/callback?intent=signup#access_token=synthetic&refresh_token=synthetic'} />, mock);
+    expect(mock.auth.setSession).toHaveBeenCalledTimes(1);
+    expect(confirmed).not.toHaveBeenCalled();
+    await act(async () => mock.emit('SIGNED_IN', testSession));
+    expect(confirmed).toHaveBeenCalledTimes(1);
+  });
+
+  it('completes a mocked Web signup callback, clears credentials and preserves the verified session', async () => {
     const callbackUrl = 'http://localhost:8081/auth/callback?intent=signup#access_token=mock-access&refresh_token=mock-refresh&expires_in=3600&token_type=bearer';
     const mock = createAuthClient();
     const clearSensitiveParameters = jest.fn();
@@ -297,19 +332,19 @@ describe('Auth callbacks and gate', () => {
       mock,
     );
 
-    expect(await screen.findByText('Sign In destination')).toBeTruthy();
+    expect(await screen.findByText('Confirmed destination')).toBeTruthy();
     expect(mock.auth.setSession).toHaveBeenCalledWith({
       access_token: 'mock-access',
       refresh_token: 'mock-refresh',
     });
-    expect(mock.auth.signOut).toHaveBeenCalledTimes(1);
+    expect(mock.auth.signOut).not.toHaveBeenCalled();
     expect(clearSensitiveParameters).toHaveBeenCalledWith(callbackUrl);
     expect(screen.queryByText('מאמת את הקישור…')).toBeNull();
     expect(screen.queryByText('mock-access')).toBeNull();
     expect(screen.queryByText('mock-refresh')).toBeNull();
   });
 
-  it('establishes a real Web recovery fragment session and reaches Reset Password without signing out', async () => {
+  it('establishes a mocked Web recovery fragment session and reaches Reset Password without signing out', async () => {
     const callbackUrl = 'http://localhost:8081/auth/callback?intent=recovery#access_token=mock-access&refresh_token=mock-refresh&type=recovery';
     const mock = createAuthClient();
     const clearSensitiveParameters = jest.fn();

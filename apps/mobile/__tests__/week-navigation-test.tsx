@@ -4,6 +4,7 @@ import { notifyManager } from '@tanstack/react-query';
 import * as commitmentApi from '@/features/commitments/commitment.api';
 import type { Commitment } from '@/features/commitments/commitment.types';
 import * as planningApi from '@/features/planning/planning.api';
+import * as flowApi from '@/features/planning/daily-flow.api';
 import * as settingsApi from '@/features/settings/settings.api';
 import * as taskApi from '@/features/tasks/task.api';
 import type { Task } from '@/features/tasks/task.types';
@@ -20,6 +21,9 @@ jest.mock('@/features/tasks/task.api', () => ({ listTasks: jest.fn(), createTask
 jest.mock('@/features/commitments/commitment.api', () => ({ listCommitments: jest.fn(), createCommitment: jest.fn(), updateCommitment: jest.fn(), deleteCommitment: jest.fn() }));
 jest.mock('@/features/planning/planning.api', () => ({ getWeeklyFocuses: jest.fn(), replaceWeeklyFocuses: jest.fn() }));
 jest.mock('@/features/settings/settings.api', () => ({ getSettings: jest.fn(), putSettings: jest.fn() }));
+jest.mock('@/features/planning/daily-flow.api', () => ({ ...jest.requireActual('@/features/planning/daily-flow.api'),
+  getDailyFlow: jest.fn(async () => ({ plan: null, tasks: [], snapshot: 'a'.repeat(32), today: '2026-12-31', timezone: 'UTC' })),
+  getWeekDays: jest.fn(async () => ({ days: [], tasks: [] })), saveDailyFlow: jest.fn() }));
 
 const stamp = '2026-12-31T10:00:00Z';
 function task(id: string, extra: Partial<Task> = {}): Task {
@@ -62,16 +66,28 @@ beforeEach(() => {
 });
 afterEach(() => jest.useRealTimers());
 
+it('reads approved daily membership/order and completed counts from the shared weekly contract', async () => {
+  tasks = [task('excluded', { plannedDate: '2026-12-31' })];
+  const approvedTasks = [task('selected', { plannedDate: null }), task('completed-selection', { plannedDate: null, status: 'completed' })];
+  jest.mocked(flowApi.getWeekDays).mockResolvedValueOnce({ days: [{ id: 'p', date: '2026-12-31', approved: true, revision: 1,
+    ids: ['selected', 'completed-selection'], source: 'weekly', proposal: null, summary: null }], tasks: approvedTasks });
+  await mount();
+  await screen.findByText('selected · 0:45 משוער');
+  expect(screen.queryByText('excluded · 0:45 משוער')).toBeNull();
+  await press('פתח יום 2026-12-31');
+  expect(await screen.findByText('completed-selection')).toBeTruthy();
+});
+
 it('changes every server query and all seven dates for previous/next/current week without fixtures', async () => {
   tasks = [task('current'), task('future', { plannedDate: '2027-01-04' })];
   await mount(); await screen.findByText('current · 0:45 משוער');
   expect(row('2026-12-31').getByText('היום')).toBeTruthy();
   await press('שבוע הבא');
   await screen.findByText('future · 0:45 משוער');
-  expect(taskApi.listTasks).toHaveBeenCalledWith({ plannedDateFrom: '2027-01-03', plannedDateTo: '2027-01-09' });
-  expect(taskApi.listTasks).toHaveBeenCalledWith({ weekStart: '2027-01-03' });
-  expect(commitmentApi.listCommitments).toHaveBeenCalledWith({ dateFrom: '2027-01-03', dateTo: '2027-01-09' });
-  expect(planningApi.getWeeklyFocuses).toHaveBeenCalledWith('2027-01-03');
+  expect(taskApi.listTasks).toHaveBeenCalledWith({ plannedDateFrom: '2027-01-03', plannedDateTo: '2027-01-09' }, 'current-session');
+  expect(taskApi.listTasks).toHaveBeenCalledWith({ weekStart: '2027-01-03' }, 'current-session');
+  expect(commitmentApi.listCommitments).toHaveBeenCalledWith({ dateFrom: '2027-01-03', dateTo: '2027-01-09' }, 'current-session');
+  expect(planningApi.getWeeklyFocuses).toHaveBeenCalledWith('2027-01-03', 'current-session');
   expect(screen.getByLabelText('טווח השבוע המוצג').props.children).toContain('2027');
   expect(screen.queryByLabelText('פתח יום 2026-12-31')).toBeNull();
   expect(screen.queryByText('current · 0:45 משוער')).toBeNull();
@@ -88,8 +104,8 @@ it('uses Monday boundaries after settings hydration and retains them while brows
   jest.mocked(settingsApi.getSettings).mockResolvedValue({ persisted: true, timezone: 'Asia/Jerusalem', weekStartDay: 1, defaultDailyCapacityMinutes: 360 });
   await mount(); await screen.findByLabelText('פתח יום 2026-12-28');
   await press('שבוע הבא'); await screen.findByLabelText('פתח יום 2027-01-04');
-  expect(taskApi.listTasks).toHaveBeenLastCalledWith({ weekStart: '2027-01-04' });
-  expect(commitmentApi.listCommitments).toHaveBeenLastCalledWith({ dateFrom: '2027-01-04', dateTo: '2027-01-10' });
+  expect(taskApi.listTasks).toHaveBeenLastCalledWith({ weekStart: '2027-01-04' }, 'current-session');
+  expect(commitmentApi.listCommitments).toHaveBeenLastCalledWith({ dateFrom: '2027-01-04', dateTo: '2027-01-10' }, 'current-session');
 });
 
 it('uses the account timezone for Today near a UTC date boundary', async () => {
@@ -140,7 +156,7 @@ it('navigates days across year/month/week boundaries, retains week on return, an
   await mount(); await open();
   await press('יום הבא'); expect(screen.getByLabelText('התאריך המוצג').props.children).toContain('2027');
   await press('יום הבא'); await press('יום הבא');
-  await waitFor(() => expect(taskApi.listTasks).toHaveBeenCalledWith({ plannedDateFrom: '2027-01-03', plannedDateTo: '2027-01-09' }));
+  await waitFor(() => expect(taskApi.listTasks).toHaveBeenCalledWith({ plannedDateFrom: '2027-01-03', plannedDateTo: '2027-01-09' }, 'current-session'));
   await press('חזרה לשבוע'); await screen.findByLabelText('פתח יום 2027-01-03');
   await open('2027-01-03'); await press('יום קודם');
   await waitFor(() => expect(screen.getByLabelText('התאריך המוצג').props.children).toContain('2 בינואר 2027'));

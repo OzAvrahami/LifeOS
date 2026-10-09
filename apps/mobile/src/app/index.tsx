@@ -2,6 +2,7 @@ import { Href, useLocalSearchParams, useRouter } from 'expo-router';
 
 import { TodayScreen } from '@/features/today/today-screen';
 import { isTodayDemoState } from '@/features/today/today.types';
+import { V2TodayScreen } from '@/features/today/v2-today-screen';
 
 export default function IndexRoute() {
   const router = useRouter();
@@ -15,6 +16,10 @@ export default function IndexRoute() {
   const developmentPreview = __DEV__ && (requestedPreview === '1' || requestedState !== undefined);
   const previewState = __DEV__ && isTodayDemoState(requestedState) ? requestedState : 'normal';
   const movedTaskId = Array.isArray(inboxTaskId) ? inboxTaskId[0] : inboxTaskId;
+
+  if (!requestedState || !developmentPreview) return <V2TodayScreen
+    preview={developmentPreview} onNavigateInbox={() => router.navigate('/inbox')}
+    onNavigateMore={() => router.navigate('/more')} onNavigateWeek={() => router.navigate('/week')} />;
 
   return (
     <TodayScreen

@@ -89,7 +89,7 @@ it('notification details resolve the latest date and reuse the editor; missing/d
   jest.mocked(commitmentApi.listCommitments).mockResolvedValue([{ ...item, date: '2099-02-03' }]);
   const view = await render(<TestProviders><CommitmentDetailScreen id={item.id} onBack={jest.fn()} /></TestProviders>);
   await screen.findByLabelText('עורך התחייבות');
-  expect(commitmentApi.listCommitments).toHaveBeenCalledWith({ id: item.id });
+  expect(commitmentApi.listCommitments).toHaveBeenCalledWith({ id: item.id }, 'current-session');
   expect(screen.getByLabelText('תאריך')).toHaveDisplayValue('2099-02-03');
   await view.unmount(); jest.mocked(commitmentApi.listCommitments).mockResolvedValue([]);
   await render(<TestProviders><CommitmentDetailScreen id={item.id} onBack={jest.fn()} /></TestProviders>);

@@ -16,7 +16,9 @@ import {
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
-import { colors, radius, typography } from '@/theme/tokens';
+import { radius, typography } from '@/theme/tokens';
+import { useTheme, type Palette } from '@/theme/theme-provider';
+import { V2Brand } from '@/components/v2';
 
 export function AuthScreen({
   backLabel = 'חזרה',
@@ -28,6 +30,8 @@ export function AuthScreen({
   contentStyle?: StyleProp<ViewStyle>;
   onBack?: () => void;
 }>) {
+  const { colors } = useTheme();
+  const styles = createStyles(colors);
   return (
     <SafeAreaView edges={['top', 'bottom']} style={styles.safeArea}>
       <KeyboardAvoidingView
@@ -51,6 +55,7 @@ export function AuthScreen({
               <Ionicons color={colors.textMuted} name="chevron-forward" size={19} />
             </Pressable>
           ) : null}
+          <View style={{ paddingVertical: 24 }}><V2Brand /></View>
           {children}
         </ScrollView>
       </KeyboardAvoidingView>
@@ -59,6 +64,8 @@ export function AuthScreen({
 }
 
 export function AuthHeading({ subtitle, title }: { subtitle: string; title: string }) {
+  const { colors } = useTheme();
+  const styles = createStyles(colors);
   return (
     <View style={styles.heading}>
       <Text accessibilityRole="header" selectable style={styles.headingTitle}>{title}</Text>
@@ -73,6 +80,8 @@ export function AuthTextField({
   style,
   ...props
 }: TextInputProps & { error?: string; label: string }) {
+  const { colors } = useTheme();
+  const styles = createStyles(colors);
   return (
     <View style={styles.fieldGroup}>
       <Text style={styles.fieldLabel}>{label}</Text>
@@ -80,7 +89,7 @@ export function AuthTextField({
         accessibilityLabel={label}
         placeholderTextColor={colors.textFaint}
         selectionColor={colors.accent}
-        style={[styles.input, error ? styles.inputError : null, style]}
+        style={[styles.input, props.keyboardType === 'email-address' ? { textAlign: 'left', writingDirection: 'ltr' } : null, error ? styles.inputError : null, style]}
         {...props}
       />
       {error ? <InlineError message={error} /> : null}
@@ -93,6 +102,8 @@ export function PasswordField({
   label,
   ...props
 }: TextInputProps & { error?: string; label: string }) {
+  const { colors } = useTheme();
+  const styles = createStyles(colors);
   const [visible, setVisible] = useState(false);
 
   return (
@@ -104,7 +115,7 @@ export function PasswordField({
           placeholderTextColor={colors.textFaint}
           secureTextEntry={!visible}
           selectionColor={colors.accent}
-          style={styles.passwordTextInput}
+          style={[styles.passwordTextInput, { textAlign: 'left', writingDirection: 'ltr' }]}
           {...props}
         />
         <Pressable
@@ -134,16 +145,20 @@ export function AuthPrimaryButton({
   onPress: () => void;
   title: string;
 }) {
+  const { colors } = useTheme();
+  const styles = createStyles(colors);
   const unavailable = disabled || isLoading;
   return (
     <Pressable
       accessibilityRole="button"
+      accessibilityLabel={title}
+      accessibilityState={{ disabled: !!unavailable, busy: !!isLoading }}
       disabled={unavailable}
       onPress={onPress}
-      style={[styles.primaryButton, unavailable ? styles.primaryButtonDisabled : null]}
+      style={({ pressed }) => [styles.primaryButton, unavailable ? styles.primaryButtonDisabled : null, { opacity: pressed ? 0.7 : 1 }]}
     >
-      {isLoading ? <ActivityIndicator color={colors.white} size="small" /> : null}
-      <Text style={[styles.primaryButtonText, unavailable && !isLoading ? styles.disabledButtonText : null]}>
+      {isLoading ? <ActivityIndicator color={colors.textMuted} size="small" /> : null}
+      <Text style={[styles.primaryButtonText, unavailable ? styles.disabledButtonText : null]}>
         {isLoading ? loadingLabel ?? title : title}
       </Text>
     </Pressable>
@@ -159,12 +174,14 @@ export function AuthSecondaryButton({
   onPress: () => void;
   title: string;
 }) {
+  const { colors } = useTheme();
+  const styles = createStyles(colors);
   return (
     <Pressable
       accessibilityRole="button"
       disabled={disabled}
       onPress={onPress}
-      style={[styles.secondaryButton, disabled ? styles.secondaryButtonDisabled : null]}
+      style={({ pressed }) => [styles.secondaryButton, disabled ? styles.secondaryButtonDisabled : null, { opacity: pressed ? 0.7 : 1 }]}
     >
       <Text style={[styles.secondaryButtonText, disabled ? styles.disabledButtonText : null]}>{title}</Text>
     </Pressable>
@@ -172,6 +189,8 @@ export function AuthSecondaryButton({
 }
 
 export function AuthLink({ onPress, title }: { onPress: () => void; title: string }) {
+  const { colors } = useTheme();
+  const styles = createStyles(colors);
   return (
     <Pressable accessibilityRole="button" hitSlop={6} onPress={onPress}>
       <Text style={styles.link}>{title}</Text>
@@ -180,6 +199,8 @@ export function AuthLink({ onPress, title }: { onPress: () => void; title: strin
 }
 
 export function AuthFormError({ message }: { message: string }) {
+  const { colors } = useTheme();
+  const styles = createStyles(colors);
   return (
     <View accessibilityRole="alert" style={styles.formError}>
       <View style={styles.errorBadge}><Text style={styles.errorBadgeText}>!</Text></View>
@@ -189,6 +210,8 @@ export function AuthFormError({ message }: { message: string }) {
 }
 
 export function InlineError({ message }: { message: string }) {
+  const { colors } = useTheme();
+  const styles = createStyles(colors);
   return (
     <View accessibilityRole="alert" style={styles.inlineError}>
       <View style={styles.inlineErrorBadge}><Text style={styles.inlineErrorBadgeText}>!</Text></View>
@@ -208,6 +231,8 @@ export function AuthStateView({
   subtitle: ReactNode;
   title: string;
 }) {
+  const { colors } = useTheme();
+  const styles = createStyles(colors);
   return (
     <View style={styles.statePage}>
       <View style={styles.stateCenter}>
@@ -229,6 +254,8 @@ export function AuthStateIcon({
   name: React.ComponentProps<typeof Ionicons>['name'];
   tone?: 'accent' | 'danger' | 'solid';
 }) {
+  const { colors } = useTheme();
+  const styles = createStyles(colors);
   const solid = tone === 'solid';
   return (
     <View style={[
@@ -236,12 +263,12 @@ export function AuthStateIcon({
       tone === 'danger' ? styles.stateIconDanger : null,
       solid ? styles.stateIconSolid : null,
     ]}>
-      <Ionicons color={solid ? colors.white : tone === 'danger' ? '#C77A5A' : colors.accent} name={name} size={48} />
+      <Ionicons color={solid ? colors.onAccent : tone === 'danger' ? colors.warningText : colors.accent} name={name} size={48} />
     </View>
   );
 }
 
-const styles = StyleSheet.create({
+const createStyles = (colors: Palette) => StyleSheet.create({
   flex: { flex: 1 },
   safeArea: { backgroundColor: colors.background, flex: 1 },
   screenContent: {
@@ -297,7 +324,7 @@ const styles = StyleSheet.create({
     color: colors.text,
     fontFamily: typography.family.regular,
     fontSize: 16,
-    height: 54,
+    minHeight: 54,
     paddingHorizontal: 16,
     textAlign: 'right',
     writingDirection: 'rtl',
@@ -310,7 +337,7 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     flexDirection: 'row-reverse',
     gap: 10,
-    height: 54,
+    minHeight: 54,
     paddingHorizontal: 16,
   },
   passwordTextInput: {
@@ -323,19 +350,19 @@ const styles = StyleSheet.create({
     textAlign: 'right',
     writingDirection: 'rtl',
   },
-  inputError: { backgroundColor: '#FBF3EF', borderColor: '#DDA588', borderWidth: 1.5 },
+  inputError: { backgroundColor: colors.warningSurface, borderColor: colors.warningText, borderWidth: 1.5 },
   inlineError: { alignItems: 'center', flexDirection: 'row-reverse', gap: 6 },
   inlineErrorBadge: {
     alignItems: 'center',
-    backgroundColor: '#C77A5A',
+    backgroundColor: colors.warningText,
     borderRadius: 8,
     height: 16,
     justifyContent: 'center',
     width: 16,
   },
-  inlineErrorBadgeText: { color: colors.white, fontFamily: typography.family.extraBold, fontSize: 11 },
+  inlineErrorBadgeText: { color: colors.onAccent, fontFamily: typography.family.extraBold, fontSize: 11 },
   inlineErrorText: {
-    color: '#B5623C',
+    color: colors.warningText,
     flex: 1,
     fontFamily: typography.family.regular,
     fontSize: 13,
@@ -344,8 +371,8 @@ const styles = StyleSheet.create({
   },
   formError: {
     alignItems: 'center',
-    backgroundColor: '#FAF0EB',
-    borderColor: '#E7C6B4',
+    backgroundColor: colors.warningSurface,
+    borderColor: colors.warningText,
     borderRadius: radius.md,
     borderWidth: 1,
     flexDirection: 'row-reverse',
@@ -355,15 +382,15 @@ const styles = StyleSheet.create({
   },
   errorBadge: {
     alignItems: 'center',
-    backgroundColor: '#C77A5A',
+    backgroundColor: colors.warningText,
     borderRadius: 10,
     height: 20,
     justifyContent: 'center',
     width: 20,
   },
-  errorBadgeText: { color: colors.white, fontFamily: typography.family.extraBold, fontSize: 13 },
+  errorBadgeText: { color: colors.onAccent, fontFamily: typography.family.extraBold, fontSize: 13 },
   formErrorText: {
-    color: '#A8502F',
+    color: colors.warningText,
     flex: 1,
     fontFamily: typography.family.semibold,
     fontSize: 14,
@@ -376,23 +403,23 @@ const styles = StyleSheet.create({
     borderRadius: 15,
     flexDirection: 'row-reverse',
     gap: 10,
-    height: 54,
+    minHeight: 54,
     justifyContent: 'center',
     paddingHorizontal: 16,
   },
-  primaryButtonDisabled: { backgroundColor: '#E3DDD0' },
-  primaryButtonText: { color: colors.white, fontFamily: typography.family.bold, fontSize: 17 },
-  disabledButtonText: { color: '#B0AA9C' },
+  primaryButtonDisabled: { backgroundColor: colors.surfaceMuted },
+  primaryButtonText: { color: colors.onAccent, fontFamily: typography.family.bold, fontSize: 17 },
+  disabledButtonText: { color: colors.textMuted },
   secondaryButton: {
     alignItems: 'center',
-    borderColor: '#DCD6C9',
+    borderColor: colors.border,
     borderRadius: 15,
     borderWidth: 1.5,
-    height: 54,
+    minHeight: 54,
     justifyContent: 'center',
     paddingHorizontal: 16,
   },
-  secondaryButtonDisabled: { backgroundColor: '#EFEBE1' },
+  secondaryButtonDisabled: { backgroundColor: colors.surfaceMuted },
   secondaryButtonText: { color: colors.textSoft, fontFamily: typography.family.semibold, fontSize: 17 },
   link: {
     color: colors.accent,
@@ -401,12 +428,12 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     writingDirection: 'rtl',
   },
-  statePage: { flex: 1, minHeight: 680 },
-  stateCenter: { alignItems: 'center', flex: 1, gap: 16, justifyContent: 'center' },
+  statePage: { flex: 1, minHeight: 380, gap: 28 },
+  stateCenter: { alignItems: 'stretch', gap: 16, justifyContent: 'center' },
   stateTitle: { color: colors.text, fontFamily: typography.family.extraBold, fontSize: 26, textAlign: 'center', writingDirection: 'rtl' },
   stateSubtitle: { color: colors.textMuted, fontFamily: typography.family.regular, fontSize: 16, lineHeight: 26, maxWidth: 300, textAlign: 'center', writingDirection: 'rtl' },
   stateActions: { gap: 12 },
-  stateIcon: { alignItems: 'center', backgroundColor: colors.accentWeak, borderRadius: 52, height: 100, justifyContent: 'center', width: 100 },
-  stateIconDanger: { backgroundColor: '#F4E9E2' },
+  stateIcon: { alignItems: 'center', backgroundColor: colors.accentWeak, borderRadius: 24, height: 72, justifyContent: 'center', width: 72, alignSelf: 'flex-end' },
+  stateIconDanger: { backgroundColor: colors.warningSurface },
   stateIconSolid: { backgroundColor: colors.accent, height: 104, width: 104 },
 });

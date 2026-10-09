@@ -17,7 +17,7 @@ jest.mock('@react-native-community/datetimepicker', () => {
 });
 jest.mock('@/features/tasks/task.api', () => ({ createTask: jest.fn(), listTasks: jest.fn(), updateTask: jest.fn(), cancelTask: jest.fn() }));
 jest.mock('@/features/settings/settings.queries', () => ({
-  useEffectiveSettings: () => ({ effective: { timezone: 'America/Los_Angeles', weekStartDay: 1 } }),
+  useEffectiveSettings: () => ({ effective: { timezone: 'America/Los_Angeles', weekStartDay: 1 }, query: { data: { timezone: 'America/Los_Angeles', weekStartDay: 1 } } }),
 }));
 
 const create = jest.mocked(taskApi.createTask);

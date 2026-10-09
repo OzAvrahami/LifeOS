@@ -6,8 +6,8 @@ export default function AuthCallbackRoute() {
   const router = useRouter();
   return (
     <AuthCallbackScreen
-      onConfirmed={() => router.replace('/sign-in' as Href)}
-      onExpired={() => router.replace({ pathname: '/reset-password', params: { invalid: '1' } } as unknown as Href)}
+      onConfirmed={() => router.replace('/auth/confirmed' as Href)}
+      onExpired={() => router.replace('/auth/invalid' as Href)}
       onRecovery={() => router.replace('/reset-password' as Href)}
     />
   );

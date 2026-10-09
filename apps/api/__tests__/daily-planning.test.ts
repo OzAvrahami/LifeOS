@@ -20,10 +20,11 @@ describe('Daily Planning HTTP boundary', () => {
     save: async (date, input) => { calls.push({ userId, date, input }); throw new PlanningApiError(409, 'Changed'); },
   })) });
   it('authenticates every lifecycle/candidate route before reading or writing', async () => {
-    for (const path of ['/daily-plans/2026-10-07/planning', '/daily-plans/2026-10-07/tasks']) {
+    for (const path of ['/daily-plans/2026-10-07/planning', '/daily-plans/2026-10-07/tasks', '/daily-plans/2026-10-07/flow', '/week-plans/2026-10-04/days']) {
       await request(app).get(path).expect(401);
     }
     await request(app).put('/daily-plans/2026-10-07/planning').send({ action: 'start', revision: 0, operationId }).expect(401);
+    await request(app).put('/daily-plans/2026-10-07/flow').send({ action: 'propose', revision: 0, operationId }).expect(401);
   });
   it('binds explicit dates and verified caller identity and exposes conflicts', async () => {
     const response = await request(app).get('/daily-plans/2026-10-07/planning').set('Authorization', 'Bearer valid').expect(200);

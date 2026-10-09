@@ -155,7 +155,7 @@ it('opens Focus-inspired capture blank in Inbox, cancels without writes and crea
   await fireEvent.press(screen.getByText('שמירה')); await screen.findByLabelText('בחר לתכנון: Saved');
   expect(apiRequest).toHaveBeenCalledWith('/tasks', expect.objectContaining({ expectedUserId: 'A', body: JSON.stringify({ title: 'Saved', planning: { type: 'inbox' } }) }));
   expect(stored.get(key('A', date))?.selectedTaskIds).toEqual([]);
-  expect(planningApi.getWeeklyFocuses).toHaveBeenCalledWith('2026-10-05');
+  expect(planningApi.getWeeklyFocuses).toHaveBeenCalledWith('2026-10-05', 'A');
 });
 
 it('blocks progress on partial load failure and retries the explicit date, without treating it as empty', async () => {

@@ -100,7 +100,7 @@ describe('canonical preview-fixture Task flow', () => {
     expect(capturedTask.plannedDate).toBeNull();
     expect(capturedTask.weekPlanId).toBeNull();
 
-    await user.press(within(screen.getByLabelText('ניווט ראשי')).getByText('Inbox'));
+    await user.press(within(screen.getByLabelText('ניווט ראשי')).getByText('משימות'));
     expect(screen.getByText(title)).toBeTruthy();
 
     await user.press(screen.getByLabelText(`פתח פעולות עבור ${title}`));
@@ -114,7 +114,7 @@ describe('canonical preview-fixture Task flow', () => {
     expect(getTask(title).weekPlanId).not.toBeNull();
 
     await user.press(screen.getByLabelText('סגור פעולות Inbox'));
-    await user.press(within(screen.getByLabelText('ניווט ראשי')).getByText('שבוע'));
+    await user.press(within(screen.getByLabelText('ניווט ראשי')).getByText('השבוע'));
     expect(screen.getByText(title)).toBeTruthy();
 
     await user.press(screen.getByLabelText(`בחר יום עבור ${title}`));
@@ -158,7 +158,7 @@ describe('canonical preview-fixture Task flow', () => {
       weekPlanId: null,
     }));
 
-    await user.press(within(screen.getByLabelText('ניווט ראשי')).getByText('Inbox'));
+    await user.press(within(screen.getByLabelText('ניווט ראשי')).getByText('משימות'));
     expect(screen.queryByLabelText(`פריט Inbox: ${title}`)).toBeNull();
   });
 
@@ -176,12 +176,12 @@ describe('canonical preview-fixture Task flow', () => {
     expect(weekTask.weekPlanId).not.toBeNull();
     expect(weekTask.plannedDate).toBeNull();
 
-    await user.press(within(screen.getByLabelText('ניווט ראשי')).getByText('שבוע'));
+    await user.press(within(screen.getByLabelText('ניווט ראשי')).getByText('השבוע'));
     expect(screen.getByText('משימה ישירה לשבוע')).toBeTruthy();
     expect(getTask('משימה ישירה להיום').id).toBe(todayTask.id);
 
-    await user.press(within(screen.getByLabelText('ניווט ראשי')).getByText('Inbox'));
-    await user.press(within(screen.getByLabelText('ניווט ראשי')).getByText('שבוע'));
+    await user.press(within(screen.getByLabelText('ניווט ראשי')).getByText('משימות'));
+    await user.press(within(screen.getByLabelText('ניווט ראשי')).getByText('השבוע'));
     expect(getTask('משימה ישירה לשבוע').id).toBe(weekTask.id);
     expect(screen.getByText('משימה ישירה לשבוע')).toBeTruthy();
   });

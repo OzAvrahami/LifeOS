@@ -5,8 +5,12 @@ import { planningStyles as styles } from '@/features/week/weekly-planning.styles
 import type { DailyPlanningPlan } from './daily-planning.api';
 import { useDailyPlanning } from './daily-planning.queries';
 import { useDailyPlanningCommand } from './daily-planning-command';
+import { useTheme } from '@/theme/theme-provider';
+import { V2Button } from '@/components/v2';
 
 export function DailyPlanningEntry({ date, onOpen }: { date: string; onOpen: () => void }) {
+  const { colors } = useTheme();
+  const themed = { ...styles, card: [styles.card, { backgroundColor: colors.accentWeak, borderColor: colors.border }], heading: [styles.heading, { color: colors.text }], text: [styles.text, { color: colors.textMuted }], error: [styles.error, { color: colors.warningText }] };
   const { query, save } = useDailyPlanning(date);
   const command = useDailyPlanningCommand(save);
   const open = async () => {
@@ -14,15 +18,15 @@ export function DailyPlanningEntry({ date, onOpen }: { date: string; onOpen: () 
     if (query.data && query.data.status !== 'not_started') { onOpen(); return; }
     if (await command.run({ action: 'start', revision: query.data?.revision ?? 0 })) onOpen();
   };
-  return <View accessibilityLabel="מצב התכנון היומי" style={styles.card}>
-    <Text style={styles.heading}>התכנון שלי להיום</Text>
+  return <View accessibilityLabel="מצב התכנון היומי" style={themed.card}>
+    <Text style={themed.heading}>התכנון שלי להיום</Text>
     {query.data === undefined ? <>
-      <Text style={query.isError ? styles.error : styles.text}>{query.isError ? 'לא הצלחנו לטעון את התכנון היומי. ייתכן שנדרש עדכון שרת.' : 'טוען את התכנון היומי…'}</Text>
+      <Text style={query.isError ? themed.error : themed.text}>{query.isError ? 'לא הצלחנו לטעון את התכנון היומי. ייתכן שנדרש עדכון שרת.' : 'טוען את התכנון היומי…'}</Text>
       {query.isError ? <DayAction label="נסה שוב תכנון יומי" onPress={() => { void query.refetch(); }} /> : null}
     </> : <>
-      <Text style={styles.text}>{query.data?.status === 'completed' ? 'התכנון להיום הושלם. אפשר לסקור אותו ולבחור לערוך.'
+      <Text style={themed.text}>{query.data?.status === 'completed' ? 'התכנון להיום הושלם. אפשר לסקור אותו ולבחור לערוך.'
         : query.data?.status === 'in_progress' ? 'התכנון בתהליך · ההתקדמות והבחירות שמורות.' : 'מה תרצה לבחור ליום הזה?'}</Text>
-      <DayAction label={query.data?.status === 'completed' ? 'סקירת התכנון להיום' : query.data?.status === 'in_progress' ? 'המשך התכנון' : 'תכנון היום'}
+      <V2Button title={query.data?.status === 'completed' ? 'סקירת התכנון להיום' : query.data?.status === 'in_progress' ? 'המשך התכנון' : 'תכנון היום'}
         disabled={command.pending || !!command.failed || query.isError} onPress={() => { void open(); }} />
       {query.isError ? <DayAction label="רענון התכנון היומי" onPress={() => { void query.refetch(); }} /> : null}
     </>}

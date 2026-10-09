@@ -7,8 +7,8 @@ import {
   UpdateTaskInput,
 } from './task.types';
 
-async function taskRequest<T>(path: string, options: RequestInit) {
-  return apiRequest<T>(path, { ...options, auth: 'required' });
+async function taskRequest<T>(path: string, options: RequestInit, expectedUserId?: string) {
+  return apiRequest<T>(path, { ...options, auth: 'required', ...(expectedUserId ? { expectedUserId } : {}) });
 }
 
 function taskQuery(filters: TaskListFilters) {
@@ -25,32 +25,32 @@ function taskQuery(filters: TaskListFilters) {
   return value ? `/tasks?${value}` : '/tasks';
 }
 
-export async function listTasks(filters: TaskListFilters = {}) {
-  const response = await taskRequest<{ tasks: Task[] }>(taskQuery(filters), {});
+export async function listTasks(filters: TaskListFilters = {}, expectedUserId?: string) {
+  const response = await taskRequest<{ tasks: Task[] }>(taskQuery(filters), {}, expectedUserId);
   return response.tasks;
 }
 
-export async function createTask(input: CreateTaskInput) {
+export async function createTask(input: CreateTaskInput, expectedUserId?: string) {
   const response = await taskRequest<{ task: Task }>('/tasks', {
     body: JSON.stringify(input),
     headers: { 'Content-Type': 'application/json' },
     method: 'POST',
-  });
+  }, expectedUserId);
   return response.task;
 }
 
-export async function updateTask({ id, input }: { id: string; input: UpdateTaskInput }) {
+export async function updateTask({ id, input }: { id: string; input: UpdateTaskInput }, expectedUserId?: string) {
   const response = await taskRequest<{ task: Task }>(`/tasks/${id}`, {
     body: JSON.stringify(input),
     headers: { 'Content-Type': 'application/json' },
     method: 'PATCH',
-  });
+  }, expectedUserId);
   return response.task;
 }
 
-export async function cancelTask(id: string) {
+export async function cancelTask(id: string, expectedUserId?: string) {
   const response = await taskRequest<{ task: Task }>(`/tasks/${id}`, {
     method: 'DELETE',
-  });
+  }, expectedUserId);
   return response.task;
 }

@@ -129,7 +129,7 @@ describe('<WeekScreen />', () => {
     await renderWeek('normal', onNavigateToday);
 
     const navigation = screen.getByLabelText('ניווט ראשי');
-    expect(within(navigation).getByText('שבוע').parent?.props.accessibilityState).toEqual({ selected: true });
+    expect(within(navigation).getByText('השבוע').parent?.props.accessibilityState).toEqual({ selected: true });
     await user.press(within(navigation).getByText('היום'));
     expect(onNavigateToday).toHaveBeenCalledTimes(1);
   });
@@ -143,7 +143,7 @@ describe('<WeekScreen />', () => {
       </TestProviders>,
     );
 
-    await user.press(within(screen.getByLabelText('ניווט ראשי')).getByText('שבוע'));
+    await user.press(within(screen.getByLabelText('ניווט ראשי')).getByText('השבוע'));
     expect(onNavigateWeek).toHaveBeenCalledTimes(1);
   });
 
@@ -152,7 +152,7 @@ describe('<WeekScreen />', () => {
     const user = userEvent.setup();
     await renderWeek('normal', undefined, onNavigateInbox);
 
-    await user.press(within(screen.getByLabelText('ניווט ראשי')).getByText('Inbox'));
+    await user.press(within(screen.getByLabelText('ניווט ראשי')).getByText('משימות'));
     expect(onNavigateInbox).toHaveBeenCalledTimes(1);
   });
 

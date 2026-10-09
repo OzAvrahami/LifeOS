@@ -25,6 +25,9 @@ import { TaskDetails } from '@/features/tasks/task-details';
 import { UnscheduledWeekTasks, WeeklyFocusCard, WeekSectionLabel } from './week.components';
 import { WeeklyFocusEditor } from './weekly-focus-editor';
 import { WeeklyPlanningEntry } from './weekly-planning-entry';
+import { DailyFlowCard } from '@/features/planning/daily-flow-card';
+import { approvedDayTasks } from '@/features/planning/daily-flow.api';
+import { useWeekDays } from '@/features/planning/daily-flow.queries';
 
 export function ServerWeekScreen({ onNavigateInbox, onNavigateMore, onNavigateToday }: WeekScreenProps) {
   const { effective: settings, query: settingsQuery } = useEffectiveSettings();
@@ -37,6 +40,7 @@ export function ServerWeekScreen({ onNavigateInbox, onNavigateMore, onNavigateTo
   const dateKeys = weekDateKeys(weekStart);
   const weekEnd = dateKeys[6]!;
   const weekQuery = useTasks({ plannedDateFrom: weekStart, plannedDateTo: weekEnd });
+  const daysQuery = useWeekDays(weekStart, settingsQuery.isSuccess);
   const weekOnlyQuery = useTasks({ weekStart });
   const commitmentQuery = useCommitments({ dateFrom: weekStart, dateTo: weekEnd });
   const focusQuery = useWeeklyFocuses(weekStart);
@@ -54,11 +58,19 @@ export function ServerWeekScreen({ onNavigateInbox, onNavigateMore, onNavigateTo
   const [operationError, setOperationError] = useState(false);
   const tasks = weekQuery.data ?? [];
   const activeDays = tasksByPlannedDate(tasks, dateKeys);
-  const completedFor = (date: string) => tasks.filter(task => task.plannedDate === date && task.status === 'completed');
+  const tasksFor = (date: string) => {
+    const plan = daysQuery.data?.days.find(day => day.date === date && day.approved);
+    return plan ? approvedDayTasks(plan, daysQuery.data!.tasks) : tasks.filter(task => task.plannedDate === date);
+  };
+  for (const date of dateKeys) {
+    const active = tasksFor(date).filter(task => ['open', 'in_progress'].includes(task.status));
+    activeDays.set(date, { tasks: active, plannedMinutes: active.reduce((sum, task) => sum + (task.estimatedMinutes ?? 0), 0) });
+  }
+  const completedFor = (date: string) => tasksFor(date).filter(task => task.status === 'completed');
   const commitmentsFor = (date: string) => (commitmentQuery.data ?? [])
     .filter(item => item.date === date)
     .sort((a, b) => a.startTime.localeCompare(b.startTime) || a.createdAt.localeCompare(b.createdAt) || a.id.localeCompare(b.id));
-  const selectedTask = [...tasks, ...(weekOnlyQuery.data ?? [])].find(task => task.id === taskId && task.status !== 'cancelled');
+  const selectedTask = [...(daysQuery.data?.tasks ?? []), ...tasks, ...(weekOnlyQuery.data ?? [])].find(task => task.id === taskId && task.status !== 'cancelled');
   const browseDate = (date: string) => { setAnchorDate(date); setTaskId(null); setOperationError(false); };
   const captureTask = async (title: string, placement: TaskCapturePlacement) => {
     await createTask.mutateAsync({ title, planning: placement.destination === 'day'
@@ -67,7 +79,7 @@ export function ServerWeekScreen({ onNavigateInbox, onNavigateMore, onNavigateTo
         : placement.destination === 'week' ? { type: 'week', weekStart: capture!.weekStart }
           : { type: 'inbox' } });
   };
-  const loading = settingsQuery.isPending || weekQuery.isPending || commitmentQuery.isPending;
+  const loading = settingsQuery.isPending || weekQuery.isPending || commitmentQuery.isPending || (daysQuery.data === undefined && !daysQuery.isError);
   const error = settingsQuery.isError || weekQuery.isError || commitmentQuery.isError;
   const notice = <TaskQueryNotice loading={loading || (!dayOpen && weekOnlyQuery.isPending)}
     error={error || operationError || (!dayOpen && (weekOnlyQuery.isError || focusQuery.isError))}
@@ -91,6 +103,8 @@ export function ServerWeekScreen({ onNavigateInbox, onNavigateMore, onNavigateTo
             onNext={() => browseDate(addDaysToDateKey(dayOpen ? selectedDate : weekStart, dayOpen ? 1 : 7))}
             onCurrent={() => { setAnchorDate(null); setTaskId(null); }} />
           {notice}
+          {daysQuery.isError ? <TaskQueryNotice error loading={false} onRetry={() => { void daysQuery.refetch(); }} /> : null}
+          {dayOpen && settingsQuery.isSuccess ? <DailyFlowCard date={selectedDate} source="weekly" onAllTasks={() => onNavigateInbox?.()} /> : null}
           {dayOpen ? (!loading && !error ? <WeekDayView active={activeDays.get(selectedDate)!} completed={completedFor(selectedDate)}
             commitments={commitmentsFor(selectedDate)} onTask={setTaskId}
             onCommitment={id => { const item = commitmentsFor(selectedDate).find(c => c.id === id); if (item) setCommitmentEditor({ date: selectedDate, item }); }}

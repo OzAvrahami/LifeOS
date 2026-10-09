@@ -1,3 +1,4 @@
+import { useTaskQueryScope } from '@/features/tasks/task-query-scope';
 import { Href, useLocalSearchParams, useRouter } from 'expo-router';
 
 import { WeekScreen } from '@/features/week/week-screen';
@@ -5,6 +6,7 @@ import { isWeekDemoState } from '@/features/week/week.types';
 
 export default function WeekRoute() {
   const router = useRouter();
+  const scope = useTaskQueryScope();
   const { preview, state } = useLocalSearchParams<{
     preview?: string | string[];
     state?: string | string[];
@@ -17,7 +19,7 @@ export default function WeekRoute() {
   return (
     <WeekScreen
       initialState={previewState}
-      key={previewState}
+      key={`${scope}:${previewState}`}
       onNavigateInbox={() => router.navigate('/inbox' as Href)}
       onNavigateMore={() => router.navigate('/more' as Href)}
       onNavigateToday={() => router.replace('/')}
