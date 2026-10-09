@@ -67,7 +67,7 @@ function parseTitle(value: unknown) {
 function parseNullableString(value: unknown, label: string): string | null {
   if (value === null) return null;
   if (typeof value !== 'string' || value.length > 10_000) invalid(`Invalid ${label}`);
-  return value;
+  return value.trim() ? value : null;
 }
 
 function parseEstimatedMinutes(value: unknown): number | null {

@@ -1,7 +1,8 @@
 import { Ionicons } from '@expo/vector-icons';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 
-import { colors, radius, spacing, typography } from '@/theme/tokens';
+import { radius, spacing, typography } from '@/theme/tokens';
+import { useTheme, type Palette } from '@/theme/theme-provider';
 
 export function WeekNavigation({ label, kind, current, onPrevious, onNext, onCurrent }: {
   label: string;
@@ -11,6 +12,8 @@ export function WeekNavigation({ label, kind, current, onPrevious, onNext, onCur
   onNext: () => void;
   onCurrent: () => void;
 }) {
+  const { colors } = useTheme();
+  const styles = createStyles(colors);
   const noun = kind === 'week' ? 'שבוע' : 'יום';
   const currentLabel = kind === 'week' ? 'השבוע הזה' : 'חזרה להיום';
   return (
@@ -33,7 +36,7 @@ export function WeekNavigation({ label, kind, current, onPrevious, onNext, onCur
     </View>
   );
 }
-const styles = StyleSheet.create({
+const createStyles = (colors: Palette) => StyleSheet.create({
   container: { gap: spacing.sm },
   title: { color: colors.text, fontFamily: typography.family.bold, fontSize: 22, textAlign: 'right', writingDirection: 'rtl' },
   controls: { flexDirection: 'row-reverse', flexWrap: 'wrap', gap: spacing.xs },

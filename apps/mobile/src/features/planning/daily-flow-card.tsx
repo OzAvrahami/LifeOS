@@ -1,9 +1,10 @@
-import { useRef, useState } from 'react';
+import { type ReactNode, useRef, useState } from 'react';
 import { Modal, Pressable, ScrollView, TextInput, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { V2Button, V2Card, V2Notice, V2Text } from '@/components/v2';
+import { V2Icon } from '@/components/v2-icon';
 import { useTheme } from '@/theme/theme-provider';
-import { spacing } from '@/theme/tokens';
+import { spacing, v2Layout, v2Typography } from '@/theme/tokens';
 import { ApiError } from '@/lib/api/client';
 import { approvedDayTasks, proposalReasonText, type FlowCommand } from './daily-flow.api';
 import { useDailyFlow } from './daily-flow.queries';
@@ -23,12 +24,13 @@ function ProposalCalendar({ date }: { date: string }) {
   </V2Card>;
 }
 
-type Props = { date: string; source?: 'daily' | 'weekly'; onAllTasks: () => void };
+type Props = { date: string; source?: 'daily' | 'weekly'; onAllTasks: () => void;
+  today?: boolean; onAddTask?: () => void; onOpenTask?: (id: string) => void; proposalCalendar?: ReactNode };
 export function DailyFlowCard(props: Props) {
   const flow = useDailyFlow(props.date);
-  return <FlowCard key={`${flow.userId}:${props.date}`} {...props} flow={flow} />;
+  return <DailyFlowContent key={`${flow.userId}:${props.date}`} {...props} flow={flow} />;
 }
-function FlowCard({ date, source = 'daily', flow }: Props & { flow: ReturnType<typeof useDailyFlow> }) {
+export function DailyFlowContent({ date, source = 'daily', flow, today = false, onAddTask, onOpenTask, proposalCalendar }: Props & { flow: ReturnType<typeof useDailyFlow> }) {
   const { colors } = useTheme();
   const { data } = flow.query; const plan = data?.plan;
   const [mode, setMode] = useState<'proposal' | 'edit' | 'summary' | null>(null);
@@ -37,6 +39,7 @@ function FlowCard({ date, source = 'daily', flow }: Props & { flow: ReturnType<t
   const [base, setBase] = useState({ revision: 0, snapshot: '' });
   const [pending, setPending] = useState(false);
   const [library, setLibrary] = useState(false);
+  const [moreActions, setMoreActions] = useState(false);
   const [failure, setFailure] = useState<{ command: FlowCommand; conflict: boolean } | null>(null);
   const busy = useRef(false);
   const execute = async (command: FlowCommand) => {
@@ -65,10 +68,13 @@ function FlowCard({ date, source = 'daily', flow }: Props & { flow: ReturnType<t
     ? 'הנתונים השתנו. הבחירה לא נדרסה. טען מחדש וסקור הצעה עדכנית.'
     : 'לא התקבל אישור לשמירה. הבחירה נשמרת כאן; אפשר לנסות שוב.'}
     onRetry={failure.conflict ? () => { setMode(null); setFailure(null); void flow.query.refetch(); } : () => { void execute(failure.command); }} /> : null;
-  if (!data) return <V2Notice error={flow.query.isError} title={flow.query.isError
-    ? 'הצעת היום אינה זמינה כרגע. נדרש API מעודכן וחיבור תקין.' : 'טוען את התוכנית השמורה…'} onRetry={flow.query.isError ? () => { void flow.query.refetch(); } : undefined} />;
+  if (!data) return <View style={today ? { marginTop: v2Layout.proposal.top } : undefined}><V2Notice error={flow.query.isError} title={flow.query.isError
+    ? 'לא הצלחנו לטעון את היום שלך. אפשר לנסות שוב.' : 'מכין את היום שלך…'} onRetry={flow.query.isError ? () => { void flow.query.refetch(); } : undefined} /></View>;
   const historical = date < data.today;
   const proposal = plan?.proposal;
+  const proposalCount = proposal?.ids.filter(id => data.tasks.some(task => task.id === id && task.status !== 'cancelled')).length ?? 0;
+  const approvedTasks = plan?.approved ? approvedDayTasks(plan, data.tasks) : [];
+  const completedCount = approvedTasks.filter(task => task.status === 'completed').length;
   const stale = !!proposal && proposal.snapshot !== data.snapshot;
   const chosen = ids.flatMap(id => data.tasks.find(t => t.id === id) ? [data.tasks.find(t => t.id === id)!] : []);
   const available = data.tasks.filter(t => !ids.includes(t.id) && ['open', 'in_progress'].includes(t.status));
@@ -92,19 +98,77 @@ function FlowCard({ date, source = 'daily', flow }: Props & { flow: ReturnType<t
     </View> : null}
   </V2Card>);
   return <>
-    <V2Card style={{ backgroundColor: colors.accentWeak }}>
+    {today && !plan?.approved ? <>
+      {proposal ? <>
+        <V2Card style={{ backgroundColor: colors.accentWeak, padding: v2Layout.proposal.padding, borderRadius: v2Layout.proposal.radius, marginTop: v2Layout.proposal.top, gap: 0 }}>
+          <View style={{ flexDirection: 'row-reverse', alignItems: 'center', justifyContent: 'space-between', gap: 10 }}>
+            <View style={{ flexDirection: 'row-reverse', alignItems: 'center', gap: 10, flex: 1, minWidth: 0 }}>
+              <V2Icon name="sparkles" size={v2Layout.proposal.icon} color={colors.text} />
+              <V2Text variant="heading" style={{ fontFamily: v2Typography.family.heading, fontSize: v2Layout.proposal.title, lineHeight: v2Layout.proposal.titleLine, letterSpacing: -0.6, flexShrink: 1 }}>{proposalCount === 1 ? 'דבר אחד להיום' : `${proposalCount} דברים להיום`}</V2Text>
+            </View>
+            <View style={{ backgroundColor: colors.surface, paddingVertical: 5, paddingHorizontal: 9, borderRadius: 20 }}>
+              <V2Text style={{ color: colors.accent, fontSize: 11, lineHeight: 17.05, fontFamily: v2Typography.family.semibold }}>הצעה</V2Text>
+            </View>
+          </View>
+          <V2Text muted style={{ marginTop: v2Layout.proposal.copyTop, fontSize: 12, lineHeight: 19.2, maxWidth: 250, alignSelf: 'flex-end' }}>לפי המשימות שלך.</V2Text>
+        </V2Card>
+        <View style={{ flexDirection: 'row-reverse', alignItems: 'center', justifyContent: 'space-between', gap: v2Layout.section.gap, marginTop: v2Layout.section.top, marginBottom: v2Layout.section.bottom }}>
+          <V2Text variant="heading">ההצעה שלך</V2Text>
+          <Pressable accessibilityRole="button" accessibilityLabel="שינוי ההצעה" accessibilityState={{ disabled }} disabled={disabled} onPress={() => open('proposal')} hitSlop={6}
+            style={({ pressed }) => ({ minHeight: 32, paddingVertical: 6, paddingHorizontal: 2, justifyContent: 'center', opacity: disabled || pressed ? 0.6 : 1 })}>
+            <V2Text style={{ color: colors.accent, fontFamily: v2Typography.family.semibold, fontSize: 12, lineHeight: 18.6 }}>שינוי</V2Text>
+          </Pressable>
+        </View>
+        <View style={{ gap: v2Layout.task.listGap }}>
+        {proposal.ids.map((id, index) => {
+          const task = data.tasks.find(item => item.id === id);
+          return task && task.status !== 'cancelled' ? <Pressable key={id} accessibilityRole="button" accessibilityLabel={`פרטי משימה: ${task.title}`} onPress={() => onOpenTask?.(id)}
+            style={({ pressed }) => ({ flexDirection: 'row-reverse', alignItems: 'flex-start', gap: v2Layout.task.gap, padding: v2Layout.task.padding, borderWidth: 1, borderColor: colors.border, borderRadius: v2Layout.task.radius, backgroundColor: colors.surface, minHeight: 44, opacity: pressed ? 0.6 : 1 })}>
+            <View style={{ width: v2Layout.task.rank, height: v2Layout.task.rank, borderRadius: v2Layout.task.rankRadius, backgroundColor: colors.accentWeak, alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+              <V2Text style={{ fontFamily: v2Typography.family.bold, color: colors.accent, fontSize: 11, lineHeight: 17.05 }}>{index + 1}</V2Text>
+            </View>
+            <View style={{ flex: 1, minWidth: 0 }}>
+              <V2Text style={{ ...v2Typography.taskTitle, fontFamily: v2Typography.family.semibold }}>{task.title}</V2Text>
+              <V2Text style={{ ...v2Typography.reason, color: colors.accent, marginTop: v2Layout.task.reasonTop }}>{proposalReasonText(proposal.reasons[id])}</V2Text>
+            </View>
+          </Pressable> : null;
+        })}
+        </View>
+        {proposalCalendar}
+        {stale ? <V2Notice title="המשימות השתנו מאז ההצעה. הבחירה נשמרה; יש לסקור הצעה מעודכנת לפני האישור." /> : null}
+        <V2Button icon={stale ? undefined : 'check'} style={{ marginTop: v2Layout.action.top }} title={stale ? 'עדכון וסקירת ההצעה' : proposal.ids.length ? 'מתאים לי, מאשר' : 'אישור יום ללא משימות'} busy={pending} disabled={disabled}
+          onPress={() => stale ? send('propose') : send('approve', { ids: proposal.ids, source })} />
+      </> : <V2Card style={{ padding: 24, paddingVertical: 38, borderRadius: 18, backgroundColor: colors.accentWeak, marginTop: 20, gap: spacing.md }}>
+        <V2Text variant="heading">יש מקום ליום שלך.</V2Text>
+        <V2Text muted>{data.tasks.length ? 'אפשר לבחור מתוך המשימות שלך או להוסיף משהו חדש להיום.' : 'מתחילים ממשימה אחת. מה תרצה לעשות היום?'}</V2Text>
+        <V2Button title={data.tasks.length ? 'הוספת משימה' : 'הוספת משימה ראשונה'} onPress={() => onAddTask?.()} />
+        <Pressable accessibilityRole="button" disabled={disabled} onPress={() => send('propose')} style={{ minHeight: 44, justifyContent: 'center' }}>
+          <V2Text variant="caption" muted>{data.tasks.length ? 'בחירה ידנית או יום ללא משימות' : 'אפשר גם לבחור יום ללא משימות'}</V2Text>
+        </Pressable>
+      </V2Card>}
+      {flow.query.isError ? <V2Notice error title="הרענון נכשל. מוצגת הבחירה האחרונה שנשמרה." onRetry={() => { void flow.query.refetch(); }} /> : null}
+      {!mode ? error : null}
+    </> : <V2Card style={{ backgroundColor: colors.accentWeak, ...(today ? { marginTop: 20, padding: 20, borderRadius: 22 } : {}) }}>
       <V2Text variant="heading">{plan?.approved ? 'התוכנית שלך' : 'יום חדש, בחירה חדשה'}</V2Text>
       <V2Text>{plan?.approved ? plan.source === 'weekly' ? 'היום אושר בתכנון השבועי. שינויים מוצעים מחכים לבחירה שלך.' : 'התוכנית אושרה ונשמרה. אפשר לערוך אותה.' : 'הצעה מתוך המשימות שלך, בלי להעביר אוטומטית עבודה מימים קודמים.'}</V2Text>
+      {today && plan?.approved ? <>
+        <V2Text>{completedCount} מתוך {approvedTasks.length} הושלמו</V2Text>
+        {approvedTasks.length ? <View accessibilityRole="progressbar" accessibilityValue={{ min: 0, max: approvedTasks.length, now: completedCount }} style={{ height: 6, borderRadius: 3, backgroundColor: colors.border, alignItems: 'flex-end', overflow: 'hidden' }}>
+          <View style={{ height: 6, width: `${100 * completedCount / approvedTasks.length}%`, backgroundColor: colors.accent }} />
+        </View> : null}
+      </> : null}
+      {today && plan?.approved && plan.ids.length === 0 ? <V2Text muted>בחרת יום ללא משימות. אפשר להשאיר אותו כך.</V2Text> : null}
       {flow.query.isError ? <V2Notice error title="הרענון נכשל. מוצגת התוכנית האחרונה שנטענה." onRetry={() => { void flow.query.refetch(); }} /> : null}
       {!historical ? <>
-        {proposal ? <V2Button title={stale ? 'עדכון ההצעה שהשתנתה' : 'סקירת ההצעה השמורה'} busy={pending} onPress={() => stale ? send('propose') : open('proposal')} />
-          : <V2Button title={plan?.approved ? 'בדיקת הצעות לשינוי' : 'הצעת היום'} busy={pending} onPress={() => send('propose')} />}
+        {!today || moreActions ? proposal ? <V2Button title={stale ? 'עדכון ההצעה שהשתנתה' : 'סקירת ההצעה השמורה'} busy={pending} onPress={() => stale ? send('propose') : open('proposal')} />
+          : <V2Button title={plan?.approved ? 'בדיקת הצעות לשינוי' : 'הצעת היום'} busy={pending} onPress={() => send('propose')} /> : null}
         {plan?.approved ? <V2Button secondary title="עריכת התוכנית" disabled={pending} onPress={() => open('edit')} /> : null}
       </> : <V2Text muted>תוכנית היסטורית · הבחירה נשמרת ללא שכתוב</V2Text>}
-      {plan?.approved && date <= data.today ? <V2Button secondary title="סיכום היום · לא חובה" disabled={pending} onPress={() => open('summary')} /> : null}
-      <V2Button secondary title="כל המשימות" disabled={pending} onPress={() => setLibrary(true)} />
+      {today ? <Pressable accessibilityRole="button" accessibilityState={{ expanded: moreActions }} disabled={pending} onPress={() => setMoreActions(value => !value)} style={{ minHeight: 44, justifyContent: 'center' }}><V2Text variant="caption" muted>{moreActions ? 'פחות אפשרויות' : 'סיכום היום ואפשרויות נוספות'}</V2Text></Pressable> : null}
+      {(!today || moreActions) && plan?.approved && date <= data.today ? <V2Button secondary title="סיכום היום · לא חובה" disabled={pending} onPress={() => open('summary')} /> : null}
+      {!today || moreActions ? <V2Button secondary title="כל המשימות" disabled={pending} onPress={() => setLibrary(true)} /> : null}
       {!mode ? error : null}
-    </V2Card>
+    </V2Card>}
     {mode ? <Modal visible animationType="slide" onRequestClose={() => { if (!pending) setMode(null); }}>
       <SafeAreaView style={{ flex: 1, backgroundColor: colors.background }} edges={['top', 'bottom']}>
         <ScrollView keyboardShouldPersistTaps="handled" contentInsetAdjustmentBehavior="automatic" contentContainerStyle={{ gap: spacing.md, padding: spacing.lg, paddingBottom: spacing.xxl, maxWidth: 640, alignSelf: 'center', width: '100%' }}>

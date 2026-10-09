@@ -5,15 +5,18 @@ import { CommitmentTimeField } from '@/features/commitments/commitment-date-time
 import { useSettings } from '@/features/settings/settings.queries';
 import { TaskDateSelection } from '@/features/tasks/task-date-selection';
 import { localDateKey } from '@/features/tasks/task-dates';
-import { colors, spacing, typography } from '@/theme/tokens';
+import { spacing, typography } from '@/theme/tokens';
+import { useTheme } from '@/theme/theme-provider';
+import { V2Button } from '@/components/v2';
 
-import { Action } from './notification-settings-screen';
 import { useNotifications } from './notification-context';
 import { reminderInstant, reminderLocalParts } from './reminder-time';
 
 export function TaskReminderEditor({ value, onSave, onCancel }: {
   value: string | null; onSave: (value: string | null) => Promise<void>; onCancel: () => void;
 }) {
+  const { colors } = useTheme();
+  const text = { color: colors.text, fontFamily: typography.family.regular, fontSize: 16, textAlign: 'right' as const, writingDirection: 'rtl' as const };
   const parts = reminderLocalParts(value);
   const [enabled, setEnabled] = useState(Boolean(value));
   const [date, setDate] = useState(parts?.date ?? localDateKey());
@@ -54,4 +57,6 @@ export function TaskReminderEditor({ value, onSave, onCancel }: {
     <Action label="ביטול עריכת תזכורת" disabled={saving} onPress={onCancel} />
   </View>;
 }
-const text = { color: colors.text, fontFamily: typography.family.regular, fontSize: 16, textAlign: 'right' as const, writingDirection: 'rtl' as const };
+function Action({ label, onPress, disabled }: { label: string; onPress: () => void; disabled?: boolean }) {
+  return <V2Button secondary title={label} onPress={onPress} disabled={disabled} />;
+}

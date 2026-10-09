@@ -97,9 +97,14 @@ export class SupabaseTaskStore implements TaskStore {
     if (filters.placement === 'inbox') {
       query = query.eq('status', 'open').is('planned_date', null).is('week_plan_id', null);
     }
-    const { data, error } = await query.order('position').order('created_at');
-    if (error) dataError(error);
-    return (data ?? []) as TaskRow[];
+    query = query.order('position').order('created_at').order('id');
+    const rows: TaskRow[] = [];
+    for (let offset = 0; ; offset += 500) {
+      const { data, error } = await query.range(offset, offset + 499);
+      if (error) dataError(error);
+      rows.push(...(data ?? []) as TaskRow[]);
+      if (!data || data.length < 500) return rows;
+    }
   }
 
   async create(values: Record<string, unknown>) {

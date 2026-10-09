@@ -14,6 +14,9 @@ import { SignInScreen } from '@/features/auth/sign-in-screen';
 import { SignUpScreen } from '@/features/auth/sign-up-screen';
 import { VerifyEmailScreen } from '@/features/auth/verify-email-screen';
 import { WelcomeScreen } from '@/features/auth/welcome-screen';
+import { OnboardingScreen } from '@/features/auth/onboarding-screen';
+import { newAccountMetadata, needsOnboarding } from '@/features/auth/onboarding-state';
+import { useAuth } from '@/features/auth/auth-provider';
 import { saveRecoverySession } from '@/features/auth/recovery-state';
 jest.mock('@/lib/supabase/session-storage', () => ({ recoveryStorage: require('@react-native-async-storage/async-storage') }));
 beforeEach(async () => { await saveRecoverySession(null); });
@@ -82,6 +85,52 @@ function Providers({ children, client }: PropsWithChildren<{ client: SupabaseCli
     </SafeAreaProvider>
   );
 }
+
+function OnboardingJourney() {
+  const { user, isLoading } = useAuth();
+  if (isLoading) return <Text>loading</Text>;
+  return needsOnboarding(user) ? <OnboardingScreen key={user?.id} /> : <Text>Today route available</Text>;
+}
+describe('persisted onboarding journey', () => {
+  const pendingSession = { ...testSession, user: { ...testUser, user_metadata: { ...newAccountMetadata, name: 'עוז' } } };
+  it('requires explicit completion, truthfully explains calendar availability, retries failure and persists across restart', async () => {
+    const mock = createAuthClient({ session: pendingSession });
+    const user = userEvent.setup();
+    const view = await render(<Providers client={mock.client}><OnboardingJourney /></Providers>);
+    await screen.findByText('היום שלך, בקצב שלך');
+    expect(screen.queryByText('להיום שלי')).toBeNull();
+    expect(mock.auth.updateUser).not.toHaveBeenCalled();
+    await user.press(screen.getByRole('button', { name: 'חיבור Google Calendar' }));
+    expect(await screen.findByText(/לא בוצע חיבור/)).toBeTruthy();
+    expect(mock.auth.updateUser).not.toHaveBeenCalled();
+    mock.auth.updateUser.mockResolvedValueOnce({ data: { user: null }, error: new Error('offline') });
+    await user.press(screen.getByRole('button', { name: 'לתכנון היום' }));
+    await screen.findByText(/לא הצלחנו לשמור את השלמת ההיכרות/);
+    const completed = { ...pendingSession, user: { ...pendingSession.user, user_metadata: { ...pendingSession.user.user_metadata, lifeos_onboarding_completed_at: '2026-10-09T10:00:00Z' } } };
+    mock.auth.updateUser.mockResolvedValueOnce({ data: { user: completed.user }, error: null });
+    await user.press(screen.getByRole('button', { name: 'לתכנון היום' }));
+    await screen.findByText('Today route available');
+    expect(mock.auth.updateUser).toHaveBeenLastCalledWith({ data: { lifeos_onboarding_version: 1, lifeos_onboarding_completed_at: expect.any(String) } });
+    await view.unmount();
+    const resumed = createAuthClient({ session: completed });
+    await render(<Providers client={resumed.client}><OnboardingJourney /></Providers>);
+    await screen.findByText('Today route available');
+    expect(resumed.auth.updateUser).not.toHaveBeenCalled();
+    await act(async () => resumed.emit('SIGNED_IN', { ...pendingSession, user: { ...pendingSession.user, id: 'B' } }));
+    await screen.findByText('היום שלך, בקצב שלך');
+  });
+  it('restores unfinished onboarding and protects product routes while preserving existing accounts', async () => {
+    expect(needsOnboarding(testUser)).toBe(false);
+    expect(getAuthGateState({ hasSession: true, isRecovery: false, isLoading: false, isDevelopmentPreview: false, needsOnboarding: true }).productAvailable).toBe(false);
+    const mock = createAuthClient({ session: pendingSession });
+    const view = await render(<Providers client={mock.client}><OnboardingJourney /></Providers>);
+    await screen.findByText('היום שלך, בקצב שלך');
+    await view.unmount();
+    await render(<Providers client={mock.client}><OnboardingJourney /></Providers>);
+    await screen.findByText('היום שלך, בקצב שלך');
+    expect(mock.auth.updateUser).not.toHaveBeenCalled();
+  });
+});
 
 async function renderAuth(element: ReactElement, mock = createAuthClient()) {
   const view = await render(<Providers client={mock.client}>{element}</Providers>);
@@ -214,7 +263,7 @@ describe('production Auth UI', () => {
     await user.press(screen.getByRole('button', { name: 'יצירת חשבון' }));
 
     expect(onVerificationRequired).toHaveBeenCalledWith('person@example.com');
-    expect(mock.auth.signUp.mock.calls[0][0].options.data).toEqual({ name: 'עוז' });
+    expect(mock.auth.signUp.mock.calls[0][0].options.data).toEqual({ ...newAccountMetadata, name: 'עוז' });
   });
 
   it('accepts an immediate signup session and verifies the Node API', async () => {

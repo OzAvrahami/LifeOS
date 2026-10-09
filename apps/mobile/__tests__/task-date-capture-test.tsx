@@ -56,7 +56,7 @@ it('selects a year-boundary date, displays it before saving, and sends exact pla
   expect(create).not.toHaveBeenCalled();
   await fireEvent.press(screen.getByText('שמירה'));
   expect(create).toHaveBeenCalledTimes(1);
-  expect(create).toHaveBeenCalledWith({ title: 'משימה', planning: { type: 'day', plannedDate: '2027-01-02' } }, expect.anything());
+  expect(create).toHaveBeenCalledWith({ title: 'משימה', description: null, creationId: expect.any(String), planning: { type: 'day', plannedDate: '2027-01-02' } }, expect.anything());
   expect(screen.queryByLabelText('חלונית הוספה מהירה')).toBeNull();
 });
 
@@ -101,7 +101,7 @@ it('blocks Save and keyboard submission until a day is explicitly confirmed', as
 });
 
 it.each([
-  ['Inbox', undefined],
+  ['ללא יום', undefined],
   ['היום', { type: 'day', plannedDate: '2026-12-31' }],
   ['השבוע', { type: 'week', weekStart: '2026-12-28' }],
 ])('switches from a custom date to %s without carrying it into the request', async (label, planning) => {
@@ -110,7 +110,7 @@ it.each([
   await fireEvent.press(screen.getByText(label as string));
   await fireEvent.changeText(screen.getByLabelText('כותרת'), 'משימה');
   await fireEvent(screen.getByLabelText('כותרת'), 'submitEditing');
-  expect(create.mock.calls[0]?.[0]).toEqual({ title: 'משימה', ...(planning ? { planning } : {}) });
+  expect(create.mock.calls[0]?.[0]).toEqual({ title: 'משימה', description: null, creationId: expect.any(String), ...(planning ? { planning } : {}) });
 });
 
 it('preserves failed input, guards pending repeated keyboard/Save/close actions, then retries successfully', async () => {

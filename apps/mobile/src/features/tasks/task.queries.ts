@@ -1,4 +1,5 @@
 import { QueryClient, QueryKey, useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { useEffect, useRef } from 'react';
 
 import { cancelTask, createTask, listTasks, updateTask } from './task.api';
 import { useTaskQueryScope } from './task-query-scope';
@@ -116,6 +117,7 @@ export function synchronizeTaskCaches(
   void queryClient.invalidateQueries({ queryKey: ['daily-planning', userId] });
   void queryClient.invalidateQueries({ queryKey: ['daily-flow', userId] });
   void queryClient.invalidateQueries({ queryKey: ['week-days', userId] });
+  void queryClient.invalidateQueries({ queryKey: ['task-memberships', userId] });
   const queries = queryClient.getQueryCache().findAll({ queryKey: taskKeys.user(userId) });
 
   for (const query of queries) {
@@ -146,31 +148,40 @@ export function synchronizeTaskCaches(
 export function useCreateTask() {
   const queryClient = useQueryClient();
   const userId = useTaskQueryScope();
+  const current = useCurrentScope(userId);
   return useMutation({
     mutationFn: (input: Parameters<typeof createTask>[0]) => createTask(input, userId),
-    onSuccess: (task, input) => synchronizeTaskCaches(queryClient, userId, task, {
+    onSuccess: (task, input) => { if (current()) synchronizeTaskCaches(queryClient, userId, task, {
       ensurePlanning: input.planning ?? { type: 'inbox' },
-    }),
+    }); },
   });
 }
 
 export function useUpdateTask() {
   const queryClient = useQueryClient();
   const userId = useTaskQueryScope();
+  const current = useCurrentScope(userId);
   return useMutation({
     mutationFn: (input: Parameters<typeof updateTask>[0]) => updateTask(input, userId),
-    onSuccess: (task, variables) => synchronizeTaskCaches(queryClient, userId, task, {
+    onSuccess: (task, variables) => { if (current()) synchronizeTaskCaches(queryClient, userId, task, {
       activeHandoff: variables.input.status === 'in_progress',
       ensurePlanning: variables.input.planning,
-    }),
+    }); },
   });
 }
 
 export function useCancelTask() {
   const queryClient = useQueryClient();
   const userId = useTaskQueryScope();
+  const current = useCurrentScope(userId);
   return useMutation({
     mutationFn: (input: Parameters<typeof cancelTask>[0]) => cancelTask(input, userId),
-    onSuccess: (task) => synchronizeTaskCaches(queryClient, userId, task),
+    onSuccess: (task) => { if (current()) synchronizeTaskCaches(queryClient, userId, task); },
   });
+}
+
+function useCurrentScope(userId: string) {
+  const scope = useRef<string | null>(userId);
+  useEffect(() => { scope.current = userId; return () => { scope.current = null; }; }, [userId]);
+  return () => scope.current === userId;
 }

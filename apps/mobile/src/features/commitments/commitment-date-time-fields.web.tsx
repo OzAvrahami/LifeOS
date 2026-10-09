@@ -1,6 +1,7 @@
 import type { ChangeEvent, CSSProperties, ReactNode } from 'react';
 
-import { colors, radius, typography } from '@/theme/tokens';
+import { radius, typography } from '@/theme/tokens';
+import { useTheme, type Palette } from '@/theme/theme-provider';
 
 // Web retains its native HTML fields; no separate selection surface is needed.
 export function CommitmentTimePickerProvider({ children }: { children: ReactNode }) {
@@ -10,6 +11,8 @@ export function CommitmentTimePickerProvider({ children }: { children: ReactNode
 export function CommitmentTimePicker() { return null; }
 
 export function CommitmentDateField({ value, onChange }: { value: string; onChange: (value: string) => void }) {
+  const { colors, mode } = useTheme();
+  const styles = createStyles(colors, mode);
   return (
     <input
       aria-label="תאריך ההתחייבות"
@@ -36,6 +39,8 @@ export function CommitmentTimeField({
   value: string | null;
   webMinuteStep?: 1 | 15;
 }) {
+  const { colors, mode } = useTheme();
+  const styles = createStyles(colors, mode);
   return (
     <div style={styles.timeContainer}>
       <input
@@ -52,14 +57,14 @@ export function CommitmentTimeField({
   );
 }
 
-const styles: Record<string, CSSProperties> = {
+const createStyles = (colors: Palette, mode: 'light' | 'dark'): Record<string, CSSProperties> => ({
   field: {
     backgroundColor: colors.completedSurface,
     border: 0,
     borderRadius: radius.md,
     boxSizing: 'border-box',
     color: colors.textSoft,
-    colorScheme: 'light',
+    colorScheme: mode,
     fontFamily: typography.family.semibold,
     minHeight: 50,
     outlineColor: colors.accent,
@@ -69,4 +74,4 @@ const styles: Record<string, CSSProperties> = {
   date: { fontSize: typography.size.button, textAlign: 'right' },
   timeContainer: { flex: 1 },
   time: { fontFamily: typography.family.bold, fontSize: 18, textAlign: 'center' },
-};
+});

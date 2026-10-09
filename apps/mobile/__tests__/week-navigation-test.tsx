@@ -72,25 +72,25 @@ it('reads approved daily membership/order and completed counts from the shared w
   jest.mocked(flowApi.getWeekDays).mockResolvedValueOnce({ days: [{ id: 'p', date: '2026-12-31', approved: true, revision: 1,
     ids: ['selected', 'completed-selection'], source: 'weekly', proposal: null, summary: null }], tasks: approvedTasks });
   await mount();
-  await screen.findByText('selected · 0:45 משוער');
-  expect(screen.queryByText('excluded · 0:45 משוער')).toBeNull();
+  await screen.findByText('○ selected');
+  expect(screen.queryByText('○ excluded')).toBeNull();
   await press('פתח יום 2026-12-31');
   expect(await screen.findByText('completed-selection')).toBeTruthy();
 });
 
 it('changes every server query and all seven dates for previous/next/current week without fixtures', async () => {
   tasks = [task('current'), task('future', { plannedDate: '2027-01-04' })];
-  await mount(); await screen.findByText('current · 0:45 משוער');
-  expect(row('2026-12-31').getByText('היום')).toBeTruthy();
+  await mount(); await screen.findByText('○ current');
+  expect(row('2026-12-31').getByText(/היום ·/)).toBeTruthy();
   await press('שבוע הבא');
-  await screen.findByText('future · 0:45 משוער');
+  await screen.findByText('○ future');
   expect(taskApi.listTasks).toHaveBeenCalledWith({ plannedDateFrom: '2027-01-03', plannedDateTo: '2027-01-09' }, 'current-session');
   expect(taskApi.listTasks).toHaveBeenCalledWith({ weekStart: '2027-01-03' }, 'current-session');
   expect(commitmentApi.listCommitments).toHaveBeenCalledWith({ dateFrom: '2027-01-03', dateTo: '2027-01-09' }, 'current-session');
   expect(planningApi.getWeeklyFocuses).toHaveBeenCalledWith('2027-01-03', 'current-session');
   expect(screen.getByLabelText('טווח השבוע המוצג').props.children).toContain('2027');
   expect(screen.queryByLabelText('פתח יום 2026-12-31')).toBeNull();
-  expect(screen.queryByText('current · 0:45 משוער')).toBeNull();
+  expect(screen.queryByText('○ current')).toBeNull();
   expect(screen.queryByText('לסיים את אפיון LifeOS')).toBeNull();
   expect(within(screen.getByLabelText('סקירת שבעת ימי השבוע')).getAllByRole('button').map(r => r.props.accessibilityLabel)).toEqual(
     ['03','04','05','06','07','08','09'].map(d => `פתח יום 2027-01-${d}`));
@@ -111,13 +111,14 @@ it('uses Monday boundaries after settings hydration and retains them while brows
 it('uses the account timezone for Today near a UTC date boundary', async () => {
   jest.setSystemTime(new Date('2026-12-31T23:30:00Z'));
   await mount(); await screen.findByLabelText('פתח יום 2027-01-01');
-  expect(row('2027-01-01').getByText('היום')).toBeTruthy();
+  expect(row('2027-01-01').getByText(/היום ·/)).toBeTruthy();
   expect(screen.getByLabelText('פתח יום 2026-12-31').props.accessibilityState.selected).toBe(false);
 });
 
 it('loads and saves Weekly Focus for the browsed week and returns to that week', async () => {
   await mount(); await screen.findByLabelText('פתח יום 2026-12-31');
   await press('שבוע הבא'); await screen.findByLabelText('פתח יום 2027-01-03');
+  await press('מיקודים קיימים');
   await fireEvent.press(await screen.findByText('הוסף מיקודים'));
   expect(screen.queryByLabelText('תצוגת פיתוח: תכנון השבוע')).toBeNull();
   await fireEvent.press(screen.getByText('שמירת מיקודים'));
@@ -131,24 +132,24 @@ it.each(['tasks', 'commitments', 'both', 'neither'])('shows complete %s day cont
   jest.mocked(planningApi.getWeeklyFocuses).mockResolvedValue([{ id: 'focus', title: 'direction', position: 0, weekPlanId: 'plan', createdAt: stamp, updatedAt: stamp }]);
   await mount(); await screen.findByLabelText('פתח יום 2026-12-31');
   const count = tasks.length ? 3 : 0;
-  const summary = `${count} משימות · ${count ? '1:15' : '0:00'} זמן משימות מתוכנן`;
+  const summary = `${count} משימות פעילות`;
   expect(row('2026-12-31').getByText(summary)).toBeTruthy();
   if (commitments.length) expect(row('2026-12-31').getByText('ועוד 1 התחייבויות')).toBeTruthy();
   await open();
   const day = within(screen.getByLabelText('תוכן היום'));
-  expect(day.getByText(summary)).toBeTruthy();
+  expect(day.getByText(`${count ? 1 : 0} מתוך ${count ? 4 : 0} הושלמו`)).toBeTruthy();
   expect(day.queryByText('direction')).toBeNull();
   expect(day.queryByText('cancelled')).toBeNull();
   expect(day.queryByText('unscheduled')).toBeNull();
   if (count) {
-    expect(day.getAllByLabelText(/^פתח משימה:/).map(n => n.props.accessibilityLabel)).toEqual(['estimated','unknown','active','completed'].map(t => `פתח משימה: ${t}`));
-    expect(day.getByText('ללא הערכת זמן')).toBeTruthy();
-    expect(day.getByLabelText('משימות שהושלמו')).toBeTruthy();
+    expect(day.getAllByLabelText(/^פרטי משימה:/).map(n => n.props.accessibilityLabel)).toEqual(['estimated','unknown','active','completed'].map(t => `פרטי משימה: ${t}`));
+    expect(day.queryByText('ללא הערכת זמן')).toBeNull();
+    expect(day.getByLabelText('פתיחה מחדש: completed')).toBeTruthy();
   } else expect(day.getByText('אין משימות פעילות ליום הזה')).toBeTruthy();
   if (commitments.length) {
     expect(day.getAllByLabelText(/^פתח התחייבות:/).map(n => n.props.accessibilityLabel)).toEqual(['early','middle','late'].map(t => `פתח התחייבות: ${t}`));
-    expect(day.getByText('08:00–08:30')).toBeTruthy();
-    expect(day.getByText('16:00 · ללא שעת סיום')).toBeTruthy();
+    expect(day.getByText('08:00–08:30 · LifeOS')).toBeTruthy();
+    expect(day.getByText('16:00 · ללא שעת סיום · LifeOS')).toBeTruthy();
   } else expect(day.getByText('אין התחייבויות ליום הזה')).toBeTruthy();
 });
 
@@ -168,49 +169,49 @@ it('defaults day capture to the selected date and updates its summary without na
   expect(screen.getByLabelText('תאריך המשימה').props.children).toBe('2027-01-01');
   await fireEvent.changeText(screen.getByLabelText('כותרת'), 'captured');
   await fireEvent.press(screen.getByText('שמירה'));
-  await screen.findByLabelText('פתח משימה: captured');
-  expect(jest.mocked(taskApi.createTask).mock.calls[0]?.[0]).toEqual({ title: 'captured', planning: { type: 'day', plannedDate: '2027-01-01' } });
-  await press('חזרה לשבוע'); expect(row('2027-01-01').getByText('1 משימה · 0:00 זמן משימות מתוכנן')).toBeTruthy();
+  await screen.findByLabelText('פרטי משימה: captured');
+  expect(jest.mocked(taskApi.createTask).mock.calls[0]?.[0]).toEqual({ title: 'captured', description: null, creationId: expect.any(String), planning: { type: 'day', plannedDate: '2027-01-01' } });
+  await press('חזרה לשבוע'); expect(row('2027-01-01').getByText('1 משימות פעילות')).toBeTruthy();
 });
 
 it('moves a Task across week/year boundaries with source/destination freshness and preserves other fields', async () => {
   tasks = [task('moving')]; await mount(); await screen.findByLabelText('פתח יום 2026-12-31');
   await press('שבוע הבא'); await screen.findByLabelText('פתח יום 2027-01-04');
   await press('שבוע קודם'); await open();
-  await press('פתח משימה: moving'); await press('שינוי תאריך המשימה');
+  await press('פרטי משימה: moving'); await press('שינוי תאריך המשימה');
   await fireEvent(screen.getByLabelText('תאריך לתכנון'), 'valueChange', {}, new Date(2027, 0, 4, 12));
   await press('אישור תאריך');
   await screen.findByLabelText('תוכן היום');
-  expect(screen.queryByLabelText('פתח משימה: moving')).toBeNull();
+  expect(screen.queryByLabelText('פרטי משימה: moving')).toBeNull();
   expect(jest.mocked(taskApi.updateTask).mock.calls[0]?.[0]).toEqual({ id: 'moving', input: { planning: { type: 'day', plannedDate: '2027-01-04' } } });
   expect(tasks[0]).toMatchObject({ description: 'preserved', dueDate: '2027-02-01', status: 'open', estimatedMinutes: 45 });
-  await press('חזרה לשבוע'); expect(row('2026-12-31').getByText('0 משימות · 0:00 זמן משימות מתוכנן')).toBeTruthy();
-  await press('שבוע הבא'); await screen.findByText('moving · 0:45 משוער');
-  await open('2027-01-04'); expect(screen.getAllByLabelText('פתח משימה: moving')).toHaveLength(1);
+  await press('חזרה לשבוע'); expect(row('2026-12-31').getByText('0 משימות פעילות')).toBeTruthy();
+  await press('שבוע הבא'); await screen.findByText('○ moving');
+  await open('2027-01-04'); expect(screen.getAllByLabelText('פרטי משימה: moving')).toHaveLength(1);
 });
 
 it('supports title editing, completion, reopening and confirmed deletion without stale active totals', async () => {
-  tasks = [task('editable')]; await mount(); await open(); await press('פתח משימה: editable');
-  await press('עריכת כותרת'); await fireEvent.changeText(screen.getByLabelText('עריכת כותרת משימה'), 'edited');
-  await fireEvent.press(screen.getByText('שמירה')); await press('פתח משימה: edited');
+  tasks = [task('editable')]; await mount(); await open(); await press('פרטי משימה: editable');
+  await press('עריכת כותרת'); await fireEvent.changeText(screen.getByLabelText('כותרת משימה'), 'edited');
+  await fireEvent.press(screen.getByText('שמירת שינויים')); await press('פרטי משימה: edited');
   expect(jest.mocked(taskApi.updateTask).mock.calls[0]?.[0]).toEqual({ id: 'editable', input: { title: 'edited' } });
-  await press('סימון כהושלמה'); await screen.findByLabelText('משימות שהושלמו');
-  expect(screen.getByText('0 משימות · 0:00 זמן משימות מתוכנן')).toBeTruthy();
-  await press('פתח משימה: edited'); await press('פתיחה מחדש'); await screen.findByText('1 משימה · 0:45 זמן משימות מתוכנן');
-  await press('פתח משימה: edited'); await press('מחיקת משימה'); await press('ביטול מחיקת משימה');
+  await press('סימון כהושלמה'); await screen.findByLabelText('פתיחה מחדש: edited');
+  expect(screen.getByText('1 מתוך 1 הושלמו')).toBeTruthy();
+  await press('פרטי משימה: edited'); await press('פתיחה מחדש'); await screen.findByText('0 מתוך 1 הושלמו');
+  await press('פרטי משימה: edited'); await press('מחיקת משימה'); await press('ביטול מחיקת משימה');
   expect(taskApi.cancelTask).not.toHaveBeenCalled();
   await press('מחיקת משימה'); await press('אישור מחיקת משימה'); await screen.findByText('אין משימות פעילות ליום הזה');
 });
 
 it('keeps a title draft on failure and cancels a date change without mutation', async () => {
-  tasks = [task('retry')]; await mount(); await open(); await press('פתח משימה: retry');
+  tasks = [task('retry')]; await mount(); await open(); await press('פרטי משימה: retry');
   await press('שינוי תאריך המשימה'); await press('ביטול בחירת תאריך');
   expect(taskApi.updateTask).not.toHaveBeenCalled();
-  await press('עריכת כותרת'); await fireEvent.changeText(screen.getByLabelText('עריכת כותרת משימה'), 'draft');
+  await press('עריכת כותרת'); await fireEvent.changeText(screen.getByLabelText('כותרת משימה'), 'draft');
   jest.mocked(taskApi.updateTask).mockRejectedValueOnce(new Error('offline'));
-  await fireEvent.press(screen.getByText('שמירה')); await screen.findByText('לא הצלחנו לעדכן. אפשר לנסות שוב.');
-  expect(screen.getByLabelText('עריכת כותרת משימה').props.value).toBe('draft');
-  await fireEvent.press(screen.getByText('שמירה')); await screen.findByLabelText('פתח משימה: draft');
+  await fireEvent.press(screen.getByText('שמירת שינויים')); await screen.findByText('לא הצלחנו לעדכן. הפרטים נשמרים כאן; אפשר לנסות שוב.');
+  expect(screen.getByLabelText('כותרת משימה').props.value).toBe('draft');
+  await fireEvent.press(screen.getByText('שמירת שינויים')); await screen.findByLabelText('פרטי משימה: draft');
 });
 
 it('moves and deletes a commitment through the existing editor while retaining the inspected date', async () => {
@@ -231,10 +232,10 @@ it('moves and deletes a commitment through the existing editor while retaining t
 });
 
 it('never shows the previous week response under a new week during delayed hydration', async () => {
-  tasks = [task('old')]; await mount(); await screen.findByText('old · 0:45 משוער');
+  tasks = [task('old')]; await mount(); await screen.findByText('○ old');
   let resolve!: (value: Task[]) => void;
   jest.mocked(taskApi.listTasks).mockImplementation((filters = {}) => filters.weekStart ? Promise.resolve([]) : new Promise(r => { resolve = r; }));
-  await press('שבוע הבא'); expect(screen.queryByText('old · 0:45 משוער')).toBeNull();
+  await press('שבוע הבא'); expect(screen.queryByText('○ old')).toBeNull();
   expect(screen.queryByLabelText('פתח יום 2027-01-03')).toBeNull();
   await act(async () => resolve([])); await screen.findByLabelText('פתח יום 2027-01-03');
 });
@@ -258,7 +259,7 @@ it('creates a commitment on the browsed day using the shared editor and exact ti
 it('cancels task and commitment inspection without changing the selected week/date or records', async () => {
   tasks = [task('next-week', { plannedDate: '2027-01-04' })]; commitments = [commitment('next-meeting', { date: '2027-01-04' })];
   await mount(); await screen.findByLabelText('פתח יום 2026-12-31'); await press('שבוע הבא'); await open('2027-01-04');
-  await press('פתח משימה: next-week'); await press('חזרה ליום');
+  await press('פרטי משימה: next-week'); await press('חזרה ליום');
   await press('פתח התחייבות: next-meeting'); await press('סגור עורך התחייבות');
   expect(screen.getByLabelText('התאריך המוצג').props.children).toContain('4 בינואר 2027');
   expect(taskApi.updateTask).not.toHaveBeenCalled(); expect(commitmentApi.updateCommitment).not.toHaveBeenCalled();
@@ -277,18 +278,18 @@ it('keeps global capture in Inbox by default and explicitly places week-only cap
   await press('שבוע הבא'); await screen.findByLabelText('פתח יום 2027-01-03');
   await press('הוספה מהירה');
   let sheet = within(screen.getByLabelText('חלונית הוספה מהירה'));
-  expect(sheet.getByText('Inbox').parent?.props.accessibilityState).toEqual({ selected: true });
+  expect(sheet.getByText('ללא יום').parent?.props.accessibilityState).toEqual({ selected: true });
   await fireEvent.changeText(sheet.getByLabelText('כותרת'), 'inbox capture');
   await fireEvent.press(sheet.getByText('שמירה'));
   await waitFor(() => expect(screen.queryByLabelText('חלונית הוספה מהירה')).toBeNull());
-  expect(jest.mocked(taskApi.createTask).mock.calls[0]?.[0]).toEqual({ title: 'inbox capture', planning: { type: 'inbox' } });
+  expect(jest.mocked(taskApi.createTask).mock.calls[0]?.[0]).toEqual({ title: 'inbox capture', description: null, creationId: expect.any(String), planning: { type: 'inbox' } });
   await press('הוספה מהירה');
   sheet = within(screen.getByLabelText('חלונית הוספה מהירה'));
   await fireEvent.changeText(sheet.getByLabelText('כותרת'), 'future week capture');
   await fireEvent.press(sheet.getByText('השבוע המוצג'));
   await fireEvent.press(sheet.getByText('שמירה'));
   await screen.findByLabelText('בחר יום עבור future week capture');
-  expect(jest.mocked(taskApi.createTask).mock.calls[1]?.[0]).toEqual({ title: 'future week capture', planning: { type: 'week', weekStart: '2027-01-03' } });
+  expect(jest.mocked(taskApi.createTask).mock.calls[1]?.[0]).toEqual({ title: 'future week capture', description: null, creationId: expect.any(String), planning: { type: 'week', weekStart: '2027-01-03' } });
   expect(screen.getByLabelText('פתח יום 2027-01-03')).toBeTruthy();
   expect(screen.queryByText('inbox capture')).toBeNull();
 });

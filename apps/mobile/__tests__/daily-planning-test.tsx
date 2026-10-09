@@ -147,13 +147,13 @@ it('opens Focus-inspired capture blank in Inbox, cancels without writes and crea
   jest.mocked(planningApi.getWeeklyFocuses).mockResolvedValue([{ id: 'focus', weekPlanId: 'week', title: 'Direction', position: 0, createdAt: stamp, updatedAt: stamp }]);
   await mount(); await press('המשך התכנון'); await press('יצירת משימה בהשראת: Direction');
   expect(screen.getByLabelText('כותרת').props.value).toBe('');
-  expect(screen.getByText('Inbox').parent?.props.accessibilityState?.selected).toBe(true);
+  expect(screen.getByText('ללא יום').parent?.props.accessibilityState?.selected).toBe(true);
   expect(screen.queryByLabelText('חשיבות')).toBeNull();
   await fireEvent.changeText(screen.getByLabelText('כותרת'), 'Cancelled'); await press('סגור הוספה מהירה');
   expect(apiRequest).not.toHaveBeenCalled();
   await press('יצירת משימה בהשראת: Direction'); await fireEvent.changeText(screen.getByLabelText('כותרת'), 'Saved');
   await fireEvent.press(screen.getByText('שמירה')); await screen.findByLabelText('בחר לתכנון: Saved');
-  expect(apiRequest).toHaveBeenCalledWith('/tasks', expect.objectContaining({ expectedUserId: 'A', body: JSON.stringify({ title: 'Saved', planning: { type: 'inbox' } }) }));
+  expect(apiRequest).toHaveBeenCalledWith('/tasks', expect.objectContaining({ expectedUserId: 'A', body: JSON.stringify({ title: 'Saved', description: null, planning: { type: 'inbox' } }) }));
   expect(stored.get(key('A', date))?.selectedTaskIds).toEqual([]);
   expect(planningApi.getWeeklyFocuses).toHaveBeenCalledWith('2026-10-05', 'A');
 });

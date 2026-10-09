@@ -1,7 +1,9 @@
 import type { TaskDateControlProps } from './task-date-control.types';
-import { colors, radius, typography } from '@/theme/tokens';
+import { radius, typography } from '@/theme/tokens';
+import { useTheme } from '@/theme/theme-provider';
 
 export function TaskDateControl({ value, onChange, accessibilityLabel = 'תאריך לתכנון' }: TaskDateControlProps) {
+  const { colors, mode } = useTheme();
   return (
     <input
       aria-label={accessibilityLabel}
@@ -13,7 +15,7 @@ export function TaskDateControl({ value, onChange, accessibilityLabel = 'תאר�
       value={value}
       onChange={(event) => onChange(event.target.value)}
       style={{ backgroundColor: colors.completedSurface, border: 0, borderRadius: radius.md,
-        color: colors.text, colorScheme: 'light', fontFamily: typography.family.regular,
+        color: colors.text, colorScheme: mode, fontFamily: typography.family.regular,
         fontSize: 18, minHeight: 50, paddingInline: 16, boxSizing: 'border-box', width: '100%' }}
     />
   );

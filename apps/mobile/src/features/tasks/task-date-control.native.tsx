@@ -2,12 +2,13 @@ import DateTimePicker from '@react-native-community/datetimepicker';
 import { useEffect, useRef } from 'react';
 import { Platform } from 'react-native';
 
-import { colors } from '@/theme/tokens';
+import { useTheme } from '@/theme/theme-provider';
 
 import type { TaskDateControlProps } from './task-date-control.types';
 import { localDateKey, planningDateToLocalDate } from './task-dates';
 
 export function TaskDateControl({ value, onChange, onConfirm, onCancel, accessibilityLabel = 'תאריך לתכנון' }: TaskDateControlProps) {
+  const { colors, mode } = useTheme();
   const active = useRef(true);
   useEffect(() => { active.current = true; return () => { active.current = false; }; }, []);
   const ios = Platform.OS === 'ios';
@@ -27,7 +28,7 @@ export function TaskDateControl({ value, onChange, onConfirm, onCancel, accessib
         active.current = false;
         onCancel();
       }}
-      {...(ios ? { textColor: colors.text } : {
+      {...(ios ? { textColor: colors.text, themeVariant: mode } : {
         positiveButton: { label: 'אישור' }, negativeButton: { label: 'ביטול' },
       })}
       style={{ alignSelf: 'stretch', width: '100%' }}

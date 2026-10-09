@@ -3,6 +3,7 @@ import { Href, useLocalSearchParams, useRouter } from 'expo-router';
 
 import { InboxScreen } from '@/features/inbox/inbox-screen';
 import { isInboxDemoState } from '@/features/inbox/inbox.types';
+import { V2TaskList } from '@/features/tasks/v2-task-list';
 
 export default function InboxRoute() {
   const router = useRouter();
@@ -15,6 +16,9 @@ export default function InboxRoute() {
   const requestedPreview = Array.isArray(preview) ? preview[0] : preview;
   const developmentPreview = __DEV__ && (requestedPreview === '1' || requestedState !== undefined);
   const previewState = __DEV__ && isInboxDemoState(requestedState) ? requestedState : 'normal';
+
+  if (!developmentPreview) return <V2TaskList key={scope} onNavigateToday={() => router.replace('/')}
+    onNavigateMore={() => router.navigate('/more' as Href)} onNavigateWeek={() => router.navigate('/week' as Href)} />;
 
   return (
     <InboxScreen

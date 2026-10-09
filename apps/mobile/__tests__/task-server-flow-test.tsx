@@ -17,6 +17,11 @@ import { WeekScreen } from '@/features/week/week-screen';
 import { TestProviders } from '../test-utils/test-providers';
 
 jest.mock('@/features/settings/settings.api', () => ({ getSettings: jest.fn(), putSettings: jest.fn() }));
+jest.mock('@/features/planning/daily-flow.api', () => ({ ...jest.requireActual('@/features/planning/daily-flow.api'),
+  getWeekDays: jest.fn(async () => ({ days: [], tasks: [] })),
+  getDailyFlow: jest.fn(async () => ({ plan: null, tasks: [], snapshot: 'a'.repeat(32), today: '2026-10-09', timezone: 'UTC' })),
+  saveDailyFlow: jest.fn(),
+}));
 
 jest.mock('@/features/tasks/task.api', () => ({
   cancelTask: jest.fn(),
@@ -262,10 +267,11 @@ describe('persistent server Task experience', () => {
 
     await renderFlow('week');
 
-    expect(await screen.findByText('3 משימות · 1:05 זמן משימות מתוכנן')).toBeTruthy();
-    expect(screen.getByText('1 משימה · 0:15 זמן משימות מתוכנן')).toBeTruthy();
-    expect(screen.getAllByText('0 משימות · 0:00 זמן משימות מתוכנן')).toHaveLength(5);
-    expect(screen.getByText('Focus is not a Task')).toBeTruthy();
+    expect(await screen.findByText('3 משימות פעילות')).toBeTruthy();
+    expect(screen.getByText('1 משימות פעילות')).toBeTruthy();
+    expect(screen.getAllByText('0 משימות פעילות')).toHaveLength(5);
+    await fireEvent.press(screen.getByText('מיקודים קיימים'));
+    expect(await screen.findByText('Focus is not a Task')).toBeTruthy();
     expect(screen.queryByText('5 משימות · 4:30 זמן משימות מתוכנן')).toBeNull();
     expect(screen.queryByText('פנוי')).toBeNull();
     expect(screen.queryByText('מאוזן')).toBeNull();
@@ -283,6 +289,7 @@ describe('persistent server Task experience', () => {
       title, updatedAt: new Date().toISOString(), weekPlanId: 'week-plan-1' };
     focuses = [originalFocus];
     await renderFlow('week');
+    await user.press(await screen.findByText('מיקודים קיימים'));
     await user.press(await screen.findByLabelText(`יצירת משימה בהשראת המיקוד: ${title}`));
     await user.type(screen.getByLabelText('כותרת'), title);
     await user.press(screen.getByText('שמירה'));
@@ -326,7 +333,8 @@ describe('persistent server Task experience', () => {
     await user.press(within(screen.getByLabelText('ניווט ראשי')).getByText('השבוע'));
     expect(await screen.findByText(title)).toBeTruthy();
     await user.press(screen.getByLabelText(`בחר יום עבור ${title}`));
-    await user.press(screen.getByLabelText(`שבץ להיום: ${title}`));
+    await user.press(within(screen.getByLabelText('פרטי משימה')).getByText('היום'));
+    await user.press(within(screen.getByLabelText('ניווט ראשי')).getByText('היום'));
     await waitFor(() => expect(tasks[0].plannedDate).toBe(localDateKey()));
     expect(tasks[0]).toEqual(expect.objectContaining({ id: stableId, weekPlanId: null }));
 
@@ -370,7 +378,7 @@ describe('persistent server Task experience', () => {
   it('captures once from the inline Today action, defaults it to Today, and preserves global capture cancellation and Inbox default', async () => {
     const user = userEvent.setup();
     await renderFlow('week');
-    expect(await screen.findAllByText('0 משימות · 0:00 זמן משימות מתוכנן')).toHaveLength(7);
+    expect(await screen.findAllByText('0 משימות פעילות')).toHaveLength(7);
 
     await user.press(within(screen.getByLabelText('ניווט ראשי')).getByText('היום'));
     expect(await screen.findByText('0 משימות')).toBeTruthy();
@@ -385,7 +393,7 @@ describe('persistent server Task experience', () => {
 
     await user.press(screen.getByLabelText('הוספה מהירה'));
     sheet = screen.getByLabelText('חלונית הוספה מהירה');
-    expect(within(sheet).getByText('Inbox').parent?.props.accessibilityState).toEqual({ selected: true });
+    expect(within(sheet).getByText('ללא יום').parent?.props.accessibilityState).toEqual({ selected: true });
     await user.press(screen.getByLabelText('סגור הוספה מהירה'));
 
     await user.press(screen.getByLabelText('הוסף משימה להיום'));
@@ -397,16 +405,18 @@ describe('persistent server Task experience', () => {
     expect(await screen.findByText('נוצרה מהיום')).toBeTruthy();
     expect(createTaskMock).toHaveBeenCalledTimes(1);
     expect(createTaskMock.mock.calls[0]?.[0]).toEqual({
+      description: null,
+      creationId: expect.any(String),
       planning: { plannedDate: localDateKey(), type: 'day' },
       title: 'נוצרה מהיום',
     });
     expect(tasks).toHaveLength(1);
 
     await user.press(within(screen.getByLabelText('ניווט ראשי')).getByText('השבוע'));
-    expect(await screen.findByText('1 משימה · 0:00 זמן משימות מתוכנן')).toBeTruthy();
+    expect(await screen.findByText('1 משימות פעילות')).toBeTruthy();
   });
 
-  it('expands all week-planned Tasks and schedules a previously hidden Task without creating or duplicating it', async () => {
+  it('exposes all week-planned Tasks and schedules a Task without creating or duplicating it', async () => {
     const user = userEvent.setup();
     const weekStart = currentWeekStart();
     tasks = [
@@ -418,27 +428,23 @@ describe('persistent server Task experience', () => {
     await renderFlow('week');
 
     let section = await screen.findByLabelText('לתכנן השבוע');
-    expect(within(section).getAllByLabelText(/^בחר יום עבור /)).toHaveLength(2);
-    expect(within(section).queryByText('רביעית שהוסתרה')).toBeNull();
-    await user.press(within(section).getByLabelText('הצג 2 משימות נוספות'));
     expect(within(section).getAllByLabelText(/^בחר יום עבור /)).toHaveLength(4);
     expect(within(section).getByText('רביעית שהוסתרה')).toBeTruthy();
 
     await user.press(within(section).getByLabelText('בחר יום עבור רביעית שהוסתרה'));
-    await user.press(within(section).getByLabelText('שבץ להיום: רביעית שהוסתרה'));
+    await user.press(within(screen.getByLabelText('פרטי משימה')).getByText('היום'));
     await waitFor(() => expect(tasks.find((task) => task.id === 'week-fourth')?.plannedDate).toBe(localDateKey()));
     expect(tasks).toHaveLength(4);
     expect(new Set(tasks.map((task) => task.id)).size).toBe(4);
     expect(createTaskMock).not.toHaveBeenCalled();
     expect(updateTaskMock).toHaveBeenCalledTimes(1);
-    expect(await screen.findByText('רביעית שהוסתרה')).toBeTruthy();
+    expect(await screen.findByText('○ רביעית שהוסתרה')).toBeTruthy();
 
     await user.press(within(screen.getByLabelText('ניווט ראשי')).getByText('השבוע'));
     section = await screen.findByLabelText('לתכנן השבוע');
     expect(within(section).queryByText('רביעית שהוסתרה')).toBeNull();
-    expect(within(section).getAllByLabelText(/^בחר יום עבור /)).toHaveLength(2);
-    expect(within(section).getByLabelText('הצג משימה נוספת')).toBeTruthy();
-    expect(await screen.findByText('1 משימה · 0:00 זמן משימות מתוכנן')).toBeTruthy();
+    expect(within(section).getAllByLabelText(/^בחר יום עבור /)).toHaveLength(3);
+    expect(await screen.findByText('1 משימות פעילות')).toBeTruthy();
   });
 
   it('moves Inbox directly to Today and cancels without deleting the persisted identity', async () => {
@@ -528,6 +534,7 @@ it('uses the calendar in Inbox processing and Week scheduling without recreating
   await waitFor(() => expect(screen.queryByLabelText('מיון מהיר')).toBeNull());
   await fireEvent.press(within(screen.getByLabelText('ניווט ראשי')).getByText('השבוע'));
   await fireEvent.press(await screen.findByLabelText('בחר יום עבור processing calendar'));
+  await fireEvent.press(screen.getByText('שינוי תאריך המשימה'));
   await fireEvent(screen.getByLabelText('תאריך לתכנון'), 'valueChange', {}, new Date(2028, 1, 29, 12));
   await fireEvent.press(screen.getByLabelText('אישור תאריך'));
   await waitFor(() => expect(screen.queryByLabelText('בחר יום עבור processing calendar')).toBeNull());

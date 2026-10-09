@@ -31,9 +31,10 @@ export async function listTasks(filters: TaskListFilters = {}, expectedUserId?: 
 }
 
 export async function createTask(input: CreateTaskInput, expectedUserId?: string) {
+  const { creationId, ...body } = input;
   const response = await taskRequest<{ task: Task }>('/tasks', {
-    body: JSON.stringify(input),
-    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(body),
+    headers: { 'Content-Type': 'application/json', ...(creationId ? { 'Idempotency-Key': creationId } : {}) },
     method: 'POST',
   }, expectedUserId);
   return response.task;

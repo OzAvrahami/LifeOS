@@ -6,6 +6,7 @@ import { supabase } from '@/lib/supabase/client';
 
 import { AuthContextValue, SignInCredentials, SignUpCredentials } from './auth.types';
 import { isRecoverySession, saveRecoverySession } from './recovery-state';
+import { newAccountMetadata } from './onboarding-state';
 
 const AuthContext = createContext<AuthContextValue | null>(null);
 const sessionIdentity = (value: Session) => `${value.user.id}:${value.user.last_sign_in_at ?? ''}`;
@@ -147,7 +148,7 @@ export function AuthProvider({
       const { data, error } = await client.auth.signUp({
         email,
         options: {
-          data: name ? { name } : {},
+          data: { ...newAccountMetadata, ...(name ? { name } : {}) },
           emailRedirectTo,
         },
         password,
@@ -171,9 +172,23 @@ export function AuthProvider({
     [client],
   );
 
+  const completeOnboarding = useCallback(async () => {
+    const owner = sessionRef.current?.user.id;
+    if (!owner || isRecovery) throw new Error('Authenticated account required');
+    const { data, error } = await client.auth.updateUser({ data: {
+      lifeos_onboarding_version: 1, lifeos_onboarding_completed_at: new Date().toISOString(),
+    } });
+    if (error) throw error;
+    if (data.user?.id !== owner || sessionRef.current?.user.id !== owner) throw new Error('Account changed');
+    const next = { ...sessionRef.current, user: data.user };
+    sessionRef.current = next;
+    setSession(next);
+  }, [client, isRecovery]);
+
   const value = useMemo<AuthContextValue>(
     () => ({
       beginRecovery,
+      completeOnboarding,
       clearRecovery,
       isLoading,
       isRecovery,
@@ -191,6 +206,7 @@ export function AuthProvider({
     }),
     [
       beginRecovery,
+      completeOnboarding,
       clearRecovery,
       isLoading,
       isRecovery,

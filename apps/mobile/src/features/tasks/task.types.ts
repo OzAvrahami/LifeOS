@@ -36,6 +36,7 @@ export type TaskListFilters = {
 };
 
 export type CreateTaskInput = {
+  creationId?: string;
   reminderAt?: string | null;
   title: string;
   description?: string | null;
@@ -46,7 +47,7 @@ export type CreateTaskInput = {
   planning?: TaskPlanningInput;
 };
 
-export type UpdateTaskInput = Omit<CreateTaskInput, 'title'> & {
+export type UpdateTaskInput = Omit<CreateTaskInput, 'title' | 'creationId'> & {
   title?: string;
   status?: TaskStatus;
 };

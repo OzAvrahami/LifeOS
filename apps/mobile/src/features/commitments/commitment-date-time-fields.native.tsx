@@ -2,7 +2,8 @@ import DateTimePicker, { type DateTimePickerEvent } from '@react-native-communit
 import { createContext, useCallback, useContext, useEffect, useRef, useState, type ReactNode } from 'react';
 import { Keyboard, Pressable, StyleSheet, Text, View } from 'react-native';
 
-import { colors, radius, spacing, typography } from '@/theme/tokens';
+import { radius, spacing, typography } from '@/theme/tokens';
+import { useTheme, type Palette } from '@/theme/theme-provider';
 
 function dateFromKey(value: string) {
   const [year, month, day] = value.split('-').map(Number);
@@ -26,6 +27,8 @@ function timeValue(value: Date) {
 }
 
 export function CommitmentDateField({ value, onChange }: { value: string; onChange: (value: string) => void }) {
+  const { colors, mode } = useTheme();
+  const styles = createStyles(colors);
   const [open, setOpen] = useState(false);
   const change = (event: DateTimePickerEvent, selected?: Date) => {
     setOpen(false);
@@ -40,6 +43,7 @@ export function CommitmentDateField({ value, onChange }: { value: string; onChan
         <DateTimePicker
           display={process.env.EXPO_OS === 'ios' ? 'spinner' : 'default'}
           mode="date"
+          themeVariant={mode}
           onChange={change}
           value={dateFromKey(value)}
         />
@@ -94,6 +98,8 @@ export function CommitmentTimePicker() {
 }
 
 function TimeSelectionSurface({ selection }: { selection: TimeSelection }) {
+  const { colors, mode } = useTheme();
+  const styles = createStyles(colors);
   const picker = useContext(TimePickerContext)!;
   const { close, isCurrent } = picker;
   const [draft, setDraft] = useState(() => timeDate(selection.value));
@@ -120,7 +126,7 @@ function TimeSelectionSurface({ selection }: { selection: TimeSelection }) {
     <DateTimePicker
       accessibilityLabel={`בחירת ${selection.label}`}
       display={ios ? 'spinner' : 'default'}
-      {...(ios ? { locale: 'en-GB', textColor: colors.text } : {
+      {...(ios ? { locale: 'en-GB', textColor: colors.text, themeVariant: mode } : {
         is24Hour: true,
         positiveButton: { label: 'אישור' },
         negativeButton: { label: 'ביטול' },
@@ -177,6 +183,8 @@ function TimeField({
   placeholder,
   value,
 }: TimeFieldProps) {
+  const { colors } = useTheme();
+  const styles = createStyles(colors);
   const picker = useContext(TimePickerContext)!;
   return (
     <View style={styles.timeContainer}>
@@ -197,7 +205,7 @@ function TimeField({
   );
 }
 
-const styles = StyleSheet.create({
+const createStyles = (colors: Palette) => StyleSheet.create({
   field: { backgroundColor: colors.completedSurface, borderRadius: radius.md, minHeight: 52, justifyContent: 'center', paddingHorizontal: 16 },
   dateText: { color: colors.textSoft, fontFamily: typography.family.semibold, fontSize: typography.size.button, textAlign: 'right', writingDirection: 'rtl' },
   timeContainer: { flex: 1 },

@@ -8,7 +8,7 @@ export default function InvalidCallbackRoute() {
   return <AuthScreen><AuthStateView icon={<AuthStateIcon name="time-outline" tone="danger" />}
     title="הקישור כבר לא בתוקף" subtitle="הקישור פג, כבר נוצל או אינו תקין. אפשר לחזור לכניסה או לבקש קישור איפוס חדש."
     actions={<>
-      <AuthPrimaryButton title={session && !isRecovery ? 'להיום שלי' : 'חזרה להתחברות'} onPress={() => router.replace(session && !isRecovery ? '/' : '/sign-in' as Href)} />
+      <AuthPrimaryButton title={session && !isRecovery ? 'לתכנון היום' : 'חזרה להתחברות'} onPress={() => router.replace(session && !isRecovery ? '/' : '/sign-in' as Href)} />
       {!session || isRecovery ? <AuthLink title="בקשת קישור איפוס חדש" onPress={() => router.replace('/forgot-password' as Href)} /> : null}
     </>} /></AuthScreen>;
 }

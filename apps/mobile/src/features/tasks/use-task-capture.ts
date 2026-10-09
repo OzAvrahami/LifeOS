@@ -1,4 +1,6 @@
-import type { TaskCapturePlacement } from './task-capture.types';
+import type { TaskCaptureDetails, TaskCapturePlacement } from './task-capture.types';
+import { useRef } from 'react';
+import type { CreateTaskInput } from './task.types';
 import { useEffectiveSettings } from '@/features/settings/settings.queries';
 
 import { DEMO_TODAY } from './demo-task.fixture';
@@ -11,8 +13,9 @@ export function useTaskCapture(source: TaskSource) {
   const demo = useDemoTasks();
   const createMutation = useCreateTask();
   const { effective: settings, query: settingsQuery } = useEffectiveSettings(source === 'server');
+  const attempted = useRef<{ id: string; input: CreateTaskInput } | null>(null);
 
-  const captureTask = async (title: string, placement: TaskCapturePlacement) => {
+  const captureTask = async (title: string, placement: TaskCapturePlacement, details?: TaskCaptureDetails) => {
     const { destination } = placement;
     if (destination === 'day' && !isPlanningDate(placement.plannedDate)) throw new Error('Choose a valid planning date');
     if (source === 'preview') {
@@ -20,8 +23,9 @@ export function useTaskCapture(source: TaskSource) {
       return;
     }
     if ((destination === 'today' || destination === 'week') && !settingsQuery.data) throw new Error('Account calendar settings are not loaded');
-    await createMutation.mutateAsync({
+    const input: CreateTaskInput = {
       title,
+      ...details,
       ...(destination === 'day'
         ? { planning: { type: 'day' as const, plannedDate: placement.plannedDate } }
         : destination === 'today'
@@ -29,7 +33,9 @@ export function useTaskCapture(source: TaskSource) {
         : destination === 'week'
           ? { planning: { type: 'week' as const, weekStart: currentWeekStart(undefined, settings) } }
           : {}),
-    });
+    };
+    if (details && attempted.current?.id !== details.creationId) attempted.current = { id: details.creationId, input };
+    await createMutation.mutateAsync(details ? attempted.current!.input : input);
   };
 
   return { captureTask, createMutation, defaultDate: source === 'preview' ? DEMO_TODAY : localDateKey(undefined, settings.timezone) };

@@ -2,14 +2,14 @@ import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { useEffect, useRef } from 'react';
 import { AppState } from 'react-native';
 import { useTaskQueryScope } from '@/features/tasks/task-query-scope';
-import { getDailyFlow, getWeekDays, saveDailyFlow, type DailyFlow, type FlowCommand } from './daily-flow.api';
+import { getDailyFlow, initializeDailyFlow, getWeekDays, saveDailyFlow, type DailyFlow, type FlowCommand } from './daily-flow.api';
 
-export function useDailyFlow(date: string, enabled = true) {
+export function useDailyFlow(date: string, enabled = true, initialize = false) {
   const userId = useTaskQueryScope(); const client = useQueryClient();
   const scope = useRef<string | null>(userId);
   useEffect(() => { scope.current = userId; return () => { scope.current = null; }; }, [userId]);
   const key = ['daily-flow', userId, date];
-  const query = useQuery({ queryKey: key, enabled, queryFn: ({ signal }) => getDailyFlow(userId, date, signal), staleTime: 0, refetchOnMount: 'always' });
+  const query = useQuery({ queryKey: key, enabled, queryFn: ({ signal }) => (initialize ? initializeDailyFlow : getDailyFlow)(userId, date, signal), staleTime: 0, refetchOnMount: 'always' });
   useEffect(() => {
     if (!enabled) return;
     const sub = AppState.addEventListener('change', state => { if (state === 'active') void client.invalidateQueries({ queryKey: ['daily-flow', userId] }); });
@@ -22,6 +22,7 @@ export function useDailyFlow(date: string, enabled = true) {
     if (scope.current !== userId) return result;
     client.setQueryData<DailyFlow>(key, current => (current?.plan?.revision ?? 0) > (result.plan?.revision ?? 0) ? current : result);
     void client.invalidateQueries({ queryKey: ['week-days', userId] });
+    void client.invalidateQueries({ queryKey: ['task-memberships', userId] });
     void client.invalidateQueries({ queryKey: ['daily-planning', userId] });
     return result;
   };

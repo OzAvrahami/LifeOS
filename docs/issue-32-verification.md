@@ -1,5 +1,45 @@
 # V2 daily proposals and continuation — #32
 
+## Owner acceptance and authorized local checkpoint — 2026-10-09
+
+The owner accepted the reviewed local web-preview appearance and reported passing proposal adjustment/cancellation, approval persistence after reload, completion consistency across Today/Week/Tasks, and task reopening with updated Today/counts. This is owner-reported local web evidence only. It supersedes earlier pending-owner notes for these specific checks; it does not establish physical-device, hosted-provider/email/callback, production or full integration acceptance, nor an exhaustive viewport/theme/keyboard matrix. No issue closure or metadata change.
+
+The owner authorized one new local commit over parent `bf02eff` for #33 and subsequent onboarding/Today/visual corrections. See the [reconciled 96-file manifest, evidence freshness and acceptance boundaries](issue-33-verification.md#owner-accepted-local-web-checkpoint--2026-10-09). Earlier staging manifests and checkpoint-pause statements below are historical. Source is unchanged since the recorded tests; only acceptance/checkpoint documentation changed. Versions remain 0.5.0 (9), with proposed V2 0.6.0 (10) unprepared/unauthorized. All production/provider/device and unreported acceptance gates remain pending.
+
+## Today visual correction — 2026-10-09
+
+Owner rejection prompted the focused [reference-to-native correction and evidence](v2-milestone-1-verification.md#today-visual-correction--2026-10-09). Today/shared V2 now use Heebo and actual Lucide geometry, the profile control, greeting, sparkle/pill summary, ranked task cards, approval and navigation dimensions. Counts, reasons and LifeOS events remain truthful. Initialization, persistence, stale/conflict/retry handling, approval, canonical identity and ownership logic are unchanged.
+
+Final mobile typecheck/lint pass; the Today/daily-flow/foundation/Week-navigation/task-experience group passes **49/49**. Added mocked 440/320-width light/dark long-Hebrew component cases preserve content/actions, not rendered layout. DB suites were not unnecessarily rerun. Supported browsers remain unavailable (`Browser is not available: edge` / `Browser is not available: iab`); rendered comparison, font rasterization, wrapping/keyboard and owner/provider/integration/device acceptance remain pending. Preview http://localhost:8083; startup and screenshot review route are in the linked record. #32 remains open in its existing Verify status, with no metadata write.
+
+**Release candidate remains proposed 0.6.0 (10), unprepared/unauthorized; current/accepted 0.5.0 (9) unchanged.** No version, schema, API, production or Git mutation for this correction. Earlier tree/checkpoint inventories are historical. Owner checkpoint `bf02eff` and pre-existing work remain intact.
+
+## Owner review corrections — 2026-10-09
+
+After owner review, Today now opens into a coherent first proposal, approved plan, deliberate empty day, fresh empty account, loading or retryable error state. The date/greeting/profile are real. Removed the extra first-generation/discovery button, duplicated task-list actions and stacked task/calendar empty sections. Proposal titles/order/selection reasons are shown directly with one adjustment action and one approval. Approved progress counts resolve canonical current task state; optional summary/system-adjustment actions are secondary. Calendar events retain their own times and navigation. The native theme, Hebrew/RTL and #33 task identities/actions are reused.
+
+New authenticated POST `/daily-plans/:date/initialize` reuses the existing #32 context, proposal rules, revision/snapshot checks, SQL transaction and operation ledger. It creates only the first eligible proposal. It writes nothing for zero eligible tasks or historical dates, and never regenerates an existing V2 state (including a discarded proposal), saved manual draft or approved plan. Concurrent first entries derive the same operation identity from date/revision/snapshot; retries return current persisted state. A concurrent manual edit wins through the existing revision guard. Stale saved proposals are shown with an explicit refresh/review action, not overwritten on entry. Empty approved days stay approved. Initialization changes neither task dates/importance/deadlines/reminders nor historical rows. No migration was added for this fix.
+
+Final available evidence:
+
+- New `verify-daily-entry.mjs` through `verify-local-tasks.mjs --daily-entry`: passes against disposable LifeOS32. Empty/future-only entry writes no plan, eligible tasks initialize immediately, three concurrent entries create revision 1 once, reload/new-session preserves edited and empty drafts, stale task changes preserve the draft and reject obsolete approval, approved weekly days remain intact, next-day proposals reference the same unfinished IDs/origin dates without modifying history, approved empty days remain, account B sees no A state.
+- Existing disposable `--daily-flow` and `--week-allocation` regressions both pass. #32/#33 membership, ordering, approval, completion, retry, stale/concurrent edit, ownership/RLS, descriptions and historical guards are retained. Only synthetic test accounts are created/cleaned; no local reset or production mutation.
+- API `daily-flow.test.ts` + `week-allocation.test.ts`: 11/11. Final mobile Today/daily-flow/auth-lifecycle/infrastructure run: 38/38. Separate auth UI: 23/23. The Week/task/foundation regression group also passed (44/44, including overlapping Today/daily-flow checks). Both workspace typechecks/lints pass. Exact commands and evidence boundaries are in [milestone owner-review corrections](v2-milestone-1-verification.md#owner-review-corrections--2026-10-09).
+
+The same correction pass restored native onboarding and explicit per-account completion, and proved why local signup skipped email verification: running local Auth auto-confirmation is true and actual signup returned a confirmed session. A temporary confirmation-required local Auth sidecar passed the actual email/verification/application-callback path. Existing local/hosted provider configuration was not changed; hosted acceptance remains pending. The current local redirect allow-list does not cover preview:8083, so the sidecar's callback result is not a claim about that existing configuration.
+
+HEAD remains owner checkpoint `bf02eff`; index empty, main 1 ahead / 0 behind existing origin/main, no fetch. Pre-existing #33 implementation and protected owner files remain. #32 Status changed Verify → In Progress → Verify with write readbacks; it remains open. #29/#30 remain In Progress and #33 Verify. Owner/visual/provider/integration/device acceptance remains pending. Supported browsers returned `Browser is not available: edge` / `iab`; current preview http://localhost:8083 serves the corrected development bundle, not a rendered acceptance claim. No further checkpoint preparation is included.
+
+**Release candidate update:** corrections stay within proposed 0.6.0 (10), still unprepared/unauthorized and subject to a fresh artifact inventory. Versions remain 0.5.0 (configured build 9); no accepted binary contains these changes. Prior release and production schema/API gates below remain pending.
+
+## Follow-up integration evidence — 2026-10-09
+
+The owner completed the combined #29/#30/#32 checkpoint as `bf02eff3f6ec2ee51e0a5e0891e3e3729f846f08` on main, without push or production rollout. The older baseline/checkpoint instructions below are retained as historical evidence, not instructions to repeat that commit.
+
+#33 now extends the same ordered DailyPlan contract with atomic Week allocation and a durable operation ledger in `20261009150000_add_week_allocation.sql`. All reviewed days are validated before any write; approved row identity/provenance, summaries, focus/capacity and historical references remain intact. The extension also makes an explicit same-value task placement update membership: selecting the already-stored date or no-day value must still move/remove a task allocated through a plan. Title, description and status-only edits do not invoke placement changes.
+
+The disposable LifeOS32 database passed the full 16-group local harness with #33, followed by focused Week allocation/RLS/pagination checks and the #32 daily-flow regression after the final placement-trigger refinement. The mobile core run passed 84 tests, with later changed-control/detail checks recorded in [#33 verification](issue-33-verification.md). These are local software checks, not production/provider, rendered visual or physical-device acceptance. #32 remains open and its Project metadata was not changed during #33.
+
 ## Scope and baseline
 
 Local implementation on `main`, HEAD `9b775df50b563f518464810ddf5e646b2087b67e`. Existing refs showed 0 ahead / 0 behind `origin/main`; no fetch or other Git mutation was performed. The existing milestone-1 implementation, untracked handoff and root `tsconfig.json`, ignored environment files and native/generated boundaries were inventoried before editing. A hash inventory was saved outside the repository at `%TEMP%/lifeos-32-baseline.json`.

@@ -16,14 +16,17 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { radius, spacing, typography } from '@/theme/tokens';
 import { useTheme, type Palette } from '@/theme/theme-provider';
 
-import type { CaptureDestination, TaskCapturePlacement } from '@/features/tasks/task-capture.types';
+import type { CaptureDestination, TaskCaptureDetails, TaskCapturePlacement } from '@/features/tasks/task-capture.types';
+import { newPlanningOperationId } from '@/features/planning/daily-planning-model';
+import { normalizeTaskDescription, taskContentError } from '@/features/tasks/task-content';
+import { V2Button, V2Text } from '@/components/v2';
 import { TaskDateSelection } from '@/features/tasks/task-date-selection';
-import { isPlanningDate, localDateKey } from '@/features/tasks/task-dates';
+import { addDaysToDateKey, isPlanningDate, localDateKey } from '@/features/tasks/task-dates';
 
 export type { CaptureDestination } from '@/features/tasks/task-capture.types';
 
 const destinations: { id: CaptureDestination; label: string; ltr?: boolean }[] = [
-  { id: 'inbox', label: 'Inbox', ltr: true },
+  { id: 'inbox', label: 'ללא יום' },
   { id: 'today', label: 'היום' },
   { id: 'week', label: 'השבוע' },
   { id: 'day', label: 'בחר יום' },
@@ -37,7 +40,7 @@ type CaptureProps = {
   weekLabel?: string;
   defaultDate?: string;
   onClose: () => void;
-  onSave: (title: string, placement: TaskCapturePlacement) => Promise<void> | void;
+  onSave: (title: string, placement: TaskCapturePlacement, details?: TaskCaptureDetails) => Promise<void> | void;
   visible: boolean;
 };
 
@@ -46,7 +49,7 @@ export function QuickCaptureSheet(props: CaptureProps) {
 }
 
 function CaptureSession({
-  lockDraftOnSaveAttempt = false,
+  lockDraftOnSaveAttempt = true,
   focusTitle,
   initialDestination = 'inbox',
   initialPlannedDate,
@@ -60,6 +63,10 @@ function CaptureSession({
   const styles = createStyles(colors);
   const insets = useSafeAreaInsets();
   const [title, setTitle] = useState('');
+  const [description, setDescription] = useState('');
+  const [creationId] = useState(newPlanningOperationId);
+  const [validation, setValidation] = useState<string | null>(null);
+  const attemptedRequest = useRef<{ title: string; placement: TaskCapturePlacement; details: TaskCaptureDetails } | null>(null);
   const [destination, setDestination] = useState<CaptureDestination>(initialDestination);
   const [plannedDate, setPlannedDate] = useState<string | null>(initialDestination === 'day' && isPlanningDate(initialPlannedDate) ? initialPlannedDate : null);
   const [choosingDay, setChoosingDay] = useState(false);
@@ -82,6 +89,8 @@ function CaptureSession({
 
   const save = async () => {
     const nextTitle = title.trim();
+    const invalid = taskContentError(title, description);
+    if (invalid) { setValidation(invalid); return; }
     if (!nextTitle || busy.current || choosingDay || (destination === 'day' && !isPlanningDate(plannedDate))) return;
     busy.current = true;
     setAttempted(true);
@@ -90,7 +99,9 @@ function CaptureSession({
     try {
       const placement: TaskCapturePlacement = destination === 'day'
         ? { destination, plannedDate: plannedDate! } : { destination };
-      await onSave(nextTitle, placement);
+      attemptedRequest.current ??= { title: nextTitle, placement, details: { description: normalizeTaskDescription(description), creationId } };
+      const request = attemptedRequest.current;
+      await onSave(request.title, request.placement, request.details);
       busy.current = false;
       close();
     } catch {
@@ -120,8 +131,10 @@ function CaptureSession({
         >
           <ScrollView keyboardShouldPersistTaps="handled" keyboardDismissMode={Platform.OS === 'ios' ? 'interactive' : Platform.OS === 'android' ? 'on-drag' : 'none'}>
             <View style={styles.handle} />
-            <Text style={styles.heading}>מה צריך לזכור?</Text>
+            <Text style={styles.heading}>מה צריך לעשות?</Text>
+            <V2Text muted>אפשר להוסיף עכשיו ולהחליט על היום אחר כך.</V2Text>
             {focusTitle ? <Text style={styles.destinationLabel}>בהשראת המיקוד: {focusTitle}. זו משימה עצמאית; המיקוד לא ישתנה.</Text> : null}
+            <V2Text>כותרת</V2Text>
             <TextInput
               accessibilityLabel="כותרת"
               autoFocus
@@ -136,6 +149,11 @@ function CaptureSession({
               textAlign="right"
               value={title}
             />
+            <V2Text style={{ marginTop: spacing.md }}>תיאור (לא חובה)</V2Text>
+            <TextInput accessibilityLabel="תיאור (לא חובה)" value={description} onChangeText={setDescription}
+              editable={!fieldsLocked} multiline textAlignVertical="top" placeholder="כל מה שחשוב לזכור"
+              placeholderTextColor={colors.textFaint} style={[styles.input, { minHeight: 100 }]} />
+            {validation ? <Text accessibilityRole="alert" style={styles.error}>{validation}</Text> : null}
 
             {error ? <Text accessibilityRole="alert" style={styles.error}>לא הצלחנו לשמור. אפשר לנסות שוב.</Text> : null}
             {error && lockDraftOnSaveAttempt ? <Text style={styles.error}>ניסיון חוזר משתמש באותה בקשה כדי למנוע כפילות. לשינוי פרטים, סגור ובדוק תחילה אם המשימה כבר נשמרה.</Text> : null}
@@ -169,6 +187,12 @@ function CaptureSession({
                   </Pressable>
                 );
               })}
+              <Pressable accessibilityRole="button" accessibilityLabel="מחר" disabled={fieldsLocked}
+                accessibilityState={{ selected: destination === 'day' && plannedDate === addDaysToDateKey(defaultDate, 1) }}
+                onPress={() => { setDestination('day'); setPlannedDate(addDaysToDateKey(defaultDate, 1)); setChoosingDay(false); }}
+                style={[styles.destination, destination === 'day' && plannedDate === addDaysToDateKey(defaultDate, 1) && styles.destinationSelected]}>
+                <Text style={[styles.destinationText, destination === 'day' && plannedDate === addDaysToDateKey(defaultDate, 1) && styles.destinationTextSelected]}>מחר</Text>
+              </Pressable>
             </View>
 
             {destination === 'day' && plannedDate ? <Text accessibilityLabel="תאריך המשימה" style={styles.destinationLabel}>{plannedDate}</Text> : null}
@@ -186,6 +210,7 @@ function CaptureSession({
             >
               <Text style={styles.saveText}>{saving ? 'שומר…' : 'שמירה'}</Text>
             </Pressable>
+            <V2Button secondary title="ביטול" disabled={saving} onPress={close} />
           </ScrollView>
         </View>
       </KeyboardAvoidingView>
@@ -203,7 +228,7 @@ const createStyles = (colors: Palette) => StyleSheet.create({
   error: { color: colors.warningText, fontFamily: typography.family.semibold, fontSize: typography.size.label, marginTop: spacing.xs, textAlign: 'right', writingDirection: 'rtl' },
   destinationLabel: { color: colors.textSubtle, fontFamily: typography.family.bold, fontSize: typography.size.label, marginTop: spacing.lg, textAlign: 'right', writingDirection: 'rtl' },
   destinations: { flexDirection: 'row-reverse', flexWrap: 'wrap', gap: spacing.xs, marginTop: spacing.xs },
-  destination: { alignItems: 'center', backgroundColor: colors.surfaceMuted, borderRadius: radius.round, minHeight: 40, justifyContent: 'center', paddingHorizontal: 15 },
+  destination: { alignItems: 'center', backgroundColor: colors.surfaceMuted, borderRadius: radius.round, minHeight: 44, justifyContent: 'center', paddingHorizontal: 15 },
   destinationSelected: { backgroundColor: colors.accent },
   destinationText: { color: colors.textMuted, fontFamily: typography.family.bold, fontSize: typography.size.meta, writingDirection: 'rtl' },
   destinationTextSelected: { color: colors.onAccent },

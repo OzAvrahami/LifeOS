@@ -73,7 +73,7 @@ it('preserves browser date/focus/keyboard behavior, validates empty or malformed
     await act(() => button('ביטול בחירת תאריך').click());
     expect(document.querySelector('[aria-label="תאריך המשימה"]')?.textContent).toBe('2027-01-02');
     await act(async () => { button('שמירה').click(); });
-    expect(save.mock.calls).toEqual([['browser date', { destination: 'day', plannedDate: '2027-01-02' }]]);
+    expect(save.mock.calls).toEqual([['browser date', { destination: 'day', plannedDate: '2027-01-02' }, { description: null, creationId: expect.any(String) }]]);
     expect(close).toHaveBeenCalledTimes(1);
     expect(dismiss).not.toHaveBeenCalled();
   } finally {

@@ -1,6 +1,6 @@
 import { tasksByPlannedDate } from '@/features/week/week-aggregation';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { render, screen, userEvent, waitFor } from '@testing-library/react-native';
+import { act, fireEvent, render, screen, userEvent, waitFor } from '@testing-library/react-native';
 import { useState } from 'react';
 import { Pressable, Text } from 'react-native';
 
@@ -212,4 +212,21 @@ it('moves across years and back to Inbox with exact day/range membership, aggreg
   synchronizeTaskCaches(client, userId, { ...task, plannedDate: null, status: 'completed', completedAt: '2026-12-31T13:00:00Z' }, { ensurePlanning: { type: 'inbox' } });
   expect(ids(client, { placement: 'inbox' })).toEqual([]);
   client.clear();
+});
+
+it('does not repopulate cleared account caches when an old mutation finishes', async () => {
+  const client = makeQueryClient();
+  let finish!: (task: Task) => void;
+  updateTaskMock.mockImplementationOnce(() => new Promise(resolve => { finish = resolve; }));
+  function Editor() {
+    const mutation = useUpdateTask();
+    return <Pressable accessibilityLabel="save" onPress={() => mutation.mutate({ id: 'task-1', input: { status: 'completed' } })}><Text>save</Text></Pressable>;
+  }
+  const tree = (owner: string) => <QueryClientProvider client={client}><TaskQueryScopeProvider userId={owner}><Editor /></TaskQueryScopeProvider></QueryClientProvider>;
+  const view = await render(tree('A'));
+  await fireEvent.press(screen.getByLabelText('save'));
+  await waitFor(() => expect(finish).toEqual(expect.any(Function)));
+  await view.rerender(tree('B')); client.clear();
+  await act(async () => finish(makeTask({ status: 'completed' })));
+  expect(client.getQueryCache().findAll()).toHaveLength(0);
 });

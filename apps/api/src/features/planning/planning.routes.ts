@@ -4,6 +4,7 @@ import { Router } from 'express';
 import { requireAuth } from '../../middleware/auth.middleware.js';
 import { DailyPlanningService, parseDailyPlanning } from './daily-planning.js';
 import { DailyFlowService, parseFlowCommand } from './daily-flow.js';
+import { parseWeekAllocation, saveWeekAllocation, taskPlanMemberships } from './week-allocation.js';
 import { createPlanningService } from './planning.service.js';
 import type { PlanningServiceFactory } from './planning.types.js';
 import {
@@ -22,12 +23,22 @@ export function createPlanningRouter(
 ) {
   const router = Router();
 
+  router.put('/week-plans/:weekStart/allocation', authMiddleware, async (request, response) => {
+    response.json(await saveWeekAllocation(request.auth.supabase, parsePlanningDate(request.params.weekStart, 'weekStart'), parseWeekAllocation(request.body)));
+  });
+  router.get('/task-plan-memberships/:date', authMiddleware, async (request, response) => {
+    response.json(await taskPlanMemberships(request.auth.supabase, parsePlanningDate(request.params.date, 'date')));
+  });
+
   router.get('/week-plans/:weekStart/days', authMiddleware, async (request, response) => {
     response.json(await new DailyFlowService(request.auth.supabase).week(parsePlanningDate(request.params.weekStart, 'weekStart')));
   });
 
   router.get('/daily-plans/:date/flow', authMiddleware, async (request, response) => {
     response.json(await new DailyFlowService(request.auth.supabase).get(parsePlanningDate(request.params.date, 'date')));
+  });
+  router.post('/daily-plans/:date/initialize', authMiddleware, async (request, response) => {
+    response.json(await new DailyFlowService(request.auth.supabase).initialize(parsePlanningDate(request.params.date, 'date')));
   });
   router.put('/daily-plans/:date/flow', authMiddleware, async (request, response) => {
     response.json(await new DailyFlowService(request.auth.supabase).save(parsePlanningDate(request.params.date, 'date'), parseFlowCommand(request.body)));

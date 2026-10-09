@@ -16,6 +16,7 @@ export type SignUpCredentials = SignInCredentials & {
 };
 
 export type AuthContextValue = {
+  completeOnboarding: () => Promise<void>;
   beginRecovery: (session?: Session) => Promise<void>;
   clearRecovery: () => void;
   isLoading: boolean;

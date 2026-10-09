@@ -26,7 +26,7 @@ if (command === 'api' || command === 'web') {
   const child = spawn(process.execPath, api ? ['--import', 'tsx', 'apps/api/src/server.ts']
     : [resolve(root, 'node_modules/expo/bin/cli'), 'start', '--web', '--localhost', '--port', '8083'], {
     cwd: api ? root : resolve(root, 'apps/mobile'), stdio: 'inherit',
-    env: { ...process.env, ...(api ? { NODE_ENV: 'test', PORT: '3197', SUPABASE_URL: status.API_URL, SUPABASE_PUBLISHABLE_KEY: publishable }
+    env: { ...process.env, ...(api ? { NODE_ENV: 'test', TSX_TSCONFIG_PATH: resolve(root, 'apps/api/tsconfig.json'), PORT: '3197', SUPABASE_URL: status.API_URL, SUPABASE_PUBLISHABLE_KEY: publishable }
       : { EXPO_NO_DOTENV: '1', EXPO_PUBLIC_API_URL: 'http://127.0.0.1:3197', EXPO_PUBLIC_SUPABASE_URL: status.API_URL, EXPO_PUBLIC_SUPABASE_PUBLISHABLE_KEY: publishable }) },
   });
   child.on('exit', code => { process.exitCode = code ?? 0; });

@@ -10,6 +10,8 @@ export type FlowCommand = { action: 'propose' | 'save-draft' | 'approve' | 'edit
   operationId: string; revision: number; snapshot?: string; ids?: string[]; source?: 'daily' | 'weekly'; note?: string };
 export const getDailyFlow = (userId: string, date: string, signal?: AbortSignal) =>
   apiRequest<DailyFlow>(`/daily-plans/${date}/flow`, { auth: 'required', expectedUserId: userId, signal });
+export const initializeDailyFlow = (userId: string, date: string, signal?: AbortSignal) =>
+  apiRequest<DailyFlow>(`/daily-plans/${date}/initialize`, { method: 'POST', auth: 'required', expectedUserId: userId, signal });
 export const saveDailyFlow = (userId: string, date: string, input: FlowCommand) =>
   apiRequest<DailyFlow>(`/daily-plans/${date}/flow`, { auth: 'required', expectedUserId: userId, method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(input) });
 export const getWeekDays = (userId: string, weekStart: string, signal?: AbortSignal) =>

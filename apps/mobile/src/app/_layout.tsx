@@ -14,15 +14,18 @@ import {
 import { AuthProvider, useAuth } from '@/features/auth/auth-provider';
 import { AuthLoadingScreen } from '@/features/auth/auth-loading-screen';
 import { getAuthGateState } from '@/features/auth/auth-gate';
+import { needsOnboarding } from '@/features/auth/onboarding-state';
 import { SessionQueryCacheBoundary } from '@/features/auth/session-query-cache';
 import { DemoTaskProvider } from '@/features/tasks/demo-task-provider';
 import { TaskQueryScopeProvider } from '@/features/tasks/task-query-scope';
 import { QueryProvider } from '@/lib/query/query-provider';
 import { NotificationProvider } from '@/features/notifications/notification-provider';
 import { ThemeProvider, useTheme } from '@/theme/theme-provider';
+import { v2Fonts } from '@/theme/v2-fonts';
 
 export default function RootLayout() {
   const [fontsLoaded] = useFonts({
+    ...v2Fonts,
     Assistant_400Regular,
     Assistant_500Medium,
     Assistant_600SemiBold,
@@ -66,6 +69,7 @@ function AuthenticatedStack() {
     isDevelopmentPreview: developmentPreview,
     isLoading,
     isRecovery,
+    needsOnboarding: needsOnboarding(session?.user),
   });
 
   if (gate.showLoading) return <AuthLoadingScreen label="פותח את LifeOS…" />;
@@ -92,6 +96,8 @@ function AuthenticatedStack() {
           <Stack.Screen name="task" />
           <Stack.Screen name="commitment" />
           <Stack.Screen name="calendar" />
+        </Stack.Protected>
+        <Stack.Protected guard={Boolean(session) && !isRecovery}>
           <Stack.Screen name="auth/confirmed" />
         </Stack.Protected>
         <Stack.Screen name="auth/callback" />

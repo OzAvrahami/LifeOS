@@ -1,7 +1,8 @@
 import { useRef, useState } from 'react';
 import { Platform, Pressable, StyleSheet, Text, View } from 'react-native';
 
-import { colors, radius, spacing, typography } from '@/theme/tokens';
+import { radius, spacing, typography } from '@/theme/tokens';
+import { useTheme, type Palette } from '@/theme/theme-provider';
 
 import { TaskDateControl } from './task-date-control';
 import { isPlanningDate } from './task-dates';
@@ -15,6 +16,8 @@ export function TaskDateSelection({ value, defaultDate, onConfirm, onCancel, onP
   onCancel: () => void;
   onPendingChange?: (pending: boolean) => void;
 }) {
+  const { colors } = useTheme();
+  const styles = createStyles(colors);
   const [draft, setDraft] = useState(value ?? defaultDate);
   const [pending, setPending] = useState(false);
   const [error, setError] = useState(false);
@@ -55,7 +58,7 @@ export function TaskDateSelection({ value, defaultDate, onConfirm, onCancel, onP
   );
 }
 
-const styles = StyleSheet.create({
+const createStyles = (colors: Palette) => StyleSheet.create({
   container: { alignSelf: 'stretch', gap: spacing.xs, marginTop: spacing.sm },
   label: { color: colors.text, fontFamily: typography.family.semibold, fontSize: typography.size.button, textAlign: 'right' },
   error: { color: colors.warningText, textAlign: 'right' },

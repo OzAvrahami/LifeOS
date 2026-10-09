@@ -2,6 +2,7 @@ import assert from 'node:assert/strict';
 import { execFileSync, spawn, spawnSync } from 'node:child_process';
 import console from 'node:console';
 import { randomBytes } from 'node:crypto';
+import { readFileSync } from 'node:fs';
 import { resolve } from 'node:path';
 import process from 'node:process';
 import { setTimeout as sleep } from 'node:timers/promises';
@@ -11,6 +12,8 @@ import { createClient } from '@supabase/supabase-js';
 import { verifyWeeklyPlanning } from './verify-weekly-planning.mjs';
 import { verifyDailyPlanning } from './verify-daily-planning.mjs';
 import { verifyDailyFlow } from './verify-daily-flow.mjs';
+import { verifyDailyEntry } from './verify-daily-entry.mjs';
+import { verifyWeekAllocation } from './verify-week-allocation.mjs';
 import { verifyCommitmentReminders } from './verify-commitment-reminders.mjs';
 import { verifyNotifications, notificationDefaults } from './verify-notifications.mjs';
 
@@ -18,7 +21,11 @@ const repositoryRoot = fileURLToPath(new URL('../../..', import.meta.url));
 const supabaseWorkdir = process.env.LIFEOS_INTEGRATION_SUPABASE_WORKDIR
   ? resolve(process.env.LIFEOS_INTEGRATION_SUPABASE_WORKDIR)
   : repositoryRoot;
-const supabaseProjectId = process.env.LIFEOS_INTEGRATION_SUPABASE_PROJECT_ID ?? 'LifeOS';
+const configuredProject = /^project_id\s*=\s*"([^"]+)"\s*$/m.exec(readFileSync(resolve(supabaseWorkdir, 'supabase/config.toml'), 'utf8'))?.[1];
+if (!configuredProject || (process.env.LIFEOS_INTEGRATION_SUPABASE_PROJECT_ID && process.env.LIFEOS_INTEGRATION_SUPABASE_PROJECT_ID !== configuredProject)) {
+  throw new Error('Local database project must match the selected workdir');
+}
+const supabaseProjectId = configuredProject;
 const apiPort = 3199;
 const apiBaseUrl = `http://127.0.0.1:${apiPort}`;
 const uuidPattern = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
@@ -163,6 +170,7 @@ async function main() {
         env: {
           ...process.env,
           NODE_ENV: 'test',
+          TSX_TSCONFIG_PATH: resolve(repositoryRoot, 'apps/api/tsconfig.json'),
           PORT: String(apiPort),
           SUPABASE_PUBLISHABLE_KEY: publishableKey,
           SUPABASE_URL: supabaseUrl,
@@ -183,6 +191,16 @@ async function main() {
     const callerB = quietClient(supabaseUrl, publishableKey, tokenB);
     const anonymous = quietClient(supabaseUrl, publishableKey);
 
+    if (process.argv.includes('--daily-entry')) {
+      await verifyDailyEntry({ apiRequest, tokenA, tokenB,
+        freshTokenA: async () => (await signIn(supabaseUrl, publishableKey, users[0].email, password)).access_token });
+      return;
+    }
+    if (process.argv.includes('--week-allocation')) {
+      await verifyWeekAllocation({ apiRequest, tokenA, tokenB, callerA, callerB, anonymous,
+        freshTokenA: async () => (await signIn(supabaseUrl, publishableKey, users[0].email, password)).access_token });
+      return;
+    }
     if (process.argv.includes('--daily-flow')) {
       await verifyDailyFlow({ apiRequest, tokenA, tokenB, callerA, callerB, anonymous,
         freshTokenA: async () => (await signIn(supabaseUrl, publishableKey, users[0].email, password)).access_token });
@@ -795,6 +813,8 @@ async function main() {
     await verifyDailyFlow({ apiRequest, tokenA, tokenB, callerA, callerB, anonymous,
       freshTokenA: async () => (await signIn(supabaseUrl, publishableKey, users[0].email, password)).access_token });
     console.log('PASS V2 proposals, approval/edit/empty/retry, missed days, weekly consistency, history, stale/concurrent edits and RLS');
+    await verifyWeekAllocation({ apiRequest, tokenA, tokenB, callerA, callerB, anonymous,
+      freshTokenA: async () => (await signIn(supabaseUrl, publishableKey, users[0].email, password)).access_token });
     console.log('PASS local stack and real Auth sessions');
     console.log('PASS anonymous table and application RPC privileges are denied');
     console.log('PASS caller-scoped Task and WeekPlan RLS isolation');

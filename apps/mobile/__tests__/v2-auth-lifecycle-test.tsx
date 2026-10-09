@@ -6,6 +6,7 @@ import { saveRecoverySession, isRecoverySession } from '@/features/auth/recovery
 import { processAuthCallback } from '@/features/auth/auth-callback';
 import { validateSignUp, validatePasswordReset } from '@/features/auth/auth-validation';
 import { rememberAuthDestination, consumeAuthDestination } from '@/features/auth/auth-destination';
+import { needsOnboarding, newAccountMetadata } from '@/features/auth/onboarding-state';
 
 jest.mock('@/lib/supabase/session-storage', () => ({ recoveryStorage: require('@react-native-async-storage/async-storage') }));
 const session = { user: { id: 'A', last_sign_in_at: '2026-10-08T12:00:00Z' }, access_token: 'synthetic', refresh_token: 'synthetic' } as Session;
@@ -39,6 +40,22 @@ it('does not apply a recovery marker to another account or a new login session',
   await saveRecoverySession(session);
   expect(await isRecoverySession({ ...session, user: { ...session.user, id: 'B' } })).toBe(false);
   expect(await isRecoverySession({ ...session, user: { ...session.user, last_sign_in_at: 'later' } })).toBe(false);
+});
+it('ignores late onboarding completion after the account has changed', async () => {
+  const initial = { ...session, user: { ...session.user, user_metadata: { ...newAccountMetadata } } };
+  const mock = client(initial);
+  let resolve: (value: unknown) => void = () => {};
+  mock.auth.updateUser.mockImplementationOnce(() => new Promise(done => { resolve = done; }) as never);
+  await render(<AuthProvider client={mock.client}><Probe /></AuthProvider>);
+  await screen.findByText('product');
+  let completion: Promise<void>;
+  await act(async () => { completion = value.completeOnboarding(); });
+  await act(async () => mock.emit('SIGNED_IN', { ...initial, user: { ...initial.user, id: 'B' } }));
+  await act(async () => {
+    resolve({ data: { user: { ...initial.user, user_metadata: { ...newAccountMetadata, lifeos_onboarding_completed_at: 'saved' } } }, error: null });
+    await expect(completion!).rejects.toThrow('Account changed');
+  });
+  expect(value.user?.id).toBe('B'); expect(needsOnboarding(value.user)).toBe(true);
 });
 it('rejects password updates outside a provider-verified recovery flow', async () => {
   const mock = client(session);

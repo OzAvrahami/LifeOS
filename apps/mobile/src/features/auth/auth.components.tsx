@@ -188,11 +188,11 @@ export function AuthSecondaryButton({
   );
 }
 
-export function AuthLink({ onPress, title }: { onPress: () => void; title: string }) {
+export function AuthLink({ onPress, title, disabled = false }: { onPress: () => void; title: string; disabled?: boolean }) {
   const { colors } = useTheme();
   const styles = createStyles(colors);
   return (
-    <Pressable accessibilityRole="button" hitSlop={6} onPress={onPress}>
+    <Pressable accessibilityRole="button" accessibilityState={{ disabled }} disabled={disabled} hitSlop={6} onPress={onPress} style={{ minHeight: 44, justifyContent: 'center', opacity: disabled ? 0.6 : 1 }}>
       <Text style={styles.link}>{title}</Text>
     </Pressable>
   );

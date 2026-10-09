@@ -1,5 +1,6 @@
 import type { SupabaseClient } from '@supabase/supabase-js';
 import { isDeepStrictEqual } from 'node:util';
+import { createHash } from 'node:crypto';
 import { mapTask } from '../tasks/task.service.js';
 import type { Task, TaskRow } from '../tasks/task.types.js';
 import { parseTaskId } from '../tasks/task.validation.js';
@@ -105,6 +106,24 @@ export class DailyFlowService {
     return data as FlowContext;
   }
   async get(date: string) { return presentFlow(await this.context(date)); }
+  async initialize(date: string) {
+    const context = await this.context(date);
+    // Entry can create the first suggestion only. Any existing V2 state (also a
+    // discarded proposal) belongs to the user and is never regenerated on entry.
+    if (date < context.today || context.plan?.planning_status === 'completed' || context.plan?.flow_state
+      || proposeDay(context, date).ids.length === 0) return presentFlow(context);
+    const revision = context.plan?.planning_revision ?? 0;
+    const hash = createHash('sha256').update(`lifeos:entry:${date}:${revision}:${context.snapshot}`).digest('hex');
+    const operationId = `${hash.slice(0, 8)}-${hash.slice(8, 12)}-5${hash.slice(13, 16)}-a${hash.slice(17, 20)}-${hash.slice(20, 32)}`;
+    try { return await this.save(date, { action: 'propose', operationId, revision, snapshot: context.snapshot }); }
+    catch (error) {
+      if (error instanceof PlanningApiError && error.statusCode === 409) {
+        const latest = await this.context(date);
+        if (latest.plan?.flow_state || latest.plan?.planning_status === 'completed') return presentFlow(latest);
+      }
+      throw error;
+    }
+  }
   async week(weekStart: string) {
     const end = new Date(`${weekStart}T12:00:00Z`); end.setUTCDate(end.getUTCDate() + 6);
     const context = await this.context(weekStart);

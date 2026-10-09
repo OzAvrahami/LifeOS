@@ -3,9 +3,11 @@ import { Href, useLocalSearchParams, useRouter } from 'expo-router';
 import { TodayScreen } from '@/features/today/today-screen';
 import { isTodayDemoState } from '@/features/today/today.types';
 import { V2TodayScreen } from '@/features/today/v2-today-screen';
+import { useAuth } from '@/features/auth/auth-provider';
 
 export default function IndexRoute() {
   const router = useRouter();
+  const { user } = useAuth();
   const { inboxTaskId, preview, state } = useLocalSearchParams<{
     inboxTaskId?: string | string[];
     preview?: string | string[];
@@ -18,6 +20,7 @@ export default function IndexRoute() {
   const movedTaskId = Array.isArray(inboxTaskId) ? inboxTaskId[0] : inboxTaskId;
 
   if (!requestedState || !developmentPreview) return <V2TodayScreen
+    displayName={typeof user?.user_metadata?.name === 'string' ? user.user_metadata.name : undefined}
     preview={developmentPreview} onNavigateInbox={() => router.navigate('/inbox')}
     onNavigateMore={() => router.navigate('/more')} onNavigateWeek={() => router.navigate('/week')} />;
 

@@ -1,5 +1,138 @@
 # LifeOS V2 milestone 1 - issues #29 and #30
 
+## Owner acceptance and authorized local checkpoint — 2026-10-09
+
+The owner accepted the reviewed **local web-preview screen appearance** and confirmed proposal adjustment/cancellation, approval persistence after reload, completion consistency across Today/Week/Tasks, and reopening a task with updated Today/counts. This is owner-reported acceptance of that local scope. The earlier appearance acceptance request and checkpoint pause are superseded for those reviewed screens/checks; the agent's supported-browser limitation remains an honest record of independent verification.
+
+Do not infer physical-device, hosted-provider, email/callback, production or full integration acceptance, an exhaustive viewport/theme/keyboard matrix, or additional onboarding/authentication acceptance from this report. Earlier disposable local Auth evidence remains separate. No issue is closed or Project metadata changed.
+
+One new local commit is owner-authorized over `bf02eff`, containing #33 and the subsequent onboarding/Today/visual corrections. The [current 96-file scope and checkpoint record](issue-33-verification.md#owner-accepted-local-web-checkpoint--2026-10-09) supersede older manifests. Source remains identical to the recorded final checks; this preparation edits documentation only. Current/last accepted 0.5.0 (9) and proposed, unprepared V2 0.6.0 (10) are unchanged. Provider/device/production and unreported acceptance gates remain pending.
+
+## Today visual correction — 2026-10-09
+
+The owner rejected the preceding Today presentation. This correction is implemented and focused automated checks pass, but **rendered fidelity and owner acceptance remain pending**. Older working-tree inventories below are historical, not the current checkpoint scope. Existing onboarding, Auth and planning behavior is preserved.
+
+### Reference-to-native mapping
+
+Read the actual `design-reference/LifeOS-V2-Handoff/prototype.html` markup, embedded font/icon assets and CSS cascade, including the final compact-proposal overrides. These are logical CSS pixels/React Native points. The decorative phone frame, fake status bar and flow annotations are excluded.
+
+| Mismatch | Actual correction |
+| --- | --- |
+| Gear/header | `V2Header` uses the 37-point circular bordered profile/name control, with actual initials or an unnamed-account user icon, retaining More/Settings access. The reference brand has a 28-point rotated L mark and 21-point wordmark. Header bottom gap: 15. |
+| Greeting | Heebo 800, 29/36.25 line height, tracking -0.8; 26/32.5 at widths <=375. Body horizontal padding 19, or 14 on narrow screens. Real date 12/18.6 with 5-point bottom gap; greeting gap 8; supporting copy 13/20.8: “בוא נפנה מקום למה שחשוב לך.” Timezone/time/profile supply the real date, greeting and name. |
+| Summary | Lucide Sparkles 19; soft-green card radius 22, padding/top gap 17; heading 20/26 at weight 750. The “הצעה” pill uses the card surface (white in light mode), radius 20, 5-by-9 padding and 11-point weight 650. Real count and “לפי המשימות שלך.” avoid fictional calendar/capacity claims. |
+| Task cards | Right-side 24-point pale-green rank badge, radius 8; card radius 15, padding 12, internal gap 10, list gap 9. Title 14/21 at weight 650; actual reason 11/16.5 in accent color, 4 points below. Removed “1 · מוצעת להיום”. Long titles have no fixed card height or truncation. |
+| Approval | One primary action, minimum height 48, padding 12-by-15, radius 14, 14-point Heebo 700, Lucide Check 18 and top gap 22. Existing pending/stale-review/approval behavior retained. |
+| Navigation | Actual Lucide Sun, CalendarDays, Plus, ListTodo, Calendar geometry. Icons 20, labels 10, gap 5; controls at least 53 by 46; central add 43 by 43/radius 15; active indicator 19 by 3. Padding 9 top/10 horizontal/at least 16 bottom with safe-area support. Existing routes/capture retained. |
+| Font | V2 uses bundled Heebo, replacing Assistant: exact embedded regular TTF plus explicit 650/700/750/800 faces from official Heebo 3.100. Root font loading waits before rendering. Legacy screens retain Assistant; the intentional Arial L follows the reference. |
+
+Real LifeOS events use the reference's bordered 14-radius, 13-padding row, golden 3-point side bar and 13-point title/11-point time. A local calendar icon and LifeOS source replace the fictional Google badge. Actual events appear before approval; no sample event, connected status or calendar-based recommendation is fabricated. Empty/loading/error/approved states use the corrected Heebo, palette, cards and controls. Existing approved counts/actions remain data-driven. Scroll containers and accessibility labels/states remain; visually small controls have expanded hit targets.
+
+The prototype declares only Heebo 400 even where CSS requests heavier weights, so browsers may synthesize bold. Native static weights follow the requested values; exact rendered weight matching remains unverified. Both the former Assistant font and all five Heebo files contain all 27 Hebrew letters including final forms: **a missing-Hebrew-glyph fallback was not established**. Latin, digits and application Hebrew punctuation were also checked with FontTools. Actual browser computed-font selection/native rasterization requires rendered verification. See [font provenance/license](../apps/mobile/assets/fonts/README.md) and [Lucide geometry/license](../apps/mobile/assets/icons/lucide/README.md). No dependency or native-module addition; assets do not depend on the owner handoff at runtime.
+
+### Checks and remaining acceptance
+
+Final source checks from `D:\code\LifeOS`:
+
+- `npm.cmd run typecheck --workspace @lifeos/mobile` — pass.
+- `npm.cmd run lint --workspace @lifeos/mobile` — pass.
+- `npm.cmd run test --workspace @lifeos/mobile -- --runTestsByPath __tests__/v2-today-integration-test.tsx __tests__/daily-flow-test.tsx __tests__/v2-foundation-test.tsx __tests__/week-navigation-test.tsx __tests__/v2-task-experience-test.tsx` — **5 suites, 49/49 pass**. Existing proposal/approval/edit/cancel, membership/completion, empty/loading/error, account-switch, task/capture and navigation checks pass. Four added component cases use mocked widths 440/320, height 956, light/dark theme state and long Hebrew content; they retain profile/settings, Week/tasks/capture, actual reason and a single approval without an incidental write. These are **not rendered layout or keyboard checks**.
+- `git diff --check` and new source/document whitespace validation — pass. No API, Auth, schema or proposal/query logic changed; broad DB/Auth suites were not repeated. Earlier evidence remains scoped to that implementation.
+- Baseline hashes preserve the Git index, owner handoff, root `tsconfig.json`, environments, manifests/lockfile and unrelated pre-existing work. HEAD remains `bf02eff3f6ec2ee51e0a5e0891e3e3729f846f08`, main, 1 ahead / 0 behind the existing origin/main ref. No fetch or Git mutation.
+
+Final inventory: 53 modified tracked files and 51 untracked files across the entire existing tree. This correction changed 12 pre-existing paths (eight source/test paths plus CHANGELOG and the three verification records) and added 27 font/icon/helper/provenance files; the other 358 baseline file hashes match. New implementation helpers are `src/components/v2-icon.tsx` and `src/theme/v2-fonts.ts`; assets are under `apps/mobile/assets/fonts` and `apps/mobile/assets/icons/lucide`. The untracked owner handoff/root config remain excluded from implementation scope. The live development server returns the exact bundled bytes for all five Heebo faces and the Sparkles/Check PNGs; this confirms asset delivery, not font selection or rendering.
+
+Supported browser discovery returned no apps/browsers. Opening the actual reference failed with `Browser is not available: edge`; opening the isolated preview failed with `Browser is not available: iab`. Neither proposal screen could be rendered through supported access. Development bundle/asset serving establishes compilation/reachability only. **Pixel fidelity, actual font/icon rasterization, wrapping/scrolling, keyboard focus, owner/provider/integration and physical-device acceptance remain pending.** #29 stays In Progress; #32/#33 stay open with their existing Verify statuses. No issue metadata changed for this correction.
+
+### Preview and owner recheck
+
+Current isolated preview: **http://localhost:8083**, API **http://127.0.0.1:3197**. Hard-refresh once for the bundled fonts. If the web process has stopped:
+
+```powershell
+Set-Location -LiteralPath 'D:\code\LifeOS'
+$env:LIFEOS_INTEGRATION_SUPABASE_WORKDIR = Join-Path $env:TEMP 'lifeos-32-disposable'
+node apps/api/scripts/review-daily-flow.mjs web
+```
+
+No API restart is needed for this visual change. If that process has stopped, use the same location/environment in a separate terminal and `node apps/api/scripts/review-daily-flow.mjs api`. These launchers do not reset the database or change hosted configuration.
+
+Review an existing unapproved proposal at **440 by 956 logical viewport** against the reference proposal at the same content viewport, excluding its phone/status-bar decorations. Check greeting, summary, ranks/reasons, real events when present, approval and navigation. Repeat at **320 by 956**, with a long Hebrew title, in light/dark appearance. Open profile/settings and return; open/cancel task details and proposal adjustment; approve once and check the approved state. Use a zero-task account for the empty state. Shared changes also need a quick Week/tasks/capture visual check. **Please supply application/reference screenshots labelled with viewport, theme and state while supported browser access remains unavailable.** Do not reset an approved day to obtain a screenshot.
+
+**Release candidate:** patch-level correction within proposed combined V2 **0.6.0 (10)**, still unprepared/unauthorized. Current and last accepted **0.5.0 (9)** are unchanged. No version bump, build/export/install, provider configuration, DB mutation, production change, staging, commit or push. Checkpoint preparation remains paused for owner review.
+
+## Owner review corrections — 2026-10-09
+
+This section supersedes earlier onboarding/Today readiness claims below. Owner checkpoint `bf02eff3f6ec2ee51e0a5e0891e3e3729f846f08` remains HEAD on main, 1 ahead / 0 behind the existing origin/main ref. The index remains empty. Final tree: 49 tracked modifications and 24 untracked paths (16 implementation/verification files plus the seven owner handoff files and root tsconfig). All 16 protected hashes match the pre-#33 inventory; only six pre-existing #33 paths changed further for this correction (CHANGELOG, both affected #32/#33 records, local verifier, planning routes and daily-flow query hook). The pre-existing uncommitted #33 implementation, owner handoff, root tsconfig, environment/native boundaries and versions are preserved. No checkpoint preparation, staging, commit, push, fetch, DB reset, schema application, deployment or build/install was performed for these corrections.
+
+### Findings and corrections
+
+- The old onboarding used an in-memory two-step check/leaf presentation and did not persist completion. Recreated the reference's native orbit/L hero and floating tags, centered Assistant typography, spacing, “היום שלך, בקצב שלך”, explanatory text and calendar introduction. Replaced “להיום שלי” with “לתכנון היום”, including the related invalid-link return action. The calendar action explains current unavailability; it neither connects nor marks onboarding complete. Both continuation actions explicitly save completion before product navigation. Copy avoids claiming that calendar capacity shapes the proposal.
+- New application registrations receive `lifeos_onboarding_version: 1` and an unset `lifeos_onboarding_completed_at` in existing Auth user metadata, alongside the optional name. The product route guard redirects these authenticated accounts to onboarding until an explicit continuation is acknowledged by Auth. Failures remain retryable; mounting, restarting and opening calendar information do not complete onboarding. Completion survives refresh/new login. Account-keyed views and response ownership checks prevent a late result from replacing another account's session. Legacy accounts without the marker retain their existing access; use a **fresh registration after this correction** to review the first-registration journey. These metadata fields are presentation state, not authentication authorization.
+- Today now displays the real timezone-local date, time-appropriate greeting and optional profile name. First eligible entry initializes the persisted #32 proposal. Proposal cards carry actual titles/order/reasons, a clear adjustment action and one approval action. Approved days show real progress/membership and explicit editing; optional summary/system-adjustment tools are secondary. A fresh zero-task account has one primary task-creation action and an optional deliberate empty-day path. Empty calendar sections and repeated task-list actions are removed from that state. See [#32 correction evidence](issue-32-verification.md#owner-review-corrections--2026-10-09) for initialization, concurrency and historical-plan guarantees.
+
+### Why email verification was skipped locally
+
+Inspected the **running** `supabase_auth_LifeOS32` container: `GOTRUE_MAILER_AUTOCONFIRM=true`, `GOTRUE_EXTERNAL_EMAIL_ENABLED=true`, `GOTRUE_DISABLE_SIGNUP=false`. The isolated config at `%TEMP%/lifeos-32-disposable/supabase/config.toml` has email `enable_confirmations=false`. A real synthetic signup returned both a session and `email_confirmed_at`; this establishes expected local auto-confirmation, not an app bypass. The signup screen enters onboarding only for a returned authenticated session. A null session routes to Verify Email; an unconfirmed-password sign-in is rejected by Auth.
+
+`verify-local-auth.mjs` separately started a temporary loopback-only GoTrue sidecar from the same installed image/network with auto-confirmation **disabled**, using only its own synthetic accounts in LifeOS32. It verified null signup session, `email_not_confirmed` sign-in rejection, actual Mailpit email, actual verification redirect into `/auth/callback`, the application's `processAuthCallback`, pending onboarding after login, explicit metadata completion, fresh-login persistence and isolation from the other test account. Synthetic users and the temporary container were removed. No owner account or existing service configuration was changed; no database reset was used.
+
+The **existing** local service still has site URL `http://127.0.0.1:3000` and redirect allow-list `https://127.0.0.1:3000`. These do not authorize the current preview callback on localhost:8083. The temporary confirmation-required service used its own explicit preview allow-list; its passing callback must not be represented as verification of the existing local redirect configuration. Hosted confirmation requirements, delivery, redirects/app links and provider behavior remain unverified and unchanged.
+
+### Exact available checks
+
+All commands below ran from `D:\code\LifeOS`; no broad test suite, export or native build was run.
+
+| Check | Result |
+| --- | --- |
+| `npm.cmd run typecheck` and `npm.cmd run lint` | Both workspaces pass after final source edits. Initial lint failures in new harness imports were corrected. |
+| `npm.cmd run test --workspace @lifeos/mobile -- --runTestsByPath __tests__/auth-ui-test.tsx` | 23/23 pass: actual form branching under SDK mocks, callback/gates, new onboarding no-write-on-entry/calendar, save failure/retry, completion, restart and account switch. An old exact metadata expectation was updated for the new registration marker. |
+| `npm.cmd run test --workspace @lifeos/mobile -- --runTestsByPath __tests__/v2-today-integration-test.tsx __tests__/daily-flow-test.tsx __tests__/v2-auth-lifecycle-test.tsx __tests__/auth-infrastructure-test.tsx` | Final 38/38 pass: proposal entry/reason/order, explicit approval, adjustment cancellation, real completion/focus/events, approved empty day, loading/error retry, settings readiness, account switch and late onboarding result protection, session/callback regressions. |
+| `npm.cmd run test --workspace @lifeos/mobile -- --runTestsByPath __tests__/v2-today-integration-test.tsx __tests__/daily-flow-test.tsx __tests__/v2-foundation-test.tsx __tests__/week-navigation-test.tsx __tests__/v2-task-experience-test.tsx` | 44/44 pass before the final Today presentation refinement; the subsequently changed Today/daily-flow paths are included in the final 38/38 run above. Week/task/navigation regressions remain unchanged. |
+| `$env:TSX_TSCONFIG_PATH = Join-Path (Get-Location) 'apps/api/tsconfig.json'; node --import tsx --test apps/api/__tests__/daily-flow.test.ts apps/api/__tests__/week-allocation.test.ts` | 11/11 pass. |
+| `node --import tsx apps/api/scripts/verify-local-auth.mjs` | Both real Auth groups pass as detailed above; requires the local workdir and tracked TSX config below. |
+| `node apps/api/scripts/verify-local-tasks.mjs --daily-entry` | Pass: actual local HTTP/DB initialization, empty/future-only entry, concurrent idempotence, saved/empty/stale selections, approval, next-day identity/history and account isolation. |
+| Same local verifier with `--daily-flow`, then `--week-allocation` | Both pass: #32 proposals/approval/edit/retry/missed days/history/RLS and #33 allocation/order/empty days/stale/concurrent edits/descriptions/RLS. |
+| `git diff --check`; explicit unstaged new-file whitespace checks | Pass. Protected baseline hashes and unchanged index checked. |
+
+Harness environment (no hosted credentials/config):
+
+```powershell
+Set-Location -LiteralPath 'D:\code\LifeOS'
+$env:LIFEOS_INTEGRATION_SUPABASE_WORKDIR = Join-Path $env:TEMP 'lifeos-32-disposable'
+$env:LIFEOS_INTEGRATION_SUPABASE_PROJECT_ID = 'LifeOS32'
+$env:TSX_TSCONFIG_PATH = Join-Path (Get-Location) 'apps/api/tsconfig.json'
+```
+
+The root owner `tsconfig.json` remains untracked and untouched. Both workspaces use their tracked configs; the new Auth harness command explicitly pins the tracked API config, as do the existing local API verifier/review launcher. It is not part of the application dependency or proposed source scope.
+
+### Running preview and owner recheck
+
+The existing isolated web preview is **http://localhost:8083**. Its API on 127.0.0.1:3197 was restarted to load the new initializer; LifeOS32 Auth/API remains 56321, DB 56322, Mailpit 56324. Existing database data and the web process were preserved. HTML, current development bundle and API health are reachable; bundle content includes the new onboarding marker and initializer. This is reachability/compilation evidence only.
+
+If either preview process is later stopped, use two PowerShell terminals with the harness environment above, then respectively:
+
+```powershell
+node apps/api/scripts/review-daily-flow.mjs api
+```
+
+```powershell
+node apps/api/scripts/review-daily-flow.mjs web
+```
+
+Do not start a duplicate listener or reset the local DB. The launcher reads only the explicitly named disposable project and bypasses mobile `.env` loading for this preview.
+
+1. Open the URL without `preview`/`state` query parameters. Sign out if needed; register a fresh dedicated local account. Expected here: local auto-confirmed session → onboarding. Check orbit/L composition, Hebrew heading and “לתכנון היום”; the calendar action must explain unavailability without completing onboarding.
+2. Reload before continuing: onboarding must remain. Continue explicitly; inspect the simple zero-task Today state. Reload/sign out/in: onboarding must not repeat. Switch to another fresh account: it must have its own onboarding/empty state.
+3. Add one task for today. Today should show its proposal immediately, real date/greeting and a truthful reason. Open adjustment, cancel, then reorder/save a draft and reload. Approve once; check progress/completion against Week and task list after reload. Use adjustment to approve an intentionally empty day as a separate state.
+4. For prior-day continuation, optionally use the existing `seed <fresh-local-email@example.test>` review helper only on a separate empty disposable review account; it refuses accounts with existing product rows. Inspect unfinished suggestions with real origin dates, retained historical plans and the already-approved next day. Do not seed the owner's current review account.
+5. Compare prototype `welcome`, `proposal`, `adjust` and `today` at 390×844 and 320px width, light/dark, keyboard visible and RTL. Check scrolling, navigation/return and one primary proposal approval. Supported browser attempts returned `Browser is not available: edge` and `Browser is not available: iab`; no rendered comparison was possible in this session. Visual, owner, hosted provider/integration and physical-device acceptance remain pending.
+
+### Release candidate and tracking for the corrections
+
+These fixes remain within the proposed shared **0.6.0 (10)** V2 candidate, not prepared/authorized/installed/accepted. Tracked versions remain **0.5.0**, configured iOS build **9**; accepted 0.5.0 (9) predates this work. Recheck later native artifacts and complete the workflow's pre-device/schema/API gates in a future authorized task. No new schema migration is needed for these corrections; the existing pending #32/#33 rollout gates remain.
+
+#29/#30 retain their existing **In Progress** states; this correction pass does not reassess their entire external acceptance scope. #32 moved Verify → In Progress while fixing Today, then back to **Verify** after software checks; each write was read back. #33 remains **Verify** with the integration regression evidence above. All four issues remain open; metadata other than the justified #32 Status transition is preserved. Checkpoint preparation remains paused by the owner; the historical manifests below/in #33 are not current staging instructions.
+
 ## Scope and baseline
 
 Implementation baseline: `9b775df50b563f518464810ddf5e646b2087b67e`, main, following the owner-authorized no-tags fetch and clean fast-forward. The pre-existing untracked `design-reference/LifeOS-V2-Handoff/` is preserved. No implementation from the issue-creation instructions is repeated.

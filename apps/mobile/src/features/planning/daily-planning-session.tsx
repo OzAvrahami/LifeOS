@@ -64,9 +64,9 @@ export function DailyPlanningSession({ context, onClose }: { context: DailySessi
     } catch (error) { if (mounted.current) setTaskError(true); throw error; }
     finally { taskBusy.current = false; if (mounted.current) setTaskPending(false); }
   };
-  const captureTask = async (title: string, placement: TaskCapturePlacement) => {
+  const captureTask = async (title: string, placement: TaskCapturePlacement, details?: import('@/features/tasks/task-capture.types').TaskCaptureDetails) => {
     if (!capture) return;
-    const input: CreateTaskInput = { title, planning: placement.destination === 'day' ? { type: 'day', plannedDate: placement.plannedDate }
+    const input: CreateTaskInput = { title, ...(details ? { description: details.description } : {}), planning: placement.destination === 'day' ? { type: 'day', plannedDate: placement.plannedDate }
       : placement.destination === 'today' ? { type: 'day', plannedDate: date }
       : placement.destination === 'week' ? { type: 'week', weekStart } : { type: 'inbox' } };
     const result = await apiRequest<{ task: Task }>('/tasks', { auth: 'required', expectedUserId: userId,
