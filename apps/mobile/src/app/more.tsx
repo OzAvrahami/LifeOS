@@ -1,18 +1,4 @@
-import { useTaskQueryScope } from '@/features/tasks/task-query-scope';
-import { Href, useRouter } from 'expo-router';
+import { Redirect } from 'expo-router';
 
-import { MoreScreen } from '@/features/settings/more-screen';
-
-export default function MoreRoute() {
-  const router = useRouter();
-  const scope = useTaskQueryScope();
-  return (
-    <MoreScreen key={scope}
-      onNavigateAccount={() => router.navigate('/account' as Href)}
-      onNavigateInbox={() => router.navigate('/inbox' as Href)}
-      onNavigateSettings={() => router.navigate('/settings' as Href)}
-      onNavigateToday={() => router.replace('/')}
-      onNavigateWeek={() => router.navigate('/week' as Href)}
-    />
-  );
-}
+// The accepted profile control keeps its route; Settings now owns preferences.
+export default function MoreRoute() { return <Redirect href="/settings" />; }

@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { Keyboard, Platform, Pressable, StyleSheet, Text, TextInput, View } from 'react-native';
-import { colors, radius, spacing, typography } from '@/theme/tokens';
+import { radius, spacing, v2Typography } from '@/theme/tokens';
+import { useTheme, type Palette } from '@/theme/theme-provider';
 import { validReminderLead } from './commitment-reminder-time';
 
 const presets = [0, 5, 15, 30, 60];
@@ -14,6 +15,7 @@ export function reminderLeadLabel(value: number | null) {
 export function ReminderLeadPicker({ value, onChange, allowNone = true, disabled = false }: {
   value: number | null; onChange: (value: number | null) => void; allowNone?: boolean; disabled?: boolean;
 }) {
+  const { colors } = useTheme(); const styles = createStyles(colors);
   const [custom, setCustom] = useState(value !== null && !presets.includes(value));
   const choices = allowNone ? [null, ...presets] : presets;
   const choose = (next: number | null) => { if (Platform.OS !== 'web') Keyboard.dismiss(); setCustom(false); onChange(next); };
@@ -31,10 +33,10 @@ export function ReminderLeadPicker({ value, onChange, allowNone = true, disabled
     </> : null}
   </View>;
 }
-const styles = StyleSheet.create({
+const createStyles = (colors: Palette) => StyleSheet.create({
   content: { gap: spacing.sm }, choices: { flexDirection: 'row-reverse', flexWrap: 'wrap', gap: spacing.xs },
   choice: { minHeight: 44, padding: spacing.sm, justifyContent: 'center', borderRadius: radius.md, backgroundColor: colors.completedSurface, borderWidth: 1, borderColor: 'transparent' },
   selected: { borderColor: colors.accent, backgroundColor: colors.accentWeak },
-  text: { color: colors.text, fontFamily: typography.family.regular, fontSize: 15, textAlign: 'right', writingDirection: 'rtl' },
+  text: { color: colors.text, fontFamily: v2Typography.family.regular, fontSize: 14, textAlign: 'right', writingDirection: 'rtl' },
   input: { minHeight: 48, borderWidth: 1, borderColor: colors.accent, borderRadius: radius.md, paddingHorizontal: spacing.md, color: colors.text, textAlign: 'right' },
 });

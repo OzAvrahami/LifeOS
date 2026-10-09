@@ -1,18 +1,20 @@
-import { Ionicons } from '@expo/vector-icons';
+import { V2Icon } from '@/components/v2-icon';
 import { useQueryClient } from '@tanstack/react-query';
 import { useState } from 'react';
 import { Modal, Pressable, StyleSheet, Text, View } from 'react-native';
 
 import { useAuth } from '@/features/auth/auth-provider';
 import { clearUserQueryCache } from '@/features/auth/session-query-cache';
-import { radius, spacing, typography } from '@/theme/tokens';
+import { radius, spacing, typography as legacyTypography, v2Typography } from '@/theme/tokens';
 import { useTheme, type Palette } from '@/theme/theme-provider';
 import { V2Button, V2Text } from '@/components/v2';
 import { createAuthCallbackUrl } from '@/features/auth/auth-navigation';
 import { authErrorMessage } from '@/features/auth/auth-errors';
 
 import { authDisplayName } from './more-screen';
-import { SettingsCard, SettingsPage, SettingsSectionLabel } from './settings.components';
+import { SettingsCard } from './settings.components';
+import { V2SettingsPage as SettingsPage, V2SettingsHeading as SettingsSectionLabel } from './v2-settings';
+const typography = { ...legacyTypography, family: { ...v2Typography.family, medium: v2Typography.family.semibold } };
 
 export function AccountScreen({ onBack, onSignedOut }: { onBack: () => void; onSignedOut: () => void }) {
   const { colors } = useTheme();
@@ -47,7 +49,7 @@ export function AccountScreen({ onBack, onSignedOut }: { onBack: () => void; onS
           <>
             {error ? <Text accessibilityRole="alert" style={styles.error}>{error}</Text> : null}
             <Pressable accessibilityLabel="התנתקות" accessibilityRole="button" onPress={() => setConfirming(true)} style={styles.signOutButton}>
-              <Ionicons color={colors.warningAction} name="log-out-outline" size={20} />
+              <V2Icon color={colors.warningAction} name="log-out" size={20} />
               <Text style={styles.signOutText}>התנתקות</Text>
             </Pressable>
           </>
@@ -81,7 +83,7 @@ export function AccountScreen({ onBack, onSignedOut }: { onBack: () => void; onS
         <View style={styles.modalRoot}>
           <Pressable accessibilityLabel="ביטול התנתקות" accessibilityRole="button" onPress={() => setConfirming(false)} style={styles.backdrop} />
           <View accessibilityLabel="אישור התנתקות" style={styles.confirmation}>
-            <View style={styles.confirmationIcon}><Ionicons color={colors.warningAction} name="log-out-outline" size={25} /></View>
+            <View style={styles.confirmationIcon}><V2Icon color={colors.warningAction} name="log-out" size={25} /></View>
             <Text style={styles.confirmationTitle}>להתנתק מ־LifeOS?</Text>
             <Text style={styles.confirmationBody}>תמיד אפשר להתחבר שוב עם אותו חשבון. המידע שלך נשמר.</Text>
             <Pressable accessibilityRole="button" accessibilityState={{ busy: signingOut }} disabled={signingOut} onPress={() => void confirmSignOut()} style={styles.confirmButton}>
@@ -103,7 +105,7 @@ const createStyles = (colors: Palette) => StyleSheet.create({
   detailLabel: { color: colors.textSubtle, fontFamily: typography.family.semibold, fontSize: typography.size.meta, width: 56 },
   detailValue: { color: colors.textSoft, flex: 1, fontFamily: typography.family.semibold, fontSize: typography.size.button, textAlign: 'left' },
   email: { fontFamily: typography.family.medium, fontSize: typography.size.body, writingDirection: 'ltr' },
-  hint: { color: '#A8A296', fontFamily: typography.family.regular, fontSize: 12.5, marginHorizontal: spacing.xxs, marginTop: spacing.xs, textAlign: 'right' },
+  hint: { color: colors.textMuted, fontFamily: typography.family.regular, fontSize: 12.5, marginHorizontal: spacing.xxs, marginTop: spacing.xs, textAlign: 'right' },
   signOutButton: { alignItems: 'center', backgroundColor: colors.surface, borderColor: '#EAD9CF', borderRadius: 15, borderWidth: 1, flexDirection: 'row-reverse', gap: 9, height: 54, justifyContent: 'center' },
   signOutText: { color: colors.warningAction, fontFamily: typography.family.bold, fontSize: typography.size.button },
   error: { color: colors.warningText, fontFamily: typography.family.semibold, fontSize: typography.size.label, marginBottom: spacing.sm, textAlign: 'right' },

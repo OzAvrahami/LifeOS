@@ -77,12 +77,14 @@ it('preserves unsaved lead on API failure for retry', async () => {
 it('Settings saves explicit commitment category/default without altering other intent', async () => {
   await render(<TestProviders><NotificationSettingsScreen onBack={jest.fn()} /></TestProviders>);
   await screen.findByRole('switch', { name: 'תזכורות להתחייבויות' });
+  expect(screen.queryByLabelText('מותאם אישית')).toBeNull();
+  await fireEvent.press(screen.getByRole('button', { name: 'הגדרות תזכורות להתחייבויות' }));
   await press('מותאם אישית'); await fireEvent.changeText(screen.getByLabelText('דקות לפני ההתחייבות'), '37');
   await fireEvent.press(screen.getByLabelText('שמירת התראות'));
-  await waitFor(() => expect(settingsApi.patchNotificationPreferences).toHaveBeenCalledWith({ ...prefs, commitmentDefaultReminderMinutes: 37 }, 'UTC'));
+  await waitFor(() => expect(settingsApi.patchNotificationPreferences).toHaveBeenCalledWith({ ...prefs, commitmentDefaultReminderMinutes: 37 }, 'UTC', 'current-session'));
   await fireEvent.press(screen.getByRole('switch', { name: 'תזכורות להתחייבויות' }));
   await fireEvent.press(screen.getByLabelText('שמירת התראות'));
-  await waitFor(() => expect(settingsApi.patchNotificationPreferences).toHaveBeenLastCalledWith({ ...prefs, commitmentRemindersEnabled: false, commitmentDefaultReminderMinutes: 37 }, 'UTC'));
+  await waitFor(() => expect(settingsApi.patchNotificationPreferences).toHaveBeenLastCalledWith({ ...prefs, commitmentRemindersEnabled: false, commitmentDefaultReminderMinutes: 37 }, 'UTC', 'current-session'));
 });
 
 it('notification details resolve the latest date and reuse the editor; missing/deleted records show an unavailable state', async () => {

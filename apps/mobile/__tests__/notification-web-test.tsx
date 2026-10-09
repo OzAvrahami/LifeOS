@@ -1,5 +1,6 @@
 /** @jest-environment jsdom */
-import { act, type ReactNode } from 'react';
+import { act, useState, type ReactNode } from 'react';
+import { V2SettingsSwitch } from '@/features/settings/v2-settings';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { TaskReminderEditor } from '@/features/notifications/task-reminder-editor';
 import { reminderLocalParts } from '@/features/notifications/reminder-time';
@@ -11,6 +12,34 @@ jest.mock('@/features/tasks/task-date-control', () => jest.requireActual('@/feat
 jest.mock('@/features/notifications/notification-module', () => jest.requireActual('@/features/notifications/notification-module.ts'));
 jest.mock('@/features/settings/settings.api', () => ({ getSettings: jest.fn(async () => ({ persisted: false, timezone: null, weekStartDay: 0, defaultDailyCapacityMinutes: 360 })) }));
 const { createRoot } = jest.requireActual<{ createRoot: (container: Element) => { render: (node: ReactNode) => void; unmount: () => void } }>('react-dom/client');
+
+it('exposes a focusable RTL switch, toggles once with Space/Enter and blocks disabled keyboard changes', async () => {
+  const container = document.createElement('div'); document.body.appendChild(container);
+  const root = createRoot(container);
+  const env = globalThis as typeof globalThis & { IS_REACT_ACT_ENVIRONMENT: boolean };
+  const previous = env.IS_REACT_ACT_ENVIRONMENT; env.IS_REACT_ACT_ENVIRONMENT = true;
+  function Probe({ disabled = false }: { disabled?: boolean }) {
+    const [value, setValue] = useState(false);
+    return <V2SettingsSwitch label="התראות LifeOS" value={value} disabled={disabled} onChange={setValue} />;
+  }
+  try {
+    await act(() => root.render(<Probe />));
+    const toggle = container.querySelector<HTMLElement>('[role="switch"]')!;
+    await act(() => toggle.focus()); expect(document.activeElement).toBe(toggle);
+    expect(toggle.getAttribute('aria-checked')).toBe('false');
+    await act(() => toggle.dispatchEvent(new KeyboardEvent('keydown', { key: ' ', bubbles: true, cancelable: true })));
+    expect(toggle.getAttribute('aria-checked')).toBe('true');
+    await act(() => toggle.dispatchEvent(new KeyboardEvent('keydown', { key: ' ', repeat: true, bubbles: true })));
+    expect(toggle.getAttribute('aria-checked')).toBe('true');
+    await act(() => toggle.dispatchEvent(new KeyboardEvent('keydown', { key: 'Enter', bubbles: true })));
+    await act(() => toggle.dispatchEvent(new KeyboardEvent('keyup', { key: 'Enter', bubbles: true })));
+    expect(toggle.getAttribute('aria-checked')).toBe('false');
+    await act(() => root.render(<Probe disabled />));
+    expect(toggle.getAttribute('aria-disabled')).toBe('true');
+    await act(() => toggle.dispatchEvent(new KeyboardEvent('keydown', { key: ' ', bubbles: true })));
+    expect(toggle.getAttribute('aria-checked')).toBe('false');
+  } finally { await act(() => root.unmount()); container.remove(); env.IS_REACT_ACT_ENVIRONMENT = previous; }
+});
 
 it('keeps browser input focus and exact-minute validity, persists/reopens local values and never requests native delivery', async () => {
   const container = document.createElement('div'); document.body.appendChild(container);

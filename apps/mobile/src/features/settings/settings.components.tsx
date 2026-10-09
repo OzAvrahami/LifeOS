@@ -1,10 +1,11 @@
-import { Ionicons } from '@expo/vector-icons';
+import { V2Icon } from '@/components/v2-icon';
 import type { PropsWithChildren, ReactNode } from 'react';
 import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 
-import { radius, spacing, typography } from '@/theme/tokens';
+import { radius, spacing, typography as legacyTypography, v2Typography } from '@/theme/tokens';
 import { useTheme, type Palette } from '@/theme/theme-provider';
+const typography = { ...legacyTypography, family: { ...v2Typography.family, medium: v2Typography.family.semibold } };
 
 export function SettingsBackHeader({ onBack, title }: { onBack: () => void; title: string }) {
   const { colors } = useTheme();
@@ -17,7 +18,7 @@ export function SettingsBackHeader({ onBack, title }: { onBack: () => void; titl
         onPress={onBack}
         style={styles.backButton}
       >
-        <Ionicons color={colors.textMuted} name="chevron-forward" size={20} />
+        <V2Icon color={colors.textMuted} name="arrow-right" size={20} />
       </Pressable>
       <Text style={styles.headerTitle}>{title}</Text>
     </View>
@@ -81,18 +82,20 @@ export function SettingsRow({
     >
       <Text style={styles.rowLabel}>{label}</Text>
       <Text style={styles.rowValue}>{value}</Text>
-      <Ionicons color="#B0AA9E" name="chevron-back" size={18} />
+      <V2Icon color={colors.textMuted} name="chevron-left" size={18} />
     </Pressable>
   );
 }
 
 export function RadioOption({
+  disabled = false,
   current = false,
   label,
   onPress,
   selected,
 }: {
   current?: boolean;
+  disabled?: boolean;
   label: string;
   onPress: () => void;
   selected: boolean;
@@ -103,12 +106,15 @@ export function RadioOption({
     <Pressable
       accessibilityLabel={label}
       accessibilityRole="radio"
-      accessibilityState={{ checked: selected }}
+      aria-checked={selected}
+      aria-disabled={disabled}
+      accessibilityState={{ checked: selected, disabled }}
+      disabled={disabled}
       onPress={onPress}
       style={[styles.radioOption, selected && styles.radioOptionSelected]}
     >
       <View style={[styles.radioCircle, selected && styles.radioCircleSelected]}>
-        {selected ? <Ionicons color={colors.onAccent} name="checkmark" size={14} /> : null}
+        {selected ? <V2Icon color={colors.onAccent} name="check" size={14} /> : null}
       </View>
       <Text style={[styles.radioLabel, selected && styles.radioLabelSelected]}>{label}</Text>
       {selected && current ? <Text style={styles.currentBadge}>נוכחי</Text> : null}
@@ -139,7 +145,7 @@ export function SettingsChoiceSheet({
     <SafeAreaView edges={['top']} style={styles.choiceRoot}>
       <View style={styles.choiceBackground}>
         <Text style={styles.choiceBackgroundTitle}>הגדרות</Text>
-        <SettingsSectionLabel>תכנון</SettingsSectionLabel>
+        <SettingsSectionLabel>העדפות</SettingsSectionLabel>
         <View style={styles.choiceBackgroundCard}><Text style={styles.rowLabel}>{title}</Text></View>
       </View>
       <View style={styles.choiceOverlay} />

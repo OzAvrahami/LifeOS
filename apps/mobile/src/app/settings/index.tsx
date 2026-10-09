@@ -6,11 +6,12 @@ export default function SettingsRoute() {
   const router = useRouter();
   return (
     <SettingsScreen
-      onBack={() => router.back()}
+      onBack={() => router.canGoBack() ? router.back() : router.replace('/')}
+      onAccount={() => router.navigate('/account')}
+      onCalendar={provider => router.navigate(`/settings/calendar-connection?provider=${provider}` as Href)}
+      onAppearance={() => router.navigate('/settings/appearance' as Href)}
+      onPreferences={() => router.navigate('/settings/preferences' as Href)}
       onNotifications={() => router.navigate('/settings/notifications' as Href)}
-      onDayWindow={() => router.navigate('/settings/day-window' as Href)}
-      onTimezone={() => router.navigate('/settings/timezone' as Href)}
-      onWeekStart={() => router.navigate('/settings/week-start' as Href)}
     />
   );
 }

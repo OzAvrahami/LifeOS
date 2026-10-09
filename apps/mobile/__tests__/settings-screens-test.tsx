@@ -12,6 +12,7 @@ import { MoreScreen } from '@/features/settings/more-screen';
 import * as settingsApi from '@/features/settings/settings.api';
 import { settingsKeys } from '@/features/settings/settings.queries';
 import { SettingsScreen } from '@/features/settings/settings-screen';
+import { DatePreferencesScreen } from '@/features/settings/date-preferences-screen';
 import { TimezoneScreen } from '@/features/settings/timezone-screen';
 import type { UserSettings } from '@/features/settings/settings.types';
 import { WeekStartScreen } from '@/features/settings/week-start-screen';
@@ -161,16 +162,29 @@ describe('More and Settings screens', () => {
     const dayWindow = jest.fn();
     const week = jest.fn();
     const timezone = jest.fn();
-    await renderSettings(<SettingsScreen onBack={jest.fn()} onDayWindow={dayWindow} onTimezone={timezone} onWeekStart={week} />);
+    await renderSettings(<DatePreferencesScreen onBack={jest.fn()} onDayWindow={dayWindow} onTimezone={timezone} onWeekStart={week} />);
     const user = userEvent.setup();
-    expect(screen.getAllByText('לא הוגדר')).toHaveLength(2);
     expect(screen.getByText('ראשון')).toBeTruthy();
     expect(screen.getByText(/ישראל · GMT\+/)).toBeTruthy();
-    expect(screen.getByText(/גרסת פיתוח .* · מספר בנייה לא זמין/)).toBeTruthy();
-    await user.press(screen.getByLabelText('תחילת היום: לא הוגדר'));
-    await user.press(screen.getByLabelText('תחילת שבוע: ראשון'));
+    await user.press(screen.getByLabelText('חלון היום'));
+    await user.press(screen.getByLabelText('תחילת שבוע'));
     expect(dayWindow).toHaveBeenCalledTimes(1);
     expect(week).toHaveBeenCalledTimes(1);
+  });
+
+  it('routes the V2 Settings groups without task editing or planning workflow shortcuts', async () => {
+    const account = jest.fn(); const calendar = jest.fn(); const notifications = jest.fn(); const appearance = jest.fn(); const preferences = jest.fn();
+    await renderSettings(<SettingsScreen onBack={jest.fn()} onAccount={account} onCalendar={calendar} onNotifications={notifications} onAppearance={appearance} onPreferences={preferences} />);
+    const user = userEvent.setup();
+    await user.press(screen.getByLabelText('פרטי חשבון וסיסמה')); expect(account).toHaveBeenCalledTimes(1);
+    await user.press(screen.getByLabelText('Google Calendar')); expect(calendar).toHaveBeenLastCalledWith('google');
+    await user.press(screen.getByLabelText('Apple Calendar')); expect(calendar).toHaveBeenLastCalledWith('apple');
+    await user.press(screen.getByLabelText('התראות ותזכורות')); expect(notifications).toHaveBeenCalledTimes(1);
+    await user.press(screen.getByLabelText('מראה האפליקציה: לפי המכשיר')); expect(appearance).toHaveBeenCalledTimes(1);
+    await user.press(screen.getByLabelText('העדפות תאריך וזמן')); expect(preferences).toHaveBeenCalledTimes(1);
+    expect(screen.getAllByText('החיבור עדיין אינו זמין')).toHaveLength(2);
+    expect(screen.queryByText('תכנון השבוע')).toBeNull(); expect(screen.queryByLabelText('הוספה מהירה')).toBeNull();
+    expect(screen.getByText(/גרסת פיתוח .* · מספר בנייה לא זמין/)).toBeTruthy();
   });
 
   it('saves Daily Capacity as complete settings without refetching', async () => {

@@ -2,5 +2,5 @@ import { useRouter } from 'expo-router';
 import { NotificationSettingsScreen } from '@/features/notifications/notification-settings-screen';
 export default function NotificationsRoute() {
   const router = useRouter();
-  return <NotificationSettingsScreen onBack={() => router.back()} />;
+  return <NotificationSettingsScreen onBack={() => router.canGoBack() ? router.back() : router.replace('/settings')} />;
 }

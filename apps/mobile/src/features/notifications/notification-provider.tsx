@@ -27,11 +27,19 @@ export function NotificationProvider({ children }: PropsWithChildren) {
   const [permission, setPermission] = useState<NotificationPermission>('not_requested');
   const [error, setError] = useState(false);
   const [result, setResult] = useState<ReconciliationResult | null>(null);
+  const [resultOwner, setResultOwner] = useState(userId);
+  // Account-specific reconciliation notices must not flash for the next account.
+  if (resultOwner !== userId) { setResultOwner(userId); setResult(null); setError(false); }
   const responseRouter = useRef(new NotificationResponseRouter());
 
   const reconcile = useCallback(async () => {
     if (isLoading || !localNotificationsSupported) return;
     const scope = session?.user.id ?? null;
+    // Permission is a device fact: refresh it even if the account snapshot fails.
+    // Do not delay the reconciler's logout cleanup behind a permission request.
+    void getNotificationPermission().then(next => {
+      if (scope === activeUser.current) setPermission(next);
+    }).catch(() => { if (scope === activeUser.current) setError(true); });
     return notificationReconciler.reconcile(scope, async () => {
         // Capture this session's token, never fetch another account's snapshot
         // through a token getter that can change while a request is in flight.
@@ -54,8 +62,12 @@ export function NotificationProvider({ children }: PropsWithChildren) {
   }, [isLoading, session]);
 
   const requestPermission = useCallback(async () => {
-    try { setPermission(await requestNotificationPermission()); await reconcile(); }
-    catch { setError(true); }
+    const scope = activeUser.current;
+    try {
+      const next = await requestNotificationPermission();
+      if (scope !== activeUser.current) return;
+      setPermission(next); await reconcile();
+    } catch { if (scope === activeUser.current) setError(true); }
   }, [reconcile]);
 
   useEffect(() => {

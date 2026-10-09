@@ -1,4 +1,5 @@
-import { getSettings, putSettings } from '@/features/settings/settings.api';
+import { getSettings, putSettings, patchNotificationPreferences } from '@/features/settings/settings.api';
+import { defaultNotificationPreferences } from '@/features/notifications/notification.types';
 import type { UserSettings } from '@/features/settings/settings.types';
 import { apiRequest } from '@/lib/api/client';
 
@@ -17,6 +18,11 @@ const settings: UserSettings = {
 beforeEach(() => request.mockReset());
 
 describe('Settings API client', () => {
+  it('binds notification writes to the expected account without adding ownership to the body', async () => {
+    request.mockResolvedValueOnce({ settings: { ...settings, notifications: defaultNotificationPreferences } });
+    await patchNotificationPreferences(defaultNotificationPreferences, 'UTC', 'owner-A');
+    expect(request).toHaveBeenCalledWith('/settings', expect.objectContaining({ expectedUserId: 'owner-A', auth: 'required', method: 'PATCH', body: JSON.stringify({ notifications: defaultNotificationPreferences, timezone: 'UTC' }) }));
+  });
   it('uses the authenticated Node API and preserves the absent-timezone distinction', async () => {
     const defaults: UserSettings = {
       defaultDailyCapacityMinutes: 360,

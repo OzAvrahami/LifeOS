@@ -1,5 +1,6 @@
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { act, render, waitFor } from '@testing-library/react-native';
+import { act, render, screen, waitFor } from '@testing-library/react-native';
+import { useNotifications } from '@/features/notifications/notification-context';
 import { AppState, Text } from 'react-native';
 import * as Expo from 'expo-notifications';
 import type { Session } from '@supabase/supabase-js';
@@ -27,9 +28,27 @@ const response: Expo.NotificationResponse = { actionIdentifier: 'expo.modules.no
 const settings = { persisted: true, timezone: 'Asia/Jerusalem', weekStartDay: 0, defaultDailyCapacityMinutes: 360, notifications: defaultNotificationPreferences };
 beforeEach(() => {
   jest.clearAllMocks();
+  jest.mocked(Expo.getPermissionsAsync).mockResolvedValue({ granted: true, status: 'granted', canAskAgain: true, expires: 'never', ios: { status: 2 } } as Expo.NotificationPermissionsStatus);
   jest.mocked(useAuth).mockReturnValue({ session, isLoading: false, isRecovery: false } as ReturnType<typeof useAuth>);
   jest.mocked(createApiClient).mockReturnValue(jest.fn(async path => path === '/settings' ? { settings } : path.startsWith('/commitments') ? { commitments: [] } : { tasks: [] }) as ReturnType<typeof createApiClient>);
   jest.mocked(Expo.getLastNotificationResponseAsync).mockResolvedValue(null);
+  jest.mocked(Expo.addNotificationResponseReceivedListener).mockReturnValue({ remove: jest.fn() });
+});
+
+it('refreshes actual permission on return even when account loading fails, without requesting permission', async () => {
+  const listener = jest.spyOn(AppState, 'addEventListener').mockReturnValue({ remove: jest.fn() });
+  const client = new QueryClient({ defaultOptions: { queries: { gcTime: Infinity } } });
+  function Probe() { const state = useNotifications(); return <Text>{state.permission + ':' + state.error}</Text>; }
+  const view = await render(<QueryClientProvider client={client}><NotificationProvider><Probe /></NotificationProvider></QueryClientProvider>);
+  await screen.findByText('allowed:false');
+  jest.mocked(Expo.getPermissionsAsync).mockResolvedValue({ granted: false, status: 'denied', canAskAgain: false, expires: 'never', ios: { status: 1 } } as Expo.NotificationPermissionsStatus);
+  await act(() => listener.mock.calls[0][1]('active'));
+  await screen.findByText('denied:false');
+  jest.mocked(createApiClient).mockReturnValue(jest.fn(async () => { throw new Error('offline'); }) as ReturnType<typeof createApiClient>);
+  jest.mocked(Expo.getPermissionsAsync).mockResolvedValue({ granted: true, status: 'granted', canAskAgain: true, expires: 'never', ios: { status: 2 } } as Expo.NotificationPermissionsStatus);
+  await act(() => listener.mock.calls[0][1]('active'));
+  await screen.findByText('allowed:true');
+  await view.unmount(); client.clear(); listener.mockRestore();
 });
 
 it('reconciles bootstrap, foreground and persisted task/settings cache changes; cleans listeners and logs out safely', async () => {

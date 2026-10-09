@@ -1,83 +1,40 @@
-import { Text } from 'react-native';
-
-import { TaskQueryNotice } from '@/features/tasks/task-query-notice';
-import { spacing, typography } from '@/theme/tokens';
-import { useTheme, type Palette } from '@/theme/theme-provider';
-
+import { Pressable, useWindowDimensions, View } from 'react-native';
+import { V2Notice, V2Text } from '@/components/v2';
+import { V2Icon } from '@/components/v2-icon';
+import { useTheme } from '@/theme/theme-provider';
 import { AppVersionFooter } from './app-version-footer';
-import { AppearanceSetting } from './appearance-setting';
-import { SettingsCard, SettingsPage, SettingsRow, SettingsSectionLabel } from './settings.components';
 import { useEffectiveSettings } from './settings.queries';
-import { dayWindowValue, timezoneOffsetLabel } from './settings-time';
-import { timezoneOptions, weekdayLabels } from './settings.types';
+import { V2SettingsGroup, V2SettingsHeading, V2SettingsPage, V2SettingsRow } from './v2-settings';
 
-export function SettingsScreen({
-  onBack,
-  onNotifications,
-  onDayWindow,
-  onTimezone,
-  onWeekStart,
-}: {
-  onBack: () => void;
-  onNotifications?: () => void;
-  onDayWindow: () => void;
-  onTimezone: () => void;
-  onWeekStart: () => void;
+export function SettingsScreen({ onBack, onAccount, onCalendar, onNotifications, onAppearance, onPreferences }: {
+  onBack: () => void; onAccount: () => void; onCalendar: (provider: 'google' | 'apple') => void;
+  onNotifications: () => void; onAppearance: () => void; onPreferences: () => void;
 }) {
-  const { colors } = useTheme();
-  const styles = createStyles(colors);
-  const { effective, query } = useEffectiveSettings();
-  const timezoneLabel = timezoneOptions.find((item) => item.timezone === effective.timezone)?.label
-    ?? effective.timezone;
-  return (
-    <SettingsPage footer={<AppVersionFooter />} onBack={onBack} title="הגדרות">
-      <TaskQueryNotice error={query.isError} loading={query.isPending} onRetry={() => void query.refetch()} />
-      <AppearanceSetting />
-      <SettingsSectionLabel>היום שלי</SettingsSectionLabel>
-      <SettingsCard>
-        <SettingsRow
-          divider
-          label="תחילת היום"
-          onPress={onDayWindow}
-          value={query.isPending ? 'טוען…' : effective.dayWindowSupported ? effective.dayStartTime ?? 'לא הוגדר' : 'דורש עדכון שרת'}
-        />
-        <SettingsRow
-          label="סיום היום"
-          onPress={onDayWindow}
-          value={query.isPending ? 'טוען…' : effective.dayWindowSupported ? effective.dayEndTime ?? 'לא הוגדר' : 'דורש עדכון שרת'}
-        />
-      </SettingsCard>
-      <Text style={styles.hint}>
-        {query.isPending
-          ? 'טוען את טווח היום מהחשבון…'
-          : query.isError
-            ? 'לא ניתן לקבוע אם טווח היום זמין עד שההגדרות ייטענו.'
-            : effective.dayWindowSupported
-              ? `טווח היום הפעיל שלך (${dayWindowValue(effective.dayStartTime, effective.dayEndTime)}). הוא אינו זמן פנוי למשימות.`
-              : 'שמירת טווח היום בחשבון תהיה זמינה לאחר עדכון השרת.'}
-      </Text>
-      <SettingsSectionLabel>תכנון שבועי</SettingsSectionLabel>
-      <SettingsCard>
-        <SettingsRow label="תחילת שבוע" onPress={onWeekStart} value={weekdayLabels[effective.weekStartDay] ?? weekdayLabels[0]} />
-      </SettingsCard>
-      <SettingsSectionLabel>מערכת</SettingsSectionLabel>
-      {onNotifications ? <SettingsCard><SettingsRow label="התראות" onPress={onNotifications} value="משימות ותכנון שבועי" /></SettingsCard> : null}
-      <SettingsCard>
-        <SettingsRow label="אזור זמן" onPress={onTimezone} value={`${timezoneLabel} · ${timezoneOffsetLabel(effective.timezone)}`} />
-      </SettingsCard>
-    </SettingsPage>
-  );
+  const { query } = useEffectiveSettings(); const { colors, preference } = useTheme();
+  const narrow = useWindowDimensions().width <= 375;
+  const appearance = { system: 'לפי המכשיר', light: 'בהיר', dark: 'כהה' }[preference];
+  return <V2SettingsPage onBack={onBack} eyebrow="LifeOS" title="הגדרות" description="חיבורים, התראות והעדפות אישיות.">
+    <V2SettingsHeading>החשבון שלי</V2SettingsHeading>
+    <V2SettingsGroup><V2SettingsRow title="פרטי חשבון וסיסמה" description="פרטים אישיים, איפוס סיסמה ויציאה" icon="user-round" onPress={onAccount} /></V2SettingsGroup>
+    <V2SettingsHeading>חיבורי יומן</V2SettingsHeading>
+    <V2SettingsGroup>
+      <V2SettingsRow title="Google Calendar" description="החיבור עדיין אינו זמין" icon="google" ltr onPress={() => onCalendar('google')} />
+      <V2SettingsRow title="Apple Calendar" description="החיבור עדיין אינו זמין" icon="calendar-days" ltr divider onPress={() => onCalendar('apple')} />
+    </V2SettingsGroup>
+    <V2Text muted style={{ fontSize: 11, lineHeight: 17.6, marginTop: 9 }}>בינתיים מוצגות רק התחייבויות שנשמרו ב־LifeOS.</V2Text>
+    <V2SettingsHeading>התראות</V2SettingsHeading>
+    <V2SettingsGroup><V2SettingsRow title="התראות ותזכורות" icon="bell" onPress={onNotifications}
+      description={query.data?.notifications ? query.data.notifications.enabled ? 'בחירת סוגי התראות והעדפות מסירה' : 'ההתראות כבויות' : query.isError ? 'לא ניתן לטעון את ההעדפות' : query.data ? 'נדרש עדכון שרת לשמירת התראות' : 'טוען העדפות…'} /></V2SettingsGroup>
+    {query.isError ? <V2Notice error title="לא הצלחנו לרענן את ההעדפות." onRetry={() => { void query.refetch(); }} /> : null}
+    <V2SettingsHeading>תצוגה</V2SettingsHeading>
+    <V2SettingsGroup><V2SettingsRow title="מראה האפליקציה" icon="sun-moon" trailing={
+      <Pressable accessibilityRole="button" accessibilityLabel={'מראה האפליקציה: ' + appearance} onPress={onAppearance} hitSlop={2}
+        style={{ minHeight: 40, maxWidth: narrow ? 103 : 122, padding: 6, borderWidth: 1, borderColor: colors.border, borderRadius: 9, backgroundColor: colors.background, flexDirection: 'row-reverse', alignItems: 'center', gap: 6 }}>
+        <V2Text style={{ fontSize: narrow ? 11 : 12, flexShrink: 1 }}>{appearance}</V2Text><V2Icon name="chevron-down" size={14} color={colors.textMuted} />
+      </Pressable>} /></V2SettingsGroup>
+    <Pressable accessibilityRole="button" accessibilityLabel="העדפות תאריך וזמן" onPress={onPreferences} style={{ minHeight: 44, justifyContent: 'center', marginTop: 12 }}>
+      <V2Text variant="caption" muted>העדפות תאריך וזמן</V2Text>
+    </Pressable>
+    <View style={{ marginTop: 26 }}><AppVersionFooter /></View>
+  </V2SettingsPage>;
 }
-
-const createStyles = (colors: Palette) => ({
-  hint: {
-    color: colors.textFaint,
-    fontFamily: typography.family.regular,
-    fontSize: 12.5,
-    lineHeight: 18,
-    marginHorizontal: spacing.xxs,
-    marginTop: spacing.xs,
-    textAlign: 'right' as const,
-    writingDirection: 'rtl' as const,
-  },
-});

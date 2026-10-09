@@ -12,6 +12,9 @@ import { reminderLocalParts } from '@/features/notifications/reminder-time';
 import { TaskDetailScreen } from '@/features/tasks/task-detail-screen';
 import type { Task } from '@/features/tasks/task.types';
 import { TestProviders } from '../test-utils/test-providers';
+import { TaskQueryScopeProvider } from '@/features/tasks/task-query-scope';
+import { useQueryClient, type QueryClient } from '@tanstack/react-query';
+import { settingsKeys } from '@/features/settings/settings.queries';
 
 jest.mock('@react-native-community/datetimepicker', () => {
   const { View } = jest.requireActual('react-native');
@@ -59,19 +62,102 @@ it('saves explicit master/category/weekly weekday and exact time; turning off re
   await screen.findByLabelText('התראות LifeOS');
   await press('התראות LifeOS'); await press('תזכורות למשימות'); await press('תזכורת לתכנון השבוע');
   expect(screen.getByLabelText('שמירת התראות')).toBeDisabled();
+  expect(screen.queryByRole('radio', { name: 'שני' })).toBeNull();
+  await press('הגדרות תזכורת לתכנון השבוע');
   await fireEvent.press(screen.getByRole('radio', { name: 'שני' }));
   await press('שעת תכנון השבוע'); await setTime(17);
   expect(settingsApi.patchNotificationPreferences).not.toHaveBeenCalled();
   await press('אישור שעה'); await press('שמירת התראות');
   const expected = { ...defaultNotificationPreferences, enabled: true, taskRemindersEnabled: true, weeklyPlanningEnabled: true, weeklyPlanningWeekday: 1, weeklyPlanningTime: '09:17' };
-  await waitFor(() => expect(settingsApi.patchNotificationPreferences).toHaveBeenCalledWith(expected, 'Asia/Jerusalem'));
+  await waitFor(() => expect(settingsApi.patchNotificationPreferences).toHaveBeenCalledWith(expected, 'Asia/Jerusalem', 'current-session'));
   await waitFor(() => expect(reconcile).toHaveBeenCalled());
   expect(requestPermission).toHaveBeenCalledTimes(1);
   expect(jest.mocked(settingsApi.patchNotificationPreferences).mock.invocationCallOrder[0]).toBeLessThan(requestPermission.mock.invocationCallOrder[0]);
-  await press('התראות LifeOS'); await press('תזכורות למשימות'); await press('תזכורת לתכנון השבוע');
+  await press('תזכורות למשימות'); await press('תזכורת לתכנון השבוע'); await press('התראות LifeOS');
   await press('שמירת התראות');
-  await waitFor(() => expect(settingsApi.patchNotificationPreferences).toHaveBeenLastCalledWith({ ...expected, enabled: false, taskRemindersEnabled: false, weeklyPlanningEnabled: false }, 'Asia/Jerusalem'));
+  await waitFor(() => expect(settingsApi.patchNotificationPreferences).toHaveBeenLastCalledWith({ ...expected, enabled: false, taskRemindersEnabled: false, weeklyPlanningEnabled: false }, 'Asia/Jerusalem', 'current-session'));
   expect(requestPermission).toHaveBeenCalledTimes(1);
+});
+
+it('keeps category choices across hiding, master-off persistence and reopening', async () => {
+  const saved = { ...prefs, commitmentRemindersEnabled: true, commitmentDefaultReminderMinutes: 30, weeklyPlanningEnabled: true, weeklyPlanningWeekday: 2, weeklyPlanningTime: '09:17' };
+  jest.mocked(settingsApi.getSettings).mockResolvedValue({ ...settings, notifications: saved });
+  const view = await render(wrap(<NotificationSettingsScreen onBack={jest.fn()} />));
+  await screen.findByRole('switch', { name: 'התראות LifeOS' });
+  expect(screen.queryByRole('radio', { name: 'שלישי' })).toBeNull();
+  await press('הגדרות תזכורת לתכנון השבוע');
+  expect(screen.getByRole('radio', { name: 'שלישי' })).toBeChecked();
+  expect(screen.getByText('09:17')).toBeTruthy();
+  await press('סגירת הגדרות תכנון השבוע');
+  expect(screen.queryByText('09:17')).toBeNull();
+  await press('התראות LifeOS');
+  for (const name of ['תזכורות למשימות', 'תזכורות להתחייבויות', 'תזכורת לתכנון השבוע']) {
+    expect(screen.getByRole('switch', { name })).toBeDisabled();
+    expect(screen.getByRole('switch', { name })).toBeChecked();
+    await press(name);
+  }
+  await press('שמירת התראות');
+  await waitFor(() => expect(settingsApi.patchNotificationPreferences).toHaveBeenCalledWith({ ...saved, enabled: false }, 'Asia/Jerusalem', 'current-session'));
+  expect(requestPermission).not.toHaveBeenCalled();
+  await view.unmount();
+  jest.mocked(settingsApi.getSettings).mockResolvedValue({ ...settings, notifications: { ...saved, enabled: false } });
+  await render(wrap(<NotificationSettingsScreen onBack={jest.fn()} />));
+  await screen.findByRole('switch', { name: 'התראות LifeOS' });
+  await press('התראות LifeOS');
+  await press('הגדרות תזכורת לתכנון השבוע');
+  expect(screen.getByRole('radio', { name: 'שלישי' })).toBeChecked();
+  expect(screen.getByText('09:17')).toBeTruthy();
+  await press('הגדרות תזכורות להתחייבויות');
+  expect(screen.queryByText('09:17')).toBeNull();
+  expect(screen.getByRole('radio', { name: '30 דקות לפני', selected: true })).toBeTruthy();
+});
+
+it('preserves a failed draft for retry and discards it only on explicit cancellation', async () => {
+  jest.mocked(settingsApi.patchNotificationPreferences).mockRejectedValueOnce(new Error('offline'));
+  await render(wrap(<NotificationSettingsScreen onBack={jest.fn()} />));
+  await screen.findByRole('switch', { name: 'התראות LifeOS' });
+  await press('תזכורות למשימות'); await press('שמירת התראות');
+  await screen.findByText('לא הצלחנו לשמור את ההגדרות. הבחירות נשארו כאן ואפשר לנסות שוב.');
+  expect(screen.getByRole('switch', { name: 'תזכורות למשימות' })).not.toBeChecked();
+  expect(requestPermission).not.toHaveBeenCalled();
+  await press('שמירת התראות');
+  await waitFor(() => expect(reconcile).toHaveBeenCalledTimes(1));
+  expect(settingsApi.patchNotificationPreferences).toHaveBeenCalledTimes(2);
+  await press('תזכורות למשימות'); await press('ביטול השינויים');
+  expect(screen.getByRole('switch', { name: 'תזכורות למשימות' })).not.toBeChecked();
+  expect(settingsApi.patchNotificationPreferences).toHaveBeenCalledTimes(2);
+});
+
+it('does not erase unsaved choices when the server settings cache refreshes', async () => {
+  let client!: QueryClient;
+  function Capture() { client = useQueryClient(); return <NotificationSettingsScreen onBack={jest.fn()} />; }
+  await render(wrap(<Capture />));
+  await screen.findByRole('switch', { name: 'התראות LifeOS' });
+  await press('תזכורות למשימות');
+  await act(() => client.setQueryData(settingsKeys.user('current-session'), { ...settings, notifications: { ...prefs, commitmentDefaultReminderMinutes: 60 } }));
+  expect(screen.getByRole('switch', { name: 'תזכורות למשימות' })).not.toBeChecked();
+  await press('ביטול השינויים');
+  expect(screen.getByRole('switch', { name: 'תזכורות למשימות' })).toBeChecked();
+  expect(settingsApi.patchNotificationPreferences).not.toHaveBeenCalled();
+});
+
+it('isolates drafts and ignores an old account save acknowledgement after switching accounts', async () => {
+  let finish!: (value: typeof settings) => void;
+  jest.mocked(settingsApi.patchNotificationPreferences).mockReturnValueOnce(new Promise(resolve => { finish = resolve; }));
+  const tree = (userId: string) => wrap(<TaskQueryScopeProvider userId={userId}><NotificationSettingsScreen onBack={jest.fn()} /></TaskQueryScopeProvider>);
+  const view = await render(tree('account-a'));
+  await screen.findByRole('switch', { name: 'התראות LifeOS' });
+  await press('תזכורות למשימות'); await press('שמירת התראות');
+  expect(settingsApi.patchNotificationPreferences).toHaveBeenCalledWith({ ...prefs, taskRemindersEnabled: false }, 'Asia/Jerusalem', 'account-a');
+  jest.mocked(settingsApi.getSettings).mockResolvedValue({ ...settings, notifications: defaultNotificationPreferences });
+  await view.rerender(tree('account-b'));
+  await waitFor(() => expect(settingsApi.getSettings).toHaveBeenCalledWith('account-b'));
+  await screen.findByRole('switch', { name: 'התראות LifeOS' });
+  await act(() => finish({ ...settings, notifications: { ...prefs, taskRemindersEnabled: false } }));
+  expect(screen.getByRole('switch', { name: 'התראות LifeOS' })).not.toBeChecked();
+  expect(screen.getByRole('switch', { name: 'תזכורות למשימות' })).toBeDisabled();
+  expect(requestPermission).not.toHaveBeenCalled(); expect(reconcile).not.toHaveBeenCalled();
+  expect(screen.queryByText('ביטול השינויים')).toBeNull();
 });
 
 it('sets and reopens exact reminder minutes only after persistence, then clears without stale wheel state', async () => {

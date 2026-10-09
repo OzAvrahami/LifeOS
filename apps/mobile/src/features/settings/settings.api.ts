@@ -3,8 +3,9 @@ import { apiRequest } from '@/lib/api/client';
 import type { PutUserSettingsInput, UserSettings } from './settings.types';
 import { defaultNotificationPreferences, type NotificationPreferences } from '@/features/notifications/notification.types';
 
-export async function patchNotificationPreferences(notifications: NotificationPreferences, timezone: string) {
+export async function patchNotificationPreferences(notifications: NotificationPreferences, timezone: string, expectedUserId?: string) {
   const response = await apiRequest<{ settings: unknown }>('/settings', { auth: 'required',
+    ...(expectedUserId ? { expectedUserId } : {}),
     method: 'PATCH', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ notifications, timezone }) });
   const settings = normalizeSettings(response.settings);
   if (!settings.notifications) throw new Error('Server did not persist notification preferences');
