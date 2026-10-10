@@ -1,5 +1,11 @@
 # V2 Week and task experience — #33
 
+## Current 2.0.0 device-test preparation - 2026-10-10
+
+The owner-selected **LifeOS 2.0.0 (10)** is now prepared in tracked metadata over `3310f96bbdfd9c8d46816c4a3f8cbea03ddcf42d`. Exact-source Railway deployment and its variable snapshot are verified; all 14 hosted migrations were already verified. **Mac-native synchronization, build/install and exact iPhone acceptance remain pending.** The available records support build 10; current Mac artifacts must still be checked before use. See [deployment evidence, checks and Mac handoff](release-2.0.0-verification.md).
+
+This supersedes earlier proposed 0.6.0/current-0.5.0 and pending-checkpoint/rollout statements only for current preparation status. Dated implementation/acceptance evidence below remains historical and retains its original scope; local web review does not accept a physical binary. No issue state or Project status is advanced by this preparation.
+
 ## Owner-accepted local web checkpoint — 2026-10-09
 
 The owner accepted the reviewed **local web-preview screen appearance** and reported these manual checks passing:
@@ -250,16 +256,16 @@ Short manual route:
 
 | Field | Value |
 | --- | --- |
-| SemVer impact | Minor: new compatible Week/task workflows; can share the V2 candidate with #29/#30/#32 |
-| Candidate version | Proposed 0.6.0; not prepared/authorized |
-| Candidate iOS build | Proposed 10, subject to rechecking all later prepared/built artifacts on the build Mac; do not reuse an existing candidate number |
-| Version prepared | Pending; all tracked versions remain 0.5.0, configured iOS build remains 9 |
-| Native version synchronized | Pending; no native project exists in this Windows checkout |
-| Physical build installed | Pending; no build/install performed |
-| Owner accepted exact build | Pending for V2/#33; previously accepted 0.5.0 (9) predates this implementation |
-| Included issues | #29/#30/#32 from bf02eff, plus the uncommitted #33 implementation; #16 content evidence only, not closure/acceptance of that issue |
+| SemVer decision | Owner-selected Major **2.0.0** for combined V2; supersedes the unprepared 0.6.0 proposal |
+| Candidate version | **2.0.0**, unreleased internal device-test candidate |
+| Candidate iOS build | **10**, prepared against configured/accepted 9 and available records; confirm unused on the build Mac |
+| Version prepared | **Yes**, tracked root/API/mobile/lockfile and Expo metadata, 2026-10-10 |
+| Native version synchronized | **Pending**; no native project exists in this Windows checkout; see the preserving Mac handoff |
+| Physical build installed | **Pending**; no build/install performed |
+| Owner accepted exact build | **Pending**; accepted 0.5.0 (9) predates V2; local web evidence does not accept this candidate |
+| Included issues/source | #33 Week/tasks/capture and subsequent onboarding/Today corrections, committed in `c3c120b` and included in `3310f96`; #16 contract reuse is not separate acceptance |
 
-Candidate: **proposed LifeOS 0.6.0 (10); not prepared, installed or accepted**. Before any future device instructions, complete the canonical pre-device gate on the actual build checkout, including authorized version/native preparation, artifact review and schema/API rollout. No versions, provider configuration, production migrations, deployments, native builds/installs, tags or releases were changed here.
+**Candidate: LifeOS 2.0.0 (10); tracked metadata prepared, not built, installed or accepted.** [Current release record](release-2.0.0-verification.md) separates completed API/schema/configuration evidence from pending authenticated hosted OAuth, native synchronization/signing, physical delivery and full integration acceptance. No new implementation, production-data mutation, Git write, tag or publication is authorized by this preparation. #17 remains Open / In Progress with outbound/background phases unfinished.
 
 ## Rollout and tracking boundary
 

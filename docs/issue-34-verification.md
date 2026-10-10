@@ -1,5 +1,11 @@
 # V2 Settings and notification controls — #34 / #26 / #27
 
+## Current 2.0.0 device-test preparation - 2026-10-10
+
+The owner-selected **LifeOS 2.0.0 (10)** is now prepared in tracked metadata over `3310f96bbdfd9c8d46816c4a3f8cbea03ddcf42d`. Exact-source Railway deployment and its variable snapshot are verified; all 14 hosted migrations were already verified. **Mac-native synchronization, build/install and exact iPhone acceptance remain pending.** The available records support build 10; current Mac artifacts must still be checked before use. See [deployment evidence, checks and Mac handoff](release-2.0.0-verification.md).
+
+This supersedes earlier proposed 0.6.0/current-0.5.0 and pending-checkpoint/rollout statements only for current preparation status. Dated implementation/acceptance evidence below remains historical and retains its original scope; local web review does not accept a physical binary. No issue state or Project status is advanced by this preparation.
+
 ## Owner visual acceptance and checkpoint preparation — 2026-10-09
 
 The owner accepted the **appearance of the reviewed Settings screens in the local web preview**. This is owner-reported visual acceptance only. It does not attest to additional manual functional checks, a complete viewport/theme/accessibility matrix, restart/account-switch behavior, notification permissions or delivery, hosted Auth/email/callback, calendar providers, production rollout or physical-device acceptance. The agent's earlier browser-access limitation remains an accurate record of independent verification. Earlier pending visual-review statements are superseded only for the screens the owner reviewed.
@@ -128,16 +134,16 @@ These require the existing running disposable LifeOS32 service. If it is unavail
 
 | Field | Value |
 | --- | --- |
-| SemVer impact | Patch for #26/#27 controls; grouped V2 Settings capability belongs to the existing Minor V2 candidate |
-| Candidate version | Proposed 0.6.0, carried from #29–#33; unprepared |
-| Candidate iOS build | Proposed 10; recheck known built/prepared candidates before authorization |
-| Version prepared | Pending; forbidden in this task. Tracked manifests/config remain 0.5.0 (9) |
-| Native version synchronized | Pending; no native files modified. Future iOS preparation must also apply/verify automatic appearance |
-| Physical build installed | Pending for this implementation. Prior accepted 0.5.0 (9), source 6407ae8, predates it |
-| Owner accepted exact build | Pending; local Settings appearance acceptance is visual-only and does not accept an installed binary |
-| Included issues | #34/#26/#27 over c3c120b, grouped with pending V2 #29/#30/#32/#33 |
+| SemVer decision | Owner-selected Major **2.0.0** for combined V2; supersedes the unprepared 0.6.0 proposal |
+| Candidate version | **2.0.0**, unreleased internal device-test candidate |
+| Candidate iOS build | **10**, prepared against configured/accepted 9 and available records; confirm unused on the build Mac |
+| Version prepared | **Yes**, tracked root/API/mobile/lockfile and Expo metadata, 2026-10-10 |
+| Native version synchronized | **Pending**; no native project exists in this Windows checkout; see the preserving Mac handoff |
+| Physical build installed | **Pending**; no build/install performed |
+| Owner accepted exact build | **Pending**; accepted 0.5.0 (9) predates V2; local web evidence does not accept this candidate |
+| Included issues/source | #34/#26/#27 Settings/preferences/notification controls from `6b53159`, included in `3310f96`; provider/device acceptance remains scoped and pending |
 
-**Candidate: LifeOS 0.6.0 (10); not prepared, installed or accepted.** Before any future device request, complete the canonical version/native/config/rollout gate under fresh authorization. No build/install is requested here. Hosted Auth/email/callback, provider configuration, Google #17/Apple #31, full integration and physical notification delivery remain pending. Existing V2 migrations remain unapplied to production by this task.
+**Candidate: LifeOS 2.0.0 (10); tracked metadata prepared, not built, installed or accepted.** [Current release record](release-2.0.0-verification.md) separates completed API/schema/configuration evidence from pending authenticated hosted OAuth, native synchronization/signing, physical delivery and full integration acceptance. No new implementation, production-data mutation, Git write, tag or publication is authorized by this preparation. #17 remains Open / In Progress with outbound/background phases unfinished.
 
 ## Tracking and checkpoint readiness
 

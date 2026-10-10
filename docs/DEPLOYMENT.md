@@ -1,6 +1,18 @@
 # LifeOS Deployment
 
+## Verified V2 API and 2.0.0 preparation — 2026-10-10
+
+The owner committed/pushed **`3310f96bbdfd9c8d46816c4a3f8cbea03ddcf42d`**; this checkout's main and existing origin/main match it, with an empty index at preparation entry. Railway **LifeOS / production / @lifeos/api** is actively running **SUCCESS** deployment **`bd36780e-65b9-496f-91c2-8e53aeca247c`**, with that exact source SHA and a RUNNING instance. Public `/health` returned HTTP 200 and the expected contract. Reviewed build/startup logs contain no error/fatal/exception/failed entries; npm warnings/advisories are recorded, not silently remediated.
+
+Deployment snapshot **`41ff3da5-2c08-4e31-8d6e-268057a3e0f2`** contains all five required Google/service-role variables, matching the saved service values. Hosted project/callback and 32-byte encryption-key shape checks pass; the web return is intentionally unset. This supersedes the earlier saved-but-not-deployed status. No authorized hosted-user session was accessible, so authenticated `GET /integrations/google` configuration availability remains unverified; unauthenticated 401 is only auth-boundary evidence. No consent/callback/import/device success is inferred. All 14 migrations and corrected ledger privileges retain their prior verified evidence; none was reapplied.
+
+**Owner-selected candidate: LifeOS 2.0.0 (10), unreleased.** The five canonical tracked version files are prepared with dependency resolutions preserved. The 0.6.0 proposal is superseded. Build 10 is supported by configured/accepted build 9 and available repository records; current Mac native/artifact/installed state is inaccessible and must be rechecked before build. No native directory was generated on Windows. Existing ignored plist and Debug/Release metadata, plugin/autolinking, system appearance, Pods/Node/Xcode/signing and Release endpoint checks remain Mac gates. No build/install is requested until those checks and separate owner authorization are complete.
+
+See the [complete 2.0.0 deployment evidence, 13-file manifest and Mac handoff](release-2.0.0-verification.md). #17 stays Open / In Progress: authorization, explicit selection and manual read-only imports are the delivered slice; outbound/background synchronization remain unfinished. Do not import all-day events into production accounts used by the old 0.5.0 (9) binary before a compatible client is installed. No deployment/configuration/data mutation, Git write, tag or publication was performed during this preparation. A future owner push of shared version manifests may trigger another API deployment and must be verified separately.
+
 ## Current V2 / Google production preparation — 2026-10-10
+
+**Historical pre-push preparation snapshot.** The verified deployment and 2.0.0 record above supersede this section's pending-checkpoint/deployment and 0.6.0 statements; its migration/configuration evidence remains valid.
 
 The owner committed the #17 phases 1–2 slice as `16245b7075741428284d4ac2399a7cc1abf920f3` and previously reported local Google-flow success, not individual scenario or physical-iPhone acceptance. #17 remains Open / In Progress; outbound writes and automatic/background synchronization are unfinished. See the [current native-only correction, hosted inspection and saved configuration](issue-17-verification.md#current-production-preparation-follow-up--2026-10-10).
 

@@ -1,5 +1,11 @@
 # V2 daily proposals and continuation — #32
 
+## Current 2.0.0 device-test preparation - 2026-10-10
+
+The owner-selected **LifeOS 2.0.0 (10)** is now prepared in tracked metadata over `3310f96bbdfd9c8d46816c4a3f8cbea03ddcf42d`. Exact-source Railway deployment and its variable snapshot are verified; all 14 hosted migrations were already verified. **Mac-native synchronization, build/install and exact iPhone acceptance remain pending.** The available records support build 10; current Mac artifacts must still be checked before use. See [deployment evidence, checks and Mac handoff](release-2.0.0-verification.md).
+
+This supersedes earlier proposed 0.6.0/current-0.5.0 and pending-checkpoint/rollout statements only for current preparation status. Dated implementation/acceptance evidence below remains historical and retains its original scope; local web review does not accept a physical binary. No issue state or Project status is advanced by this preparation.
+
 ## Owner acceptance and authorized local checkpoint — 2026-10-09
 
 The owner accepted the reviewed local web-preview appearance and reported passing proposal adjustment/cancellation, approval persistence after reload, completion consistency across Today/Week/Tasks, and task reopening with updated Today/counts. This is owner-reported local web evidence only. It supersedes earlier pending-owner notes for these specific checks; it does not establish physical-device, hosted-provider/email/callback, production or full integration acceptance, nor an exhaustive viewport/theme/keyboard matrix. No issue closure or metadata change.
@@ -122,16 +128,16 @@ Intermediate checks found two old screen mocks that did not supply the new API q
 
 | Field | Value |
 | --- | --- |
-| SemVer impact | Minor: compatible new daily workflow and shared planning persistence |
-| Candidate version | Proposed future 0.6.0, grouped with #29/#30; not prepared/authorized |
-| Candidate iOS build | Proposed future 10, subject to rechecking the owner's native/artifact inventory before preparation |
-| Version prepared | No; all current first-party versions remain 0.5.0, configured iOS build 9 |
-| Native version synchronized | No; ignored native/environment boundaries preserved; no native directories generated |
-| Physical build installed | Pending for this implementation |
-| Owner accepted exact build | Pending; accepted 0.5.0 (9) predates #29/#30/#32 |
-| Included issues | #29/#30 existing local work, #32 and the limited #33 contract, on the baseline above plus eventual owner checkpoint |
+| SemVer decision | Owner-selected Major **2.0.0** for combined V2; supersedes the unprepared 0.6.0 proposal |
+| Candidate version | **2.0.0**, unreleased internal device-test candidate |
+| Candidate iOS build | **10**, prepared against configured/accepted 9 and available records; confirm unused on the build Mac |
+| Version prepared | **Yes**, tracked root/API/mobile/lockfile and Expo metadata, 2026-10-10 |
+| Native version synchronized | **Pending**; no native project exists in this Windows checkout; see the preserving Mac handoff |
+| Physical build installed | **Pending**; no build/install performed |
+| Owner accepted exact build | **Pending**; accepted 0.5.0 (9) predates V2; local web evidence does not accept this candidate |
+| Included issues/source | #32 daily planning within combined #29/#30/#33/#34 and partial #17 source at `3310f96` |
 
-No production migrations, live provider changes, deployment, native build/install, versions, tags or releases were performed. Before future installation, complete the canonical pre-device gate and migration/API rollout order. No device build command is supplied here.
+**Candidate: LifeOS 2.0.0 (10); tracked metadata prepared, not built, installed or accepted.** [Current release record](release-2.0.0-verification.md) separates completed API/schema/configuration evidence from pending authenticated hosted OAuth, native synchronization/signing, physical delivery and full integration acceptance. No new implementation, production-data mutation, Git write, tag or publication is authorized by this preparation. #17 remains Open / In Progress with outbound/background phases unfinished.
 
 ## Local review preview and isolated next-day scenario
 

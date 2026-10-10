@@ -1,5 +1,11 @@
 # LifeOS V2 milestone 1 - issues #29 and #30
 
+## Current 2.0.0 device-test preparation - 2026-10-10
+
+The owner-selected **LifeOS 2.0.0 (10)** is now prepared in tracked metadata over `3310f96bbdfd9c8d46816c4a3f8cbea03ddcf42d`. Exact-source Railway deployment and its variable snapshot are verified; all 14 hosted migrations were already verified. **Mac-native synchronization, build/install and exact iPhone acceptance remain pending.** The available records support build 10; current Mac artifacts must still be checked before use. See [deployment evidence, checks and Mac handoff](release-2.0.0-verification.md).
+
+This supersedes earlier proposed 0.6.0/current-0.5.0 and pending-checkpoint/rollout statements only for current preparation status. Dated implementation/acceptance evidence below remains historical and retains its original scope; local web review does not accept a physical binary. No issue state or Project status is advanced by this preparation.
+
 ## Owner acceptance and authorized local checkpoint — 2026-10-09
 
 The owner accepted the reviewed **local web-preview screen appearance** and confirmed proposal adjustment/cancellation, approval persistence after reload, completion consistency across Today/Week/Tasks, and reopening a task with updated Today/counts. This is owner-reported acceptance of that local scope. The earlier appearance acceptance request and checkpoint pause are superseded for those reviewed screens/checks; the agent's supported-browser limitation remains an honest record of independent verification.
@@ -174,16 +180,16 @@ Official references reviewed: [password security](https://supabase.com/docs/guid
 
 | Field | Value |
 | --- | --- |
-| SemVer impact | Minor: substantial compatible visual/account capability; both issues may share one future candidate |
-| Proposed future candidate | 0.6.0 (10), compatible Minor grouping; not prepared or authorized |
-| Candidate inventory gate | Recheck the owner's native artifacts before preparation; exceed every relevant known build |
-| Version prepared | No; existing baseline remains 0.5.0 (9) |
-| Native version synchronized | No; native files preserved |
-| Physical build installed | Pending for this implementation |
-| Owner accepted exact build | Pending; 0.5.0 (9) predates this implementation |
-| Included issues | #29 and #30 in this record; the combined local checkpoint also includes #32 and its existing shared Week/day contract, not full #33 implementation |
+| SemVer decision | Owner-selected Major **2.0.0** for combined V2; supersedes the unprepared 0.6.0 proposal |
+| Candidate version | **2.0.0**, unreleased internal device-test candidate |
+| Candidate iOS build | **10**, prepared against configured/accepted 9 and available records; confirm unused on the build Mac |
+| Version prepared | **Yes**, tracked root/API/mobile/lockfile and Expo metadata, 2026-10-10 |
+| Native version synchronized | **Pending**; no native project exists in this Windows checkout; see the preserving Mac handoff |
+| Physical build installed | **Pending**; no build/install performed |
+| Owner accepted exact build | **Pending**; accepted 0.5.0 (9) predates V2; local web evidence does not accept this candidate |
+| Included issues/source | #29/#30 within the combined V2 source at `3310f96`; #32/#33/#34 and partial #17 are recorded separately |
 
-No production mutation, provider configuration change, deployment, native build/install, tag or release is authorized. Complete the canonical pre-device gate in a later authorized task before requesting installation.
+**Candidate: LifeOS 2.0.0 (10); tracked metadata prepared, not built, installed or accepted.** [Current release record](release-2.0.0-verification.md) separates completed API/schema/configuration evidence from pending authenticated hosted OAuth, native synchronization/signing, physical delivery and full integration acceptance. No new implementation, production-data mutation, Git write, tag or publication is authorized by this preparation. #17 remains Open / In Progress with outbound/background phases unfinished.
 
 ## Verification
 

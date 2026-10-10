@@ -1,5 +1,11 @@
 # Issue #17 — Google Calendar phases 1–2
 
+## Current 2.0.0 device-test preparation - 2026-10-10
+
+The owner-selected **LifeOS 2.0.0 (10)** is now prepared in tracked metadata over `3310f96bbdfd9c8d46816c4a3f8cbea03ddcf42d`. Exact-source Railway deployment and its variable snapshot are verified; all 14 hosted migrations were already verified. **Mac-native synchronization, build/install and exact iPhone acceptance remain pending.** The available records support build 10; current Mac artifacts must still be checked before use. See [deployment evidence, checks and Mac handoff](release-2.0.0-verification.md).
+
+This supersedes earlier proposed 0.6.0/current-0.5.0 and pending-checkpoint/rollout statements only for current preparation status. Dated implementation/acceptance evidence below remains historical and retains its original scope; local web review does not accept a physical binary. No issue state or Project status is advanced by this preparation.
+
 Implementation/evidence: 2026-10-09. This is a **partial implementation** of the existing bidirectional issue. #17 stays open and **In Progress**; import-only delivery does not complete it. [Data, security, synchronization and future-write contracts](issue-17-calendar-contracts.md) are the phase 1 specification.
 
 ## Current production-preparation follow-up — 2026-10-10
@@ -260,17 +266,18 @@ Phase 3 outbound creation/edit/export, writable-calendar consent, conflict resol
 
 ## Release candidate
 
-| Release candidate field | Status |
+| Field | Value |
 | --- | --- |
-| SemVer impact | Minor user-facing integration, grouped with pending V2 work |
-| Candidate version/build | Proposed **0.6.0 (10)**, unprepared; recheck relevant prepared/built artifacts before future authorization |
-| Current tracked version/build | **0.5.0 (9)**, unchanged |
-| Last owner-accepted binary | **0.5.0 (9)**, source `6407ae8`, predates this implementation |
-| Version prepared / native synchronized | Pending; forbidden by this task |
-| Physical build installed / exact build accepted | Pending; none built or installed |
-| Included scope | Partial #17 phases 1–2, required #15 location foundation, native-only configuration correction and verified ledger privilege correction over checkpoint `16245b7` |
+| SemVer decision | Owner-selected Major **2.0.0** for combined V2; supersedes the unprepared 0.6.0 proposal |
+| Candidate version | **2.0.0**, unreleased internal device-test candidate |
+| Candidate iOS build | **10**, prepared against configured/accepted 9 and available records; confirm unused on the build Mac |
+| Version prepared | **Yes**, tracked root/API/mobile/lockfile and Expo metadata, 2026-10-10 |
+| Native version synchronized | **Pending**; no native project exists in this Windows checkout; see the preserving Mac handoff |
+| Physical build installed | **Pending**; no build/install performed |
+| Owner accepted exact build | **Pending**; accepted 0.5.0 (9) predates V2; local web evidence does not accept this candidate |
+| Included issues/source | Partial #17 phases 1-2, required #15 location foundation, native-only configuration and ledger correction, included in deployed `3310f96` |
 
-**Release candidate: LifeOS 0.6.0 (10), proposed only—not prepared, installed or accepted.** Before any device request, follow the canonical pre-device and schema/API rollout gates with fresh authorization. Provider/hosted Auth/email/callback, production, complete integration, visual and physical-device acceptance remain pending.
+**Candidate: LifeOS 2.0.0 (10); tracked metadata prepared, not built, installed or accepted.** [Current release record](release-2.0.0-verification.md) separates completed API/schema/configuration evidence from pending authenticated hosted OAuth, native synchronization/signing, physical delivery and full integration acceptance. No new implementation, production-data mutation, Git write, tag or publication is authorized by this preparation. #17 remains Open / In Progress with outbound/background phases unfinished.
 
 ## Tracking and checkpoint
 
