@@ -100,6 +100,10 @@ try {
   await call(`/callback?state=${old.state}&code=x`, undefined, null, 'get', 409);
   await call('/cancel', { id: fresh.id });
   await call(`/callback?state=${fresh.state}&code=x`, undefined, null, 'get', 409);
+  const savedWebReturn = config.webReturn;
+  config.webReturn = null;
+  assert.equal((await call()).body.configured, true, 'native-only setup remains available');
+  await call('/authorize', { platform: 'web' }, tokens[0], 'post', 503);
   const attempt = await start(tokens[0], 'native'); const returned = await callback(attempt);
   assert.equal(returned.protocol, 'lifeos:');
   await call(`/callback?state=${attempt.state}&code=x`, undefined, null, 'get', 409);
@@ -108,6 +112,7 @@ try {
   await call('/complete', { ...completion, proof: 'x'.repeat(43) }, tokens[0], 'post', 409);
   await call('/complete', { ...completion, receipt: 'x'.repeat(43) }, tokens[0], 'post', 409);
   await call('/complete', completion);
+  config.webReturn = savedWebReturn; // Remaining connection/import checks use the existing local web flow.
   assert.equal((await call('', undefined, tokens[1])).body.status, 'disconnected');
   const secret = await store.command(users[0], 'read');
   assert.ok(secret.credential && !secret.credential.includes('fixture-provider-secret'));

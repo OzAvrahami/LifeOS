@@ -2,6 +2,81 @@
 
 Implementation/evidence: 2026-10-09. This is a **partial implementation** of the existing bidirectional issue. #17 stays open and **In Progress**; import-only delivery does not complete it. [Data, security, synchronization and future-write contracts](issue-17-calendar-contracts.md) are the phase 1 specification.
 
+## Current production-preparation follow-up — 2026-10-10
+
+The owner completed checkpoint **`16245b7075741428284d4ac2399a7cc1abf920f3`**. Actual checkout is `main`, **4 ahead / 0 behind** existing `origin/main`, with an empty index. Only the owner handoff directory and root `tsconfig.json` were untracked at entry. This follow-up leaves staging/commit/push owner-managed and supersedes the earlier pending-checkpoint, pending-migration and missing-production-variable statements below.
+
+The owner reports applying `20261009120000`, `20261009150000` and `20261009180000`, seeing all 13 remote history entries and an up-to-date subsequent dry run. The post-apply pg-delta catalog-cache timeout is not evidence of a failed migration. No migration was reapplied and no history repair/reset was performed. The owner also confirms adding the production Google callback to the existing OAuth Web client; the older downloaded JSON is not evidence against that live update. The agent did not inspect/change Google Cloud settings or run a real hosted callback.
+
+### Hosted schema verification and resolved ledger blocker
+
+Management-API SQL inspection used `BEGIN READ ONLY` / `ROLLBACK` against the verified linked LifeOS project `vcizpdzqbctjksnivnzt`; no product records, credentials or connection rows were selected or mutated. Independently confirmed all **13 migration versions**, the V2 `flow_state` column/operation ledgers, imported commitment columns and constraints, enabled provider guard trigger and unique per-user/account/calendar/event index. All seven relevant product/private tables have RLS enabled. Product/operation policies bind authenticated callers to `auth.uid() = user_id`; the private Google table has no client policy and anon/authenticated lack private schema/table access. `google_calendar_command(uuid,text,jsonb)` is SECURITY DEFINER with empty search_path, granted to service_role and denied to anon/authenticated. V2 caller RPCs remain SECURITY INVOKER and deny anon. Seven inspected function definitions match the tested disposable schema (Google differs only in trailing whitespace; six hashes match exactly).
+
+**Blocker discovered, subsequently resolved below:** hosted `public.daily_flow_operations` granted authenticated callers **UPDATE, DELETE, TRUNCATE, REFERENCES, TRIGGER and MAINTAIN**, in addition to SELECT/INSERT. Its owner RLS policy remained enabled, but these extra grants violated the append-only ledger contract. The #32 migration revoked anon privileges and granted authenticated SELECT/INSERT without first revoking pre-existing/default authenticated privileges. The #33 `week_allocation_operations` migration explicitly revokes both roles and its hosted grants correctly remain SELECT/INSERT only. The earlier disposable SELECT/INSERT-only characterization was incomplete: fresh ACL inspection also found residual TRUNCATE/REFERENCES/TRIGGER/MAINTAIN there and different service-role grants. The corrective harness therefore reproduces the reviewed hosted ACL explicitly inside its rollback transaction. No forbidden operation was attempted on hosted LifeOS.
+
+The owner subsequently authorized the single forward-only correction and its hosted application after local validation and an exact plan check, before the combined follow-up Git checkpoint. This is the explicitly authorized exception to the usual checkpoint-before-hosted-application sequence; no historical migration or history entry was edited. The private Google table and canonical commitments do not have those extra authenticated/anon grants. The timeout warning was unrelated to the privilege discrepancy.
+
+### Ledger correction applied and verified — 2026-10-10
+
+Source review confirms `save_daily_flow(date,jsonb)` is SECURITY INVOKER under the caller JWT: it SELECTs the owner/operation identity for safe retries and INSERTs one immutable command after saving the plan. It never updates/deletes ledger rows. `20261010120000_restrict_daily_flow_operation_privileges.sql` revokes this table's PUBLIC/anon/authenticated grants, explicitly clears its four columns' client grants and restores authenticated SELECT/INSERT. It preserves service-role grants and owner RLS. A postcondition rejects unexpected inherited excess privileges. No global membership/default ACL, unrelated object, product record or historical migration changes are included. PostgreSQL's [REVOKE contract](https://www.postgresql.org/docs/current/sql-revoke.html) and [effective privilege functions](https://www.postgresql.org/docs/current/functions-info.html) informed the table/column/inheritance checks.
+
+Pre-apply hosted inspection found direct authenticated grants, no PUBLIC grant, no column ACLs and no inherited authenticated role beyond itself. Service_role had all eight PostgreSQL 17 table privileges. The new disposable-only `verify-daily-flow-privileges.mjs` recreates those service/client grants and adds PUBLIC/column bypass fixtures, applies the exact migration twice, and verifies:
+
+- Effective authenticated SELECT/INSERT only; no anon table/column access, and no UPDATE/REFERENCES column bypass or MAINTAIN grant.
+- Actual SECURITY INVOKER RPC insertion and identical retry with one ledger record; changed-command identity reuse rejection, own direct insertion/read, cross-account read filtering and insert rejection, anonymous denial.
+- Actual UPDATE, DELETE, TRUNCATE, REFERENCES and TRIGGER denial **only in LifeOS32**; service-role fixture SELECT/INSERT/UPDATE/DELETE still works and its full ACL is unchanged.
+- Rollback removes fixture users/plans/schema and restores pre-test grants. Before/after user-ID, plan, ledger and ACL fingerprints match. No reset or persistent disposable record/ACL change occurred.
+
+Exact hosted target was reverified as **LifeOS**, `vcizpdzqbctjksnivnzt` (ap-northeast-1), matching the linked project. All 13 prior versions matched the local historical filenames. Fresh `supabase db push --linked --dry-run --skip-vault` succeeded and listed **only** `20261010120000_restrict_daily_flow_operation_privileges.sql`. Its reviewed SHA-256 was checked again before one `supabase db push --linked --skip-vault --yes` invocation. Vault, seed and custom-role updates were excluded. Application exited **0** and reported completion; a post-apply catalog-cache timeout warning did not prompt reapplication or repair.
+
+Independent read-only Management-API readback confirms **14** migration entries through `20261010120000`; the subsequent dry run exits **0**, reports up to date and lists no pending migrations. Authenticated has exactly SELECT/INSERT, including effective column access; UPDATE/DELETE/TRUNCATE/REFERENCES/TRIGGER/MAINTAIN are false. All four column ACLs remain null; anon has no access. Service_role retains all eight table privileges and full effective column access. Owner RLS/policy and role inheritance are identical. Ledger count/content digest, global role-membership/default-ACL fingerprints, other public/private table ACLs and relevant function definitions are unchanged. `save_daily_flow` remains caller-invoker/authenticated-accessible; Google RPC remains service-only SECURITY DEFINER. Hosted verification used introspection only, with no destructive-operation probe or calendar import.
+
+Focused checks: disposable harness **pass**; its ESLint check from `apps/api` **pass**; `git diff --check` **pass**. During harness development, a temporary-table foreign key was correctly rejected by PostgreSQL before the intended privilege check; the fixture now uses an isolated rollback-only regular schema. The service fixture also now explicitly matches hosted grants after discovering different disposable defaults. An initial root-directory lint invocation lacked the app ESLint config; the corrected app-directory invocation passes. These failed probes rolled back and never touched hosted records. The existing **19/19 native-auth tests**, controlled-provider Auth/DB/RLS pass and API typecheck/lint evidence below are reused because their four source/test files remain byte-identical. No broad suite, version change or build was needed for the ACL-only correction.
+
+### Minimal native-only configuration correction
+
+`GOOGLE_CALENDAR_WEB_RETURN_URI` is now optional at the shared configuration boundary. Absent web return produces `webReturn: null`; native authorization retains the fixed **`lifeos://settings/google-return`**. Web initiation without an explicit return fails with `503 setup_required` **before storing an attempt or contacting Google**. If a web return is supplied, the existing HTTPS/loopback, no-userinfo/query/fragment and exact `/settings/google-return` path validation remains mandatory. Existing callback URI, key, server-credential, PKCE, one-use state, ownership/proof/receipt and account-isolation checks are unchanged. No placeholder production web URL was introduced.
+
+Valid native callbacks retain the attempt's stored app return for success, denial/cancellation, missing code and provider failure. Only successful exchange supplies a completion receipt; credentials/provider errors never enter return URLs. Forged/replayed state still fails closed. The local persistent web return/callback configuration was preserved and validates with the corrected code; the owner preview was not restarted or reauthorized.
+
+### Railway configuration saved, not deployed
+
+Verified exact target: **LifeOS** project `4b0ede86-7928-45fa-ade4-46a1094b7101`, **production** environment `628a150a-e576-462f-9f82-ea5ca4651dc5`, **@lifeos/api** service `d99536c4-ae42-429d-9116-f073396a3943`. The existing Supabase URL matches hosted LifeOS, not LifeOS32.
+
+Saved and read back these **five** authorized server variables using supported `railway variable set --stdin --skip-deploys`, with values supplied only through stdin and captured output suppressed:
+
+- `GOOGLE_CALENDAR_CLIENT_ID` and `GOOGLE_CALENDAR_CLIENT_SECRET`, from the existing private local OAuth configuration.
+- `GOOGLE_CALENDAR_REDIRECT_URI`: `https://lifeosapi-production-0362.up.railway.app/integrations/google/callback`.
+- `GOOGLE_CALENDAR_ENCRYPTION_KEY`: no valid existing production key was present; generated 32 cryptographically random bytes as base64, separate from the local key, and persisted privately at `%LOCALAPPDATA%\LifeOS\production\google-calendar-key.env` with owner/SYSTEM-only access.
+- `SUPABASE_SERVICE_ROLE_KEY`: retrieved through the authenticated Supabase project-key API for `vcizpdzqbctjksnivnzt` and checked for matching project/service_role claims; never sourced from LifeOS32.
+
+`GOOGLE_CALENDAR_WEB_RETURN_URI` remains unset intentionally. No unrelated variable was altered. The existing STAGED pending patch was empty and its ID/status/content remained unchanged; deployment IDs/statuses also remained unchanged. No pending changes were applied. The active API remains SUCCESS deployment `ca91328a-57b3-475a-93f7-06237f856d9f`, source `6407ae8856ee8289e8183aaeaf6661b680d32267`. **Saved variables are not evidence that a deployed process has loaded them.** Local evaluation of the corrected config with the saved values passes in production mode; no production deployment or integration request was made. Secret values were not printed, passed in command arguments, written to Git/logs or put in public Expo variables.
+
+### Focused verification and handoff
+
+- `node --import tsx --test apps/api/__tests__/google-calendar.test.ts` with tracked API TS config: **19/19 pass**, including 11 new native/web configuration/callback checks. Native-only setup, missing required secrets, invalid return URLs, web setup rejection, success/cancel/error/missing-code redirects and one-use state are covered.
+- `node --import tsx apps/api/scripts/verify-google-calendar.mjs` against existing **LifeOS32**: **pass**. Now removes the web return during actual local Auth/DB/RLS native initiation/completion, rejects web initiation, verifies ownership/proof/receipt/replay, restores the local web configuration and runs existing controlled-provider selection/import regressions. Only temporary harness users/data were removed; real owner records were preserved. No Google request or production import occurred.
+- API `typecheck` and `lint`: **pass**; targeted harness lint after its last change: **pass**. The corrected config also validates both saved native-only production values and the unchanged local web values. One ad hoc local probe used an incorrect relative CLI path; rerunning with the absolute repository CLI path passed, with no configuration change.
+- Diff/whitespace, secret containment, private ACLs, version consistency and preservation checks: **pass**. No mobile source changed, so no broad mobile suite, native export/build or owner Google-flow repetition was run.
+
+Combined follow-up checkpoint scope is now **nine files**:
+
+```text
+CHANGELOG.md
+apps/api/__tests__/google-calendar.test.ts
+apps/api/scripts/verify-daily-flow-privileges.mjs
+apps/api/scripts/verify-google-calendar.mjs
+apps/api/src/features/google-calendar/google.config.ts
+apps/api/src/features/google-calendar/google.service.ts
+docs/DEPLOYMENT.md
+docs/issue-17-verification.md
+supabase/migrations/20261010120000_restrict_daily_flow_operation_privileges.sql
+```
+
+The previous seven-file manifest is superseded. The earlier 53-file slice is already in `16245b7` and must not be restaged. Owner handoff/root config, environments/private credentials, ignored files and index remain preserved. Final Railway readback confirms saved variables and deployment metadata unchanged; no deployment or pending-change application was triggered.
+
+Ready for the combined owner checkpoint; **the hosted ledger privilege blocker is resolved, with no pending migration**. Next: owner checkpoint and separately authorized push/API rollout, verify the new active source and loaded configuration, then complete mobile release preparation. Saved Railway variables are not active-process evidence. Current/last accepted **0.5.0 (9)** and proposed unprepared **0.6.0 (10)** remain unchanged. Do not import into production accounts used by the old binary; it is not compatible with all-day imports. Hosted callback/consent, operational log redaction, exact physical binary and device acceptance remain pending. #17 stays Open / In Progress (read back unchanged); no later phase was implemented.
+
 ## Owner-reported local success — 2026-10-10
 
 After configuring Google OAuth and trying the local flow, the owner reported **“Amazing, it works.”** This is owner-reported local success for the flow they tried, not independent observation or an item-by-item acceptance checklist. It supersedes the earlier absence of any real-provider owner feedback; it does not establish which individual connection, selection, import or event-detail steps were checked.
@@ -10,7 +85,7 @@ Duplicate prevention, cancellation, disconnect/reconnect, every imported event/t
 
 ## Baseline and preservation
 
-Actual baseline and final HEAD: `6b531593e0fcae87dbd1a4696f5c48a4ab7d70d1`, branch `main`, **3 ahead / 0 behind** existing `origin/main` (`9b775df50b563f518464810ddf5e646b2087b67e`). No fetch/pull/branch/history operation. Index remains empty. Source changes are local and unstaged.
+Historical implementation baseline: `6b531593e0fcae87dbd1a4696f5c48a4ab7d70d1`, branch `main`, then **3 ahead / 0 behind** existing `origin/main` (`9b775df50b563f518464810ddf5e646b2087b67e`). The owner subsequently committed that slice as `16245b7`; the current follow-up status is above. No agent fetch/pull/branch/history operation occurred.
 
 The seven owner handoff files and untracked root `tsconfig.json` are preserved. Baseline SHA-256 comparison passes for 26 protected paths, including index, environment and native files. No dependency/version/font/license change is needed: existing Heebo/Lucide assets and dependencies are reused. Mobile typecheck uses its tracked app config extending Expo; API launch and TypeScript tests explicitly pin `apps/api/tsconfig.json`. The untracked root config is not a prerequisite.
 
@@ -39,7 +114,7 @@ New forward-only migration: `supabase/migrations/20261009180000_add_google_calen
 
 Applied once transactionally using `psql --single-transaction -v ON_ERROR_STOP=1` **only** to verified Docker container `supabase_db_LifeOS32`, project `LifeOS32`, localhost API `56321`, DB `56322`, workdir `%TEMP%\lifeos-32-disposable`. No reset. Existing records/accounts were retained; harness-created users were deleted after each run. The direct disposable SQL application is not a claim of remote migration-history application.
 
-Production is untouched. Before any future deployment-triggering push: owner Git checkpoint → inspect **all** pending remote migrations and dry run → explicitly authorized migration/history verification → API rollout verification. Existing V2 migrations and this migration must precede this schema-dependent API. Do not run the new API against an unmigrated hosted database.
+Production was untouched by the original implementation. The owner subsequently applied all three migrations; the current read-only verification and remaining privilege blocker are recorded above. The schema-before-API ordering remains mandatory; successful migration history alone does not resolve the grant discrepancy.
 
 ## Checks and results
 
@@ -87,7 +162,7 @@ At implementation handoff on 2026-10-09, local Google configuration was absent a
 | Future hosted Google callback, derived from documented Railway API | `https://lifeosapi-production-0362.up.railway.app/integrations/google/callback` — not deployed/verified by this task |
 | Future hosted web return | Requires the owner's actual web origin plus `/settings/google-return`; no hosted web origin is assumed |
 
-3. Supply **server-only** `GOOGLE_CALENDAR_CLIENT_ID`, `GOOGLE_CALENDAR_CLIENT_SECRET`, `GOOGLE_CALENDAR_REDIRECT_URI`, `GOOGLE_CALENDAR_WEB_RETURN_URI`, `GOOGLE_CALENDAR_ENCRYPTION_KEY` (base64-encoded cryptographically random 32 bytes), and `SUPABASE_SERVICE_ROLE_KEY`, alongside existing `SUPABASE_URL`/`SUPABASE_PUBLISHABLE_KEY`. Use the matching disposable service key for local tests, never a hosted key. Preserve and back up the encryption key securely; changing it without re-encryption forces reconnection. Never prefix these secrets with `EXPO_PUBLIC_`, paste them into logs/docs, or commit an environment file.
+3. Supply **server-only** `GOOGLE_CALENDAR_CLIENT_ID`, `GOOGLE_CALENDAR_CLIENT_SECRET`, `GOOGLE_CALENDAR_REDIRECT_URI`, `GOOGLE_CALENDAR_ENCRYPTION_KEY` (base64-encoded cryptographically random 32 bytes), and `SUPABASE_SERVICE_ROLE_KEY`, alongside existing `SUPABASE_URL`/`SUPABASE_PUBLISHABLE_KEY`. Set `GOOGLE_CALENDAR_WEB_RETURN_URI` only for an explicitly configured web client; native-only production does not require it after the current correction. Use the matching disposable service key for local tests, never a hosted key. Preserve and back up the encryption key securely; changing it without re-encryption forces reconnection. Never prefix these secrets with `EXPO_PUBLIC_`, paste them into logs/docs, or commit an environment file.
 4. Configure production `CORS_ALLOWED_ORIGINS` only for approved web origins; redirect and return URLs must be HTTPS in production. Native on-device testing needs an owner-approved reachable HTTPS API/Supabase endpoint; a phone's loopback is not this PC. Native uses the same server callback followed by the `lifeos` return, with same-user proof checked in the app.
 5. Before real use, ensure reverse-proxy/APM/request logging redacts callback query codes/state/receipts, Authorization headers and response bodies. The application itself does not log requests or provider payloads. Review service-key access, key rotation and secret retention operationally.
 6. After explicit authorization, restart only the isolated API with those server variables, sign into the intended LifeOS review account, choose the intended Google account during consent, complete the app return, explicitly select calendars, save, then import. Cancel/deny consent first as a negative check. Do not treat setup or connecting an account as authorization to import every calendar.
@@ -111,6 +186,8 @@ Additional checks: launcher `node --check` and targeted ESLint pass; isolated la
 At the end of the configuration task, no real Google flow had been attempted by the agent; the later owner-reported local success is recorded above. Scenario-specific provider, rendered UI and physical-device acceptance remain pending. Configuration availability alone is not Google connection success. Issue #17 remains open/In Progress; broader bidirectional scope is unchanged. The startup blocks below load the persisted private configuration automatically; do not duplicate existing listeners.
 
 ## Checkpoint and read-only deployment review — 2026-10-10
+
+**Historical pre-apply review.** The completed owner checkpoint, applied migrations, native-only correction and saved Railway configuration in the current follow-up above supersede the pending-state statements in this section. No instructions here authorize repeating a migration.
 
 Current checkout independently re-read: `main`, HEAD `6b531593e0fcae87dbd1a4696f5c48a4ab7d70d1`, empty index, **3 ahead / 0 behind** existing `origin/main`. GitHub's read-only main lookup also returns `9b775df50b563f518464810ddf5e646b2087b67e`; no fetch was performed. The complete scope remains **53 files**, including the API, migration, tests, native-component surfaces, review launcher and records in the manifest below. No dependency, bundled-font/license or version changes are missing. The handoff directory and root `tsconfig.json` are excluded, as are private credentials, environments and ignored generated/native files.
 
@@ -191,7 +268,7 @@ Phase 3 outbound creation/edit/export, writable-calendar consent, conflict resol
 | Last owner-accepted binary | **0.5.0 (9)**, source `6407ae8`, predates this implementation |
 | Version prepared / native synchronized | Pending; forbidden by this task |
 | Physical build installed / exact build accepted | Pending; none built or installed |
-| Included scope | Partial #17 phases 1–2 and required #15 location foundation over the existing V2 checkpoint |
+| Included scope | Partial #17 phases 1–2, required #15 location foundation, native-only configuration correction and verified ledger privilege correction over checkpoint `16245b7` |
 
 **Release candidate: LifeOS 0.6.0 (10), proposed only—not prepared, installed or accepted.** Before any device request, follow the canonical pre-device and schema/API rollout gates with fresh authorization. Provider/hosted Auth/email/callback, production, complete integration, visual and physical-device acceptance remain pending.
 
@@ -199,9 +276,9 @@ Phase 3 outbound creation/edit/export, writable-calendar consent, conflict resol
 
 #17 is open/In Progress because the broader bidirectional scope remains unfinished. Only its Project Status was changed from Backlog to In Progress, with readback; priority/labels/assignees/milestone/membership and unrelated issues are preserved. [Evidence comment](https://github.com/OzAvrahami/LifeOS/issues/17#issuecomment-6087617536) was read back; before/after Project comparison shows only Status changed. No issue is closed. The local slice is coherent for an owner-reviewed partial checkpoint after the available checks; external setup/acceptance gates remain explicit and are not passes. Staging, commit and push remain owner-managed and were not executed.
 
-## Exact changed files
+## Checkpoint 16245b7 file scope (historical)
 
-Current reconciled scope after local launcher configuration: **53 files** (31 tracked modifications, 22 new files). Excludes the protected owner handoff, root config, environments and native/generated files. No API/schema file is optional for this slice.
+The owner committed this **53-file** slice as `16245b7`. It excludes the protected owner handoff, root config, environments and native/generated files. The current combined follow-up has the separate nine-file scope listed above.
 
 ```text
 CHANGELOG.md

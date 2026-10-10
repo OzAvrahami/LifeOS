@@ -12,9 +12,11 @@ export class GoogleCalendarService {
   constructor(private config: GoogleConfig, private store: GoogleStore, private provider: GoogleProvider) {}
   async state(user: string) { return publicGoogleState(await this.store.command(user, 'read')); }
   async begin(user: string, platform: 'web' | 'native') {
+    const returnUri = platform === 'web' ? this.config.webReturn : this.config.nativeReturn;
+    if (!returnUri) throw new GoogleError(503, 'setup_required');
     const state = nonce(); const proof = nonce(); const verifier = nonce(); const id = randomUUID();
     await this.store.command(user, 'begin', { id, stateHash: digest(state), proofHash: digest(proof), verifier: seal(verifier,user,'pkce',this.config.key),
-      returnUri: platform === 'web' ? this.config.webReturn : this.config.nativeReturn, expiresAt: new Date(Date.now()+600000).toISOString() });
+      returnUri, expiresAt: new Date(Date.now()+600000).toISOString() });
     return { id, proof, authorizationUrl: this.provider.authorize(state, verifier) };
   }
   async callback(state: string, code?: string, denied = false) {

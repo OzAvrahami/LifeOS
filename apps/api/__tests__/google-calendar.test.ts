@@ -3,7 +3,9 @@ import { randomBytes } from 'node:crypto';
 import test from 'node:test';
 import request from 'supertest';
 import { createApp } from '../src/app.js';
-import { seal, unseal, googleScopes, type GoogleConfig } from '../src/features/google-calendar/google.config.js';
+import { seal, unseal, googleScopes, readGoogleConfig, type GoogleConfig } from '../src/features/google-calendar/google.config.js';
+import { GoogleCalendarService } from '../src/features/google-calendar/google.service.js';
+import { GoogleError, type GoogleState, type GoogleStore } from '../src/features/google-calendar/google.types.js';
 import { importWindow, normalizeGoogleEvent } from '../src/features/google-calendar/google.import.js';
 import { HttpGoogleProvider } from '../src/features/google-calendar/google.provider.js';
 import { createGoogleCalendarRouter } from '../src/features/google-calendar/google.routes.js';
@@ -13,6 +15,92 @@ const calendar = { id: 'a/b@example.test', summary: 'Calendar', timeZone: 'Ameri
 const config: GoogleConfig = { clientId: 'fixture', clientSecret: 'fixture-secret', key: randomBytes(32),
   redirectUri: 'http://127.0.0.1:3197/integrations/google/callback', webReturn: 'http://localhost:8083/settings/google-return',
   nativeReturn: 'lifeos://settings/google-return', supabaseUrl: 'http://127.0.0.1:56321', serviceKey: 'fixture' };
+
+function configured(overrides: Record<string, string | undefined> = {}) {
+  const values: Record<string, string | undefined> = { NODE_ENV: 'production', GOOGLE_CALENDAR_CLIENT_ID: 'fixture',
+    GOOGLE_CALENDAR_CLIENT_SECRET: 'fixture-secret', GOOGLE_CALENDAR_REDIRECT_URI: 'https://api.example.test/integrations/google/callback',
+    GOOGLE_CALENDAR_WEB_RETURN_URI: undefined, GOOGLE_CALENDAR_ENCRYPTION_KEY: config.key.toString('base64'),
+    SUPABASE_URL: 'https://database.example.test', SUPABASE_SERVICE_ROLE_KEY: 'fixture-service', ...overrides };
+  const saved = Object.fromEntries(Object.keys(values).map(key => [key, process.env[key]]));
+  try {
+    for (const [key, value] of Object.entries(values)) { if (value === undefined) delete process.env[key]; else process.env[key] = value; }
+    return readGoogleConfig();
+  } finally {
+    for (const [key, value] of Object.entries(saved)) { if (value === undefined) delete process.env[key]; else process.env[key] = value; }
+  }
+}
+
+test('native-only production configuration needs no web return and retains server checks', () => {
+  const native = configured();
+  assert.ok(native); assert.equal(native.webReturn, null); assert.equal(native.nativeReturn, 'lifeos://settings/google-return');
+  for (const key of ['GOOGLE_CALENDAR_CLIENT_ID', 'GOOGLE_CALENDAR_CLIENT_SECRET', 'GOOGLE_CALENDAR_REDIRECT_URI', 'GOOGLE_CALENDAR_ENCRYPTION_KEY', 'SUPABASE_URL', 'SUPABASE_SERVICE_ROLE_KEY']) {
+    assert.equal(configured({ [key]: undefined }), null);
+  }
+  assert.equal(configured({ GOOGLE_CALENDAR_ENCRYPTION_KEY: 'invalid' }), null);
+  for (const uri of ['http://127.0.0.1:3197/integrations/google/callback', 'https://api.example.test/wrong', 'https://user:pass@api.example.test/integrations/google/callback', 'https://api.example.test/integrations/google/callback?next=elsewhere']) {
+    assert.equal(configured({ GOOGLE_CALENDAR_REDIRECT_URI: uri }), null);
+  }
+});
+
+test('explicit web return keeps HTTPS/path validation and the existing local web configuration', () => {
+  const webReturn = 'https://web.example.test/settings/google-return';
+  assert.equal(configured({ GOOGLE_CALENDAR_WEB_RETURN_URI: webReturn })?.webReturn, webReturn);
+  for (const uri of ['http://localhost:8083/settings/google-return', 'https://web.example.test/wrong', 'https://user:pass@web.example.test/settings/google-return', 'https://web.example.test/settings/google-return#fragment', 'https://web.example.test/settings/google-return?next=elsewhere', 'lifeos://settings/google-return', 'not-a-url']) {
+    assert.equal(configured({ GOOGLE_CALENDAR_WEB_RETURN_URI: uri }), null);
+  }
+  const local = configured({ NODE_ENV: 'test', GOOGLE_CALENDAR_REDIRECT_URI: config.redirectUri,
+    GOOGLE_CALENDAR_WEB_RETURN_URI: config.webReturn!, SUPABASE_URL: config.supabaseUrl });
+  assert.equal(local?.webReturn, config.webReturn); assert.equal(local?.redirectUri, config.redirectUri);
+});
+
+test('web authorization without a configured return fails before creating an attempt or contacting Google', async () => {
+  const store: GoogleStore = { async command() { assert.fail('No attempt should be stored'); } };
+  const provider = new HttpGoogleProvider(config);
+  const service = new GoogleCalendarService({ ...config, webReturn: null }, store, provider);
+  await assert.rejects(service.begin('owner', 'web'), error => error instanceof GoogleError && error.statusCode === 503 && error.code === 'setup_required');
+});
+
+for (const platform of ['native', 'web'] as const) {
+  for (const outcome of ['ready', 'cancelled', 'failed', 'missing-code'] as const) {
+    test(`${platform} callback safely handles ${outcome} with the stored return and one-use state`, async () => {
+      const selectedConfig = platform === 'native' ? { ...config, webReturn: null } : config;
+      let stored: GoogleState = { status: 'disconnected', revision: 0, calendars: [], userId: 'owner' };
+      const store: GoogleStore = { async command(user, action, payload = {}) {
+        if (action === 'begin') stored.attempt = { ...payload, stage: 'started' } as GoogleState['attempt'];
+        else if (action === 'consume') {
+          if (!stored.attempt || stored.attempt.stage !== 'started' || stored.attempt.stateHash !== payload.stateHash) throw new GoogleError(409, 'invalid_attempt');
+          stored.attempt.stage = 'claimed';
+        } else if (action === 'pending') stored.attempt = { ...stored.attempt!, ...payload, stage: 'pending' };
+        else if (action === 'cancel') stored = { ...stored, attempt: undefined };
+        else assert.fail('Unexpected command');
+        if (action !== 'consume') assert.equal(user, 'owner');
+        return structuredClone(stored);
+      } };
+      let exchanges = 0;
+      const provider = new HttpGoogleProvider(selectedConfig);
+      provider.exchange = async () => {
+        exchanges++;
+        if (outcome === 'failed') throw new Error('fixture-private-provider-error');
+        return { refreshToken: 'fixture-private-refresh', accountId: 'subject', email: 'owner@example.test' };
+      };
+      const service = new GoogleCalendarService(selectedConfig, store, provider);
+      const attempt = await service.begin('owner', platform);
+      const authorization = new URL(attempt.authorizationUrl);
+      assert.equal(authorization.searchParams.get('redirect_uri'), config.redirectUri);
+      assert.equal(authorization.searchParams.get('code_challenge_method'), 'S256');
+      const state = authorization.searchParams.get('state')!;
+      await assert.rejects(service.callback('forged-state', 'code'), /invalid_attempt/);
+      const returned = new URL(await service.callback(state, outcome === 'missing-code' ? undefined : 'fixture-code', outcome === 'cancelled'));
+      assert.equal(`${returned.protocol}//${returned.host}${returned.pathname}`, platform === 'native' ? config.nativeReturn : config.webReturn);
+      assert.equal(returned.searchParams.get('attempt'), attempt.id);
+      assert.equal(returned.searchParams.get('result'), outcome === 'missing-code' ? 'failed' : outcome);
+      assert.equal(returned.searchParams.has('receipt'), outcome === 'ready');
+      assert.equal(exchanges, outcome === 'cancelled' || outcome === 'missing-code' ? 0 : 1);
+      assert.ok(!returned.href.includes('fixture-private')); assert.ok(!returned.href.includes(attempt.proof));
+      await assert.rejects(service.callback(state, 'fixture-code'), /invalid_attempt/);
+    });
+  }
+}
 
 test('encrypted credentials bind owner, purpose and integrity', () => {
   const value = seal('fixture-refresh', 'owner-A', 'refresh', config.key);

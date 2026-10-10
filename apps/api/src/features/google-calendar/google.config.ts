@@ -1,10 +1,10 @@
 import { createCipheriv, createDecipheriv, createHash, randomBytes } from 'node:crypto';
 import { GoogleError } from './google.types.js';
 export const googleScopes = ['openid', 'email', 'https://www.googleapis.com/auth/calendar.calendarlist.readonly', 'https://www.googleapis.com/auth/calendar.events.readonly'];
-export type GoogleConfig = { clientId: string; clientSecret: string; redirectUri: string; webReturn: string; nativeReturn: string; key: Buffer; supabaseUrl: string; serviceKey: string };
+export type GoogleConfig = { clientId: string; clientSecret: string; redirectUri: string; webReturn: string | null; nativeReturn: string; key: Buffer; supabaseUrl: string; serviceKey: string };
 export function readGoogleConfig(): GoogleConfig | null {
   const env = process.env;
-  const values = ['GOOGLE_CALENDAR_CLIENT_ID','GOOGLE_CALENDAR_CLIENT_SECRET','GOOGLE_CALENDAR_REDIRECT_URI','GOOGLE_CALENDAR_WEB_RETURN_URI','GOOGLE_CALENDAR_ENCRYPTION_KEY','SUPABASE_SERVICE_ROLE_KEY','SUPABASE_URL'];
+  const values = ['GOOGLE_CALENDAR_CLIENT_ID','GOOGLE_CALENDAR_CLIENT_SECRET','GOOGLE_CALENDAR_REDIRECT_URI','GOOGLE_CALENDAR_ENCRYPTION_KEY','SUPABASE_SERVICE_ROLE_KEY','SUPABASE_URL'];
   if (values.some(name => !env[name])) return null;
   const localOrHttps = (value: string) => {
     const u = new URL(value);
@@ -15,8 +15,10 @@ export function readGoogleConfig(): GoogleConfig | null {
     const key = Buffer.from(env.GOOGLE_CALENDAR_ENCRYPTION_KEY!, 'base64');
     if (key.length !== 32) return null;
     const redirectUri = localOrHttps(env.GOOGLE_CALENDAR_REDIRECT_URI!);
-    const webReturn = localOrHttps(env.GOOGLE_CALENDAR_WEB_RETURN_URI!);
-    if (new URL(redirectUri).pathname !== '/integrations/google/callback' || new URL(webReturn).pathname !== '/settings/google-return') return null;
+    // Native authorization does not need a web frontend. When supplied, the web
+    // return still must satisfy the same exact-path and production HTTPS checks.
+    const webReturn = env.GOOGLE_CALENDAR_WEB_RETURN_URI ? localOrHttps(env.GOOGLE_CALENDAR_WEB_RETURN_URI) : null;
+    if (new URL(redirectUri).pathname !== '/integrations/google/callback' || (webReturn && new URL(webReturn).pathname !== '/settings/google-return')) return null;
     return { clientId: env.GOOGLE_CALENDAR_CLIENT_ID!, clientSecret: env.GOOGLE_CALENDAR_CLIENT_SECRET!, redirectUri, webReturn,
       nativeReturn: 'lifeos://settings/google-return', key, supabaseUrl: localOrHttps(env.SUPABASE_URL!), serviceKey: env.SUPABASE_SERVICE_ROLE_KEY! };
   } catch { return null; }
