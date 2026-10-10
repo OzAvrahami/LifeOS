@@ -10,7 +10,7 @@ import { TestProviders } from '../test-utils/test-providers';
 
 jest.mock('expo-notifications', () => ({}));
 
-it.each(['google', 'apple'] as const)('keeps %s unavailable without fabricated connect/select/disconnect actions', async provider => {
+it.each(['apple'] as const)('keeps %s unavailable without fabricated connect/select/disconnect actions', async provider => {
   const back = jest.fn();
   await render(<TestProviders><CalendarConnectionScreen provider={provider} onBack={back} /></TestProviders>);
   expect(screen.getByText('החיבור עדיין אינו זמין')).toBeTruthy();

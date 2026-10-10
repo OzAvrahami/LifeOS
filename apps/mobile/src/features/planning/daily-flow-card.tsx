@@ -1,3 +1,4 @@
+import { commitmentTimeLabel, commitmentSourceLabel } from '@/features/commitments/commitment-presentation';
 import { type ReactNode, useRef, useState } from 'react';
 import { Modal, Pressable, ScrollView, TextInput, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -16,11 +17,11 @@ function ProposalCalendar({ date }: { date: string }) {
   const query = useCommitments({ date });
   return <V2Card>
     <V2Text variant="heading">ביומן היום</V2Text>
-    <V2Text variant="caption" muted>התחייבויות LifeOS בלבד. Google ו־Apple עדיין אינם מחוברים כאן; ההצעה אינה מחשבת זמן פנוי.</V2Text>
+    <V2Text variant="caption" muted>התחייבויות שנשמרו או יובאו ליומן. ההצעה אינה מחשבת זמן פנוי.</V2Text>
     {query.isError ? <V2Notice error title="לא הצלחנו לרענן את ההתחייבויות." onRetry={() => { void query.refetch(); }} /> : null}
     {query.data === undefined && !query.isError ? <V2Text muted>טוען התחייבויות…</V2Text> : null}
     {query.data?.length === 0 ? <V2Text muted>אין התחייבויות שמורות לתאריך הזה.</V2Text> : null}
-    {query.data?.map(event => <View key={event.id}><V2Text>{event.title}</V2Text><V2Text variant="caption" muted>{event.startTime}{event.endTime ? `–${event.endTime}` : ''} · LifeOS</V2Text></View>)}
+    {query.data?.map(event => <View key={event.id}><V2Text>{event.title}</V2Text><V2Text variant="caption" muted>{commitmentTimeLabel(event)} · {commitmentSourceLabel(event)}</V2Text></View>)}
   </V2Card>;
 }
 

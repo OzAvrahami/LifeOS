@@ -57,15 +57,15 @@ function filtersFromKey(queryKey: QueryKey, userId: string) {
 function belongs(commitment: Commitment, filters: NormalizedCommitmentFilters) {
   if (filters.id && commitment.id !== filters.id) return false;
   if (filters.reminders && commitment.reminderMinutesBefore == null) return false;
-  if (filters.date && commitment.date !== filters.date) return false;
-  if (filters.dateFrom && commitment.date < filters.dateFrom) return false;
+  if (filters.date && (commitment.date > filters.date || (commitment.endDate ?? commitment.date) < filters.date)) return false;
+  if (filters.dateFrom && (commitment.endDate ?? commitment.date) < filters.dateFrom) return false;
   if (filters.dateTo && commitment.date > filters.dateTo) return false;
   return true;
 }
 
 function ordered(items: Commitment[]) {
   return [...items].sort((left, right) => left.date.localeCompare(right.date)
-    || left.startTime.localeCompare(right.startTime)
+    || (left.startTime ?? '').localeCompare(right.startTime ?? '')
     || left.createdAt.localeCompare(right.createdAt));
 }
 

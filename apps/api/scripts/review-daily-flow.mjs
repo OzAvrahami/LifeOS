@@ -1,11 +1,13 @@
 import { execFileSync, spawn } from 'node:child_process';
 import { randomUUID } from 'node:crypto';
-import { readFileSync } from 'node:fs';
+import { existsSync, readFileSync } from 'node:fs';
+import { homedir } from 'node:os';
 import { resolve } from 'node:path';
 import { fileURLToPath, URL } from 'node:url';
 import process from 'node:process';
 import console from 'node:console';
 import { createClient } from '@supabase/supabase-js';
+import { parse } from 'dotenv';
 
 // Review utility only. Never imported by the application. Requires the explicitly
 // named disposable project, reads keys internally, and never prints credentials.
@@ -14,8 +16,13 @@ const workdir = process.env.LIFEOS_INTEGRATION_SUPABASE_WORKDIR;
 if (!workdir || !/^project_id\s*=\s*"LifeOS32"\s*$/m.test(readFileSync(resolve(workdir, 'supabase/config.toml'), 'utf8'))) {
   throw new Error('Set LIFEOS_INTEGRATION_SUPABASE_WORKDIR to the isolated LifeOS32 project');
 }
-const raw = execFileSync(process.execPath, [resolve(root, 'node_modules/supabase/dist/supabase.js'), 'status', '--output', 'json'], { cwd: workdir, encoding: 'utf8' });
-const status = JSON.parse(raw.slice(raw.indexOf('{'), raw.lastIndexOf('}') + 1));
+let status;
+try {
+  const raw = execFileSync(process.execPath, [resolve(root, 'node_modules/supabase/dist/supabase.js'), 'status', '--output', 'json'], { cwd: workdir, encoding: 'utf8', stdio: ['ignore', 'pipe', 'pipe'] });
+  status = JSON.parse(raw.slice(raw.indexOf('{'), raw.lastIndexOf('}') + 1));
+} catch {
+  throw new Error('Could not read isolated LifeOS32 status; check Docker and the existing local project. No hosted fallback.');
+}
 for (const name of ['API_URL', 'DB_URL']) {
   if (!['localhost', '127.0.0.1', '[::1]'].includes(new URL(status[name]).hostname)) throw new Error('Review requires localhost');
 }
@@ -23,10 +30,24 @@ const publishable = status.PUBLISHABLE_KEY || status.ANON_KEY;
 const command = process.argv[2];
 if (command === 'api' || command === 'web') {
   const api = command === 'api';
+  // Outside Git and persistent across terminals/restarts. Only the API reads it.
+  const privateConfig = resolve(process.env.LOCALAPPDATA || resolve(homedir(), '.config'), 'LifeOS/LifeOS32/api.env');
+  const google = {};
+  if (api && existsSync(privateConfig)) {
+    const saved = parse(readFileSync(privateConfig));
+    for (const name of ['CLIENT_ID', 'CLIENT_SECRET', 'REDIRECT_URI', 'WEB_RETURN_URI', 'ENCRYPTION_KEY']) {
+      const key = `GOOGLE_CALENDAR_${name}`;
+      if (saved[key]) google[key] = saved[key];
+    }
+  }
+  // Never inherit hosted Supabase values or pass provider/server secrets to Expo.
+  const inherited = Object.fromEntries(Object.entries(process.env).filter(([name]) =>
+    !/^(GOOGLE_CALENDAR_|SUPABASE_|DOTENV_CONFIG_)/i.test(name)));
+  if (!publishable || (api && !status.SERVICE_ROLE_KEY)) throw new Error('Matching LifeOS32 local API keys are unavailable');
   const child = spawn(process.execPath, api ? ['--import', 'tsx', 'apps/api/src/server.ts']
     : [resolve(root, 'node_modules/expo/bin/cli'), 'start', '--web', '--localhost', '--port', '8083'], {
     cwd: api ? root : resolve(root, 'apps/mobile'), stdio: 'inherit',
-    env: { ...process.env, ...(api ? { NODE_ENV: 'test', TSX_TSCONFIG_PATH: resolve(root, 'apps/api/tsconfig.json'), PORT: '3197', SUPABASE_URL: status.API_URL, SUPABASE_PUBLISHABLE_KEY: publishable }
+    env: { ...inherited, ...(api ? { ...google, DOTENV_CONFIG_PATH: privateConfig, NODE_ENV: 'test', TSX_TSCONFIG_PATH: resolve(root, 'apps/api/tsconfig.json'), PORT: '3197', SUPABASE_URL: status.API_URL, SUPABASE_PUBLISHABLE_KEY: publishable, SUPABASE_SERVICE_ROLE_KEY: status.SERVICE_ROLE_KEY }
       : { EXPO_NO_DOTENV: '1', EXPO_PUBLIC_API_URL: 'http://127.0.0.1:3197', EXPO_PUBLIC_SUPABASE_URL: status.API_URL, EXPO_PUBLIC_SUPABASE_PUBLISHABLE_KEY: publishable }) },
   });
   child.on('exit', code => { process.exitCode = code ?? 0; });

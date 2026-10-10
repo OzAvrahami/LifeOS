@@ -53,10 +53,10 @@ export function OnboardingScreen() {
           <Ionicons name="calendar-outline" size={22} color={colors.accent} /><V2Text variant="heading">מתחילים מהיומן שלך</V2Text>
         </View>
         <V2Text muted>היומן מציג את מה שכבר קבוע. בינתיים אפשר להוסיף התחייבויות ב־LifeOS, לצד המשימות.</V2Text>
-        <V2Text variant="caption" muted>חיבורי Google ו־Apple עדיין אינם זמינים.</V2Text>
+        <V2Text variant="caption" muted>אפשר לנהל את חיבור Google בהגדרות לאחר ההיכרות. Apple עדיין אינו זמין.</V2Text>
       </V2Card>
       <AuthSecondaryButton title="חיבור Google Calendar" disabled={pending} onPress={() => setCalendarInfo(value => !value)} />
-      {calendarInfo ? <V2Notice title="חיבור Google Calendar עדיין בפיתוח. לא בוצע חיבור ולא ניתנה גישה ליומן. אפשר להמשיך לתכנון היום בלי לחבר יומן." /> : null}
+      {calendarInfo ? <V2Notice title="לא בוצע חיבור ולא ניתנה גישה ליומן. לאחר ההיכרות אפשר לפתוח את חיבורי היומן בהגדרות ולבדוק את זמינות Google. אפשר להמשיך לתכנון היום בלי לחבר יומן." /> : null}
       {failed ? <V2Notice error title="לא הצלחנו לשמור את השלמת ההיכרות. אפשר לנסות שוב." /> : null}
       <AuthPrimaryButton title="לתכנון היום" isLoading={pending} loadingLabel="שומר…" onPress={() => { void complete(); }} />
       <AuthLink title="אראה קודם איך זה עובד" disabled={pending} onPress={() => { void complete(); }} />

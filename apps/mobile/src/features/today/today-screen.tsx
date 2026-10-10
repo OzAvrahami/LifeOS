@@ -111,7 +111,7 @@ export function TodayScreen({
   const presentedCommitments = serverCommitments.map((commitment) => ({
     id: commitment.id,
     lifeArea: commitment.lifeArea ?? 'personal' as const,
-    time: commitment.startTime,
+    time: commitment.startTime ?? 'כל היום',
     title: commitment.title,
   }));
   const serverTaskTime = serverTasks

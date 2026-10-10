@@ -17,6 +17,10 @@ import type { Task } from '@/features/tasks/task.types';
 import { TodayScreen } from '@/features/today/today-screen';
 import { WeekScreen } from '@/features/week/week-screen';
 
+jest.mock('@/features/planning/daily-flow.api', () => ({ ...jest.requireActual('@/features/planning/daily-flow.api'),
+  getWeekDays: jest.fn(async () => ({ days: [], tasks: [] })),
+}));
+
 jest.mock('@/features/tasks/task.api', () => ({
   cancelTask: jest.fn(), createTask: jest.fn(), listTasks: jest.fn(), updateTask: jest.fn(),
 }));
@@ -286,12 +290,11 @@ describe('configured Week start with a controlled calendar date', () => {
       expect(rows.map((row) => row.props.accessibilityLabel)).toEqual(
         expected.map(([, day]) => `פתח יום 2026-09-${String(day).padStart(2, '0')}`),
       );
-      expect(overview.getAllByText('היום')).toHaveLength(1);
+      expect(overview.getAllByText(/^היום · /)).toHaveLength(1);
       expected.forEach(([weekday, dayOfMonth], index) => {
         const row = rows[index]!;
         const today = weekday === todayLabel;
-        expect(within(row).getByText(today ? 'היום' : weekday)).toBeTruthy();
-        expect(within(row).getByText(String(dayOfMonth))).toBeTruthy();
+        expect(within(row).getByText(`${today ? 'היום · ' : ''}${weekday} · ${dayOfMonth}`)).toBeTruthy();
         expect(row.props.accessibilityState.selected).toBe(today);
         if (today) expect(within(row).queryByText(weekday)).toBeNull();
       });

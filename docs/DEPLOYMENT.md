@@ -1,5 +1,17 @@
 # LifeOS Deployment
 
+## Current V2 / Google readiness review — 2026-10-10
+
+The local #17 phases 1–2 slice is ready for an owner-managed partial checkpoint. The owner reported local Google-flow success, not individual scenario or physical-iPhone acceptance. #17 remains Open / In Progress; outbound writes and automatic/background synchronization are unfinished. See the [current checkpoint, migration and provider readiness evidence](issue-17-verification.md#checkpoint-and-read-only-deployment-review--2026-10-10).
+
+Read-only linked history confirms **three pending migrations**, in order: `20261009120000_add_daily_proposals.sql`, `20261009150000_add_week_allocation.sql`, `20261009180000_add_google_calendar_import.sql`. The preceding ten entries through `20261007120000` match remote history. Hold deployment-triggering pushes until the owner has checkpointed, reviewed a fresh dry run, explicitly authorized schema application and verified history.
+
+Direct Railway inspection identifies the active `@lifeos/api` production deployment as SUCCESS at `6407ae8856ee8289e8183aaeaf6661b680d32267`; the `9b775df` documentation deployment was SKIPPED. Public health is healthy, but V2/#17 is not deployed. The production service lacks `SUPABASE_SERVICE_ROLE_KEY` and the five `GOOGLE_CALENDAR_*` settings. The required production Google callback is `https://lifeosapi-production-0362.up.railway.app/integrations/google/callback`; native app return is `lifeos://settings/google-return`. An approved HTTPS web return is still required by the current validator. Production Google registration, secret provisioning and callback-log redaction remain owner rollout gates; no hosted setting was changed.
+
+Actual tracked version/build remains **0.5.0 (9)**, matching the last recorded accepted binary. Combined V2 candidate **0.6.0 (10)** is proposed, unprepared and unaccepted. Windows has no existing iOS project or Xcode; current Mac artifacts/signing/device state must be rechecked before authorized version/native preparation and any separate build/install. No migration, deployment, version change or build occurred in this review. Historical records below describe their dated scopes.
+
+Coordinate production import with compatible-client rollout: accepted 0.5.0 source assumes non-null commitment start times, whereas imported all-day events legitimately omit them. Do not populate production accounts used by the old binary with imports before the compatible candidate is installed. API deployment does not update that binary.
+
 ## Current acceptance / publication handoff — 2026-10-08
 
 **LifeOS 0.5.0 (9) is owner-accepted**, from build checkpoint `6407ae8856ee8289e8183aaeaf6661b680d32267` on local/remote main. After the previously verified wireless installation, signature, version and launch, the owner said **“נראה טוב” (“Looks good”)** during product review. This is scoped owner acceptance, not independent review observation or proof of each individual checklist scenario. #5 is **Closed / Completed / Done / P1 — High**. Existing schema/API evidence is retained below; no new production operation or binary is needed for documentation finalization.
@@ -128,13 +140,13 @@ The local integration gate is complete and #3 is Open / Verify. The owner has al
 iPhone → Railway HTTPS API → Supabase Cloud
 ```
 
-The installed iPhone application sends authenticated requests to the public Railway API. The API verifies the caller's Supabase JWT and accesses Supabase with the publishable key and caller identity, leaving Row Level Security responsible for data isolation. The application does not require or use `service_role`.
+The installed iPhone application sends authenticated requests to the public Railway API. The API verifies the caller's Supabase JWT and accesses Supabase with the publishable key and caller identity, leaving Row Level Security responsible for data isolation. Ordinary product routes do not use `service_role`. The pending #17 Google Calendar slice introduces a separate server-only integration RPC boundary: a service credential accesses encrypted provider state and imports commitments after verified ownership checks. It must never enter Expo configuration. See [Google contracts](issue-17-calendar-contracts.md) and [setup/verification](issue-17-verification.md); this integration is not deployed or configured in production by this task.
 
 ## Railway API service
 
 | Setting | Value |
 | --- | --- |
-| Service name | `lifeos-api` |
+| Service name | `@lifeos/api` (current provider name, re-read 2026-10-10) |
 | Public URL | `https://lifeosapi-production-0362.up.railway.app` |
 | Root Directory | `/` (repository root) |
 | Build Command | `npm run build --workspace @lifeos/api` |
@@ -160,6 +172,8 @@ The API service requires these variable names:
 - `PORT` — provided by Railway
 
 `CORS_ALLOWED_ORIGINS` is required only when approved browser clients need API access. Native React Native requests do not depend on browser CORS.
+
+The pending #17 deployment additionally requires server-only `SUPABASE_SERVICE_ROLE_KEY`, `GOOGLE_CALENDAR_CLIENT_ID`, `GOOGLE_CALENDAR_CLIENT_SECRET`, `GOOGLE_CALENDAR_REDIRECT_URI`, `GOOGLE_CALENDAR_WEB_RETURN_URI` and `GOOGLE_CALENDAR_ENCRYPTION_KEY`. They are absent in the production variable inspection on 2026-10-10. Never use disposable local credentials, expose these through `EXPO_PUBLIC_`, or deploy this API before all three pending migrations. See the current #17 record for exact callback/return requirements and secret-retention gates.
 
 Values and secrets belong in the Railway service configuration or untracked local environment files. Local `.env` files, Supabase key values, passwords, and JWTs must never be committed.
 

@@ -33,7 +33,7 @@ export function WeeklyPlanningReview({ weekStart, step, onReady }: {
         </> : null}
         {step !== 1 ? <>
           <Text style={styles.heading}>התחייבויות השבוע</Text>
-          {(commitments.data ?? []).length ? [...commitments.data!].sort((a,b) => a.date.localeCompare(b.date) || a.startTime.localeCompare(b.startTime)).map(c =>
+          {(commitments.data ?? []).length ? [...commitments.data!].sort((a,b) => a.date.localeCompare(b.date) || (a.startTime ?? '').localeCompare(b.startTime ?? '')).map(c =>
             <Text style={styles.text} key={c.id}>{c.title} · {c.date} · {commitmentTimeLabel(c)}</Text>)
             : <Text style={styles.text}>אין התחייבויות בשבוע הזה.</Text>}
         </> : null}

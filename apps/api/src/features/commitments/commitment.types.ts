@@ -18,7 +18,10 @@ export type CommitmentRow = {
   description: string | null;
   date: string;
   reminder_minutes_before?: number | null;
-  start_time: string;
+  start_time: string | null;
+  location?: string | null;
+  end_date?: string;
+  calendar_source?: import('../google-calendar/google.types.js').CalendarSource | null;
   end_time: string | null;
   life_area: CommitmentLifeArea | null;
   created_at: string;
@@ -31,7 +34,10 @@ export type Commitment = {
   title: string;
   description: string | null;
   date: string;
-  startTime: string;
+  startTime: string | null;
+  location?: string | null;
+  endDate?: string;
+  calendarSource?: import('../google-calendar/google.types.js').CalendarSource | null;
   endTime: string | null;
   lifeArea: CommitmentLifeArea | null;
   createdAt: string;
@@ -47,6 +53,7 @@ export type CommitmentListFilters = {
 };
 
 export type CreateCommitmentInput = {
+  location?: string | null;
   reminderMinutesBefore?: number | null;
   title: string;
   description: string | null;

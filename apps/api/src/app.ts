@@ -1,6 +1,7 @@
 import express, { NextFunction, Request, Response, Router } from 'express';
 
 import { commitmentRouter } from './features/commitments/commitment.routes.js';
+import { googleCalendarRouter } from './features/google-calendar/google.routes.js';
 import { planningRouter } from './features/planning/planning.routes.js';
 import { settingsRouter } from './features/settings/settings.routes.js';
 import { taskRouter } from './features/tasks/task.routes.js';
@@ -11,10 +12,11 @@ import { healthRouter } from './routes/health.routes.js';
 export function createApp({
   auth = authRouter,
   commitments = commitmentRouter,
+  google = googleCalendarRouter,
   planning = planningRouter,
   settings = settingsRouter,
   tasks = taskRouter,
-}: { auth?: Router; commitments?: Router; planning?: Router; settings?: Router; tasks?: Router } = {}) {
+}: { auth?: Router; commitments?: Router; google?: Router; planning?: Router; settings?: Router; tasks?: Router } = {}) {
   const application = express();
 
   application.disable('x-powered-by');
@@ -23,6 +25,7 @@ export function createApp({
   application.use('/health', healthRouter);
   application.use('/auth', auth);
   application.use('/commitments', commitments);
+  application.use('/integrations/google', google);
   application.use(planning);
   application.use('/settings', settings);
   application.use('/tasks', tasks);

@@ -10,7 +10,7 @@ export function validReminderLead(value: number): boolean {
 // fall-back times use JavaScript's earlier occurrence, as the Task editor does.
 export function commitmentReminderInstant(commitment: Pick<Commitment, 'date' | 'startTime' | 'reminderMinutesBefore'>): number | null {
   const { date, startTime, reminderMinutesBefore: lead } = commitment;
-  if (lead == null || !validReminderLead(lead) || !/^\d{4}-\d{2}-\d{2}$/.test(date) || !/^(?:[01]\d|2[0-3]):[0-5]\d$/.test(startTime)) return null;
+  if (!startTime || lead == null || !validReminderLead(lead) || !/^\d{4}-\d{2}-\d{2}$/.test(date) || !/^(?:[01]\d|2[0-3]):[0-5]\d$/.test(startTime)) return null;
   const [year, month, day] = date.split('-').map(Number);
   const [hour, minute] = startTime.split(':').map(Number);
   const start = new Date(year!, month! - 1, day!, hour!, minute!, 0, 0);

@@ -1,9 +1,8 @@
+import { V2CommitmentRow } from '@/features/commitments/v2-commitment-row';
 import { useEffect, useState } from 'react';
-import { AppState, Modal, Pressable, ScrollView, useWindowDimensions, View } from 'react-native';
+import { AppState, Modal, ScrollView, useWindowDimensions, View } from 'react-native';
 import { MobileShell, V2Header } from '@/components/mobile-shell';
 import { V2Button, V2Notice, V2TaskRow, V2Text } from '@/components/v2';
-import { V2Icon } from '@/components/v2-icon';
-import { useTheme } from '@/theme/theme-provider';
 import { QuickCaptureSheet } from '@/features/capture/quick-capture-sheet';
 import { CommitmentEditor } from '@/features/commitments/commitment-editor';
 import { useCommitments, useCreateCommitment, useDeleteCommitment, useUpdateCommitment } from '@/features/commitments/commitment.queries';
@@ -44,7 +43,6 @@ export function todayGreeting(timezone: string, displayName?: string) {
 }
 function ScopedToday({ preview = false, displayName, onNavigateInbox, onNavigateMore, onNavigateWeek }: TodayProps) {
   const { width } = useWindowDimensions();
-  const { colors } = useTheme();
   const narrow = width <= v2Layout.body.narrowBreakpoint;
   const server = !preview;
   const demo = useDemoTasks();
@@ -92,16 +90,8 @@ function ScopedToday({ preview = false, displayName, onNavigateInbox, onNavigate
     </View>
     {commitments.data === undefined && !commitments.isError ? <V2Notice title="טוען התחייבויות…" /> : null}
     {commitments.isError ? <V2Notice error title="לא הצלחנו לרענן את ההתחייבויות." onRetry={() => { void commitments.refetch(); }} /> : null}
-    {(commitments.data ?? []).map(item => <Pressable key={item.id} accessibilityRole="button" accessibilityLabel={`פרטי אירוע: ${item.title}`} onPress={() => setEditor(item)}
-      style={({ pressed }) => ({ flexDirection: 'row-reverse', alignItems: 'center', gap: 10, padding: 13, marginTop: 9, borderRadius: 14, borderWidth: 1, borderColor: colors.border, backgroundColor: colors.surface, opacity: pressed ? 0.6 : 1 })}>
-      <View style={{ width: 3, alignSelf: 'stretch', borderRadius: 6, backgroundColor: colors.gold }} />
-      <View style={{ flex: 1, minWidth: 0 }}>
-        <V2Text style={{ fontSize: 13, lineHeight: 20.15, fontFamily: v2Typography.family.semibold }}>{item.title}</V2Text>
-        <V2Text muted style={{ fontSize: 11, lineHeight: 17.05 }}>{item.startTime}{item.endTime ? `–${item.endTime}` : ''} · LifeOS</V2Text>
-      </View>
-      <V2Icon name="calendar" size={17} color={colors.textMuted} />
-    </Pressable>)}
-    <V2Text muted style={{ ...v2Typography.reason, marginTop: 8 }}>חיבורי Google ו־Apple עדיין אינם זמינים.</V2Text>
+    {(commitments.data ?? []).map(item => <V2CommitmentRow key={item.id} item={item} onPress={() => setEditor(item)} />)}
+    <V2Text muted style={{ ...v2Typography.reason, marginTop: 8 }}>ייבוא Google מנוהל בהגדרות היומן. Apple עדיין אינו זמין.</V2Text>
   </View> : null;
   return <>
     <MobileShell header={false} onNavigateInbox={onNavigateInbox} onNavigateMore={onNavigateMore} onNavigateWeek={onNavigateWeek} onQuickCapture={() => setCapture('inbox')}>

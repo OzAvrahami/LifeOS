@@ -42,7 +42,7 @@ describe('Commitment API client', () => {
     const input = {
       date: commitment.date,
       endTime: commitment.endTime,
-      startTime: commitment.startTime,
+      startTime: commitment.startTime!,
       title: commitment.title,
     };
     await createCommitment(input);

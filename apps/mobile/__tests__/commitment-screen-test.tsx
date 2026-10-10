@@ -13,6 +13,11 @@ import { WeekScreen } from '@/features/week/week-screen';
 
 import { TestProviders } from '../test-utils/test-providers';
 
+jest.mock('@/features/planning/daily-flow.api', () => ({ ...jest.requireActual('@/features/planning/daily-flow.api'),
+  getWeekDays: jest.fn(async () => ({ days: [], tasks: [] })),
+  getDailyFlow: jest.fn(async (_owner: string, date: string) => ({ plan: null, tasks: [], snapshot: 'fixture', today: date, timezone: 'UTC' })),
+}));
+
 jest.mock('@react-native-community/datetimepicker', () => {
   const { Pressable, Text } = jest.requireActual('react-native');
   return function MockDateTimePicker({ mode, onChange }: { mode: string; onChange: (event: { type: string }, value: Date) => void }) {
@@ -168,7 +173,7 @@ it('shows real Week commitments and prefills creation after opening the selected
   ]);
   createCommitmentMock.mockImplementation(async (input) => item({ ...input, date: input.date, id: 'week-created' }));
   await render(<TestProviders><WeekScreen taskSource="server" /></TestProviders>);
-  expect(await screen.findByText('08:15–11:00')).toBeTruthy();
+  expect(await screen.findByText('08:15–11:00 · LifeOS')).toBeTruthy();
 
   const user = userEvent.setup();
   await user.press(screen.getByLabelText(`פתח יום ${monday}`));

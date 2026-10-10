@@ -18,7 +18,7 @@ export class CommitmentApiError extends Error {
 const datePattern = /^\d{4}-\d{2}-\d{2}$/;
 const timePattern = /^(?:[01]\d|2[0-3]):[0-5]\d$/;
 const uuidPattern = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
-const bodyKeys = new Set(['title', 'description', 'date', 'startTime', 'endTime', 'lifeArea', 'reminderMinutesBefore']);
+const bodyKeys = new Set(['location', 'title', 'description', 'date', 'startTime', 'endTime', 'lifeArea', 'reminderMinutesBefore']);
 
 function invalid(message = 'Invalid Commitment input'): never {
   throw new CommitmentApiError(400, message);
@@ -38,6 +38,12 @@ function parseTitle(value: unknown) {
   const title = value.trim();
   if (!title || title.length > 500) invalid('Invalid title');
   return title;
+}
+
+function parseLocation(value: unknown) {
+  if (value === null || value === undefined) return null;
+  if (typeof value !== 'string' || value.trim().length > 2000) invalid('Invalid location');
+  return value.trim() || null;
 }
 
 function parseDescription(value: unknown) {
@@ -115,6 +121,7 @@ export function parseCreateCommitment(value: unknown): CreateCommitmentInput {
     startTime: parseTime(body.startTime, 'startTime'),
     title: parseTitle(body.title),
   };
+  if ('location' in body) input.location = parseLocation(body.location);
   if ('reminderMinutesBefore' in body) input.reminderMinutesBefore = parseReminderLead(body.reminderMinutesBefore);
   validateCommitmentTimeRange(input.startTime, input.endTime);
   return input;
@@ -126,6 +133,7 @@ export function parseUpdateCommitment(value: unknown): UpdateCommitmentInput {
   if (Object.keys(body).length === 0) invalid('At least one Commitment field is required');
 
   const input: UpdateCommitmentInput = {};
+  if ('location' in body) input.location = parseLocation(body.location);
   if ('reminderMinutesBefore' in body) input.reminderMinutesBefore = parseReminderLead(body.reminderMinutesBefore);
   if ('title' in body) input.title = parseTitle(body.title);
   if ('description' in body) input.description = parseDescription(body.description);

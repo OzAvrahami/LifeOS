@@ -78,7 +78,7 @@ it('presents the proposal on entry, with one card per identity, truthful reasons
   expect(flow.saveDailyFlow).not.toHaveBeenCalled();
   expect(screen.queryByText('הצעת היום')).toBeNull();
   expect(await screen.findByText('09:17–10:43 · LifeOS')).toBeTruthy();
-  expect(screen.getByText(/חיבורי Google ו־Apple עדיין אינם זמינים/)).toBeTruthy();
+  expect(screen.getByText(/ייבוא Google מנוהל בהגדרות היומן/)).toBeTruthy();
 });
 it('shows fetch errors rather than an empty success and supports retry', async () => {
   jest.mocked(flow.initializeDailyFlow).mockRejectedValueOnce(new Error('offline'));

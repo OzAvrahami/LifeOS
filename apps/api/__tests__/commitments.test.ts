@@ -53,7 +53,7 @@ class MemoryCommitmentService implements CommitmentServiceContract {
       .filter((item) => !filters.dateFrom || item.date >= filters.dateFrom)
       .filter((item) => !filters.dateTo || item.date <= filters.dateTo)
       .sort((left, right) => left.date.localeCompare(right.date)
-        || left.startTime.localeCompare(right.startTime))
+        || (left.startTime ?? '').localeCompare(right.startTime ?? ''))
       .map(withoutOwnership);
   }
 
@@ -76,7 +76,7 @@ class MemoryCommitmentService implements CommitmentServiceContract {
       (candidate) => candidate.id === id && candidate.userId === this.userId,
     );
     if (!item) throw new CommitmentApiError(404, 'Commitment not found');
-    validateCommitmentTimeRange(input.startTime ?? item.startTime, input.endTime === undefined
+    validateCommitmentTimeRange(input.startTime ?? item.startTime!, input.endTime === undefined
       ? item.endTime
       : input.endTime);
     Object.assign(item, input, { updatedAt: new Date().toISOString() });

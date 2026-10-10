@@ -1,3 +1,4 @@
+import { ImportedCommitmentDetails } from './imported-commitment-details';
 import { ReminderLeadPicker } from '@/features/notifications/reminder-lead-picker';
 import { commitmentReminderInstant, validReminderLead } from '@/features/notifications/commitment-reminder-time';
 import type { NotificationPreferences } from '@/features/notifications/notification.types';
@@ -48,6 +49,7 @@ type CommitmentEditorProps = {
 
 export function CommitmentEditor(props: CommitmentEditorProps) {
   if (!props.visible) return null;
+  if (props.commitment?.calendarSource) return <ImportedCommitmentDetails commitment={props.commitment} onClose={props.onClose} />;
   return (
     <CommitmentTimePickerProvider key={props.commitment?.id ?? `new-${props.initialDate}`}>
       <CommitmentEditorSession {...props} />
@@ -75,12 +77,13 @@ function CommitmentEditorSession({
     ? commitment.reminderMinutesBefore ?? null
     : notificationPreferences?.commitmentRemindersEnabled ? notificationPreferences.commitmentDefaultReminderMinutes : null);
   const [title, setTitle] = useState(commitment?.title ?? '');
+  const [location, setLocation] = useState(commitment?.location ?? '');
   const [description, setDescription] = useState(commitment?.description ?? '');
   const [date, setDate] = useState(commitment?.date ?? initialDate);
   const [startTime, setStartTime] = useState<string | null>(commitment?.startTime ?? null);
   const [endTime, setEndTime] = useState<string | null>(commitment?.endTime ?? null);
   const [lifeArea, setLifeArea] = useState<CommitmentLifeArea | null>(commitment?.lifeArea ?? null);
-  const [detailsOpen, setDetailsOpen] = useState(Boolean(commitment?.description || commitment?.lifeArea));
+  const [detailsOpen, setDetailsOpen] = useState(Boolean(commitment?.description || commitment?.lifeArea || commitment?.location));
   const [errors, setErrors] = useState<FieldErrors>({});
   const [saving, setSaving] = useState(false);
   const [confirmingDelete, setConfirmingDelete] = useState(false);
@@ -116,6 +119,7 @@ function CommitmentEditorSession({
         reminderMinutesBefore,
         date,
         description: description.trim() || null,
+        location: location.trim() || null,
         endTime,
         lifeArea,
         startTime: startTime!,
@@ -211,10 +215,12 @@ function CommitmentEditorSession({
                 {!detailsOpen ? (
                   <Pressable accessibilityRole="button" onPress={() => { dismissKeyboard(); setDetailsOpen(true); }} style={styles.detailsButton}>
                     <Ionicons color={colors.accent} name="add" size={16} />
-                    <Text style={styles.detailsButtonText}>תיאור או תחום בחיים</Text>
+                    <Text style={styles.detailsButtonText}>תיאור, מיקום או תחום בחיים</Text>
                   </Pressable>
                 ) : (
                   <>
+                    <Text style={styles.label}>מיקום (רשות)</Text>
+                    <TextInput accessibilityLabel="מיקום התחייבות" maxLength={2000} onChangeText={setLocation} style={styles.input} textAlign="right" value={location} />
                     <Text style={styles.label}>תיאור</Text>
                     <TextInput accessibilityLabel="תיאור התחייבות" multiline onChangeText={setDescription} placeholder="פרטים נוספים (רשות)" placeholderTextColor={colors.textFaint} style={[styles.input, styles.description]} textAlign="right" textAlignVertical="top" value={description} />
                     <Text style={styles.label}>תחום בחיים</Text>

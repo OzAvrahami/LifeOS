@@ -23,7 +23,10 @@ function mapCommitment(row: CommitmentRow): Commitment {
     endTime: row.end_time ? normalizedTime(row.end_time) : null,
     id: row.id,
     lifeArea: row.life_area,
-    startTime: normalizedTime(row.start_time),
+    startTime: row.start_time ? normalizedTime(row.start_time) : null,
+    ...('location' in row ? { location: row.location } : {}),
+    ...('end_date' in row ? { endDate: row.end_date } : {}),
+    ...(row.calendar_source ? { calendarSource: row.calendar_source } : {}),
     title: row.title,
     updatedAt: row.updated_at,
   };
@@ -39,6 +42,7 @@ function dataError(error: PostgrestError): never {
 function databaseValues(input: UpdateCommitmentInput) {
   return {
     ...('reminderMinutesBefore' in input ? { reminder_minutes_before: input.reminderMinutesBefore } : {}),
+    ...('location' in input ? { location: input.location } : {}),
     ...('date' in input ? { date: input.date } : {}),
     ...('description' in input ? { description: input.description } : {}),
     ...('endTime' in input ? { end_time: input.endTime } : {}),
@@ -60,11 +64,11 @@ export class SupabaseCommitmentService implements CommitmentServiceContract {
     // prevents equal date/time records from changing page membership.
     const pageSize = 500;
     for (let offset = 0; ; offset += pageSize) {
-      let query = this.client.from('commitments').select('*').eq('user_id', this.userId);
+      let query = this.client.from('commitments').select('*').eq('user_id', this.userId).eq('provider_visible', true);
       if (filters.id) query = query.eq('id', filters.id);
       if (filters.reminders) query = query.not('reminder_minutes_before', 'is', null);
-      if (filters.date) query = query.eq('date', filters.date);
-      if (filters.dateFrom) query = query.gte('date', filters.dateFrom);
+      if (filters.date) query = query.lte('date', filters.date).gte('end_date', filters.date);
+      if (filters.dateFrom) query = query.gte('end_date', filters.dateFrom);
       if (filters.dateTo) query = query.lte('date', filters.dateTo);
       const { data, error } = await query.order('date').order('start_time').order('id').range(offset, offset + pageSize - 1);
       if (error) dataError(error);
@@ -94,8 +98,9 @@ export class SupabaseCommitmentService implements CommitmentServiceContract {
     if (findError) dataError(findError);
     if (!existing) throw new CommitmentApiError(404, 'Commitment not found');
     const current = existing as CommitmentRow;
+    if (current.calendar_source) throw new CommitmentApiError(409, 'Imported commitments are read only');
     validateCommitmentTimeRange(
-      input.startTime ?? normalizedTime(current.start_time),
+      input.startTime ?? normalizedTime(current.start_time!),
       input.endTime === undefined
         ? current.end_time ? normalizedTime(current.end_time) : null
         : input.endTime,
@@ -114,6 +119,9 @@ export class SupabaseCommitmentService implements CommitmentServiceContract {
   }
 
   async delete(id: string) {
+    const { data: existing, error: findError } = await this.client.from('commitments').select('calendar_source').eq('id', id).eq('user_id', this.userId).maybeSingle();
+    if (findError) dataError(findError);
+    if (existing?.calendar_source) throw new CommitmentApiError(409, 'Imported commitments are read only');
     const { data, error } = await this.client
       .from('commitments')
       .delete()

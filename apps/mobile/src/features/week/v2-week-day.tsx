@@ -1,3 +1,5 @@
+import { V2CommitmentRow } from '@/features/commitments/v2-commitment-row';
+import { commitmentSourceLabel } from '@/features/commitments/commitment-presentation';
 import { Pressable, View } from 'react-native';
 import { V2Button, V2Card, V2TaskRow, V2Text } from '@/components/v2';
 import type { Task } from '@/features/tasks/task.types';
@@ -20,7 +22,7 @@ export function V2WeekDayCard({ date, weekday, today, tasks, approved, commitmen
       {tasks.length > 3 ? <V2Text muted>ועוד {tasks.length - 3} משימות</V2Text> : null}
       {!tasks.length ? <V2Text muted>{approved ? 'יום מאושר ללא משימות' : 'מקום פתוח לדברים שיצוצו.'}</V2Text> : null}
       <V2Text variant="caption" muted>{commitments.length} {commitments.length === 1 ? 'התחייבות' : 'התחייבויות'}</V2Text>
-      {commitments.slice(0, 2).map(event => <View key={event.id}><V2Text>{event.title}</V2Text><V2Text variant="caption" muted>{commitmentTimeLabel(event)} · LifeOS</V2Text></View>)}
+      {commitments.slice(0, 2).map(event => <View key={event.id}><V2Text>{event.title}</V2Text><V2Text variant="caption" muted>{commitmentTimeLabel(event)} · {commitmentSourceLabel(event)}</V2Text></View>)}
       {commitments.length > 2 ? <V2Text muted>ועוד {commitments.length - 2} התחייבויות</V2Text> : null}
       <V2Text style={{ color: colors.accent }}>פתיחת היום ←</V2Text>
     </V2Card>
@@ -43,12 +45,9 @@ export function V2WeekDayView({ tasks, commitments, pending, onTask, onStatus, o
     </View>)}
     <V2Button secondary title="הוסף משימה ליום הזה" onPress={onAddTask} />
     <V2Text variant="heading">ביומן היום</V2Text>
-    <V2Text variant="caption" muted>התחייבויות LifeOS. Google ו־Apple אינם מחוברים כאן. משימות אינן הופכות לאירועים.</V2Text>
+    <V2Text variant="caption" muted>התחייבויות שנשמרו או יובאו ליומן. משימות אינן הופכות לאירועים.</V2Text>
     {!commitments.length ? <V2Text muted>אין התחייבויות ליום הזה</V2Text> : null}
-    {commitments.map(event => <V2Card key={event.id}>
-      <V2Button secondary title={event.title} accessibilityLabel={'פתח התחייבות: ' + event.title} onPress={() => onCommitment(event.id)} />
-      <V2Text muted>{commitmentTimeLabel(event)} · LifeOS</V2Text>
-    </V2Card>)}
+    {commitments.map(event => <V2CommitmentRow key={event.id} item={event} accessibilityLabel={'פתח התחייבות: ' + event.title} onPress={() => onCommitment(event.id)} />)}
     <V2Button secondary title="הוסף התחייבות ליום הזה" onPress={onAddCommitment} />
   </View>;
 }

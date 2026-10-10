@@ -57,8 +57,8 @@ function AuthenticatedStack() {
   const router = useRouter();
   const parameters = useGlobalSearchParams();
   useEffect(() => {
-    if (isLoading || (!session && sessionExpired)) rememberAuthDestination(pathname, parameters.id);
-  }, [isLoading, pathname, parameters.id, session, sessionExpired]);
+    if (isLoading || (!session && sessionExpired)) rememberAuthDestination(pathname, parameters.id, parameters);
+  }, [isLoading, pathname, parameters, session, sessionExpired]);
   useEffect(() => {
     if (!isLoading && isRecovery && (pathname === '/' || pathname === '/welcome')) router.replace('/reset-password');
   }, [isLoading, isRecovery, pathname, router]);

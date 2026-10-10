@@ -71,8 +71,8 @@ function ScopedWeek({ onNavigateInbox, onNavigateMore, onNavigateToday }: WeekSc
     return plan ? approvedDayTasks(plan, daysQuery.data!.tasks) : tasks.filter(task => task.plannedDate === date);
   };
   const commitmentsFor = (date: string) => (commitmentQuery.data ?? [])
-    .filter(item => item.date === date)
-    .sort((a, b) => a.startTime.localeCompare(b.startTime) || a.createdAt.localeCompare(b.createdAt) || a.id.localeCompare(b.id));
+    .filter(item => item.date <= date && (item.endDate ?? item.date) >= date)
+    .sort((a, b) => (a.startTime ?? '').localeCompare(b.startTime ?? '') || a.createdAt.localeCompare(b.createdAt) || a.id.localeCompare(b.id));
   const selectedTask = [...(daysQuery.data?.tasks ?? []), ...tasks, ...(weekOnlyQuery.data ?? [])].find(task => task.id === taskId && task.status !== 'cancelled');
   const browseDate = (date: string) => { setAnchorDate(date); setTaskId(null); setOperationError(false); };
   const captureTask = async (title: string, placement: TaskCapturePlacement, details?: TaskCaptureDetails) => {

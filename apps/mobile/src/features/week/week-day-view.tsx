@@ -7,9 +7,8 @@ import { colors, radius, spacing, typography } from '@/theme/tokens';
 
 import type { WeekDayTasks } from './week-aggregation';
 
-export function commitmentTimeLabel(item: Commitment) {
-  return item.endTime ? `${item.startTime}–${item.endTime}` : `${item.startTime} · ללא שעת סיום`;
-}
+import { commitmentTimeLabel } from '@/features/commitments/commitment-presentation';
+export { commitmentTimeLabel } from '@/features/commitments/commitment-presentation';
 export function taskEstimateLabel(task: Task) {
   return task.estimatedMinutes === null ? 'ללא הערכת זמן' : `${formatMinutes(task.estimatedMinutes)} משוער`;
 }
