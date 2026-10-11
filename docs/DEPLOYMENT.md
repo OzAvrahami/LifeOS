@@ -1,6 +1,18 @@
 # LifeOS Deployment
 
-## Verified V2 API and 2.0.0 preparation — 2026-10-10
+## Current installed V2 candidate — 2026-10-11
+
+**LifeOS 2.0.0 (10)** from `22761937e99a96ecf1bc922e64eb763528929b58` was successfully Release-built, signature/profile/config-verified, installed as a wireless update over 0.5.0 (9), independently read back and launched on the paired iPhone 17 Pro Max. No uninstall, data reset, dependency upgrade or native regeneration occurred. The embedded profile expires **2026-10-14T09:20:58Z**. Existing app/Keychain identity and non-snapshot container file paths/sizes are preserved; visible session continuity remains owner verification. See [actual artifact/install/launch evidence and owner checklist](release-2.0.0-verification.md#current-installed-candidate--2026-10-11).
+
+**Owner-reported iPhone results, 2026-10-11:** LifeOS 2.0.0 (10) looks good; Google authorization succeeded, the calendar list is displayed, and an import was performed with imported content visible in LifeOS. These are scoped hosted-device results, separate from independently recorded installation/launch and earlier automated evidence. Duplicate prevention, all-day correctness, cancellation, reminders and session continuity were **not individually confirmed** and remain pending. No independent consent/callback trace, hosted status-response or comprehensive integration audit is claimed. #17 remains Open / In Progress, with outbound/background scope unfinished. The candidate remains unpublished; this documentation update repeats no build, installation or production operation.
+
+## Historical Mac candidate gate — 2026-10-11
+
+**LifeOS 2.0.0 (10)** is native-prepared on clean source `22761937e99a96ecf1bc922e64eb763528929b58`; it is not built, installed or accepted. Existing native versions, automatic appearance and SecureStore linkage are reconciled without prebuild, retaining scene support/signing. Build-number inventory found no collision. Focused checks pass; Expo patch compatibility advisories remain, with committed dependencies unchanged. See [Mac evidence and exact subsequent build/install commands](release-2.0.0-verification.md#exact-subsequent-buildinstall-handoff--not-executed). The current device profile expires 2026-10-14; subsequent authorized automatic signing may renew it.
+
+GitHub reports API deployment success for this preparation SHA (Railway deployment `9d4efa5e-5f75-4ed0-b52c-cb7cba990128`); live health is HTTP 200 on 2026-10-11. No new direct-provider inspection or hosted Google authentication/import verification is implied. All 14 previously verified migrations are unchanged. #17 stays Open / In Progress; no production import on accounts still using 0.5.0 (9). Build/install and exact-build owner acceptance remain separate gates.
+
+## Historical Windows API and 2.0.0 preparation — 2026-10-10
 
 The owner committed/pushed **`3310f96bbdfd9c8d46816c4a3f8cbea03ddcf42d`**; this checkout's main and existing origin/main match it, with an empty index at preparation entry. Railway **LifeOS / production / @lifeos/api** is actively running **SUCCESS** deployment **`bd36780e-65b9-496f-91c2-8e53aeca247c`**, with that exact source SHA and a RUNNING instance. Public `/health` returned HTTP 200 and the expected contract. Reviewed build/startup logs contain no error/fatal/exception/failed entries; npm warnings/advisories are recorded, not silently remediated.
 
@@ -14,7 +26,7 @@ See the [complete 2.0.0 deployment evidence, 13-file manifest and Mac handoff](r
 
 **Historical pre-push preparation snapshot.** The verified deployment and 2.0.0 record above supersede this section's pending-checkpoint/deployment and 0.6.0 statements; its migration/configuration evidence remains valid.
 
-The owner committed the #17 phases 1–2 slice as `16245b7075741428284d4ac2399a7cc1abf920f3` and previously reported local Google-flow success, not individual scenario or physical-iPhone acceptance. #17 remains Open / In Progress; outbound writes and automatic/background synchronization are unfinished. See the [current native-only correction, hosted inspection and saved configuration](issue-17-verification.md#current-production-preparation-follow-up--2026-10-10).
+The owner committed the #17 phases 1–2 slice as `16245b7075741428284d4ac2399a7cc1abf920f3` and previously reported local Google-flow success, not individual scenario or physical-iPhone acceptance. #17 remains Open / In Progress; outbound writes and automatic/background synchronization are unfinished. See the [current native-only correction, hosted inspection and saved configuration](issue-17-verification.md#historical-production-preparation-follow-up--2026-10-10).
 
 The owner applied `20261009120000_add_daily_proposals.sql`, `20261009150000_add_week_allocation.sql` and `20261009180000_add_google_calendar_import.sql`, then reported an up-to-date dry run. Independent read-only hosted inspection confirms **all 13 migration entries**, affected schema/RLS, private Google access denial and the service-only Google RPC grant. Do not reapply migrations or repair history because of the post-apply pg-delta catalog-cache timeout.
 

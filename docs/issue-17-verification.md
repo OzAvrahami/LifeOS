@@ -1,6 +1,16 @@
 # Issue #17 — Google Calendar phases 1–2
 
-## Current 2.0.0 device-test preparation - 2026-10-10
+## Current owner-reported hosted iPhone results — 2026-10-11
+
+Tested installed binary: **LifeOS 2.0.0 (10)**, built from **22761937e99a96ecf1bc922e64eb763528929b58**. The [release verification record](release-2.0.0-verification.md#current-installed-candidate--2026-10-11) preserves the successful Release build, signature/profile verification, wireless update from 0.5.0 (9), installed-version readback and launch. Those completed checks were reused, not rerun.
+
+The owner reports that the installed app **looks good**, **Google authorization succeeded**, the **Google calendar list is displayed**, and **import was performed with imported calendar content visible in LifeOS**. This is owner-reported hosted physical-iPhone evidence, not only the earlier local/web feedback. No independent observation of consent/callback screens, response payloads or imported records is claimed; no provider operation was performed by the assistant in this documentation step.
+
+**Remaining, not individually confirmed:** duplicate prevention/repeated import, all-day correctness, cancellation, reminders and session continuity. Broader event/timezone/recurrence, disconnect/reconnect, operational and end-to-end scenarios retain their separate evidence boundaries. Existing fixture/DB tests support internal invariants but do not establish these live-device passes. General appearance feedback does not certify every screen or a full accessibility audit.
+
+#17 remains **Open / In Progress / P1 — High**, read back without mutation on 2026-10-11. Outbound creation/update/export and automatic/background synchronization remain unfinished; this successful read-only import flow does not complete the bidirectional issue or Phase 5. Version/build stay **2.0.0 (10)**. This is a documentation checkpoint for scoped device results, **not publication or blanket release acceptance**. Earlier dated preparation, configuration and local-only feedback below are historical snapshots superseded only where these later results provide evidence.
+
+## Historical 2.0.0 device-test preparation - 2026-10-10
 
 The owner-selected **LifeOS 2.0.0 (10)** is now prepared in tracked metadata over `3310f96bbdfd9c8d46816c4a3f8cbea03ddcf42d`. Exact-source Railway deployment and its variable snapshot are verified; all 14 hosted migrations were already verified. **Mac-native synchronization, build/install and exact iPhone acceptance remain pending.** The available records support build 10; current Mac artifacts must still be checked before use. See [deployment evidence, checks and Mac handoff](release-2.0.0-verification.md).
 
@@ -8,7 +18,7 @@ This supersedes earlier proposed 0.6.0/current-0.5.0 and pending-checkpoint/roll
 
 Implementation/evidence: 2026-10-09. This is a **partial implementation** of the existing bidirectional issue. #17 stays open and **In Progress**; import-only delivery does not complete it. [Data, security, synchronization and future-write contracts](issue-17-calendar-contracts.md) are the phase 1 specification.
 
-## Current production-preparation follow-up — 2026-10-10
+## Historical production-preparation follow-up — 2026-10-10
 
 The owner completed checkpoint **`16245b7075741428284d4ac2399a7cc1abf920f3`**. Actual checkout is `main`, **4 ahead / 0 behind** existing `origin/main`, with an empty index. Only the owner handoff directory and root `tsconfig.json` were untracked at entry. This follow-up leaves staging/commit/push owner-managed and supersedes the earlier pending-checkpoint, pending-migration and missing-production-variable statements below.
 
@@ -84,6 +94,8 @@ The previous seven-file manifest is superseded. The earlier 53-file slice is alr
 Ready for the combined owner checkpoint; **the hosted ledger privilege blocker is resolved, with no pending migration**. Next: owner checkpoint and separately authorized push/API rollout, verify the new active source and loaded configuration, then complete mobile release preparation. Saved Railway variables are not active-process evidence. Current/last accepted **0.5.0 (9)** and proposed unprepared **0.6.0 (10)** remain unchanged. Do not import into production accounts used by the old binary; it is not compatible with all-day imports. Hosted callback/consent, operational log redaction, exact physical binary and device acceptance remain pending. #17 stays Open / In Progress (read back unchanged); no later phase was implemented.
 
 ## Owner-reported local success — 2026-10-10
+
+**Historical local-only feedback.** Its then-pending hosted/device wording is superseded by the specific 2026-10-11 iPhone results above; unreported scenarios are not retroactively passed.
 
 After configuring Google OAuth and trying the local flow, the owner reported **“Amazing, it works.”** This is owner-reported local success for the flow they tried, not independent observation or an item-by-item acceptance checklist. It supersedes the earlier absence of any real-provider owner feedback; it does not establish which individual connection, selection, import or event-detail steps were checked.
 
@@ -236,6 +248,8 @@ After schema/API readiness and explicit release-preparation authorization: reche
 
 ## Preview and visual review
 
+**Historical local preview handoff.** Retained for its setup and proposed scenario scope; subsequent hosted iPhone feedback is recorded above, without treating every suggested check as performed.
+
 Working preview: **http://localhost:8083/settings/calendar-connection?provider=google**. API: **http://127.0.0.1:3197**. The old non-watching local API was verified and restarted on the same port/database; the new protected integration route returns 401 without a session. Preview page and health return 200. These are availability evidence only.
 
 If stopped, run each block in its own PowerShell terminal (do not duplicate listeners). Existing running disposable LifeOS32 is required; do not reset or fall back to hosted environment values.
@@ -270,14 +284,14 @@ Phase 3 outbound creation/edit/export, writable-calendar consent, conflict resol
 | --- | --- |
 | SemVer decision | Owner-selected Major **2.0.0** for combined V2; supersedes the unprepared 0.6.0 proposal |
 | Candidate version | **2.0.0**, unreleased internal device-test candidate |
-| Candidate iOS build | **10**, prepared against configured/accepted 9 and available records; confirm unused on the build Mac |
+| Candidate iOS build | **10**; Mac inventory found no collision before building; subsequently installed on the owner iPhone |
 | Version prepared | **Yes**, tracked root/API/mobile/lockfile and Expo metadata, 2026-10-10 |
-| Native version synchronized | **Pending**; no native project exists in this Windows checkout; see the preserving Mac handoff |
-| Physical build installed | **Pending**; no build/install performed |
-| Owner accepted exact build | **Pending**; accepted 0.5.0 (9) predates V2; local web evidence does not accept this candidate |
-| Included issues/source | Partial #17 phases 1-2, required #15 location foundation, native-only configuration and ledger correction, included in deployed `3310f96` |
+| Native version synchronized | **Yes, Mac 2026-10-11**: existing ignored plist and Debug/Release fields 2.0.0 / 10; preserved native/signing configuration |
+| Physical build installed | **Yes, 2026-10-11**, wireless update with independently verified 2.0.0 (10) metadata and launch; prior release record evidence reused |
+| Owner accepted exact build | **Scoped owner verification, 2026-10-11, 2.0.0 (10)**: looks good; Google authorization, calendar list and imported-content visibility succeeded. Unconfirmed scenarios and full #17 acceptance remain incomplete |
+| Included issues/source | Partial #17 phases 1-2, required #15 location foundation, native-only configuration and ledger correction; installed preparation source `2276193` contains `3310f96` |
 
-**Candidate: LifeOS 2.0.0 (10); tracked metadata prepared, not built, installed or accepted.** [Current release record](release-2.0.0-verification.md) separates completed API/schema/configuration evidence from pending authenticated hosted OAuth, native synchronization/signing, physical delivery and full integration acceptance. No new implementation, production-data mutation, Git write, tag or publication is authorized by this preparation. #17 remains Open / In Progress with outbound/background phases unfinished.
+**Installed candidate: LifeOS 2.0.0 (10), with scoped owner results recorded above.** The [current release record](release-2.0.0-verification.md) distinguishes build/install evidence, owner-reported hosted authorization/list/import success, and unconfirmed scenarios. No new implementation, production-data mutation, Git write, tag or publication occurred in this documentation checkpoint. #17 remains Open / In Progress with outbound/background phases unfinished.
 
 ## Tracking and checkpoint
 
