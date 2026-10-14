@@ -4,6 +4,7 @@ export class PlanningApiError extends Error {
   constructor(
     public readonly statusCode: number,
     public readonly responseMessage: string,
+    public readonly code?: string,
   ) {
     super(responseMessage);
   }

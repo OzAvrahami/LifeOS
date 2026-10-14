@@ -6,6 +6,8 @@ LifeOS follows Semantic Versioning for development and release tags.
 
 ## [Unreleased]
 
+- Correct explicit daily selection saving (#32/shared #33): accept valid ordered/empty selections independently of recommendation/global snapshots, preserve drafts and day-revision conflict protection, and retain choices through actionable save recovery. Add a forward-only RPC migration and API/mobile/database regressions. Local component/API checks and actual disposable selection/Today/daily-flow/Week/RLS checks pass; existing local records are preserved. Hosted migration/API rollout and rendered/device acceptance remain pending. Proposed patch candidate **2.0.1 (11)** only; version/build remain unchanged. See [verification and compatibility](docs/daily-selection-verification.md).
+
 ### LifeOS 2.0.0 (10) — internal device-test candidate
 
 The owner selected **2.0.0**, replacing the earlier unprepared 0.6.0 proposal. Tracked root/API/mobile/Expo metadata is prepared for **2.0.0**, iOS build **10**, with dependency resolutions unchanged. Build 10 follows accepted 0.5.0 (9) and the available records; current Mac artifact inventory, ignored native synchronization, signing, build/install and exact iPhone acceptance remain pending. This is not a published release or App Store/TestFlight candidate acceptance.

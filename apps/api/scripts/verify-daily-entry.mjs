@@ -29,9 +29,7 @@ export async function verifyDailyEntry({ apiRequest, tokenA, tokenB, freshTokenA
   state = await enter();
   assert.deepEqual(state.plan, original.plan); // stale draft is kept for explicit review
   assert.notEqual(state.snapshot, state.plan.proposal.snapshot);
-  await save(original, 'approve', { ids: [task.id], source: 'daily' }, today, 409);
-  state = await save(state, 'propose');
-  state = await save(state, 'approve', { ids: [task.id], source: 'weekly' });
+  state = await save(original, 'approve', { ids: [task.id], source: 'weekly' }); // stale recommendation and command snapshots do not block explicit acceptance
   assert.deepEqual((await enter()).plan, state.plan);
   const history = state.plan;
   const following = await enter(tomorrow);

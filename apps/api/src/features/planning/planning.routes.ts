@@ -105,7 +105,7 @@ export function createPlanningRouter(
 
   router.use((error: unknown, _request: Request, response: Response, next: NextFunction) => {
     if (error instanceof PlanningApiError) {
-      response.status(error.statusCode).json({ error: error.responseMessage });
+      response.status(error.statusCode).json({ error: error.responseMessage, ...(error.code ? { code: error.code } : {}) });
       return;
     }
     next(error);

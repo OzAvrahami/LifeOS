@@ -13,6 +13,7 @@ import { verifyWeeklyPlanning } from './verify-weekly-planning.mjs';
 import { verifyDailyPlanning } from './verify-daily-planning.mjs';
 import { verifyDailyFlow } from './verify-daily-flow.mjs';
 import { verifyDailyEntry } from './verify-daily-entry.mjs';
+import { verifyDailySelection } from './verify-daily-selection.mjs';
 import { verifyWeekAllocation } from './verify-week-allocation.mjs';
 import { verifyCommitmentReminders } from './verify-commitment-reminders.mjs';
 import { verifyNotifications, notificationDefaults } from './verify-notifications.mjs';
@@ -191,6 +192,17 @@ async function main() {
     const callerB = quietClient(supabaseUrl, publishableKey, tokenB);
     const anonymous = quietClient(supabaseUrl, publishableKey);
 
+    if (process.argv.includes('--daily-selection')) {
+      await verifyDailySelection({ apiRequest, tokenA, tokenB, callerA, callerB, anonymous,
+        freshTokenA: async () => (await signIn(supabaseUrl, publishableKey, users[0].email, password)).access_token,
+        deleteTaskFixture: async id => {
+          const deleted = localSql(docker, databaseContainer,
+            `delete from public.tasks where id = '${assertUuid(id)}' and user_id = '${assertUuid(users[0].id)}' returning id;`);
+          assert.ok(deleted.split(/\r?\n/).includes(id), 'Only this disposable account fixture may be deleted');
+        } });
+      console.log('PASS explicit daily selection: stale context, drafts, empty, concurrency, retries, eligibility and RLS');
+      return;
+    }
     if (process.argv.includes('--daily-entry')) {
       await verifyDailyEntry({ apiRequest, tokenA, tokenB,
         freshTokenA: async () => (await signIn(supabaseUrl, publishableKey, users[0].email, password)).access_token });

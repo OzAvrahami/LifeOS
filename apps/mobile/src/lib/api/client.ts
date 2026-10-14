@@ -17,6 +17,7 @@ export class ApiError extends Error {
   constructor(
     message: string,
     public readonly status: number,
+    public readonly code?: string,
   ) {
     super(message);
     this.name = 'ApiError';
@@ -59,7 +60,13 @@ export function createApiClient({
     );
 
     if (!response.ok) {
-      throw new ApiError(`LifeOS API request failed with status ${response.status}`, response.status);
+      // Consume only known public recovery codes, never echo arbitrary server payloads.
+      const payload: unknown = await response.json().catch(() => null);
+      const code = payload && typeof payload === 'object' && 'code' in payload
+        && typeof payload.code === 'string'
+        && ['selection_unavailable', 'daily_plan_conflict', 'historical_plan_read_only'].includes(payload.code)
+        ? payload.code : undefined;
+      throw new ApiError(`LifeOS API request failed with status ${response.status}`, response.status, code);
     }
 
     return response.json() as Promise<T>;

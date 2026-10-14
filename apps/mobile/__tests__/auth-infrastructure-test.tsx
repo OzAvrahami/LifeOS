@@ -42,6 +42,19 @@ it('passes the expected account to credential resolution without sending interna
 
 type AuthListener = (event: AuthChangeEvent, session: Session | null) => void;
 
+it('keeps only allowlisted public recovery codes and preserves errors for non-JSON failures', async () => {
+  const fetchImplementation = jest.fn()
+    .mockResolvedValueOnce({ ok: false, status: 422, json: async () => ({ code: 'selection_unavailable', error: 'arbitrary payload' }) })
+    .mockResolvedValueOnce({ ok: false, status: 409, json: async () => ({ code: 'daily_plan_conflict' }) })
+    .mockResolvedValueOnce({ ok: false, status: 500, json: async () => ({ code: 'internal-detail', error: 'arbitrary payload' }) })
+    .mockResolvedValueOnce({ ok: false, status: 502, json: async () => { throw new Error('not JSON'); } });
+  const request = createApiClient({ baseUrl: 'https://api.example.test', fetchImplementation, getAccessToken: async () => 'synthetic' });
+  await expect(request('/daily-plans/2026-10-14/flow')).rejects.toMatchObject({ status: 422, code: 'selection_unavailable', message: 'LifeOS API request failed with status 422' });
+  await expect(request('/daily-plans/2026-10-14/flow')).rejects.toMatchObject({ status: 409, code: 'daily_plan_conflict' });
+  await expect(request('/daily-plans/2026-10-14/flow')).rejects.toMatchObject({ status: 500, code: undefined });
+  await expect(request('/daily-plans/2026-10-14/flow')).rejects.toMatchObject({ status: 502, code: undefined });
+});
+
 function createMockSupabaseClient(initialSession: Session | null) {
   let listener: AuthListener | undefined;
   const unsubscribe = jest.fn();

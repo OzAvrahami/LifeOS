@@ -75,7 +75,8 @@ export function parseFlowCommand(value: unknown): FlowCommand {
     || Object.keys(body).some(k => !['action', 'operationId', 'revision', 'snapshot', ...extra].includes(k))
     || !Number.isSafeInteger(body.revision) || Number(body.revision) < 0 || Number(body.revision) > 2147483646) return invalid();
   try { if (typeof body.operationId !== 'string') return invalid(); parseTaskId(body.operationId); } catch { return invalid(); }
-  if (!['discard', 'summarize'].includes(action) && (typeof body.snapshot !== 'string' || !/^[a-f0-9]{32}$/.test(body.snapshot))) return invalid();
+  // Legacy clients may still send snapshots for selection writes; only generation requires one.
+  if ((action === 'propose' || body.snapshot !== undefined) && (typeof body.snapshot !== 'string' || !/^[a-f0-9]{32}$/.test(body.snapshot))) return invalid();
   if (['save-draft', 'approve', 'edit'].includes(action)) {
     if (!Array.isArray(body.ids) || body.ids.length > 500 || new Set(body.ids).size !== body.ids.length) return invalid();
     try { for (const id of body.ids) { if (typeof id !== 'string') return invalid(); parseTaskId(id); } } catch { return invalid(); }
@@ -84,7 +85,10 @@ export function parseFlowCommand(value: unknown): FlowCommand {
   if (action === 'summarize' && (typeof body.note !== 'string' || body.note.length > 1000)) return invalid();
   return body as FlowCommand;
 }
-function databaseError(error: { code?: string }): never {
+function databaseError(error: { code?: string; message?: string }): never {
+  if (error.code === '23514' && error.message === 'Invalid selection') throw new PlanningApiError(422, 'Some selected tasks are no longer available; review your selection', 'selection_unavailable');
+  if (error.code === '55000' && error.message === 'Plan changed; review again') throw new PlanningApiError(409, 'The day plan changed; review before saving', 'daily_plan_conflict');
+  if (error.code === '55000' && error.message === 'Historical plans cannot be rewritten') throw new PlanningApiError(409, 'Historical plans cannot be rewritten', 'historical_plan_read_only');
   if (['42883', '42703', 'PGRST202', 'PGRST204'].includes(error.code ?? '')) throw new PlanningApiError(503, 'Daily proposals require a database update');
   if (['40001', '40P01', '55000'].includes(error.code ?? '')) throw new PlanningApiError(409, 'Planning changed; reload and review');
   if (['22023', '23514', '22P02', '42501'].includes(error.code ?? '')) throw new PlanningApiError(400, 'Invalid daily flow command');

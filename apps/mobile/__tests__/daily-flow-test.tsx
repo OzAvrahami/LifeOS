@@ -86,10 +86,13 @@ it('requires refresh on conflict, preserves the approved plan, and resets a revi
   await fireEvent.press(await screen.findByText('עריכת התוכנית'));
   await fireEvent.press(screen.getByLabelText(`הסר לתוכנית: ${task.title}`));
   await fireEvent.press(screen.getByText('שמירת השינויים'));
-  await screen.findByText(/הנתונים השתנו/);
+  await screen.findByText(/התוכנית ליום הזה השתנתה/);
   expect(state.plan.ids).toEqual(['a']);
-  await fireEvent.press(screen.getByText('נסה שוב'));
-  await fireEvent.press(await screen.findByText('עריכת התוכנית'));
+  await fireEvent.press(screen.getByText('טעינת התוכנית העדכנית לסקירה'));
+  await screen.findByText('התוכנית העדכנית שנשמרה');
+  expect(screen.getByRole('button', { name: 'שמירת השינויים' })).toBeDisabled();
+  await fireEvent.press(screen.getByText('סקרתי, המשך עם הבחירה שלי'));
+  expect(screen.getByText('יום ללא משימות הוא תוכנית תקפה.')).toBeTruthy();
   await act(async () => { state = { ...state, plan: null, tasks: [] }; });
   await view.rerender(tree('2026-10-10', 'b'));
   await screen.findByText('יום חדש, בחירה חדשה');

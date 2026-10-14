@@ -39,7 +39,7 @@ export async function verifyDailyFlow({ apiRequest, tokenA, tokenB, callerA, cal
   const draft = command(state, 'save-draft', { ids: [b.id, a.id] }); state = await put(draft);
   assert.deepEqual((await get(today, await freshTokenA())).plan.proposal.ids, [b.id, a.id]);
   assert.deepEqual((await get()).plan.ids, []); // draft has not changed approval
-  await put(command(state, 'approve', { ids: [foreign.id], source: 'daily' }), 400);
+  await put(command(state, 'approve', { ids: [foreign.id], source: 'daily' }), 422);
   const approve = command(state, 'approve', { ids: [b.id, a.id], source: 'weekly' });
   const retries = await Promise.all([put(approve), put(approve), put(approve)]);
   retries.forEach(r => assert.deepEqual(r.plan.ids, [b.id, a.id]));
@@ -50,11 +50,11 @@ export async function verifyDailyFlow({ apiRequest, tokenA, tokenB, callerA, cal
   state = await put(command(state, 'discard'));
   assert.deepEqual(state.plan.ids, [b.id, a.id]); assert.equal(state.plan.proposal, null);
   assert.deepEqual((await put(approve)).plan.ids, [b.id, a.id]); // delayed retry after later operations
-  // Task changes invalidate an existing review; a failed apply leaves the plan intact.
+  // Task metadata changes do not invalidate explicit selection saves.
   state = await put(command(state, 'propose'));
   const stale = command(state, 'approve', { ids: [a.id], source: 'daily' });
   await apiRequest('PATCH', `/tasks/${a.id}`, tokenA, { title: 'Changed after review' });
-  await put(stale, 409); assert.deepEqual((await get()).plan.ids, [b.id, a.id]);
+  await put(stale); assert.deepEqual((await get()).plan.ids, [a.id]);
   state = await get(); state = await put(command(state, 'propose'));
   const edit = command(state, 'edit', { ids: [a.id] });
   const responses = await Promise.all([0, 1].map(async n => {
@@ -93,7 +93,7 @@ export async function verifyDailyFlow({ apiRequest, tokenA, tokenB, callerA, cal
   // A used operation cannot silently become another command or target another day.
   await put({ ...approve, ids: [] }, 409);
   await put(approve, 409, next);
-  // Real database date context follows the account timezone; changing it invalidates reviews.
+  // Date context follows timezone; selection saves still enforce the historical-day boundary.
   const beforeZone = await get(next);
   for (const timezone of ['Pacific/Kiritimati', 'America/Adak']) {
     assert.ifError((await callerA.from('user_settings').upsert({ user_id: owner, timezone }, { onConflict: 'user_id' })).error);
@@ -101,7 +101,7 @@ export async function verifyDailyFlow({ apiRequest, tokenA, tokenB, callerA, cal
     const expected = new Intl.DateTimeFormat('en-CA', { timeZone: timezone, year: 'numeric', month: '2-digit', day: '2-digit' }).format(new Date());
     assert.equal(zoned.today, expected); assert.equal(zoned.timezone, timezone);
   }
-  await put(command(beforeZone, 'approve', { ids: beforeZone.plan.proposal.ids, source: 'daily' }), 409, next);
+  await put(command(beforeZone, 'approve', { ids: beforeZone.plan.proposal.ids, source: 'daily' }), 200, next);
   const legacyDate = add(today, 4);
   const oldStart = (await apiRequest('PUT', `/daily-plans/${legacyDate}/planning`, tokenA, { action: 'start', revision: 0, operationId: randomUUID() })).plan;
   await apiRequest('PUT', `/daily-plans/${legacyDate}/planning`, tokenA, { action: 'save', revision: oldStart.revision, operationId: randomUUID(), step: 2, selectedTaskIds: [c.id] });

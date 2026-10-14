@@ -1,5 +1,14 @@
 # V2 Week and task experience — #33
 
+## Explicit daily selection correction - 2026-10-14
+
+The owner clarified that saving chooses an ordered day-plan selection independently of recommendation freshness. The local correction removes both global-snapshot save guards, retains revision/eligibility/ownership/history/idempotency protections, and keeps local choices during actionable error recovery. It does not regenerate recommendations when opening an editor. See [the current correction contract, passing disposable SQL/RLS checks and rollout requirements](daily-selection-verification.md). Docker was restored without a reset; actual selection, Today-entry, daily-flow, Week and ledger-privilege harnesses pass with existing local records preserved. This supersedes earlier statements requiring recommendation freshness for an explicit daily selection; weekly multi-day allocation and recommendation ranking are unchanged. Rendered/device acceptance and production rollout remain pending.
+
+## Release candidate
+
+**Proposed LifeOS 2.0.1 (11), patch correction; not prepared, built, installed or accepted.** Canonical configuration remains 2.0.0 (10). The historical owner-reported 2.0.0 (10) binary predates this correction. Native metadata, provider/device acceptance and production rollout are not verified by this local work. [Current release-candidate table](daily-selection-verification.md#release-candidate) records the remaining gates; earlier release evidence below is historical.
+
+
 ## Current 2.0.0 device-test preparation - 2026-10-10
 
 The owner-selected **LifeOS 2.0.0 (10)** is now prepared in tracked metadata over `3310f96bbdfd9c8d46816c4a3f8cbea03ddcf42d`. Exact-source Railway deployment and its variable snapshot are verified; all 14 hosted migrations were already verified. **Mac-native synchronization, build/install and exact iPhone acceptance remain pending.** The available records support build 10; current Mac artifacts must still be checked before use. See [deployment evidence, checks and Mac handoff](release-2.0.0-verification.md).
@@ -252,7 +261,7 @@ Short manual route:
 5. Open a saved #32 proposal and adjust/cancel before approval; the approved plan must remain. Skip the optional summary. Check Calendar tab, exact event times/source, event detail/return and unavailable provider states; no task becomes an event.
 6. Repeat all migrated screens in light/dark/system mode, narrow width, Hebrew RTL and with the keyboard open. Compare the actual rendered reference. Record observations/screenshots and the exact environment before claiming acceptance.
 
-## Release candidate
+## Historical release candidate - 2026-10-10
 
 | Field | Value |
 | --- | --- |
